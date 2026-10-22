@@ -10,7 +10,7 @@ struct Breadcrumbs: View {
                 if crumbs.count > 1 {
                     Button("Voltar", systemImage: "chevron.left", action: model.goUp)
                         .labelStyle(.iconOnly)
-                        .buttonStyle(.quiet)
+                        .buttonStyle(.bordered)
                         .keyboardShortcut("[", modifiers: .command)
                 }
                 ForEach(crumbs.indices, id: \.self) { index in

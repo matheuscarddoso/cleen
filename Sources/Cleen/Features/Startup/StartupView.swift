@@ -9,9 +9,9 @@ struct StartupView: View {
         VStack(spacing: 0) {
             PageHeader(title: "Inicialização", subtitle: subtitle) {
                 Button("Itens de início do macOS", action: openLoginItems)
-                    .buttonStyle(.quiet)
+                    .buttonStyle(.bordered)
                 Button("Atualizar", action: refresh)
-                    .buttonStyle(.quiet)
+                    .buttonStyle(.bordered)
                     .disabled(model.phase == .scanning)
             }
             if model.phase == .ready {

@@ -12,7 +12,7 @@ struct SpaceTargetMenu: View {
             Button("Escolher pasta…", action: chooseFolder)
         }
         .menuStyle(.button)
-        .buttonStyle(.quiet)
+        .buttonStyle(.bordered)
         .fixedSize()
         .disabled(model.phase == .scanning)
     }

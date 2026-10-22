@@ -11,7 +11,7 @@ struct JunkCategoryRow: View {
         VStack(spacing: 0) {
             HStack(spacing: 14) {
                 Checkbox(state: model.state(of: result), label: result.category.title, action: toggleCategory)
-                SymbolBadge(symbol: result.category.symbol)
+                ToolIcon(symbol: result.category.symbol, color: ToolPalette.color(for: result.category), size: 28)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(result.category.title)
                         .font(Theme.bodyMedium)

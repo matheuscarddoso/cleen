@@ -30,3 +30,10 @@ extension Array where Element == String {
     /// `a, b e c`
     var listed: String { formatted(.list(type: .and).locale(.cleen)) }
 }
+
+extension Int {
+    /// `1 item`, `3 itens`: picks the word for the count.
+    func counted(_ singular: String, _ plural: String) -> String {
+        "\(self) \(self == 1 ? singular : plural)"
+    }
+}

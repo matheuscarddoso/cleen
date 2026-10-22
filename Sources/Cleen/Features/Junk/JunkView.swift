@@ -11,13 +11,14 @@ struct JunkView: View {
             PageHeader(title: "Lixo do sistema", subtitle: subtitle) {
                 if model.phase == .ready {
                     Button("Analisar de novo", action: model.startScan)
-                        .buttonStyle(.quiet)
+                        .buttonStyle(.bordered)
                 }
             }
             switch model.phase {
             case .idle:
                 ScanPrompt(
-                    symbol: "trash",
+                    symbol: Route.junk.filledSymbol,
+                    color: ToolPalette.color(for: .junk),
                     title: "Caches, logs e restos de desenvolvimento",
                     message: "O Cleen procura o que os apps recriam sozinhos e o que ficou para trás: caches, logs, DerivedData, pacotes de npm e Composer, instaladores esquecidos.",
                     action: model.startScan

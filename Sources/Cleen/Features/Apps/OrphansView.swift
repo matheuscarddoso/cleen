@@ -10,13 +10,14 @@ struct OrphansView: View {
             PageHeader(title: "Restos de apps", subtitle: subtitle) {
                 if model.phase == .ready {
                     Button("Analisar de novo", action: model.startScan)
-                        .buttonStyle(.quiet)
+                        .buttonStyle(.bordered)
                 }
             }
             switch model.phase {
             case .idle:
                 ScanPrompt(
-                    symbol: "puzzlepiece.extension",
+                    symbol: Route.leftovers.filledSymbol,
+                    color: ToolPalette.color(for: .leftovers),
                     title: "O que ficou de apps apagados",
                     message: "Arrastar um app para o Lixo deixa para trás caches, preferências e dados. O Cleen acha o que pertence a apps que não estão mais no Mac.",
                     action: model.startScan

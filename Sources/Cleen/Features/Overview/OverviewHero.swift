@@ -16,7 +16,7 @@ struct OverviewHero: View {
                     .foregroundStyle(.tertiary)
                     .textCase(.uppercase)
                 Text(headline)
-                    .font(Theme.display(40))
+                    .font(Theme.display(32))
                     .fixedSize(horizontal: false, vertical: true)
                     .contentTransition(.opacity)
                 Text(detail)
@@ -39,13 +39,15 @@ struct OverviewHero: View {
                         .foregroundStyle(.secondary)
                 } else if app.hasSmartResults, app.smartCleanSize > 0 {
                     Button("Limpar \(app.smartCleanSize.bytes)", action: confirmClean)
-                        .buttonStyle(.primaryLarge)
+                        .buttonStyle(.borderedProminent)
+                .controlSize(.large)
                         .keyboardShortcut(.defaultAction)
                     Button("Analisar de novo", action: scan)
-                        .buttonStyle(.quiet)
+                        .buttonStyle(.bordered)
                 } else {
                     Button(app.hasSmartResults ? "Analisar de novo" : "Analisar o Mac", action: scan)
-                        .buttonStyle(.primaryLarge)
+                        .buttonStyle(.borderedProminent)
+                .controlSize(.large)
                         .keyboardShortcut(.defaultAction)
                 }
             }

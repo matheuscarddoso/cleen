@@ -28,7 +28,8 @@ struct CleanupBar: View {
                 ProgressView().controlSize(.small)
             }
             Button(actionTitle, action: action)
-                .buttonStyle(.primaryLarge)
+                .buttonStyle(.borderedProminent)
+                .controlSize(.large)
                 .disabled(selectedCount == 0 || isWorking)
                 .keyboardShortcut(.defaultAction)
         }

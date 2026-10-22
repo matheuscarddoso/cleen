@@ -27,11 +27,11 @@ struct ReportBanner: View {
             Spacer(minLength: 12)
             if !report.failures.isEmpty {
                 Button("Ver detalhes", action: showFailures)
-                    .buttonStyle(.quiet)
+                    .buttonStyle(.bordered)
             }
             if let retryAsAdministrator, !report.permissionFailures.isEmpty {
                 Button("Tentar com senha", action: retryAsAdministrator)
-                    .buttonStyle(.quiet)
+                    .buttonStyle(.bordered)
             }
         }
         .surface(radius: Theme.Radius.medium, padding: 12)

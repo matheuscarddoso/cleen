@@ -49,6 +49,24 @@ enum Route: String, CaseIterable, Identifiable, Hashable {
         }
     }
 
+    /// White-on-color variant for the sidebar's icon tiles.
+    var filledSymbol: String {
+        switch self {
+        case .overview: "sparkle"
+        case .junk: "trash.fill"
+        case .projects: "chevron.left.forwardslash.chevron.right"
+        case .largeFiles: "doc.fill"
+        case .duplicates: "square.on.square.fill"
+        case .spaceLens: "chart.pie.fill"
+        case .uninstaller: "xmark.app.fill"
+        case .leftovers: "puzzlepiece.extension.fill"
+        case .startup: "power"
+        case .monitor: "waveform.path.ecg"
+        case .maintenance: "wrench.and.screwdriver.fill"
+        case .settings: "gearshape.fill"
+        }
+    }
+
     enum Group: String, CaseIterable {
         case start = ""
         case cleanup = "Limpeza"

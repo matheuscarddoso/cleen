@@ -11,13 +11,14 @@ struct ProjectsView: View {
                 ProjectRootsMenu()
                 if model.phase == .ready {
                     Button("Analisar de novo", action: model.startScan)
-                        .buttonStyle(.quiet)
+                        .buttonStyle(.bordered)
                 }
             }
             switch model.phase {
             case .idle:
                 ScanPrompt(
-                    symbol: "chevron.left.forwardslash.chevron.right",
+                    symbol: Route.projects.filledSymbol,
+                    color: ToolPalette.color(for: .projects),
                     title: "Dependências de projetos parados",
                     message: promptMessage,
                     action: model.startScan

@@ -31,7 +31,7 @@ struct LaunchItemRow: View {
                 ProgressView().controlSize(.small).frame(width: 88)
             } else {
                 Button(item.isDisabled ? "Ativar" : "Desativar", action: toggle)
-                    .buttonStyle(.quiet)
+                    .buttonStyle(.bordered)
                     .fixedSize()
                     .frame(width: 88)
             }

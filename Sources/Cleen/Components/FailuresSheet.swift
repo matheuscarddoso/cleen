@@ -26,7 +26,7 @@ struct FailuresSheet: View {
             HStack {
                 Spacer()
                 Button("OK", action: close)
-                    .buttonStyle(.primary)
+                    .buttonStyle(.borderedProminent)
                     .keyboardShortcut(.defaultAction)
             }
             .padding(20)

@@ -2,6 +2,7 @@ import SwiftUI
 
 struct MenuBarLabel: View {
     @Environment(SystemMonitor.self) private var monitor
+    @Environment(\.openWindow) private var openWindow
     @AppStorage(MenuBarDisplay.storageKey) private var display = MenuBarDisplay.freeSpace
 
     var body: some View {
@@ -14,6 +15,12 @@ struct MenuBarLabel: View {
         }
         .accessibilityLabel("Cleen")
         .accessibilityValue(text ?? "")
+        // The notch panel lives outside SwiftUI's scenes; it asks for the window here,
+        // where `openWindow` is available for the app's whole life.
+        .onReceive(NotificationCenter.default.publisher(for: .cleenOpenMainWindow)) { _ in
+            openWindow(id: MainWindow.id)
+            NSApp.activate()
+        }
     }
 
     private var text: String? {

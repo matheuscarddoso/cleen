@@ -17,7 +17,7 @@ struct ProcessTable: View {
                     .textFieldStyle(.roundedBorder)
                     .frame(width: 180)
                 Button("Encerrar", action: quitSelected)
-                    .buttonStyle(.quiet)
+                    .buttonStyle(.bordered)
                     .disabled(selection == nil)
             }
             Table(rows, selection: $selection, sortOrder: $sortOrder) {

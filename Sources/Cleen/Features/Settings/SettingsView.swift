@@ -8,6 +8,9 @@ struct SettingsView: View {
     @AppStorage(LowDiskAlert.thresholdKey) private var lowDiskThreshold = 10
     @AppStorage(ProjectsModel.staleDaysKey) private var staleDays = 30
     @AppStorage(LargeFilesModel.minimumKey) private var largeFileMinimum = 50
+    @AppStorage(NotchSettings.openOnHoverKey) private var notchOpensOnHover = true
+    @AppStorage(NotchSettings.hoverDelayKey) private var notchHoverDelay = 0.12
+    @AppStorage(NotchSettings.showsWingsKey) private var notchShowsWings = true
 
     @State private var launchesAtLogin = SMAppService.mainApp.status == .enabled
     @State private var loginError: String?
@@ -28,6 +31,28 @@ struct SettingsView: View {
                             Text(display.title).tag(display)
                         }
                     }
+                }
+                Section {
+                    Picker("Abrir o painel", selection: $notchOpensOnHover) {
+                        Text("Ao passar o mouse").tag(true)
+                        Text("Ao clicar").tag(false)
+                    }
+                    if notchOpensOnHover {
+                        Picker("Atraso", selection: $notchHoverDelay) {
+                            Text("Nenhum").tag(0.0)
+                            Text("Curto").tag(0.12)
+                            Text("Médio").tag(0.3)
+                            Text("Longo").tag(0.6)
+                        }
+                    }
+                    Toggle("Mostrar disco e espaço livre ao lado da câmera", isOn: $notchShowsWings)
+                    LabeledContent("Atalho para abrir e fechar", value: "⌃⌥C")
+                } header: {
+                    Text("Notch")
+                } footer: {
+                    Text("Em telas sem notch, o Cleen desenha um no topo da tela.")
+                        .font(Theme.caption)
+                        .foregroundStyle(.secondary)
                 }
                 Section("Avisos") {
                     Toggle("Avisar quando o disco estiver quase cheio", isOn: $lowDiskAlert)

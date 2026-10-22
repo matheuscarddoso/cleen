@@ -1,7 +1,17 @@
 # Cleen
 
-Limpeza e saúde do Mac, na barra de menus. Nativo (SwiftUI, macOS 26), sem
+Limpeza e saúde do Mac, morando no notch. Nativo (SwiftUI, macOS 26), sem
 dependências, sem rede.
+
+## O notch
+
+Passe o mouse no notch (ou ⌃⌥C) e o painel desce dele: saudação, disco com limpeza
+em um clique, vitais ao vivo e uma barra de ferramentas embaixo (Limpeza, Projetos,
+Arquivos grandes, Sistema, Inicialização, Manutenção). Fechado, mostra o anel do
+disco e o espaço livre dos dois lados da câmera. Em telas sem notch, o Cleen desenha
+um. As ações destrutivas pedem dois cliques no próprio painel, sem diálogo. A janela
+completa (ícone da barra de menus ou o botão no painel) tem tudo, incluindo Mapa do
+disco, Duplicados e o desinstalador.
 
 ## O que faz
 
@@ -37,8 +47,8 @@ swift test                      # testes da CleenKit (Swift Testing)
 ```
 
 Para conferir telas: `open build/Cleen.app --args --open junk --scan` abre a
-janela numa seção e já analisa; `--panel-preview` mostra o painel da barra de
-menus numa janela comum.
+janela numa seção e já analisa; `--notch <aba>` abre o notch fixado numa aba;
+`./scripts/shoot-notch.sh <pasta>` fotografa todas as abas do notch.
 
 Estrutura: `CleenKit` tem toda a lógica de disco e sistema, sem UI e testada
 contra pastas temporárias. `Cleen` é o app (SwiftUI, isolamento padrão

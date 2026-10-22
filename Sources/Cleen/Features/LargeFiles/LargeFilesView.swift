@@ -10,13 +10,14 @@ struct LargeFilesView: View {
             PageHeader(title: "Arquivos grandes", subtitle: subtitle) {
                 if model.phase == .ready {
                     Button("Analisar de novo", action: model.startScan)
-                        .buttonStyle(.quiet)
+                        .buttonStyle(.bordered)
                 }
             }
             switch model.phase {
             case .idle:
                 ScanPrompt(
-                    symbol: "doc.badge.arrow.up",
+                    symbol: Route.largeFiles.filledSymbol,
+                    color: ToolPalette.color(for: .largeFiles),
                     title: "O que mais ocupa a sua pasta",
                     message: "Vídeos, imagens de disco e arquivos compactados acima de \(model.minimumMB) MB, com a data do último uso. Nada vem marcado: você escolhe.",
                     action: model.startScan

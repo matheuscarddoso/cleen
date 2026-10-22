@@ -24,7 +24,7 @@ struct ScanningView: View {
             }
             if let cancel {
                 Button("Parar", action: cancel)
-                    .buttonStyle(.quiet)
+                    .buttonStyle(.bordered)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)

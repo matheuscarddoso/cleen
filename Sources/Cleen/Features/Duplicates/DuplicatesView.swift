@@ -10,13 +10,14 @@ struct DuplicatesView: View {
             PageHeader(title: "Duplicados", subtitle: subtitle) {
                 if model.phase == .ready {
                     Button("Analisar de novo", action: model.startScan)
-                        .buttonStyle(.quiet)
+                        .buttonStyle(.bordered)
                 }
             }
             switch model.phase {
             case .idle:
                 ScanPrompt(
-                    symbol: "square.on.square",
+                    symbol: Route.duplicates.filledSymbol,
+                    color: ToolPalette.color(for: .duplicates),
                     title: "Cópias idênticas, byte a byte",
                     message: "Compara o conteúdo, não o nome, em \(model.roots.map(\.lastPathComponent).listed). Fica sempre uma cópia de cada.",
                     action: model.startScan

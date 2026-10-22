@@ -20,7 +20,7 @@ struct AllClearView: View {
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: 360)
             Button("Analisar de novo", action: rescan)
-                .buttonStyle(.quiet)
+                .buttonStyle(.bordered)
                 .padding(.top, 4)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)

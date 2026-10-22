@@ -13,7 +13,8 @@ enum ScanExclusions {
     static let folderNames: Set<String> = [
         "node_modules", ".git", ".svn", ".hg", "vendor", "Pods", "DerivedData", ".build",
         ".next", ".venv", "venv", ".Trash", ".cache", ".npm", ".bun", ".cargo", ".gradle",
-        ".rustup", ".nvm", ".pyenv", ".docker", ".orbstack",
+        ".rustup", ".nvm", ".pyenv", ".docker", ".orbstack", ".cocoapods", ".m2", ".pub-cache",
+        ".gem", ".vscode", ".cursor", ".swiftpm",
     ]
 
     static func shouldSkip(folderName name: String, level: Int, home: Bool) -> Bool {

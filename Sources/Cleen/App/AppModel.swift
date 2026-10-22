@@ -4,6 +4,10 @@ import Observation
 /// survive while windows and the menu bar panel open and close.
 @Observable
 final class AppModel {
+    /// One per process. SwiftUI may evaluate the `App`'s initial state more than once,
+    /// and a second model would mean a second notch panel and a second sampling loop.
+    static let shared = AppModel()
+
     var route = LaunchArguments.route ?? .overview
 
     let cleanup = CleanupService()
@@ -19,8 +23,9 @@ final class AppModel {
     let orphans: OrphansModel
     let startup: StartupModel
     let maintenance: MaintenanceModel
+    @ObservationIgnored private(set) lazy var notch = NotchController(app: self)
 
-    init() {
+    private init() {
         junk = JunkModel(cleanup: cleanup)
         projects = ProjectsModel(cleanup: cleanup)
         largeFiles = LargeFilesModel(cleanup: cleanup)
@@ -35,6 +40,17 @@ final class AppModel {
         monitor.onDiskReading = { [lowDiskAlert] disk in lowDiskAlert.evaluate(disk) }
         monitor.start()
         if LaunchArguments.scan { startScan(for: route) }
+        // After the app finishes launching, so screens and the menu bar are in place.
+        Task { [weak self] in self?.installNotch() }
+    }
+
+    private func installNotch() {
+        notch.install()
+        if let tab = LaunchArguments.notchTab {
+            notch.state.isPinned = true
+            notch.open(tab: tab)
+            if LaunchArguments.scan { startScan(for: tab.route) }
+        }
     }
 
     /// Kicks off the scan behind a section (used by `--scan`).

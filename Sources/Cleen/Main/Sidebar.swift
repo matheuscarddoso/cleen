@@ -9,8 +9,12 @@ struct Sidebar: View {
             ForEach(Route.Group.allCases, id: \.self) { group in
                 Section {
                     ForEach(group.routes) { route in
-                        Label(route.title, systemImage: route.symbol)
-                            .tag(route)
+                        Label {
+                            Text(route.title)
+                        } icon: {
+                            ToolIcon(symbol: route.filledSymbol, color: ToolPalette.color(for: route), size: 20)
+                        }
+                        .tag(route)
                     }
                 } header: {
                     if !group.rawValue.isEmpty {

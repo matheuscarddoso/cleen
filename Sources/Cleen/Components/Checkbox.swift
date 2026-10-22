@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// A round selection mark with a mixed state for groups. Calls `action` to toggle;
+/// A macOS-style checkbox with a mixed state for groups. Calls `action` to toggle;
 /// the owner decides what toggling a mixed group means.
 struct Checkbox: View {
     let state: CheckState
@@ -10,15 +10,16 @@ struct Checkbox: View {
     var body: some View {
         Button(action: action) {
             ZStack {
-                Circle()
-                    .strokeBorder(state == .off ? Color.white.opacity(0.28) : .clear, lineWidth: 1.25)
-                    .background(state == .off ? .clear : Theme.accent, in: .circle)
+                RoundedRectangle(cornerRadius: 4, style: .continuous)
+                    .fill(state == .off ? AnyShapeStyle(Theme.surface) : AnyShapeStyle(Theme.accent))
+                RoundedRectangle(cornerRadius: 4, style: .continuous)
+                    .strokeBorder(state == .off ? Color.primary.opacity(0.25) : .clear, lineWidth: 1)
                 Image(systemName: state == .mixed ? "minus" : "checkmark")
-                    .font(.system(size: 8.5, weight: .semibold))
-                    .foregroundStyle(Theme.onAccent)
+                    .font(.system(size: 9, weight: .bold))
+                    .foregroundStyle(.white)
                     .opacity(state == .off ? 0 : 1)
             }
-            .frame(width: 17, height: 17)
+            .frame(width: 15, height: 15)
             .contentShape(.rect)
             .animation(Theme.quick, value: state)
         }

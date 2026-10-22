@@ -10,7 +10,7 @@ struct PageHeader<Actions: View>: View {
         HStack(alignment: .bottom, spacing: 24) {
             VStack(alignment: .leading, spacing: 6) {
                 Text(title)
-                    .font(Theme.display(30))
+                    .font(Theme.display(26))
                     .accessibilityAddTraits(.isHeader)
                 Text(subtitle)
                     .font(Theme.body)

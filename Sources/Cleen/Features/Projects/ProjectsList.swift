@@ -15,9 +15,9 @@ struct ProjectsList: View {
                     Eyebrow(text: "\(model.projects.count) projetos")
                     Spacer()
                     Button("Marcar parados", action: model.selectStale)
-                        .buttonStyle(.quiet)
+                        .buttonStyle(.bordered)
                     Button("Desmarcar tudo", action: model.selectNone)
-                        .buttonStyle(.quiet)
+                        .buttonStyle(.bordered)
                 }
                 LazyVStack(spacing: 0) {
                     ForEach(model.projects) { project in

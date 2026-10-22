@@ -8,7 +8,7 @@ struct ToolCleanupRow: View {
     var body: some View {
         HStack(spacing: 14) {
             Checkbox(state: model.selectedTools.contains(tool.kind) ? .on : .off, label: tool.title, action: toggle)
-            SymbolBadge(symbol: tool.symbol)
+            ToolIcon(symbol: tool.symbol, color: ToolPalette.blue, size: 28)
             VStack(alignment: .leading, spacing: 2) {
                 Text(tool.title)
                     .font(Theme.bodyMedium)

@@ -15,7 +15,5 @@ extension View {
             .environment(app.orphans)
             .environment(app.startup)
             .environment(app.maintenance)
-            .preferredColorScheme(.dark)
-            .tint(Theme.accent)
     }
 }

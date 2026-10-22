@@ -1,11 +1,12 @@
 import Foundation
 
 /// Launch flags for opening straight into a screen, used when checking the UI:
-/// `--open <route>` opens the main window on that section, `--panel-preview` shows the
-/// menu bar panel in a window, `--scan` starts that section's scan right away.
+/// `--open <route>` opens the main window on that section, `--notch <tab>` opens the notch
+/// pinned on a tool, `--scan` starts that section's scan right away.
 enum LaunchArguments {
     static let route: Route? = value(after: "--open").flatMap(Route.init(rawValue:))
-    static let panelPreview = ProcessInfo.processInfo.arguments.contains("--panel-preview")
+    /// `--notch <tab>` opens the notch pinned on that tool.
+    static let notchTab: NotchTab? = value(after: "--notch").flatMap(NotchTab.init(rawValue:))
     static let scan = ProcessInfo.processInfo.arguments.contains("--scan")
 
     private static func value(after flag: String) -> String? {

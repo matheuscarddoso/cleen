@@ -13,7 +13,8 @@ struct SpaceLensView: View {
             switch model.phase {
             case .idle:
                 ScanPrompt(
-                    symbol: "chart.pie",
+                    symbol: Route.spaceLens.filledSymbol,
+                    color: ToolPalette.color(for: .spaceLens),
                     title: "Onde está o seu espaço",
                     message: "Mede cada pasta e mostra o tamanho de tudo, para você descer até o que pesa. Comece pela sua pasta pessoal ou pelo disco inteiro.",
                     buttonTitle: "Mapear minha pasta",

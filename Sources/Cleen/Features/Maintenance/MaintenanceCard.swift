@@ -8,7 +8,7 @@ struct MaintenanceCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .top) {
-                SymbolBadge(symbol: task.symbol)
+                ToolIcon(symbol: task.symbol, color: ToolPalette.color(for: task), size: 30)
                 Spacer()
                 if task.needsAdministrator {
                     Label("Pede senha", systemImage: "lock")
@@ -38,7 +38,7 @@ struct MaintenanceCard: View {
                         .foregroundStyle(.secondary)
                 } else {
                     Button("Executar", action: run)
-                        .buttonStyle(.quiet)
+                        .buttonStyle(.bordered)
                         .disabled(task == .thinSnapshots && model.snapshotCount == 0)
                     if let outcome = model.outcomes[task] {
                         OutcomeLabel(outcome: outcome)

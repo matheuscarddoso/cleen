@@ -17,7 +17,7 @@ struct FullDiskAccessBanner: View {
                 .foregroundStyle(.secondary)
             Spacer(minLength: 12)
             Button("Abrir Ajustes", action: openSettings)
-                .buttonStyle(.quiet)
+                .buttonStyle(.bordered)
         }
         .surface(radius: Theme.Radius.medium, padding: 12)
     }

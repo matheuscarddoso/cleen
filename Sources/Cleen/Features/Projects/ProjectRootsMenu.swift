@@ -21,7 +21,7 @@ struct ProjectRootsMenu: View {
             Button("Adicionar pasta…", action: chooseFolder)
         }
         .menuStyle(.button)
-        .buttonStyle(.quiet)
+        .buttonStyle(.bordered)
         .fixedSize()
     }
 

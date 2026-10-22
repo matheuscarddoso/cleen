@@ -14,7 +14,7 @@ struct FindingCard: View {
         Button(action: select) {
             VStack(alignment: .leading, spacing: 12) {
                 HStack {
-                    SymbolBadge(symbol: route.symbol, size: 28)
+                    ToolIcon(symbol: route.filledSymbol, color: ToolPalette.color(for: route), size: 28)
                     Spacer()
                     Image(systemName: "arrow.right")
                         .font(.system(size: 11, weight: .medium))

@@ -2,17 +2,17 @@ import SwiftUI
 
 @main
 struct CleenApp: App {
-    @State private var app = AppModel()
+    @State private var app = AppModel.shared
 
     var body: some Scene {
         MenuBarExtra {
-            MenuBarPanel()
+            MenuBarMenu()
                 .injecting(app)
         } label: {
             MenuBarLabel()
-                .environment(app.monitor)
+                .injecting(app)
         }
-        .menuBarExtraStyle(.window)
+        .menuBarExtraStyle(.menu)
 
         Window("Cleen", id: MainWindow.id) {
             MainWindow()
@@ -24,14 +24,5 @@ struct CleenApp: App {
         .commands {
             CommandGroup(replacing: .newItem) {}
         }
-
-        // The menu bar panel in an ordinary window, for screenshots (`--panel-preview`).
-        Window("Prévia do painel", id: "panel-preview") {
-            MenuBarPanel()
-                .injecting(app)
-                .background(.regularMaterial)
-        }
-        .windowResizability(.contentSize)
-        .defaultLaunchBehavior(LaunchArguments.panelPreview ? .presented : .suppressed)
     }
 }
