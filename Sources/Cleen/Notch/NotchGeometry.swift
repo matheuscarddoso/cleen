@@ -9,7 +9,7 @@ struct NotchGeometry: Equatable {
     let hasPhysicalNotch: Bool
 
     /// Width each live-activity wing adds beside the notch when it's closed.
-    static let wingWidth = 60.0
+    static let wingWidth = 46.0
     /// One size for every tool: switching tabs never resizes the panel.
     static let openPanelSize = CGSize(width: 680, height: 276)
     /// Room around the open panel for its shadow; the window is this much larger.

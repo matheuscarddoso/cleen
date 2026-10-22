@@ -11,7 +11,8 @@ final class AgendaModel {
         case denied
     }
 
-    private(set) var events: [AgendaEvent] = []
+    /// Events per day (keyed by start of day) for a window around today.
+    private(set) var eventsByDay: [Date: [AgendaEvent]] = [:]
     private(set) var reminders: [AgendaReminder] = []
     private(set) var calendarAccess = Access.unknown
     private(set) var remindersAccess = Access.unknown
@@ -33,6 +34,17 @@ final class AgendaModel {
             try? await Task.sleep(for: .seconds(60))
             await reload()
         }
+    }
+
+    /// What's on a day; for today, only what hasn't ended yet.
+    func events(on day: Date) -> [AgendaEvent] {
+        let events = eventsByDay[Calendar.current.startOfDay(for: day)] ?? []
+        guard Calendar.current.isDateInToday(day) else { return events }
+        return events.filter { $0.isAllDay || $0.end > .now }
+    }
+
+    func hasEvents(on day: Date) -> Bool {
+        !(eventsByDay[Calendar.current.startOfDay(for: day)] ?? []).isEmpty
     }
 
     func complete(_ reminder: AgendaReminder) {
@@ -81,11 +93,24 @@ final class AgendaModel {
         let endOfDay = calendar.date(byAdding: .day, value: 1, to: calendar.startOfDay(for: now)) ?? now
 
         if calendarAccess == .granted {
-            let predicate = store.predicateForEvents(withStart: calendar.startOfDay(for: now), end: endOfDay, calendars: nil)
-            events = store.events(matching: predicate)
-                .filter { $0.isAllDay || $0.endDate > now }
-                .sorted { ($0.isAllDay ? 0 : 1, $0.startDate) < ($1.isAllDay ? 0 : 1, $1.startDate) }
+            // A window around today for the day strip: two weeks back, a month ahead.
+            let today = calendar.startOfDay(for: now)
+            let start = calendar.date(byAdding: .day, value: -14, to: today) ?? today
+            let end = calendar.date(byAdding: .day, value: 32, to: today) ?? endOfDay
+            let all = store.events(matching: store.predicateForEvents(withStart: start, end: end, calendars: nil))
                 .map(AgendaEvent.init)
+            var byDay: [Date: [AgendaEvent]] = [:]
+            for event in all {
+                // Multi-day events show on every day they cover.
+                var day = calendar.startOfDay(for: event.start)
+                let last = calendar.startOfDay(for: event.end.addingTimeInterval(-1))
+                while day <= last {
+                    byDay[day, default: []].append(event)
+                    guard let next = calendar.date(byAdding: .day, value: 1, to: day) else { break }
+                    day = next
+                }
+            }
+            eventsByDay = byDay.mapValues { $0.sorted { ($0.isAllDay ? 0 : 1, $0.start) < ($1.isAllDay ? 0 : 1, $1.start) } }
         }
 
         if remindersAccess == .granted {

@@ -14,7 +14,7 @@ struct NotchHomeTab: View {
                 Rectangle()
                     .fill(NotchStyle.track)
                     .frame(width: 1, height: 104)
-                AgendaColumn()
+                NotchCalendar()
             }
             .padding(.top, 4)
         }

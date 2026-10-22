@@ -44,6 +44,8 @@ final class AppModel {
         if LaunchArguments.scan { startScan(for: route) }
         // After the app finishes launching, so screens and the menu bar are in place.
         Task { [weak self] in self?.installNotch() }
+        // The closed notch shows what's playing, so listen from the start.
+        Task { [nowPlaying] in await nowPlaying.watch() }
     }
 
     private func installNotch() {
