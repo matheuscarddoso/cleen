@@ -7,10 +7,10 @@ struct NotchCalendar: View {
     @State private var selected = Calendar.current.startOfDay(for: .now)
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: 8) {
             HStack(alignment: .center, spacing: 6) {
                 Text(selected.formatted(.dateTime.month(.abbreviated).locale(.cleen)).replacing(".", with: "").capitalized)
-                    .font(.system(size: 24, weight: .semibold))
+                    .font(.system(size: 16, weight: .semibold))
                     .contentTransition(.numericText())
                     .onTapGesture(perform: AgendaModel.openCalendar)
                     .help("Abrir o Calendário")

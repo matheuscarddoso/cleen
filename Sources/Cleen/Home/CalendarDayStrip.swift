@@ -39,6 +39,6 @@ struct CalendarDayStrip: View {
                 endPoint: .trailing
             )
         }
-        .frame(height: 44)
+        .frame(height: 34)
     }
 }

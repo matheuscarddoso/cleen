@@ -15,15 +15,15 @@ struct CalendarDayAgenda: View {
             } else if events.isEmpty && reminders.isEmpty {
                 VStack(spacing: 6) {
                     Image(systemName: "calendar.badge.checkmark")
-                        .font(.system(size: 16))
+                        .font(.system(size: 13))
                         .foregroundStyle(NotchStyle.tertiary)
                     Text(Calendar.current.isDateInToday(day) ? "Nada para hoje" : "Nada neste dia")
-                        .font(NotchStyle.bodyMedium)
+                        .font(.system(size: 11, weight: .medium))
                         .foregroundStyle(NotchStyle.secondary)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
-                VStack(alignment: .leading, spacing: 7) {
+                VStack(alignment: .leading, spacing: 6) {
                     ForEach(events.prefix(reminders.isEmpty ? 2 : 1)) { event in
                         AgendaEventRow(event: event)
                     }

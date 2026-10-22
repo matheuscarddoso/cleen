@@ -10,7 +10,7 @@ struct AgendaReminderRow: View {
         HStack(spacing: 8) {
             Button(action: complete) {
                 Image(systemName: isHovered ? "checkmark.circle" : "circle")
-                    .font(.system(size: 14))
+                    .font(.system(size: 12))
                     .foregroundStyle(isHovered ? NotchStyle.primary : NotchStyle.secondary)
                     .contentTransition(.symbolEffect(.replace))
             }
@@ -18,7 +18,7 @@ struct AgendaReminderRow: View {
             .onHover { isHovered = $0 }
             .accessibilityLabel("Concluir \(reminder.title)")
             Text(reminder.title)
-                .font(NotchStyle.bodyMedium)
+                .font(.system(size: 11, weight: .medium))
                 .foregroundStyle(reminder.isOverdue ? NotchStyle.critical : NotchStyle.primary)
                 .lineLimit(1)
         }

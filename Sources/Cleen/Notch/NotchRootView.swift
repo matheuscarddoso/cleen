@@ -25,7 +25,7 @@ struct NotchRootView: View {
                         .frame(width: geometry.openSize.width, height: geometry.openSize.height, alignment: .top)
                         .transition(.notchPanel)
                 } else if showsWings {
-                    NotchWings(notchWidth: geometry.notchSize.width)
+                    NotchWings(notchWidth: geometry.notchSize.width, notchHeight: geometry.notchSize.height)
                         .padding(.horizontal, NotchStyle.closedTopRadius)
                         .frame(width: closed.width, height: closed.height)
                         .transition(.notchWings)

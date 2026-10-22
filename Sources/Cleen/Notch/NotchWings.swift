@@ -5,6 +5,7 @@ import SwiftUI
 /// disk fullness and free space. During a scan or cleanup: progress.
 struct NotchWings: View {
     let notchWidth: Double
+    let notchHeight: Double
     @Environment(SystemMonitor.self) private var monitor
     @Environment(JunkModel.self) private var junk
     @Environment(AppModel.self) private var app
@@ -14,17 +15,24 @@ struct NotchWings: View {
         HStack(spacing: 0) {
             leading
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.leading, 8)
+                .padding(.leading, inset)
             Spacer(minLength: notchWidth)
             trailing
                 .frame(maxWidth: .infinity, alignment: .trailing)
-                .padding(.trailing, 8)
+                .padding(.trailing, inset)
         }
         .frame(maxHeight: .infinity)
         .animation(.smooth(duration: 0.3), value: isPlaying)
         .accessibilityElement(children: .combine)
         .accessibilityLabel("Cleen")
     }
+
+    /// Artwork as large as the notch allows, up to 20 pt.
+    private var artworkSize: Double { min(20, notchHeight - 8) }
+
+    /// The gap the artwork leaves above and below; used on the sides too, so the
+    /// artwork sits equally far from the side and the bottom of the notch.
+    private var inset: Double { (notchHeight - artworkSize) / 2 }
 
     private var isPlaying: Bool { nowPlaying.track?.isPlaying == true }
 
@@ -39,7 +47,7 @@ struct NotchWings: View {
                 .controlSize(.mini)
                 .tint(.white)
         } else if isPlaying {
-            WingArtwork(image: nowPlaying.artwork)
+            WingArtwork(image: nowPlaying.artwork, size: artworkSize, cornerRadius: max(3, NotchStyle.closedBottomRadius - inset))
                 .transition(.scale(0.6).combined(with: .opacity))
         } else {
             WingRing(fraction: monitor.disk?.usedFraction ?? 0)
@@ -50,7 +58,7 @@ struct NotchWings: View {
     @ViewBuilder
     private var trailing: some View {
         if isPlaying {
-            SoundBars(tint: .white.opacity(0.92), isPlaying: isPlaying)
+            SoundBars(isPlaying: isPlaying)
                 .transition(.opacity)
         } else {
             Text(monitor.disk.map { Self.compact($0.available) } ?? "")

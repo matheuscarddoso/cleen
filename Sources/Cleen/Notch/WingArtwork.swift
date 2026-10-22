@@ -4,6 +4,8 @@ import SwiftUI
 /// The playing item's artwork, small, for the closed notch.
 struct WingArtwork: View {
     let image: NSImage?
+    var size = 20.0
+    var cornerRadius = 6.0
 
     var body: some View {
         Color(white: 0.2)
@@ -18,8 +20,8 @@ struct WingArtwork: View {
                         .foregroundStyle(NotchStyle.secondary)
                 }
             }
-            .frame(width: 20, height: 20)
-            .clipShape(.rect(cornerRadius: 5, style: .continuous))
+            .frame(width: size, height: size)
+            .clipShape(.rect(cornerRadius: cornerRadius, style: .continuous))
             .accessibilityHidden(true)
     }
 }

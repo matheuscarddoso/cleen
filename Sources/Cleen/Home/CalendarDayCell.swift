@@ -10,17 +10,17 @@ struct CalendarDayCell: View {
         Button(action: select) {
             VStack(spacing: 1) {
                 Text(weekday)
-                    .font(.system(size: 9.5, weight: .semibold))
+                    .font(.system(size: 8, weight: .semibold))
                     .foregroundStyle(isSelected ? NotchStyle.primary.opacity(0.75) : labelColor)
                 Text(day.formatted(.dateTime.day(.twoDigits)))
-                    .font(.system(size: isSelected ? 19 : 15, weight: .semibold).monospacedDigit())
+                    .font(.system(size: isSelected ? 14 : 12, weight: .semibold).monospacedDigit())
                     .foregroundStyle(isSelected ? Color(red: 0.2, green: 0.55, blue: 1) : numberColor)
                 Circle()
                     .fill(isSelected ? Color(red: 0.2, green: 0.55, blue: 1) : NotchStyle.secondary)
-                    .frame(width: 3.5, height: 3.5)
+                    .frame(width: 3, height: 3)
                     .opacity(hasEvents ? 1 : 0)
             }
-            .frame(width: isSelected ? 40 : 30, height: 44)
+            .frame(width: isSelected ? 30 : 24, height: 34)
             .contentShape(.rect)
         }
         .buttonStyle(.plain)

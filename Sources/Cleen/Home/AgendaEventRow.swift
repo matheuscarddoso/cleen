@@ -7,13 +7,13 @@ struct AgendaEventRow: View {
         HStack(spacing: 8) {
             Capsule()
                 .fill(Color(nsColor: event.color))
-                .frame(width: 3.5, height: 30)
+                .frame(width: 3, height: 26)
             VStack(alignment: .leading, spacing: 1) {
                 Text(event.title)
-                    .font(NotchStyle.bodyMedium)
+                    .font(.system(size: 11, weight: .medium))
                     .lineLimit(1)
                 Text(event.timeText)
-                    .font(NotchStyle.caption)
+                    .font(.system(size: 9.5))
                     .foregroundStyle(NotchStyle.secondary)
             }
         }

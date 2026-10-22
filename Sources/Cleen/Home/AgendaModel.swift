@@ -22,20 +22,28 @@ final class AgendaModel {
 
     @ObservationIgnored private var refresher: Task<Void, Never>?
 
-    /// Asks once for access, then keeps the lists current. Several views call this;
-    /// they all share one refresh loop.
+    /// Asks once for access, then keeps the lists current. Several views (and several
+    /// screens' notches) call this; they all share one refresh loop.
     func watch() async {
         guard refresher == nil else { return }
-        await requestAccess()
-        await reload()
-        observer = NotificationCenter.default.addObserver(forName: .EKEventStoreChanged, object: store, queue: .main) { [weak self] _ in
-            Task { @MainActor in await self?.reload() }
-        }
-        // The day rolls over and "in 10 minutes" goes stale; refresh now and then.
+        // Claim it before the first await, so a second caller can't slip in.
         refresher = Task { [weak self] in
+            // Listen before the first read: right after launch the store is still
+            // loading, the first read can come back empty, and the "changed" signal
+            // that follows must not be missed.
+            guard let self else { return }
+            self.observer = NotificationCenter.default.addObserver(forName: .EKEventStoreChanged, object: self.store, queue: .main) { [weak self] _ in
+                Task { @MainActor in await self?.reload() }
+            }
+            await self.requestAccess()
+            await self.reload()
+            // A second look once the store has settled, then every minute (the day
+            // rolls over, "in 10 minutes" goes stale).
+            try? await Task.sleep(for: .seconds(2))
+            await self.reload()
             while !Task.isCancelled {
                 try? await Task.sleep(for: .seconds(60))
-                await self?.reload()
+                await self.reload()
             }
         }
     }
