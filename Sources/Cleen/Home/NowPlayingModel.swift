@@ -34,6 +34,10 @@ final class NowPlayingModel {
     }
 
     func send(_ command: NowPlayingCommand) async {
+        // Flip the button right away; the stream confirms (or corrects) a moment later.
+        if command == .playPause, let track {
+            self.track = track.toggled()
+        }
         await NowPlayingBridge.send(command)
     }
 
@@ -51,12 +55,14 @@ final class NowPlayingModel {
             appName = app?.localizedName
             appURL = app?.bundleURL
         }
-        if reading.artworkKey == nil {
-            artwork = nil
-            tint = nil
-        } else if let artworkData, let image = NSImage(data: artworkData) {
+        if let artworkData, let image = NSImage(data: artworkData) {
             artwork = image
             tint = Self.averageColor(of: image)
+        } else if reading.artworkKey == nil, reading.identity != track?.identity {
+            // A new item without artwork; an update of the same item without it
+            // (players omit it while paused) keeps the one already shown.
+            artwork = nil
+            tint = nil
         }
         track = reading
     }

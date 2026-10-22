@@ -3,19 +3,18 @@ import SwiftUI
 struct PlayerButton: View {
     let symbol: String
     let label: String
-    let size: Double
     let action: () -> Void
     @State private var isHovered = false
 
     var body: some View {
         Button(action: action) {
             Image(systemName: symbol)
-                .font(.system(size: size, weight: .semibold))
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundStyle(NotchStyle.primary)
                 .contentTransition(.symbolEffect(.replace))
-                .frame(width: 30, height: 28)
-                .contentShape(.rect)
-                .opacity(isHovered ? 1 : 0.9)
-                .scaleEffect(isHovered ? 1.08 : 1)
+                .frame(width: 34, height: 34)
+                .background(isHovered ? Color.white.opacity(0.14) : .clear, in: .circle)
+                .contentShape(.circle)
         }
         .buttonStyle(.plain)
         .onHover { isHovered = $0 }

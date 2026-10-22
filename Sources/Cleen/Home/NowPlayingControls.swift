@@ -1,24 +1,19 @@
 import SwiftUI
 
+/// Previous, play/pause, next — small glyphs with a round hover, as in NotchNook.
 struct NowPlayingControls: View {
     @Environment(NowPlayingModel.self) private var model
     let isPlaying: Bool
+    var isEnabled = true
 
     var body: some View {
-        HStack(spacing: 22) {
-            Spacer(minLength: 0)
-            PlayerButton(symbol: "backward.fill", label: "Anterior", size: 17) { send(.previous) }
-            PlayerButton(symbol: isPlaying ? "pause.fill" : "play.fill", label: isPlaying ? "Pausar" : "Tocar", size: 22) { send(.playPause) }
-            PlayerButton(symbol: "forward.fill", label: "Próxima", size: 17) { send(.next) }
-            Spacer(minLength: 0)
+        HStack(spacing: 4) {
+            PlayerButton(symbol: "backward.end.fill", label: "Anterior") { send(.previous) }
+            PlayerButton(symbol: isPlaying ? "pause.fill" : "play.fill", label: isPlaying ? "Pausar" : "Tocar") { send(.playPause) }
+            PlayerButton(symbol: "forward.end.fill", label: "Próxima") { send(.next) }
         }
-        .overlay(alignment: .trailing) {
-            Image(systemName: "waveform")
-                .font(.system(size: 14, weight: .medium))
-                .foregroundStyle(NotchStyle.tertiary)
-                .symbolEffect(.variableColor.iterative, isActive: isPlaying)
-                .accessibilityHidden(true)
-        }
+        .disabled(!isEnabled)
+        .opacity(isEnabled ? 1 : 0.35)
     }
 
     private func send(_ command: NowPlayingCommand) {

@@ -57,6 +57,9 @@ static void Emit(void) {
                     // Artwork only when it changed: it's the heavy part of every line.
                     static NSString *lastArtworkKey;
                     id artwork = info[@"kMRMediaRemoteNowPlayingInfoArtworkData"];
+                    // Players drop the artwork from some updates (paused); forget the
+                    // last one so it is sent again when it comes back.
+                    if (![artwork isKindOfClass:[NSData class]]) lastArtworkKey = nil;
                     id artworkID = info[@"kMRMediaRemoteNowPlayingInfoArtworkIdentifier"];
                     if ([artwork isKindOfClass:[NSData class]]) {
                         NSString *key = [artworkID isKindOfClass:[NSString class]]
@@ -110,4 +113,6 @@ void cleen_send(void) {
     int command = raw ? atoi(raw) : 2;
     MRSendCommand send = (MRSendCommand)dlsym(MediaRemote(), "MRMediaRemoteSendCommand");
     if (send) send(command, nil);
+    // The command travels over XPC; exiting right away can drop it.
+    CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.4, false);
 }

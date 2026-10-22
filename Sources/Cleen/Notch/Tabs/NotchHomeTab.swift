@@ -10,9 +10,13 @@ struct NotchHomeTab: View {
             NotchGreeting()
             HStack(alignment: .top, spacing: 18) {
                 NowPlayingCard()
-                    .frame(width: 400)
+                    .frame(width: 360)
+                Rectangle()
+                    .fill(NotchStyle.track)
+                    .frame(width: 1, height: 104)
                 AgendaColumn()
             }
+            .padding(.top, 4)
         }
         .task { await nowPlaying.watch() }
         .task { await agenda.watch() }

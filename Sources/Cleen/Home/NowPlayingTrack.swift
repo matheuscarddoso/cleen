@@ -16,6 +16,23 @@ nonisolated struct NowPlayingTrack: Equatable, Sendable {
     /// Same item, regardless of where the playhead is.
     var identity: String { "\(pid)|\(title)|\(artist)|\(album)" }
 
+    private init(copying other: NowPlayingTrack, isPlaying: Bool, elapsed: TimeInterval) {
+        title = other.title
+        artist = other.artist
+        album = other.album
+        duration = other.duration
+        self.elapsed = elapsed
+        timestamp = .now
+        self.isPlaying = isPlaying
+        pid = other.pid
+        artworkKey = other.artworkKey
+    }
+
+    /// The same item with play/pause flipped, for instant feedback on the button.
+    func toggled() -> NowPlayingTrack {
+        NowPlayingTrack(copying: self, isPlaying: !isPlaying, elapsed: position(at: .now))
+    }
+
     init?(json: [String: Any]) {
         guard let title = json["title"] as? String, !title.isEmpty else { return nil }
         self.title = title
