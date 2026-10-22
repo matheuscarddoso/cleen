@@ -35,14 +35,6 @@ struct MainWindow: View {
     private func becomeRegularApp() {
         NSApp.setActivationPolicy(.regular)
         NSApp.activate()
-        if ProcessInfo.processInfo.arguments.contains("--dump-views") {
-            Task {
-                try? await Task.sleep(for: .seconds(6))
-                for window in NSApp.windows where window.title == "Cleen" {
-                    if let view = window.contentView?.superview { ViewHierarchyDump.dump(view) }
-                }
-            }
-        }
     }
 
     /// Back to living only in the menu bar.
