@@ -7,18 +7,19 @@ struct ShelfDropZone: View {
 
     var body: some View {
         ZStack {
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .fill(isTargeted ? NotchStyle.control : Color.white.opacity(0.03))
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .strokeBorder(style: StrokeStyle(lineWidth: 1.5, dash: [5, 4]))
-                .foregroundStyle(isTargeted ? NotchStyle.primary.opacity(0.6) : NotchStyle.primary.opacity(0.22))
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .fill(isTargeted ? NotchStyle.card : .clear)
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .strokeBorder(style: StrokeStyle(lineWidth: 1, dash: [4, 4]))
+                .foregroundStyle(isTargeted ? NotchStyle.primary.opacity(0.5) : NotchStyle.primary.opacity(0.18))
             if shelf.items.isEmpty {
                 VStack(spacing: 8) {
                     Image(systemName: "tray.and.arrow.down")
-                        .font(.system(size: 22, weight: .medium))
+                        .font(.system(size: 18, weight: .regular))
+                        .foregroundStyle(NotchStyle.secondary)
                     VStack(spacing: 2) {
                         Text("Solte arquivos aqui")
-                            .font(.system(size: 13, weight: .semibold))
+                            .font(.system(size: 12.5, weight: .medium))
                         Text("Ficam por um dia · segure ⌥ e clique para tirar")
                             .font(NotchStyle.caption)
                             .foregroundStyle(NotchStyle.secondary)

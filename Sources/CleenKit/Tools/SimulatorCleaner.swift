@@ -13,8 +13,8 @@ public enum SimulatorCleaner {
         guard !devices.isEmpty else { return nil }
 
         let root = home.appending(path: "Library/Developer/CoreSimulator/Devices")
-        let size = devices.reduce(Int64(0)) { total, udid in
-            total + FileSizer.allocatedSize(of: root.appending(path: udid))
+        let size = await BlockingIO.run {
+            devices.reduce(Int64(0)) { total, udid in total + FileSizer.allocatedSize(of: root.appending(path: udid)) }
         }
         guard size > 0 else { return nil }
 

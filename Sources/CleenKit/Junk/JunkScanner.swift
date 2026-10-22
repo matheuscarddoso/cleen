@@ -119,7 +119,7 @@ public struct JunkScanner: Sendable {
             func addNext() -> Bool {
                 guard let candidate = iterator.next() else { return false }
                 group.addTask {
-                    let size = FileSizer.allocatedSize(of: candidate.url)
+                    let size = await BlockingIO.run { FileSizer.allocatedSize(of: candidate.url) }
                     guard size > 0 else { return nil }
                     return JunkItem(
                         url: candidate.url,

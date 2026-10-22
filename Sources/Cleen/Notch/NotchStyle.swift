@@ -4,12 +4,12 @@ import SwiftUI
 /// for structure, color reserved for meaning (usage levels, warnings).
 enum NotchStyle {
     static let background = Color.black
-    static let card = LinearGradient(
-        colors: [Color(white: 0.14), Color(white: 0.095)],
-        startPoint: .top,
-        endPoint: .bottom
-    )
-    static let cardStroke = Color.white.opacity(0.06)
+    /// The one surface: a barely lifted black with a hairline edge, never a gradient.
+    static let card = Color.white.opacity(0.045)
+    static let cardStroke = Color.white.opacity(0.07)
+    static let separator = Color.white.opacity(0.07)
+    /// Bar fill: light grey, not pure white, so bars sit back from the text.
+    static let barFill = Color.white.opacity(0.78)
     static let control = Color.white.opacity(0.1)
     static let controlHover = Color.white.opacity(0.16)
     static let selection = Color.white.opacity(0.14)
@@ -41,7 +41,7 @@ enum NotchStyle {
         switch fraction {
         case 0.9...: critical
         case 0.75...: warning
-        default: .white
+        default: barFill
         }
     }
 }

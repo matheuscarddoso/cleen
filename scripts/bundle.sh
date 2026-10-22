@@ -56,8 +56,14 @@ cat > "$APP/Contents/Info.plist" <<PLIST
 </plist>
 PLIST
 
-# Ad-hoc signature: enough for the app to run and keep its permissions on this Mac.
-codesign --force --sign - --timestamp=none "$APP" >/dev/null
+# Sign with a stable identity. An ad-hoc signature changes with every build, and macOS
+# ties privacy permissions (Calendar, Reminders, Full Disk Access, Keychain "Always
+# Allow") to the signature, so every rebuild would silently lose them.
+# Override with CLEEN_SIGN_IDENTITY; falls back to ad-hoc when no certificate exists.
+IDENTITY="${CLEEN_SIGN_IDENTITY:-$(security find-identity -v -p codesigning 2>/dev/null | grep -m1 'Apple Development' | awk '{print $2}')}"
+IDENTITY="${IDENTITY:--}"
+codesign --force --sign "$IDENTITY" --timestamp=none "$APP/Contents/Resources/libCleenNowPlaying.dylib" >/dev/null
+codesign --force --sign "$IDENTITY" --timestamp=none "$APP" >/dev/null
 echo "Built $APP"
 
 if [[ "${1:-}" == "--install" ]]; then

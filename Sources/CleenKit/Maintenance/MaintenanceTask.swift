@@ -19,7 +19,7 @@ public enum MaintenanceTask: String, CaseIterable, Sendable, Identifiable {
         case .thinSnapshots: "Liberar espaço reservado"
         case .flushDNS: "Limpar cache de DNS"
         case .reindexSpotlight: "Reindexar o Spotlight"
-        case .rebuildLaunchServices: "Reconstruir o menu Abrir Com"
+        case .rebuildLaunchServices: "Refazer o Abrir Com"
         case .resetFontCache: "Limpar cache de fontes"
         case .verifyDisk: "Verificar o disco"
         }

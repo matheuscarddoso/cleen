@@ -21,7 +21,8 @@ struct NowPlayingArtwork: View {
                         .foregroundStyle(NotchStyle.tertiary)
                 }
             }
-            .clipShape(.rect(cornerRadius: 14, style: .continuous))
+            // App-icon proportions: a true squircle rather than a rounded square.
+            .clipShape(.rect(cornerRadius: 24, style: .continuous))
             .overlay(alignment: .bottomTrailing) {
                 if let appURL {
                     FileIcon(url: appURL, size: 30)

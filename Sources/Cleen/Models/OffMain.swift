@@ -1,7 +1,7 @@
-/// Runs blocking file-system work on the concurrent pool instead of the main actor.
-/// The scanners are synchronous on purpose (they're plain loops over `fts`); this is
-/// the single place that moves them off the UI thread.
-@concurrent
-nonisolated func offMain<T: Sendable>(_ work: @Sendable () -> T) async -> T {
-    work()
+import CleenKit
+
+/// Runs blocking file-system work off the main actor *and* off Swift's cooperative pool
+/// (see `BlockingIO` for why the pool matters).
+nonisolated func offMain<T: Sendable>(_ work: @escaping @Sendable () -> T) async -> T {
+    await BlockingIO.run(work)
 }

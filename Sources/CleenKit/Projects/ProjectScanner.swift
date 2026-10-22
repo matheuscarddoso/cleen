@@ -16,8 +16,8 @@ public struct ProjectScanner: Sendable {
         self.maxDepth = maxDepth
     }
 
-    public func scan(progress: @Sendable (String) -> Void = { _ in }) async -> [CodeProject] {
-        let found = locateArtifacts(progress: progress)
+    public func scan(progress: @escaping @Sendable (String) -> Void = { _ in }) async -> [CodeProject] {
+        let found = await BlockingIO.run { [self] in self.locateArtifacts(progress: progress) }
         let sized = await measure(found)
 
         let byProject = Dictionary(grouping: sized) { $0.url.deletingLastPathComponent().standardizedFileURL }
@@ -84,7 +84,7 @@ public struct ProjectScanner: Sendable {
             func addNext() -> Bool {
                 guard let next = iterator.next() else { return false }
                 group.addTask {
-                    ProjectArtifact(url: next.url, kind: next.kind, size: FileSizer.allocatedSize(of: next.url))
+                    ProjectArtifact(url: next.url, kind: next.kind, size: await BlockingIO.run { FileSizer.allocatedSize(of: next.url) })
                 }
                 return true
             }

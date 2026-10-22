@@ -1,59 +1,56 @@
 import CleenKit
 import SwiftUI
 
-/// Live vitals as a row of cards, then the processes doing the most.
+/// Live vitals as one grouped list: label, thin bar, value.
 struct NotchSystemTab: View {
     @Environment(SystemMonitor.self) private var monitor
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack(alignment: .top, spacing: 8) {
-                NotchMetricCard(
-                    symbol: "cpu",
-                    title: "CPU",
-                    value: monitor.cpu?.total.percent ?? "—",
-                    detail: monitor.cpu.map { "\($0.user.percent) apps · \($0.system.percent) sistema" } ?? "",
-                    fraction: monitor.cpu?.total
-                )
-                NotchMetricCard(
-                    symbol: "memorychip",
-                    title: "Memória",
-                    value: monitor.memory?.used.memoryBytes ?? "—",
-                    detail: memoryDetail,
-                    detailColor: memoryColor,
-                    fraction: monitor.memory?.usedFraction
-                )
-                NotchMetricCard(
-                    symbol: "network",
-                    title: "Rede",
-                    value: "↓ \(monitor.network?.download.rate ?? "—")",
-                    detail: "↑ \(monitor.network?.upload.rate ?? "—")",
-                    history: monitor.downloadHistory
-                )
-                if let battery = monitor.battery {
-                    NotchMetricCard(
-                        symbol: battery.isCharging ? "battery.100.bolt" : "battery.75",
-                        title: "Bateria",
-                        value: battery.level.percent,
-                        detail: [battery.health.map { "saúde \($0.percent)" }, battery.cycleCount.map { "\($0) ciclos" }].compactMap { $0 }.joined(separator: " · "),
-                        fraction: battery.level,
-                        fractionTint: battery.level < 0.2 ? NotchStyle.critical : NotchStyle.good
-                    )
+        NotchGroup {
+            NotchMeterRow(symbol: "cpu", label: "CPU", value: monitor.cpu?.total.percent ?? "—") {
+                UsageBar(fraction: monitor.cpu?.total ?? 0, height: 3.5)
+            }
+            NotchMeterRow(
+                symbol: "memorychip",
+                label: "Memória",
+                value: monitor.memory?.used.memoryBytes ?? "—",
+                valueColor: memoryColor ?? NotchStyle.primary
+            ) {
+                UsageBar(fraction: monitor.memory?.usedFraction ?? 0, height: 3.5, tint: memoryColor)
+            }
+            NotchMeterRow(
+                symbol: "internaldrive",
+                label: "Disco",
+                value: "\(monitor.disk?.available.bytes ?? "—") livres",
+                valueColor: NotchStyle.level(monitor.disk?.usedFraction ?? 0) == NotchStyle.barFill ? NotchStyle.primary : NotchStyle.level(monitor.disk?.usedFraction ?? 0)
+            ) {
+                UsageBar(fraction: monitor.disk?.usedFraction ?? 0, height: 3.5)
+            }
+            NotchMeterRow(symbol: "network", label: "Rede", value: "↑ \(monitor.network?.upload.rate ?? "—")") {
+                HStack(spacing: 8) {
+                    Text("↓")
+                        .font(.system(size: 10.5))
+                        .foregroundStyle(NotchStyle.tertiary)
+                    Sparkline(values: monitor.downloadHistory, tint: NotchStyle.barFill)
+                        .frame(height: 14)
+                    Text(monitor.network?.download.rate ?? "—")
+                        .font(.system(size: 11, weight: .medium).monospacedDigit())
+                        .foregroundStyle(NotchStyle.primary.opacity(0.85))
+                        .fixedSize()
                 }
             }
-            .fixedSize(horizontal: false, vertical: true)
-            NotchProcessList()
+            if let battery = monitor.battery {
+                NotchMeterRow(
+                    symbol: battery.isCharging ? "battery.100.bolt" : "battery.75",
+                    label: "Bateria",
+                    value: battery.level.percent,
+                    detail: battery.health.map { "saúde \($0.percent)" }
+                ) {
+                    UsageBar(fraction: battery.level, height: 3.5, tint: battery.level < 0.2 ? NotchStyle.critical : NotchStyle.barFill)
+                }
+            }
         }
-        .task { await monitor.watchProcesses() }
-    }
-
-    private var memoryDetail: String {
-        guard let memory = monitor.memory else { return "" }
-        return switch memory.pressure {
-        case .normal: "de \(memory.total.memoryBytes) · pressão normal"
-        case .warning: "pressão alta"
-        case .critical: "pressão crítica"
-        }
+        .padding(.top, 4)
     }
 
     private var memoryColor: Color? {

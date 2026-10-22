@@ -11,24 +11,20 @@ struct AirDropTile: View {
         Button(action: send) {
             VStack(spacing: 8) {
                 Image(systemName: "dot.radiowaves.left.and.right")
-                    .font(.system(size: 22, weight: .medium))
+                    .font(.system(size: 18, weight: .regular))
                     .foregroundStyle(isTargeted ? Color(red: 0.2, green: 0.55, blue: 1) : NotchStyle.primary)
                     .symbolEffect(.variableColor.iterative, isActive: isTargeted)
                 VStack(spacing: 2) {
                     Text("AirDrop")
-                        .font(.system(size: 13, weight: .semibold))
+                        .font(.system(size: 12.5, weight: .medium))
                     Text(shelf.items.isEmpty ? "Envie para aparelhos por perto" : "Enviar \(shelf.items.count.counted("arquivo", "arquivos"))")
                         .font(NotchStyle.caption)
                         .foregroundStyle(NotchStyle.secondary)
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(isTargeted || isHovered ? AnyShapeStyle(NotchStyle.controlHover) : AnyShapeStyle(NotchStyle.card), in: .rect(cornerRadius: 16, style: .continuous))
-            .overlay {
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .strokeBorder(isTargeted ? Color(red: 0.2, green: 0.55, blue: 1) : NotchStyle.cardStroke, lineWidth: isTargeted ? 1.5 : 1)
-            }
-            .contentShape(.rect(cornerRadius: 16))
+            .background(isTargeted || isHovered ? NotchStyle.control.opacity(0.6) : .clear, in: .rect(cornerRadius: 14, style: .continuous))
+            .contentShape(.rect(cornerRadius: 14))
         }
         .buttonStyle(.plain)
         .onHover { isHovered = $0 }
