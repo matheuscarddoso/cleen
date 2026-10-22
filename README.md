@@ -1,4 +1,4 @@
-# Lustro
+# Cleen
 
 Limpeza e saúde do Mac, na barra de menus. Nativo (SwiftUI, macOS 26), sem
 dependências, sem rede.
@@ -21,7 +21,7 @@ dependências, sem rede.
 
 ## Segurança
 
-Toda remoção passa por `SafetyGuard` (`Sources/LustroKit/Core/SafetyGuard.swift`):
+Toda remoção passa por `SafetyGuard` (`Sources/CleenKit/Core/SafetyGuard.swift`):
 nunca remove pastas do sistema, as pastas principais da conta (`~/Library`,
 `~/Documents`…), nada fora da pasta pessoal e de `/Applications`, e não deixa um
 symlink no caminho levar a um desses lugares. O que você criou sempre vai para o
@@ -31,18 +31,18 @@ Lixo. Só o que se recria sozinho é apagado de vez.
 
 ```bash
 swift build                     # compila
-swift test                      # testes da LustroKit (Swift Testing)
-./scripts/bundle.sh             # gera build/Lustro.app
+swift test                      # testes da CleenKit (Swift Testing)
+./scripts/bundle.sh             # gera build/Cleen.app
 ./scripts/bundle.sh --install   # instala em /Applications e abre
 ```
 
-Para conferir telas: `open build/Lustro.app --args --open junk --scan` abre a
+Para conferir telas: `open build/Cleen.app --args --open junk --scan` abre a
 janela numa seção e já analisa; `--panel-preview` mostra o painel da barra de
 menus numa janela comum.
 
-Estrutura: `LustroKit` tem toda a lógica de disco e sistema, sem UI e testada
-contra pastas temporárias. `Lustro` é o app (SwiftUI, isolamento padrão
+Estrutura: `CleenKit` tem toda a lógica de disco e sistema, sem UI e testada
+contra pastas temporárias. `Cleen` é o app (SwiftUI, isolamento padrão
 `MainActor`).
 
 Para enxergar Lixeira, Mail, Safari e containers de outros apps, dê **Acesso Total
-ao Disco** ao Lustro em Ajustes do Sistema › Privacidade e Segurança.
+ao Disco** ao Cleen em Ajustes do Sistema › Privacidade e Segurança.

@@ -1,4 +1,4 @@
-// Renders Lustro's app icon into an .iconset folder.
+// Renders Cleen's app icon into an .iconset folder.
 // Usage: swift scripts/make-icon.swift <output.iconset>
 import AppKit
 import CoreGraphics

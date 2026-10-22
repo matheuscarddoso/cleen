@@ -2,27 +2,27 @@
 import PackageDescription
 
 let package = Package(
-    name: "Lustro",
+    name: "Cleen",
     defaultLocalization: "pt-BR",
     platforms: [.macOS(.v26)],
     products: [
-        .executable(name: "Lustro", targets: ["Lustro"])
+        .executable(name: "Cleen", targets: ["Cleen"])
     ],
     targets: [
         // Everything that touches the file system or the kernel lives here, free of UI,
         // so it can be tested against temporary directories.
         .target(
-            name: "LustroKit",
+            name: "CleenKit",
             linkerSettings: [.linkedFramework("IOKit")]
         ),
         .executableTarget(
-            name: "Lustro",
-            dependencies: ["LustroKit"],
+            name: "Cleen",
+            dependencies: ["CleenKit"],
             swiftSettings: [.defaultIsolation(MainActor.self)]
         ),
         .testTarget(
-            name: "LustroKitTests",
-            dependencies: ["LustroKit"]
+            name: "CleenKitTests",
+            dependencies: ["CleenKit"]
         )
     ],
     swiftLanguageModes: [.v6]
