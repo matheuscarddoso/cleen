@@ -1,4 +1,5 @@
 import Foundation
+import Synchronization
 
 public struct ShellResult: Sendable {
     public let status: Int32
@@ -83,14 +84,38 @@ public enum Shell {
         "'" + value.replacing("'", with: "'\\''") + "'"
     }
 
+    /// Reads a pipe to EOF without tying up a thread.
+    ///
+    /// `FileHandle.bytes` serializes reads from every handle in the process through one
+    /// actor: while it sits in a blocking read on an idle stderr, nobody drains stdout, the
+    /// child fills the 64 KB pipe buffer and both sides wait forever (`launchctl print`
+    /// does exactly that). A readability handler is driven by a dispatch source instead.
     private static func collect(_ handle: FileHandle) async -> String {
-        var data = Data()
-        do {
-            for try await byte in handle.bytes { data.append(byte) }
-        } catch {
-            // A closed pipe ends the stream; whatever arrived is still useful.
+        let buffer = OutputBuffer()
+        return await withCheckedContinuation { continuation in
+            handle.readabilityHandler = { handle in
+                let chunk = handle.availableData
+                guard chunk.isEmpty else {
+                    buffer.append(chunk)
+                    return
+                }
+                handle.readabilityHandler = nil
+                continuation.resume(returning: buffer.text)
+            }
         }
-        return String(decoding: data, as: UTF8.self)
+    }
+}
+
+/// Bytes collected from a pipe, appended from the handle's dispatch queue.
+private final class OutputBuffer: Sendable {
+    private let data = Mutex(Data())
+
+    func append(_ chunk: Data) {
+        data.withLock { $0.append(chunk) }
+    }
+
+    var text: String {
+        data.withLock { String(decoding: $0, as: UTF8.self) }
     }
 }
 

@@ -89,7 +89,19 @@ public struct ProcessSampler {
             let appName = String(components[index].dropLast(4))
             return (isMainExecutable ? appName : "\(appName) · \(url.lastPathComponent)", app)
         }
-        return (url.lastPathComponent, nil)
+        return (readableName(for: url), nil)
+    }
+
+    /// Tools installed as `…/claude/versions/2.1.308` run under a version number;
+    /// walk up past version-like and generic folders to the tool's real name.
+    static func readableName(for executable: URL) -> String {
+        let generic: Set<String> = ["bin", "versions", "current", "libexec", "sbin", "MacOS"]
+        var components = executable.pathComponents
+        while let last = components.last, components.count > 1,
+              last.allSatisfy({ $0.isNumber || $0 == "." || $0 == "-" }) || generic.contains(last) {
+            components.removeLast()
+        }
+        return components.last ?? executable.lastPathComponent
     }
 
     private static func string(from buffer: [CChar]) -> String {

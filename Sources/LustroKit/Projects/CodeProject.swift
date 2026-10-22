@@ -10,6 +10,13 @@ public struct CodeProject: Sendable, Identifiable, Hashable {
     /// Largest first.
     public let artifacts: [ProjectArtifact]
 
+    public init(url: URL, name: String, lastActivity: Date, artifacts: [ProjectArtifact]) {
+        self.url = url
+        self.name = name
+        self.lastActivity = lastActivity
+        self.artifacts = artifacts
+    }
+
     public var totalSize: Int64 { artifacts.reduce(0) { $0 + $1.size } }
 
     public func isStale(threshold: TimeInterval, now: Date = .now) -> Bool {

@@ -92,3 +92,26 @@ struct ParsingTests {
         #expect(CodeSignature.cleanSigner(summary, team: "TEAM") == expected)
     }
 }
+
+struct ProcessNamingTests {
+    @Test(arguments: [
+        ("/Users/me/.local/share/claude/versions/2.1.308", "claude"),
+        ("/opt/homebrew/Cellar/node/22.1.0/bin/node", "node"),
+        ("/usr/libexec/trustd", "trustd"),
+    ])
+    func versionedToolsGetTheirRealName(path: String, expected: String) {
+        #expect(ProcessSampler.readableName(for: URL(filePath: path)) == expected)
+    }
+}
+
+struct PackageManagerTrustTests {
+    @Test(arguments: [
+        ("/opt/homebrew/opt/postgresql@16/bin/postgres", "Homebrew"),
+        ("/Users/me/Library/pnpm/pnpm", "pnpm"),
+        ("/Users/me/Library/Application Support/Evil/agent", nil),
+        ("/opt/homebrew-fake/agent", nil),
+    ] as [(String, String?)])
+    func servicesFromPackageManagersAreRecognized(path: String, manager: String?) {
+        #expect(CodeSignature.packageManager(for: path, home: "/Users/me") == manager)
+    }
+}

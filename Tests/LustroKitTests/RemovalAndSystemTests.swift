@@ -59,3 +59,15 @@ struct RemovalAndSystemTests {
         #expect(list.contains { $0.pid == getpid() })
     }
 }
+
+struct ShellTests {
+    @Test(.timeLimit(.minutes(1)))
+    func largeOutputOnBothStreamsDoesNotDeadlock() async throws {
+        // 1 MB on stdout and 200 KB on stderr: far past the 64 KB pipe buffer.
+        let script = "head -c 1000000 /dev/zero | tr '\\\\0' a; head -c 200000 /dev/zero | tr '\\\\0' b >&2"
+        let result = try await Shell.run("/bin/sh", ["-c", script])
+        #expect(result.stdout.count == 1_000_000)
+        #expect(result.stderr.count == 200_000)
+        #expect(result.succeeded)
+    }
+}

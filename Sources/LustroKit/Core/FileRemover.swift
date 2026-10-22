@@ -25,6 +25,11 @@ public struct RemovalFailure: Sendable, Identifiable, Hashable {
     public var id: URL { url }
     public let url: URL
     public let reason: String
+
+    public init(url: URL, reason: String) {
+        self.url = url
+        self.reason = reason
+    }
 }
 
 public struct RemovalOutcome: Sendable {

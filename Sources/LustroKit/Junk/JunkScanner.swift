@@ -113,7 +113,7 @@ public struct JunkScanner: Sendable {
     static func measure(_ candidates: [Candidate], category: JunkCategory) async -> [JunkItem] {
         await withTaskGroup(of: JunkItem?.self) { group in
             var iterator = candidates.makeIterator()
-            let width = max(2, ProcessInfo.processInfo.activeProcessorCount)
+            let width = DiskParallelism.width
             var items: [JunkItem] = []
 
             func addNext() -> Bool {

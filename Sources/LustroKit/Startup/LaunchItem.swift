@@ -26,6 +26,12 @@ public struct LaunchItem: Sendable, Identifiable, Hashable {
     public let isLoaded: Bool
     public let signature: SignatureStatus
 
+    /// The app bundle the program lives in, if any (for its icon and name).
+    public var appBundle: URL? {
+        guard let program, let index = program.pathComponents.firstIndex(where: { $0.hasSuffix(".app") }) else { return nil }
+        return URL(filePath: NSString.path(withComponents: Array(program.pathComponents[...index])))
+    }
+
     /// Human name: the program's file name, falling back to the label.
     public var displayName: String {
         if let program, signature != .script {

@@ -6,6 +6,11 @@ public struct OrphanGroup: Sendable, Identifiable, Hashable {
     public let bundleID: String
     public let items: [Leftover]
 
+    public init(bundleID: String, items: [Leftover]) {
+        self.bundleID = bundleID
+        self.items = items
+    }
+
     public var totalSize: Int64 { items.reduce(0) { $0 + $1.size } }
 
     /// `com.spotify.client` → `Spotify`: the best name we can offer without the app.

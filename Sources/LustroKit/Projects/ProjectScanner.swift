@@ -78,7 +78,7 @@ public struct ProjectScanner: Sendable {
     func measure(_ found: [Found]) async -> [ProjectArtifact] {
         await withTaskGroup(of: ProjectArtifact.self) { group in
             var iterator = found.makeIterator()
-            let width = max(2, ProcessInfo.processInfo.activeProcessorCount)
+            let width = DiskParallelism.width
             var artifacts: [ProjectArtifact] = []
 
             func addNext() -> Bool {

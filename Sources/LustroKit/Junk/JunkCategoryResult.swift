@@ -6,5 +6,10 @@ public struct JunkCategoryResult: Sendable, Identifiable, Hashable {
     /// Largest first.
     public let items: [JunkItem]
 
+    public init(category: JunkCategory, items: [JunkItem]) {
+        self.category = category
+        self.items = items
+    }
+
     public var totalSize: Int64 { items.reduce(0) { $0 + $1.size } }
 }

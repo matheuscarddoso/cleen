@@ -27,7 +27,7 @@ public enum DockerCleaner {
 
         let detail = rows
             .filter { $0.reclaimable > 0 }
-            .map { "\($0.type): \($0.reclaimable.formatted(.byteCount(style: .file)))" }
+            .map { "\($0.type): \($0.reclaimable.bytes)" }
             .joined(separator: " · ")
         return ToolCleanup(
             kind: .docker,

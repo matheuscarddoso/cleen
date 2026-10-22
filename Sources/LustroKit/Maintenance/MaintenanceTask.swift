@@ -72,7 +72,7 @@ public enum MaintenanceTask: String, CaseIterable, Sendable, Identifiable {
             _ = try await Shell.runAsAdministrator("/usr/sbin/purge")
             let after = MemoryStats.read()?.cached ?? before
             let freed = max(0, before - after)
-            return freed > 0 ? "\(freed.formatted(.byteCount(style: .memory))) liberados." : "Memória já estava enxuta."
+            return freed > 0 ? "\(freed.memoryBytes) liberados." : "Memória já estava enxuta."
 
         case .thinSnapshots:
             let before = await Self.localSnapshotCount()
