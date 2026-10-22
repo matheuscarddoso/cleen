@@ -43,7 +43,9 @@ public enum JunkCatalog {
         summary: "Registros de apps e relatórios de travamento antigos.",
         symbol: "doc.text",
         group: .system,
-        sources: [.contents(of: "~/Library/Logs")]
+        // Crash reports are cleared file by file: macOS doesn't recreate the folder,
+        // and without it new crashes would leave no report.
+        sources: [.contents(of: "~/Library/Logs"), .contents(of: "~/Library/Logs/DiagnosticReports")]
     )
 
     static let trash = JunkCategory(

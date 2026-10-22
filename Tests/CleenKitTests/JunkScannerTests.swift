@@ -84,3 +84,15 @@ struct JunkOrderingTests {
         #expect(results.map(\.id) == ["package-managers", "app-caches", "logs"])
     }
 }
+
+struct DiagnosticReportsTests {
+    @Test func crashReportFolderItselfIsNeverOffered() async throws {
+        let sandbox = try Sandbox()
+        try sandbox.file("Library/Logs/DiagnosticReports/App-2026.ips", bytes: 20_000)
+        try sandbox.file("Library/Logs/SomeApp/app.log", bytes: 20_000)
+
+        let results = await JunkScanner(home: sandbox.root, systemRoot: sandbox.url("system")).scan()
+        let logs = try #require(results.first { $0.id == "logs" })
+        #expect(Set(logs.items.map(\.name)) == ["App-2026.ips", "SomeApp"])
+    }
+}

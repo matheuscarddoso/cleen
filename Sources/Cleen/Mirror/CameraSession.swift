@@ -2,7 +2,9 @@ import AVFoundation
 
 /// The front camera for the Mirror. Starting and stopping a capture session blocks for
 /// a moment, so both happen on the session's own serial queue, never on the main thread.
-final class CameraSession: @unchecked Sendable {
+/// `nonisolated` matters: the app target defaults to the main actor, and main-actor code
+/// called from this queue traps at runtime.
+nonisolated final class CameraSession: @unchecked Sendable {
     let session = AVCaptureSession()
     private let queue = DispatchQueue(label: "app.cleen.camera")
     private var configured = false
