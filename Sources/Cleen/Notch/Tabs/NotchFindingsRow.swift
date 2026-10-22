@@ -9,7 +9,7 @@ struct NotchFindingsRow: View {
     var body: some View {
         HStack(spacing: 8) {
             NotchFindingTile(
-                symbol: "sparkles",
+                symbol: "trash.fill",
                 color: ToolPalette.pink,
                 title: "Lixo",
                 value: app.junk.phase == .ready ? app.junk.totalSize.bytes : nil,

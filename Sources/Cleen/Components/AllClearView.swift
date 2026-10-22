@@ -8,7 +8,7 @@ struct AllClearView: View {
 
     var body: some View {
         VStack(spacing: 14) {
-            Image(systemName: "sparkle")
+            Image(systemName: "checkmark.circle")
                 .font(.system(size: 28, weight: .light))
                 .foregroundStyle(Theme.accent)
                 .accessibilityHidden(true)

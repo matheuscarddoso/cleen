@@ -16,6 +16,11 @@ rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp "$(swift build -c release --show-bin-path)/Cleen" "$APP/Contents/MacOS/Cleen"
 
+# Now Playing bridge (see Support/NowPlaying/CleenNowPlaying.m for why it's separate).
+clang -dynamiclib -fobjc-arc -O2 -framework Foundation \
+  "$ROOT/Support/NowPlaying/CleenNowPlaying.m" -o "$APP/Contents/Resources/libCleenNowPlaying.dylib"
+cp "$ROOT/Support/NowPlaying/now-playing.pl" "$APP/Contents/Resources/now-playing.pl"
+
 # Icon: regenerate only when the script changed.
 ICONSET="$ROOT/build/AppIcon.iconset"
 ICNS="$ROOT/build/AppIcon.icns"
@@ -45,6 +50,8 @@ cat > "$APP/Contents/Info.plist" <<PLIST
   <key>NSHighResolutionCapable</key><true/>
   <key>NSHumanReadableCopyright</key><string>© Matheus Cardoso</string>
   <key>NSAppleEventsUsageDescription</key><string>O Cleen usa o macOS para pedir a senha de administrador quando uma limpeza precisa dela.</string>
+  <key>NSCalendarsFullAccessUsageDescription</key><string>O Cleen mostra os eventos de hoje no notch.</string>
+  <key>NSRemindersFullAccessUsageDescription</key><string>O Cleen mostra seus lembretes no notch e deixa você marcá-los como feitos.</string>
 </dict>
 </plist>
 PLIST

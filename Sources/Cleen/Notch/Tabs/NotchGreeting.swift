@@ -5,11 +5,7 @@ struct NotchGreeting: View {
     @Environment(SystemMonitor.self) private var monitor
 
     var body: some View {
-        HStack(spacing: 10) {
-            Image(nsImage: NSApp.applicationIconImage)
-                .resizable()
-                .frame(width: 32, height: 32)
-                .accessibilityHidden(true)
+        HStack(alignment: .center, spacing: 10) {
             VStack(alignment: .leading, spacing: 1) {
                 Text("\(greeting), \(firstName)!")
                     .font(.system(size: 15, weight: .semibold))
@@ -18,7 +14,6 @@ struct NotchGreeting: View {
                     .foregroundStyle(NotchStyle.secondary)
             }
             Spacer()
-            NotchStatusPill()
         }
     }
 

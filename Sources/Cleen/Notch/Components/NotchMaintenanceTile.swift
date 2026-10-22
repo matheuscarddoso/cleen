@@ -1,54 +1,64 @@
 import CleenKit
 import SwiftUI
 
+/// One maintenance chore in a single line: icon, name, run.
 struct NotchMaintenanceTile: View {
     @Environment(MaintenanceModel.self) private var model
     let task: MaintenanceTask
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack {
-                ToolIcon(symbol: task.symbol, color: ToolPalette.color(for: task), size: 24)
-                Spacer()
-                if task.needsAdministrator {
-                    Image(systemName: "lock.fill")
-                        .font(.system(size: 9))
-                        .foregroundStyle(NotchStyle.tertiary)
-                        .help("Pede a senha de administrador")
+        HStack(spacing: 10) {
+            ToolIcon(symbol: task.symbol, color: ToolPalette.color(for: task), size: 24)
+            VStack(alignment: .leading, spacing: 1) {
+                HStack(spacing: 4) {
+                    Text(task.title)
+                        .font(.system(size: 12, weight: .semibold))
+                        .lineLimit(1)
+                    if task.needsAdministrator {
+                        Image(systemName: "lock.fill")
+                            .font(.system(size: 8))
+                            .foregroundStyle(NotchStyle.tertiary)
+                            .help("Pede a senha de administrador")
+                    }
                 }
+                Text(statusText)
+                    .font(NotchStyle.caption)
+                    .foregroundStyle(statusColor)
+                    .lineLimit(1)
             }
-            Text(task.title)
-                .font(.system(size: 11.5, weight: .semibold))
-                .lineLimit(2, reservesSpace: true)
-            status
-                .frame(height: 24, alignment: .leading)
+            Spacer(minLength: 4)
+            if model.running.contains(task) {
+                ProgressView().controlSize(.mini).tint(.white)
+            } else {
+                Button("Executar", action: run)
+                    .buttonStyle(.notchSecondary)
+                    .controlSize(.small)
+                    .disabled(task == .thinSnapshots && model.snapshotCount == 0)
+            }
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .notchCard(padding: 10)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 7)
+        .background(NotchStyle.card, in: .rect(cornerRadius: 12, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 12, style: .continuous).strokeBorder(NotchStyle.cardStroke)
+        }
         .help(task.summary)
     }
 
-    @ViewBuilder
-    private var status: some View {
-        if model.running.contains(task) {
-            ProgressView().controlSize(.mini).tint(.white)
-        } else if let outcome = model.outcomes[task] {
-            switch outcome {
-            case .success(let message):
-                Label(message, systemImage: "checkmark.circle.fill")
-                    .font(NotchStyle.caption)
-                    .foregroundStyle(NotchStyle.good)
-                    .lineLimit(2)
-            case .failure(let message):
-                Label(message, systemImage: "exclamationmark.circle.fill")
-                    .font(NotchStyle.caption)
-                    .foregroundStyle(NotchStyle.warning)
-                    .lineLimit(2)
-            }
-        } else {
-            Button("Executar", action: run)
-                .buttonStyle(.notchSecondary)
-                .disabled(task == .thinSnapshots && model.snapshotCount == 0)
+    private var statusText: String {
+        switch model.outcomes[task] {
+        case .success(let message): message
+        case .failure(let message): message
+        case nil where task == .thinSnapshots && model.snapshotCount == 0: "Nenhum snapshot agora"
+        case nil: task.needsAdministrator ? "Pede senha" : "Rápido e seguro"
+        }
+    }
+
+    private var statusColor: Color {
+        switch model.outcomes[task] {
+        case .success: NotchStyle.good
+        case .failure: NotchStyle.warning
+        case nil: NotchStyle.tertiary
         }
     }
 

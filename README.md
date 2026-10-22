@@ -5,11 +5,18 @@ dependências, sem rede.
 
 ## O notch
 
-Passe o mouse no notch (ou ⌃⌥C) e o painel desce dele: saudação, disco com limpeza
-em um clique, vitais ao vivo e uma barra de ferramentas embaixo (Limpeza, Projetos,
-Arquivos grandes, Sistema, Inicialização, Manutenção). Fechado, mostra o anel do
+Passe o mouse no notch (ou ⌃⌥C) e o painel desce dele. A primeira página é a do dia:
+saudação, o que está tocando em qualquer app (YouTube, Spotify, Música…) com capa e
+controles, e a coluna Hoje / Lembretes. As ferramentas ficam nas abas: Visão geral do
+disco com limpeza em um clique, Limpeza, Projetos, Arquivos grandes, Sistema,
+Inicialização e Manutenção. Fechado, mostra o anel do
 disco e o espaço livre dos dois lados da câmera. Em telas sem notch, o Cleen desenha
-um. As ações destrutivas pedem dois cliques no próprio painel, sem diálogo. A janela
+um, e pode mostrar um notch em cada monitor externo (Ajustes).
+
+O "tocando agora" usa o Now Playing do sistema. Desde o macOS 15.4 ele só responde
+a binários da Apple, então `Support/NowPlaying` tem uma biblioteca pequena que o
+`/usr/bin/perl` carrega e que transmite as mudanças como JSON (a mesma técnica do
+projeto mediaremote-adapter). As ações destrutivas pedem dois cliques no próprio painel, sem diálogo. A janela
 completa (ícone da barra de menus ou o botão no painel) tem tudo, incluindo Mapa do
 disco, Duplicados e o desinstalador.
 

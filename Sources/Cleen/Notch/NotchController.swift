@@ -1,31 +1,29 @@
 import AppKit
 import SwiftUI
 
-/// Owns the notch panel: puts it on the right screen, opens it when the pointer comes
-/// to the notch, closes it when the pointer leaves, and keeps it there across screen
-/// changes.
+/// One notch panel on one screen: opens when the pointer comes to the notch, closes
+/// when it leaves. `NotchCoordinator` decides which screens get one.
 final class NotchController {
     let state = NotchState()
+    let screen: NSScreen
     private unowned let app: AppModel
     private var panel: NotchPanel?
     private var monitors: [Any] = []
     private var pendingOpen: Task<Void, Never>?
     private var pendingClose: Task<Void, Never>?
-    private var hotKey: GlobalHotKey?
-    private var screenObserver: NSObjectProtocol?
 
     /// Springy like the system's own island: quick to arrive, settles without wobble.
     static let openAnimation = Animation.spring(response: 0.42, dampingFraction: 0.8)
     static let closeAnimation = Animation.spring(response: 0.34, dampingFraction: 0.92)
 
-    init(app: AppModel) {
+    init(app: AppModel, screen: NSScreen) {
         self.app = app
-        NotchSettings.register()
+        self.screen = screen
     }
 
     func install() {
         guard panel == nil else { return }
-        let geometry = NotchGeometry(screen: Self.preferredScreen())
+        let geometry = NotchGeometry(screen: screen)
         state.geometry = geometry
 
         let panel = NotchPanel(frame: geometry.windowFrame)
@@ -37,12 +35,15 @@ final class NotchController {
         self.panel = panel
 
         installMonitors()
-        hotKey = GlobalHotKey.standard { [weak self] in self?.toggle() }
-        screenObserver = NotificationCenter.default.addObserver(
-            forName: NSApplication.didChangeScreenParametersNotification, object: nil, queue: .main
-        ) { [weak self] _ in
-            MainActor.assumeIsolated { self?.relayout() }
-        }
+    }
+
+    func uninstall() {
+        pendingOpen?.cancel()
+        pendingClose?.cancel()
+        monitors.forEach(NSEvent.removeMonitor)
+        monitors.removeAll()
+        panel?.orderOut(nil)
+        panel = nil
     }
 
     // MARK: Open and close
@@ -141,21 +142,6 @@ final class NotchController {
                 self?.open()
             }
         }
-    }
-
-    // MARK: Screens
-
-    /// The built-in display when it has a notch, so the panel lives in the real notch;
-    /// otherwise the main screen gets a drawn one.
-    private static func preferredScreen() -> NSScreen {
-        NSScreen.screens.first { $0.safeAreaInsets.top > 0 } ?? NSScreen.main ?? NSScreen.screens[0]
-    }
-
-    private func relayout() {
-        let geometry = NotchGeometry(screen: Self.preferredScreen())
-        guard geometry != state.geometry else { return }
-        state.geometry = geometry
-        panel?.setFrame(geometry.windowFrame, display: true)
     }
 }
 

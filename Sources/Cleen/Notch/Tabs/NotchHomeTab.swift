@@ -1,20 +1,20 @@
 import SwiftUI
 
-/// The notch's front page: a greeting, the disk with its one-click cleanup, and a
-/// column of live vitals that each lead to their tool.
+/// The notch's front page, as in OmniNotch: a greeting, what's playing, and the day.
 struct NotchHomeTab: View {
-    let controller: NotchController
+    @Environment(NowPlayingModel.self) private var nowPlaying
+    @Environment(AgendaModel.self) private var agenda
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             NotchGreeting()
-            HStack(alignment: .top, spacing: 16) {
-                VStack(spacing: 8) {
-                    NotchDiskCard(controller: controller)
-                    NotchFindingsRow(controller: controller)
-                }
-                .frame(width: 390)
-                NotchVitalsColumn()
+            HStack(alignment: .top, spacing: 18) {
+                NowPlayingCard()
+                    .frame(width: 400)
+                AgendaColumn()
             }
         }
+        .task { await nowPlaying.watch() }
+        .task { await agenda.watch() }
     }
 }

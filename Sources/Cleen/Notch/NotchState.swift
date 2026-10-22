@@ -1,3 +1,4 @@
+import Foundation
 import Observation
 
 /// What the notch is doing right now. Owned by `NotchController`, read by the views.

@@ -15,5 +15,7 @@ extension View {
             .environment(app.orphans)
             .environment(app.startup)
             .environment(app.maintenance)
+            .environment(app.nowPlaying)
+            .environment(app.agenda)
     }
 }

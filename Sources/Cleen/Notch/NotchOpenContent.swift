@@ -13,7 +13,8 @@ struct NotchOpenContent: View {
                 .padding(.horizontal, 10)
             Group {
                 switch state.tab {
-                case .home: NotchHomeTab(controller: controller)
+                case .home: NotchHomeTab()
+                case .overview: NotchOverviewTab(controller: controller)
                 case .clean: NotchCleanTab()
                 case .projects: NotchProjectsTab()
                 case .files: NotchFilesTab()
@@ -22,16 +23,14 @@ struct NotchOpenContent: View {
                 case .maintenance: NotchMaintenanceTab()
                 }
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             .padding(.horizontal, 12)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+            .clipped()
             .padding(.top, 6)
-            .id(state.tab)
-            .transition(.opacity)
             NotchTabBar(controller: controller)
                 .padding(.bottom, 10)
                 .padding(.top, 6)
         }
         .foregroundStyle(NotchStyle.primary)
-        .animation(.smooth(duration: 0.22), value: state.tab)
     }
 }

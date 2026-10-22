@@ -6,27 +6,6 @@ import CoreGraphics
 let output = URL(filePath: CommandLine.arguments.count > 1 ? CommandLine.arguments[1] : "AppIcon.iconset")
 try? FileManager.default.createDirectory(at: output, withIntermediateDirectories: true)
 
-/// A four-point glint whose sides curve inward. `pinch` sets how thin the arms are.
-func glint(center: CGPoint, radius: CGFloat, pinch: CGFloat) -> CGPath {
-    let path = CGMutablePath()
-    let tips = [
-        CGPoint(x: center.x, y: center.y + radius),
-        CGPoint(x: center.x + radius, y: center.y),
-        CGPoint(x: center.x, y: center.y - radius),
-        CGPoint(x: center.x - radius, y: center.y),
-    ]
-    path.move(to: tips[0])
-    for index in 0..<4 {
-        let next = tips[(index + 1) % 4]
-        path.addQuadCurve(to: next, control: CGPoint(
-            x: center.x + (tips[index].x - center.x + next.x - center.x) * pinch,
-            y: center.y + (tips[index].y - center.y + next.y - center.y) * pinch
-        ))
-    }
-    path.closeSubpath()
-    return path
-}
-
 func render(size: Int) -> Data? {
     let scale = CGFloat(size) / 1024
     guard let context = CGContext(
@@ -42,54 +21,47 @@ func render(size: Int) -> Data? {
     let shape = CGPath(roundedRect: body, cornerWidth: 186, cornerHeight: 186, transform: nil)
     let space = CGColorSpace(name: CGColorSpace.displayP3)!
 
+    // A native-utility look: saturated blue squircle, light from above, one white glyph.
     context.saveGState()
     context.addPath(shape)
     context.clip()
     let background = CGGradient(colorsSpace: space, colors: [
-        CGColor(colorSpace: space, components: [0.13, 0.12, 0.12, 1])!,
-        CGColor(colorSpace: space, components: [0.035, 0.035, 0.04, 1])!,
+        CGColor(colorSpace: space, components: [0.36, 0.67, 1.0, 1])!,
+        CGColor(colorSpace: space, components: [0.10, 0.40, 0.96, 1])!,
     ] as CFArray, locations: [0, 1])!
     context.drawLinearGradient(background, start: CGPoint(x: 512, y: 924), end: CGPoint(x: 512, y: 100), options: [])
-
-    // Warm light pooling behind the glint.
-    let glow = CGGradient(colorsSpace: space, colors: [
-        CGColor(colorSpace: space, components: [0.91, 0.79, 0.56, 0.32])!,
-        CGColor(colorSpace: space, components: [0.91, 0.79, 0.56, 0])!,
+    // Soft sheen across the top half, like the system icons.
+    let sheen = CGGradient(colorsSpace: space, colors: [
+        CGColor(colorSpace: space, components: [1, 1, 1, 0.22])!,
+        CGColor(colorSpace: space, components: [1, 1, 1, 0])!,
     ] as CFArray, locations: [0, 1])!
-    context.drawRadialGradient(glow, startCenter: CGPoint(x: 512, y: 520), startRadius: 0,
-                               endCenter: CGPoint(x: 512, y: 520), endRadius: 400, options: [])
+    context.drawLinearGradient(sheen, start: CGPoint(x: 512, y: 924), end: CGPoint(x: 512, y: 520), options: [])
     context.restoreGState()
 
-    // Hairline rim, brighter at the top like light catching an edge.
+    // Hairline rim.
     context.saveGState()
     context.addPath(shape)
     context.setLineWidth(3)
-    context.replacePathWithStrokedPath()
-    context.clip()
-    let rim = CGGradient(colorsSpace: space, colors: [
-        CGColor(colorSpace: space, components: [1, 1, 1, 0.22])!,
-        CGColor(colorSpace: space, components: [1, 1, 1, 0.03])!,
-    ] as CFArray, locations: [0, 1])!
-    context.drawLinearGradient(rim, start: CGPoint(x: 512, y: 924), end: CGPoint(x: 512, y: 100), options: [])
+    context.setStrokeColor(CGColor(colorSpace: space, components: [1, 1, 1, 0.25])!)
+    context.strokePath()
     context.restoreGState()
 
-    // Main glint with a champagne-to-pale gradient.
-    let star = glint(center: CGPoint(x: 512, y: 520), radius: 250, pinch: 0.13)
-    context.saveGState()
-    context.addPath(star)
-    context.clip()
-    let metal = CGGradient(colorsSpace: space, colors: [
-        CGColor(colorSpace: space, components: [1.0, 0.95, 0.84, 1])!,
-        CGColor(colorSpace: space, components: [0.91, 0.79, 0.56, 1])!,
-        CGColor(colorSpace: space, components: [0.72, 0.58, 0.36, 1])!,
-    ] as CFArray, locations: [0, 0.55, 1])!
-    context.drawLinearGradient(metal, start: CGPoint(x: 400, y: 770), end: CGPoint(x: 640, y: 270), options: [])
-    context.restoreGState()
-
-    // A small companion glint, top right.
-    context.addPath(glint(center: CGPoint(x: 718, y: 724), radius: 64, pinch: 0.15))
-    context.setFillColor(CGColor(colorSpace: space, components: [1.0, 0.94, 0.82, 0.9])!)
-    context.fillPath()
+    // The glyph: SF Symbols' internal drive, white, with a soft drop shadow.
+    let configuration = NSImage.SymbolConfiguration(pointSize: 360, weight: .regular)
+        .applying(NSImage.SymbolConfiguration(paletteColors: [.white]))
+    if let symbol = NSImage(systemSymbolName: "internaldrive.fill", accessibilityDescription: nil)?
+        .withSymbolConfiguration(configuration) {
+        let size = symbol.size
+        let rect = CGRect(x: 512 - size.width / 2, y: 505 - size.height / 2, width: size.width, height: size.height)
+        context.saveGState()
+        context.setShadow(offset: CGSize(width: 0, height: -10), blur: 24, color: CGColor(colorSpace: space, components: [0, 0.1, 0.4, 0.35])!)
+        let graphics = NSGraphicsContext(cgContext: context, flipped: false)
+        NSGraphicsContext.saveGraphicsState()
+        NSGraphicsContext.current = graphics
+        symbol.draw(in: rect)
+        NSGraphicsContext.restoreGraphicsState()
+        context.restoreGState()
+    }
 
     guard let image = context.makeImage() else { return nil }
     return NSBitmapImageRep(cgImage: image).representation(using: .png, properties: [:])

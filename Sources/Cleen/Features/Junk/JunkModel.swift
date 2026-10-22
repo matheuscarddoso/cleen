@@ -24,6 +24,18 @@ final class JunkModel {
 
     // MARK: Totals
 
+    /// Categories and tool cleanups together, largest first — the order every list shows.
+    var rows: [JunkRow] {
+        (results.map(JunkRow.category) + tools.map(JunkRow.tool)).sorted { $0.size > $1.size }
+    }
+
+    /// Groups of categories for the window, the heaviest group first.
+    var groups: [(group: JunkCategory.Group, results: [JunkCategoryResult])] {
+        Dictionary(grouping: results, by: \.category.group)
+            .map { ($0.key, $0.value) }
+            .sorted { $0.1.reduce(0) { $0 + $1.totalSize } > $1.1.reduce(0) { $0 + $1.totalSize } }
+    }
+
     var totalSize: Int64 {
         results.reduce(0) { $0 + $1.totalSize } + tools.reduce(0) { $0 + $1.reclaimable }
     }
@@ -81,7 +93,7 @@ final class JunkModel {
         guard !Task.isCancelled else { return }
 
         results = found
-        tools = foundTools
+        tools = foundTools.sorted { $0.reclaimable > $1.reclaimable }
         selection = Set(found.flatMap(\.items).filter(\.selectedByDefault).map(\.url))
         selectedTools = Set(foundTools.filter(\.selectedByDefault).map(\.kind))
         lastScan = .now
@@ -145,6 +157,7 @@ final class JunkModel {
             let remaining = result.items.filter { !removed.contains($0.url) }
             return remaining.isEmpty ? nil : JunkCategoryResult(category: result.category, items: remaining)
         }
+        .sorted { $0.totalSize > $1.totalSize }
         tools.removeAll { cleanedTools.contains($0.kind) }
         selection.subtract(removed)
         selectedTools.removeAll()

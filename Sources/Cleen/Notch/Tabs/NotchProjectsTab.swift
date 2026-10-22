@@ -29,8 +29,8 @@ struct NotchProjectsTab: View {
                 if let report = model.report {
                     NotchReportLine(report: report)
                 }
-                ScrollView {
-                    LazyVStack(spacing: 0) {
+                NotchScroll {
+                    VStack(spacing: 0) {
                         ForEach(model.projects) { project in
                             let stale = project.isStale(threshold: model.staleThreshold)
                             NotchRow(
@@ -48,7 +48,6 @@ struct NotchProjectsTab: View {
                         }
                     }
                 }
-                .scrollIndicators(.hidden)
             }
             .animation(.smooth(duration: 0.25), value: model.report)
         }

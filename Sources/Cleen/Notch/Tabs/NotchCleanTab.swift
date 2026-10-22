@@ -9,7 +9,7 @@ struct NotchCleanTab: View {
         switch model.phase {
         case .idle:
             NotchPrompt(
-                symbol: "sparkles",
+                symbol: "trash.fill",
                 color: ToolPalette.pink,
                 title: "Caches, logs e restos de desenvolvimento",
                 message: "O que os apps recriam sozinhos e o que ficou para trás: DerivedData, npm, Composer, instaladores esquecidos.",
@@ -30,31 +30,32 @@ struct NotchCleanTab: View {
                 if let report = model.report {
                     NotchReportLine(report: report)
                 }
-                ScrollView {
-                    LazyVStack(spacing: 0) {
-                        ForEach(model.results) { result in
-                            NotchRow(title: result.category.title, subtitle: subtitle(for: result)) {
-                                NotchCheckbox(state: model.state(of: result), label: result.category.title) { model.toggle(result) }
-                                ToolIcon(symbol: result.category.symbol, color: ToolPalette.color(for: result.category))
-                            } trailing: {
-                                Text(result.totalSize.bytes)
-                                    .font(NotchStyle.bodyMedium.monospacedDigit())
-                                    .foregroundStyle(NotchStyle.secondary)
-                            }
-                        }
-                        ForEach(model.tools) { tool in
-                            NotchRow(title: tool.title, subtitle: tool.detail) {
-                                NotchCheckbox(state: model.selectedTools.contains(tool.kind) ? .on : .off, label: tool.title) { model.toggle(tool) }
-                                ToolIcon(symbol: tool.symbol, color: ToolPalette.blue)
-                            } trailing: {
-                                Text(tool.reclaimable.bytes)
-                                    .font(NotchStyle.bodyMedium.monospacedDigit())
-                                    .foregroundStyle(NotchStyle.secondary)
+                NotchScroll {
+                    VStack(spacing: 0) {
+                        ForEach(model.rows) { row in
+                            switch row {
+                            case .category(let result):
+                                NotchRow(title: result.category.title, subtitle: subtitle(for: result)) {
+                                    NotchCheckbox(state: model.state(of: result), label: result.category.title) { model.toggle(result) }
+                                    ToolIcon(symbol: result.category.symbol, color: ToolPalette.color(for: result.category))
+                                } trailing: {
+                                    Text(result.totalSize.bytes)
+                                        .font(NotchStyle.bodyMedium.monospacedDigit())
+                                        .foregroundStyle(NotchStyle.secondary)
+                                }
+                            case .tool(let tool):
+                                NotchRow(title: tool.title, subtitle: tool.detail) {
+                                    NotchCheckbox(state: model.selectedTools.contains(tool.kind) ? .on : .off, label: tool.title) { model.toggle(tool) }
+                                    ToolIcon(symbol: tool.symbol, color: ToolPalette.blue)
+                                } trailing: {
+                                    Text(tool.reclaimable.bytes)
+                                        .font(NotchStyle.bodyMedium.monospacedDigit())
+                                        .foregroundStyle(NotchStyle.secondary)
+                                }
                             }
                         }
                     }
                 }
-                .scrollIndicators(.hidden)
             }
             .animation(.smooth(duration: 0.25), value: model.report)
         }

@@ -15,8 +15,7 @@ struct JunkResultsList: View {
                 if let report = model.report {
                     ReportBanner(report: report)
                 }
-                ForEach(JunkCategory.Group.allCases, id: \.self) { group in
-                    let results = model.results.filter { $0.category.group == group }
+                ForEach(model.groups, id: \.group) { group, results in
                     if !results.isEmpty {
                         VStack(alignment: .leading, spacing: 8) {
                             Eyebrow(text: group.rawValue, trailing: results.reduce(0) { $0 + $1.totalSize }.bytes)

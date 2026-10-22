@@ -8,13 +8,13 @@ struct NotchDiskCard: View {
     @Environment(SystemMonitor.self) private var monitor
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 14) {
                 NotchRing(fraction: monitor.disk?.usedFraction ?? 0, symbol: "internaldrive")
-                    .frame(width: 64, height: 64)
+                    .frame(width: 56, height: 56)
                 VStack(alignment: .leading, spacing: 3) {
                     Text(monitor.disk?.available.bytes ?? "—")
-                        .font(.system(size: 24, weight: .semibold).monospacedDigit())
+                        .font(.system(size: 22, weight: .semibold).monospacedDigit())
                         .contentTransition(.numericText())
                     Text(caption)
                         .font(NotchStyle.caption)
@@ -37,7 +37,7 @@ struct NotchDiskCard: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .notchCard(padding: 14)
+        .notchCard(padding: 12)
         .animation(.smooth(duration: 0.25), value: app.isSmartScanning)
         .animation(.smooth(duration: 0.25), value: app.smartReport)
     }

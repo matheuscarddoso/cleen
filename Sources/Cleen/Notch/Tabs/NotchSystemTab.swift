@@ -6,16 +6,14 @@ struct NotchSystemTab: View {
     @Environment(SystemMonitor.self) private var monitor
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: 6) {
             HStack(alignment: .top, spacing: 8) {
                 NotchMetricCard(
                     symbol: "cpu",
                     title: "CPU",
                     value: monitor.cpu?.total.percent ?? "—",
                     detail: monitor.cpu.map { "\($0.user.percent) apps · \($0.system.percent) sistema" } ?? "",
-                    fraction: monitor.cpu?.total,
-                    history: monitor.cpuHistory,
-                    maximum: 1
+                    fraction: monitor.cpu?.total
                 )
                 NotchMetricCard(
                     symbol: "memorychip",
@@ -23,9 +21,7 @@ struct NotchSystemTab: View {
                     value: monitor.memory?.used.memoryBytes ?? "—",
                     detail: memoryDetail,
                     detailColor: memoryColor,
-                    fraction: monitor.memory?.usedFraction,
-                    history: monitor.memoryHistory,
-                    maximum: 1
+                    fraction: monitor.memory?.usedFraction
                 )
                 NotchMetricCard(
                     symbol: "network",

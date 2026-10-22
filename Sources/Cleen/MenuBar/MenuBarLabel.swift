@@ -7,7 +7,7 @@ struct MenuBarLabel: View {
 
     var body: some View {
         HStack(spacing: 4) {
-            Image(systemName: "sparkle")
+            Image(systemName: "internaldrive")
             if let text {
                 Text(text)
                     .monospacedDigit()

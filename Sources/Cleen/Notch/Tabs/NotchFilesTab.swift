@@ -30,9 +30,9 @@ struct NotchFilesTab: View {
                 if let report = model.report {
                     NotchReportLine(report: report)
                 }
-                ScrollView {
-                    LazyVStack(spacing: 0) {
-                        ForEach(model.files) { file in
+                NotchScroll {
+                    VStack(spacing: 0) {
+                        ForEach(model.files.prefix(40)) { file in
                             NotchRow(title: file.name, subtitle: "\(Paths.abbreviate(file.url.deletingLastPathComponent())) · usado \(file.lastUsed.relative)") {
                                 NotchCheckbox(state: model.selection.contains(file.url) ? .on : .off, label: file.name) { model.toggle(file) }
                                 FileIcon(url: file.url, size: 22)
@@ -47,7 +47,6 @@ struct NotchFilesTab: View {
                         }
                     }
                 }
-                .scrollIndicators(.hidden)
             }
             .animation(.smooth(duration: 0.25), value: model.report)
         }

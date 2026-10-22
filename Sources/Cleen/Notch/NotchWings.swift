@@ -10,11 +10,15 @@ struct NotchWings: View {
 
     var body: some View {
         HStack(spacing: 0) {
+            // Each side is centered in what's visible of its wing: the outer rounded
+            // corner eats a few points, so content sits a touch toward the camera.
             leading
                 .frame(width: NotchGeometry.wingWidth - NotchStyle.closedTopRadius, alignment: .center)
+                .padding(.leading, 2)
             Spacer(minLength: notchWidth)
             trailing
                 .frame(width: NotchGeometry.wingWidth - NotchStyle.closedTopRadius, alignment: .center)
+                .padding(.trailing, 2)
         }
         .frame(maxHeight: .infinity)
         .accessibilityElement(children: .combine)

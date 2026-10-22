@@ -34,7 +34,7 @@ enum Route: String, CaseIterable, Identifiable, Hashable {
 
     var symbol: String {
         switch self {
-        case .overview: "sparkle"
+        case .overview: "gauge.with.dots.needle.67percent"
         case .junk: "trash"
         case .projects: "chevron.left.forwardslash.chevron.right"
         case .largeFiles: "doc.badge.arrow.up"
@@ -52,7 +52,7 @@ enum Route: String, CaseIterable, Identifiable, Hashable {
     /// White-on-color variant for the sidebar's icon tiles.
     var filledSymbol: String {
         switch self {
-        case .overview: "sparkle"
+        case .overview: "gauge.with.dots.needle.67percent"
         case .junk: "trash.fill"
         case .projects: "chevron.left.forwardslash.chevron.right"
         case .largeFiles: "doc.fill"

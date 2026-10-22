@@ -6,16 +6,19 @@ enum NotchSettings {
     static let openOnHoverKey = "notchOpensOnHover"
     static let hoverDelayKey = "notchHoverDelay"
     static let showsWingsKey = "notchShowsWings"
+    static let allScreensKey = "notchOnAllScreens"
 
     static func register() {
         UserDefaults.standard.register(defaults: [
             openOnHoverKey: true,
             hoverDelayKey: 0.12,
             showsWingsKey: true,
+            allScreensKey: false,
         ])
     }
 
     static var opensOnHover: Bool { UserDefaults.standard.bool(forKey: openOnHoverKey) }
     static var hoverDelay: Double { UserDefaults.standard.double(forKey: hoverDelayKey) }
     static var showsWings: Bool { UserDefaults.standard.bool(forKey: showsWingsKey) }
+    static var showsOnAllScreens: Bool { UserDefaults.standard.bool(forKey: allScreensKey) }
 }

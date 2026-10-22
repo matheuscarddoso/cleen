@@ -11,6 +11,7 @@ struct SettingsView: View {
     @AppStorage(NotchSettings.openOnHoverKey) private var notchOpensOnHover = true
     @AppStorage(NotchSettings.hoverDelayKey) private var notchHoverDelay = 0.12
     @AppStorage(NotchSettings.showsWingsKey) private var notchShowsWings = true
+    @AppStorage(NotchSettings.allScreensKey) private var notchOnAllScreens = false
 
     @State private var launchesAtLogin = SMAppService.mainApp.status == .enabled
     @State private var loginError: String?
@@ -46,11 +47,12 @@ struct SettingsView: View {
                         }
                     }
                     Toggle("Mostrar disco e espaço livre ao lado da câmera", isOn: $notchShowsWings)
+                    Toggle("Mostrar o notch também em monitores externos", isOn: $notchOnAllScreens)
                     LabeledContent("Atalho para abrir e fechar", value: "⌃⌥C")
                 } header: {
                     Text("Notch")
                 } footer: {
-                    Text("Em telas sem notch, o Cleen desenha um no topo da tela.")
+                    Text("Em telas sem notch, o Cleen desenha um no topo, no centro. O atalho abre o notch da tela onde está o mouse.")
                         .font(Theme.caption)
                         .foregroundStyle(.secondary)
                 }

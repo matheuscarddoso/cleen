@@ -72,3 +72,15 @@ struct JunkScannerTests {
         }
     }
 }
+
+struct JunkOrderingTests {
+    @Test func categoriesComeLargestFirst() async throws {
+        let sandbox = try Sandbox()
+        try sandbox.file("Library/Logs/app.log", bytes: 20_000)
+        try sandbox.file("Library/Caches/com.example.app/blob", bytes: 300_000)
+        try sandbox.file("Library/Caches/Homebrew/pkg.tar.gz", bytes: 900_000)
+
+        let results = await JunkScanner(home: sandbox.root, systemRoot: sandbox.url("system")).scan()
+        #expect(results.map(\.id) == ["package-managers", "app-caches", "logs"])
+    }
+}

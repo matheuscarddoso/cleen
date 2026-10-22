@@ -5,6 +5,7 @@ struct NotchRow<Leading: View, Trailing: View>: View {
     let title: String
     var subtitle: String?
     var subtitleColor: Color = NotchStyle.tertiary
+    var verticalPadding = 6.0
     @ViewBuilder let leading: Leading
     @ViewBuilder let trailing: Trailing
     @State private var isHovered = false
@@ -29,7 +30,7 @@ struct NotchRow<Leading: View, Trailing: View>: View {
             trailing
         }
         .padding(.horizontal, 8)
-        .padding(.vertical, 6)
+        .padding(.vertical, verticalPadding)
         .background(isHovered ? NotchStyle.control.opacity(0.6) : .clear, in: .rect(cornerRadius: 9, style: .continuous))
         .contentShape(.rect)
         .onHover { isHovered = $0 }

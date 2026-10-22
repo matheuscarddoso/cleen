@@ -20,8 +20,8 @@ struct NotchStartupTab: View {
                         .font(NotchStyle.caption)
                         .foregroundStyle(NotchStyle.warning)
                 }
-                ScrollView {
-                    LazyVStack(spacing: 0) {
+                NotchScroll {
+                    VStack(spacing: 0) {
                         ForEach(model.items) { item in
                             NotchRow(
                                 title: item.displayName,
@@ -40,7 +40,6 @@ struct NotchStartupTab: View {
                         }
                     }
                 }
-                .scrollIndicators(.hidden)
             }
         }
     }

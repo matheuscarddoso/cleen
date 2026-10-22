@@ -7,7 +7,7 @@ struct NotchProcessList: View {
     @Environment(SystemMonitor.self) private var monitor
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 2) {
+        VStack(alignment: .leading, spacing: 0) {
             HStack {
                 Text("Pesando agora")
                     .font(.system(size: 12, weight: .semibold))
@@ -22,7 +22,7 @@ struct NotchProcessList: View {
             .foregroundStyle(NotchStyle.tertiary)
             .padding(.horizontal, 8)
             ForEach(top) { process in
-                NotchRow(title: process.name) {
+                NotchRow(title: process.name, verticalPadding: 1) {
                     if let app = process.appURL {
                         FileIcon(url: app, size: 18)
                     } else {
@@ -45,7 +45,7 @@ struct NotchProcessList: View {
     }
 
     private var top: [ProcessUsage] {
-        Array(monitor.processes.sorted { ($0.cpu, $0.memory) > ($1.cpu, $1.memory) }.prefix(4))
+        Array(monitor.processes.sorted { ($0.cpu, $0.memory) > ($1.cpu, $1.memory) }.prefix(3))
     }
 
     /// Apps get a normal quit (they can ask to save); plain processes get SIGTERM.

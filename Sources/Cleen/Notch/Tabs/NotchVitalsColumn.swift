@@ -5,7 +5,6 @@ import SwiftUI
 struct NotchVitalsColumn: View {
     @Environment(NotchState.self) private var state
     @Environment(SystemMonitor.self) private var monitor
-    @Environment(StartupModel.self) private var startup
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -30,16 +29,8 @@ struct NotchVitalsColumn: View {
                     )
                 }
             }
-            VStack(alignment: .leading, spacing: 6) {
-                NotchSectionLink(symbol: "power", title: "Inicialização") { state.tab = .startup }
-                Text(startupSummary)
-                    .font(NotchStyle.caption)
-                    .foregroundStyle(startup.suspicious.isEmpty ? NotchStyle.secondary : NotchStyle.warning)
-                    .lineLimit(2)
-            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .task { if startup.phase == .idle { await startup.scan() } }
     }
 
     private var memoryTint: Color? {
@@ -48,12 +39,5 @@ struct NotchVitalsColumn: View {
         case .warning: NotchStyle.warning
         default: nil
         }
-    }
-
-    private var startupSummary: String {
-        guard startup.phase == .ready else { return "Lendo…" }
-        let suspicious = startup.suspicious.count
-        if suspicious > 0 { return "\(startup.items.count) itens · \(suspicious) para revisar" }
-        return "\(startup.items.count) itens abrem sozinhos, todos confiáveis"
     }
 }

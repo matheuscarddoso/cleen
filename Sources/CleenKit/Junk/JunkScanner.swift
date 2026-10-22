@@ -19,8 +19,8 @@ public struct JunkScanner: Sendable {
         self.systemRoot = systemRoot
     }
 
-    /// Finds every candidate in the catalog and sizes it. Categories with nothing to
-    /// clean are omitted. `progress` receives the title of the category being scanned.
+    /// Finds every candidate in the catalog and sizes it, largest category first.
+    /// Categories with nothing to clean are omitted. `progress` receives the title of the category being scanned.
     public func scan(progress: @Sendable (String) -> Void = { _ in }) async -> [JunkCategoryResult] {
         let claimed = claimedPaths()
         var results: [JunkCategoryResult] = []
@@ -34,7 +34,7 @@ public struct JunkScanner: Sendable {
                 results.append(JunkCategoryResult(category: category, items: items))
             }
         }
-        return results
+        return results.sorted { $0.totalSize > $1.totalSize }
     }
 
     // MARK: - Candidates

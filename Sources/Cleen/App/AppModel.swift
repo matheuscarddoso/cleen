@@ -23,7 +23,9 @@ final class AppModel {
     let orphans: OrphansModel
     let startup: StartupModel
     let maintenance: MaintenanceModel
-    @ObservationIgnored private(set) lazy var notch = NotchController(app: self)
+    let nowPlaying = NowPlayingModel()
+    let agenda = AgendaModel()
+    @ObservationIgnored private(set) lazy var notch = NotchCoordinator(app: self)
 
     private init() {
         junk = JunkModel(cleanup: cleanup)
@@ -47,8 +49,8 @@ final class AppModel {
     private func installNotch() {
         notch.install()
         if let tab = LaunchArguments.notchTab {
-            notch.state.isPinned = true
-            notch.open(tab: tab)
+            notch.primary?.state.isPinned = true
+            notch.primary?.open(tab: tab)
             if LaunchArguments.scan { startScan(for: tab.route) }
         }
     }
