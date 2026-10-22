@@ -6,13 +6,13 @@ struct NotchShelfTab: View {
     @Environment(ShelfModel.self) private var shelf
 
     var body: some View {
-        HStack(spacing: 16) {
+        HStack(spacing: 20) {
             AirDropTile()
-                .frame(width: 170)
+                .frame(width: 180)
             Rectangle()
                 .fill(NotchStyle.separator)
                 .frame(width: 1)
-                .padding(.vertical, 8)
+                .padding(.vertical, 14)
             ShelfDropZone()
         }
         .padding(.bottom, 4)

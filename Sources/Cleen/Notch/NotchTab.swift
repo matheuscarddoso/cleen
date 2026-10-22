@@ -1,5 +1,6 @@
-/// The tools in the notch's tab bar.
-enum NotchTab: String, CaseIterable, Identifiable {
+/// The tools in the notch's tab bar. Which ones show, and in what order, is set in
+/// Ajustes › Abas (see `TabPreferences`).
+enum NotchTab: String, CaseIterable, Identifiable, Codable {
     case home
     case calendar
     case shelf
@@ -8,6 +9,10 @@ enum NotchTab: String, CaseIterable, Identifiable {
     case clean
     case projects
     case files
+    case duplicates
+    case space
+    case apps
+    case leftovers
     case system
     case startup
     case maintenance
@@ -24,11 +29,18 @@ enum NotchTab: String, CaseIterable, Identifiable {
         case .clean: "Limpeza"
         case .projects: "Projetos"
         case .files: "Arquivos grandes"
+        case .duplicates: "Duplicados"
+        case .space: "Mapa do disco"
+        case .apps: "Desinstalar apps"
+        case .leftovers: "Restos de apps"
         case .system: "Sistema"
         case .startup: "Inicialização"
         case .maintenance: "Manutenção"
         }
     }
+
+    /// Name in the Abas settings list (Home reads better there than the app's name).
+    var settingsTitle: String { self == .home ? "Início" : title }
 
     var symbol: String {
         switch self {
@@ -40,22 +52,13 @@ enum NotchTab: String, CaseIterable, Identifiable {
         case .clean: "trash"
         case .projects: "chevron.left.forwardslash.chevron.right"
         case .files: "doc.fill"
+        case .duplicates: "square.on.square"
+        case .space: "chart.pie"
+        case .apps: "xmark.app"
+        case .leftovers: "puzzlepiece.extension"
         case .system: "chart.bar.fill"
         case .startup: "power"
         case .maintenance: "wrench.and.screwdriver.fill"
-        }
-    }
-
-    /// The full-window section with the same content, for "open in window".
-    var route: Route {
-        switch self {
-        case .home, .overview, .calendar, .shelf, .ai: .overview
-        case .clean: .junk
-        case .projects: .projects
-        case .files: .largeFiles
-        case .system: .monitor
-        case .startup: .startup
-        case .maintenance: .maintenance
         }
     }
 }

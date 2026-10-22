@@ -21,7 +21,7 @@ struct MonthGrid: View {
                 Spacer()
                 MonthArrow(symbol: "chevron.right", label: "Próximo mês") { shift(1) }
             }
-            .frame(height: 20)
+            .frame(height: 18)
             HStack(spacing: 0) {
                 ForEach(weekdaySymbols, id: \.self) { symbol in
                     Text(symbol)
@@ -30,7 +30,7 @@ struct MonthGrid: View {
                         .frame(maxWidth: .infinity)
                 }
             }
-            .frame(height: 14)
+            .frame(height: 12)
             Grid(horizontalSpacing: 0, verticalSpacing: 0) {
                 ForEach(weeks, id: \.self) { week in
                     GridRow {
@@ -55,11 +55,13 @@ struct MonthGrid: View {
         return text.prefix(1).uppercased() + text.dropFirst()
     }
 
-    /// Six weeks starting on the week that holds the 1st, so the grid never jumps.
+    /// The weeks that hold a day of this month (four to six).
     private var weeks: [[Date]] {
         let first = calendar.dateInterval(of: .weekOfMonth, for: month)?.start ?? month
         let days = (0..<42).compactMap { calendar.date(byAdding: .day, value: $0, to: first) }
-        return stride(from: 0, to: 42, by: 7).map { Array(days[$0..<$0 + 7]) }
+        return stride(from: 0, to: 42, by: 7)
+            .map { Array(days[$0..<$0 + 7]) }
+            .filter { week in week.contains { calendar.isDate($0, equalTo: month, toGranularity: .month) } }
     }
 
     /// "D S T Q Q S S", in the calendar's first-weekday order.

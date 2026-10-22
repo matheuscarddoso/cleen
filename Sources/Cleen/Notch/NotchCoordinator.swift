@@ -37,6 +37,10 @@ final class NotchCoordinator {
         (controllerUnderPointer ?? primary)?.open(tab: tab)
     }
 
+    func openSettings() {
+        (controllerUnderPointer ?? primary)?.openSettings()
+    }
+
     func toggleUnderPointer() {
         (controllerUnderPointer ?? primary)?.toggle()
     }

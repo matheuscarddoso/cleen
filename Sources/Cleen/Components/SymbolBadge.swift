@@ -3,7 +3,7 @@ import SwiftUI
 /// An SF Symbol on a soft circular plate, used as a row's leading icon.
 struct SymbolBadge: View {
     let symbol: String
-    var tint = Theme.accent
+    var tint = NotchStyle.primary
     var size = 30.0
 
     var body: some View {

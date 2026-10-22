@@ -57,7 +57,10 @@ final class NotchController {
 
     func open(tab: NotchTab? = nil) {
         pendingClose?.cancel()
-        if let tab { state.tab = tab }
+        if let tab {
+            state.tab = tab
+            state.showsSettings = false
+        }
         guard !state.isOpen else { return }
         panel?.ignoresMouseEvents = false
         withAnimation(Self.openAnimation) { state.isOpen = true }
@@ -75,12 +78,11 @@ final class NotchController {
         state.isPinned.toggle()
     }
 
-    /// Opens a full-window section and tucks the notch away.
-    func openWindow(_ route: Route) {
-        app.route = route
-        NotificationCenter.default.post(name: .cleenOpenMainWindow, object: nil)
-        state.isPinned = false
-        close()
+    /// Opens the panel on Ajustes.
+    func openSettings(_ section: SettingsSection? = nil) {
+        if let section { state.settingsSection = section }
+        state.showsSettings = true
+        open()
     }
 
     // MARK: Pointer
@@ -159,9 +161,4 @@ final class NotchController {
             }
         }
     }
-}
-
-extension Notification.Name {
-    /// Asks the SwiftUI scene layer to open the main window (it owns `openWindow`).
-    static let cleenOpenMainWindow = Notification.Name("cleenOpenMainWindow")
 }

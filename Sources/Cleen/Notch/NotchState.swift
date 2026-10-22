@@ -7,8 +7,11 @@ final class NotchState {
     var isOpen = false
     var isPinned = false
     var tab = NotchTab.home
+    /// The panel shows Ajustes instead of a tool.
+    var showsSettings = false
+    var settingsSection = SettingsSection.general
     var geometry: NotchGeometry?
     /// While true the panel stays open even if the pointer leaves (a confirmation is
-    /// waiting, a text field has focus).
+    /// waiting, a sheet or open panel is up).
     var holdsOpen = false
 }

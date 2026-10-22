@@ -50,6 +50,7 @@ cat > "$APP/Contents/Info.plist" <<PLIST
   <key>NSHighResolutionCapable</key><true/>
   <key>NSHumanReadableCopyright</key><string>© Matheus Cardoso</string>
   <key>NSAppleEventsUsageDescription</key><string>O Cleen usa o macOS para pedir a senha de administrador quando uma limpeza precisa dela.</string>
+  <key>NSCameraUsageDescription</key><string>O Espelho do Cleen mostra a câmera frontal para você se ver antes de uma chamada. Nada é gravado.</string>
   <key>NSCalendarsFullAccessUsageDescription</key><string>O Cleen mostra os eventos de hoje no notch.</string>
   <key>NSRemindersFullAccessUsageDescription</key><string>O Cleen mostra seus lembretes no notch e deixa você marcá-los como feitos.</string>
 </dict>

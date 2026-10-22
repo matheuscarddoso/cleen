@@ -8,13 +8,17 @@ struct NotchHomeTab: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             NotchGreeting()
-            HStack(alignment: .top, spacing: 18) {
+            HStack(alignment: .center, spacing: 16) {
                 NowPlayingCard()
-                    .frame(width: 360)
+                    .frame(width: 270)
                 Rectangle()
                     .fill(NotchStyle.track)
-                    .frame(width: 1, height: 104)
+                    .frame(width: 1, height: 96)
                 NotchCalendar()
+                Rectangle()
+                    .fill(NotchStyle.track)
+                    .frame(width: 1, height: 96)
+                MirrorButton()
             }
             .padding(.top, 4)
         }

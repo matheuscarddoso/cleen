@@ -38,7 +38,7 @@ struct NotchAIUsageTab: View {
                 ) { Task { await model.refresh(force: true) } }
             } else if let summary = model.summary {
                 NotchGroup {
-                    ForEach(limitRows) { row in
+                    ForEach(limitRows.prefix(3)) { row in
                         NotchMeterRow(symbol: row.symbol, label: row.label, value: row.window.used.percent, valueColor: row.color, detail: row.detail) {
                             ZStack {
                                 UsageBar(fraction: row.window.used, height: 3.5, tint: row.color == NotchStyle.primary ? nil : row.color)
@@ -54,7 +54,7 @@ struct NotchAIUsageTab: View {
                         }
                     }
                     // Fill what's left of five rows with the biggest models.
-                    ForEach(summary.models.prefix(max(0, 5 - limitRows.count - 1 - (model.claude == nil ? 1 : 0)))) { share in
+                    ForEach(summary.models.prefix(max(0, 3 - min(limitRows.count, 3) - (model.claude == nil ? 1 : 0)))) { share in
                         NotchMeterRow(symbol: "cube", label: share.name, value: (share.cost / max(summary.monthCost, 0.01)).percent, detail: "do gasto") {
                             UsageBar(fraction: share.cost / max(summary.monthCost, 0.01), height: 3.5, tint: NotchStyle.barFill)
                         }

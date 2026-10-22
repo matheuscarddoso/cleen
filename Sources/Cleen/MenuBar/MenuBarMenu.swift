@@ -1,16 +1,13 @@
 import SwiftUI
 
-/// The menu bar item's menu: a way into the notch and the window, and out of the app.
+/// The menu bar item's menu: into the notch, into Ajustes, out of the app.
 struct MenuBarMenu: View {
     @Environment(AppModel.self) private var app
     @Environment(SystemMonitor.self) private var monitor
-    @Environment(\.openWindow) private var openWindow
 
     var body: some View {
-        Button("Abrir o Cleen no notch", action: openNotch)
+        Button("Abrir o Cleen", action: openNotch)
             .keyboardShortcut("c", modifiers: [.control, .option])
-        Button("Abrir janela do Cleen", action: openMain)
-        Divider()
         if let disk = monitor.disk {
             Text("\(disk.available.bytes) livres de \(disk.total.bytes)")
         }
@@ -25,14 +22,8 @@ struct MenuBarMenu: View {
         app.notch.open()
     }
 
-    private func openMain() {
-        openWindow(id: MainWindow.id)
-        NSApp.activate()
-    }
-
     private func openSettings() {
-        app.route = .settings
-        openMain()
+        app.notch.openSettings()
     }
 
     private func quit() {

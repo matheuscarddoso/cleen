@@ -1,6 +1,7 @@
 import SwiftUI
 
-/// The open panel: header in the notch strip, the selected tool, and the tab bar.
+/// The open panel: header in the notch strip, then either the selected tool with the
+/// tab bar, or Ajustes.
 struct NotchOpenContent: View {
     let controller: NotchController
     let notchHeight: Double
@@ -10,30 +11,48 @@ struct NotchOpenContent: View {
         VStack(spacing: 0) {
             NotchHeader(controller: controller)
                 .frame(height: notchHeight)
-                .padding(.horizontal, 10)
-            Group {
-                switch state.tab {
-                case .home: NotchHomeTab()
-                case .calendar: NotchCalendarTab()
-                case .shelf: NotchShelfTab()
-                case .ai: NotchAIUsageTab()
-                case .overview: NotchOverviewTab(controller: controller)
-                case .clean: NotchCleanTab()
-                case .projects: NotchProjectsTab()
-                case .files: NotchFilesTab()
-                case .system: NotchSystemTab()
-                case .startup: NotchStartupTab()
-                case .maintenance: NotchMaintenanceTab()
-                }
+                .padding(.horizontal, NotchOpenContent.inset - 2)
+            if state.showsSettings {
+                NotchSettingsView()
+                    .padding(.horizontal, NotchOpenContent.inset)
+                    .padding(.top, 4)
+                    .padding(.bottom, 10)
+                    .transition(.opacity)
+            } else {
+                tool
+                    .padding(.horizontal, NotchOpenContent.inset)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                    .clipped()
+                    .padding(.top, 6)
+                NotchTabBar()
+                    .padding(.bottom, 10)
+                    .padding(.top, 6)
             }
-            .padding(.horizontal, 12)
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-            .clipped()
-            .padding(.top, 6)
-            NotchTabBar(controller: controller)
-                .padding(.bottom, 10)
-                .padding(.top, 6)
         }
         .foregroundStyle(NotchStyle.primary)
+    }
+
+    /// Room between the panel's rounded edge and its content.
+    static let inset = 20.0
+
+    @ViewBuilder
+    private var tool: some View {
+        switch state.tab {
+        case .home: NotchHomeTab()
+        case .calendar: NotchCalendarTab()
+        case .shelf: NotchShelfTab()
+        case .ai: NotchAIUsageTab()
+        case .overview: NotchOverviewTab(controller: controller)
+        case .clean: NotchCleanTab()
+        case .projects: NotchProjectsTab()
+        case .files: NotchFilesTab()
+        case .duplicates: NotchDuplicatesTab()
+        case .space: NotchSpaceTab()
+        case .apps: NotchAppsTab()
+        case .leftovers: NotchLeftoversTab()
+        case .system: NotchSystemTab()
+        case .startup: NotchStartupTab()
+        case .maintenance: NotchMaintenanceTab()
+        }
     }
 }

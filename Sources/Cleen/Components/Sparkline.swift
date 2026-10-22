@@ -4,7 +4,7 @@ import SwiftUI
 /// A tiny area chart of recent samples, oldest on the left.
 struct Sparkline: View {
     let values: [Double]
-    var tint = Theme.accent
+    var tint = NotchStyle.primary
     /// Fixed top of the scale; nil scales to the data (for throughput).
     var maximum: Double?
 

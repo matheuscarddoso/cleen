@@ -10,7 +10,7 @@ struct LaunchItemIcon: View {
         } else {
             SymbolBadge(
                 symbol: item.signature.isSuspicious ? "exclamationmark.shield" : "gearshape",
-                tint: item.signature.isSuspicious ? Theme.warning : .secondary,
+                tint: item.signature.isSuspicious ? NotchStyle.warning : .secondary,
                 size: 28
             )
         }

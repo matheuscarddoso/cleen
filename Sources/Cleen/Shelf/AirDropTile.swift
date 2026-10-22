@@ -9,7 +9,7 @@ struct AirDropTile: View {
 
     var body: some View {
         Button(action: send) {
-            VStack(spacing: 8) {
+            VStack(spacing: 10) {
                 Image(systemName: "dot.radiowaves.left.and.right")
                     .font(.system(size: 18, weight: .regular))
                     .foregroundStyle(isTargeted ? Color(red: 0.2, green: 0.55, blue: 1) : NotchStyle.primary)
@@ -20,8 +20,10 @@ struct AirDropTile: View {
                     Text(shelf.items.isEmpty ? "Envie para aparelhos por perto" : "Enviar \(shelf.items.count.counted("arquivo", "arquivos"))")
                         .font(NotchStyle.caption)
                         .foregroundStyle(NotchStyle.secondary)
+                        .multilineTextAlignment(.center)
                 }
             }
+            .padding(.horizontal, 14)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(isTargeted || isHovered ? NotchStyle.control.opacity(0.6) : .clear, in: .rect(cornerRadius: 14, style: .continuous))
             .contentShape(.rect(cornerRadius: 14))

@@ -8,8 +8,6 @@ final class AppModel {
     /// and a second model would mean a second notch panel and a second sampling loop.
     static let shared = AppModel()
 
-    var route = LaunchArguments.route ?? .overview
-
     let cleanup = CleanupService()
     let monitor = SystemMonitor()
     let lowDiskAlert = LowDiskAlert()
@@ -27,6 +25,8 @@ final class AppModel {
     let agenda = AgendaModel()
     let aiUsage = AIUsageModel()
     let shelf = ShelfModel()
+    let tabs = TabPreferences()
+    let mirror = MirrorModel()
     @ObservationIgnored private(set) lazy var notch = NotchCoordinator(app: self)
 
     private init() {
@@ -43,7 +43,6 @@ final class AppModel {
         cleanup.onChange = { [monitor] in monitor.refreshDisk() }
         monitor.onDiskReading = { [lowDiskAlert] disk in lowDiskAlert.evaluate(disk) }
         monitor.start()
-        if LaunchArguments.scan { startScan(for: route) }
         // After the app finishes launching, so screens and the menu bar are in place.
         Task { [weak self] in self?.installNotch() }
         // The closed notch shows what's playing, so listen from the start.
@@ -52,24 +51,28 @@ final class AppModel {
 
     private func installNotch() {
         notch.install()
-        if let tab = LaunchArguments.notchTab {
+        if LaunchArguments.settings {
+            notch.primary?.state.isPinned = true
+            notch.primary?.openSettings()
+        } else if let tab = LaunchArguments.notchTab {
             notch.primary?.state.isPinned = true
             notch.primary?.open(tab: tab)
-            if LaunchArguments.scan { startScan(for: tab.route) }
+            if LaunchArguments.scan { startScan(for: tab) }
         }
     }
 
-    /// Kicks off the scan behind a section (used by `--scan`).
-    func startScan(for route: Route) {
-        switch route {
-        case .overview: Task { await smartScan() }
-        case .junk: junk.startScan()
+    /// Kicks off the scan behind a tab (used by `--scan`).
+    func startScan(for tab: NotchTab) {
+        switch tab {
+        case .home, .overview: Task { await smartScan() }
+        case .clean: junk.startScan()
         case .projects: projects.startScan()
-        case .largeFiles: largeFiles.startScan()
+        case .files: largeFiles.startScan()
         case .duplicates: duplicates.startScan()
-        case .spaceLens: spaceLens.scan(.home)
+        case .space: spaceLens.scan(.home)
         case .leftovers: orphans.startScan()
-        case .uninstaller, .startup, .monitor, .maintenance, .settings: break
+        case .apps: Task { await apps.load() }
+        case .calendar, .shelf, .ai, .system, .startup, .maintenance: break
         }
     }
 

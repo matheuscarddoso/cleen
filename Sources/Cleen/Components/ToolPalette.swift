@@ -16,23 +16,6 @@ enum ToolPalette {
     static let gray = Color(red: 0.56, green: 0.56, blue: 0.58)
     static let graphite = Color(red: 0.36, green: 0.36, blue: 0.38)
 
-    static func color(for route: Route) -> Color {
-        switch route {
-        case .overview: blue
-        case .junk: pink
-        case .projects: purple
-        case .largeFiles: orange
-        case .duplicates: teal
-        case .spaceLens: indigo
-        case .uninstaller: red
-        case .leftovers: yellow
-        case .startup: graphite
-        case .monitor: green
-        case .maintenance: gray
-        case .settings: gray
-        }
-    }
-
     static func color(for category: JunkCategory) -> Color {
         switch category.id {
         case "app-caches": blue

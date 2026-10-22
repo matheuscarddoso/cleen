@@ -14,11 +14,11 @@ struct MonthDayCell: View {
 
     var body: some View {
         Button(action: select) {
-            VStack(spacing: 1) {
+            VStack(spacing: 0) {
                 Text(day.formatted(.dateTime.day()))
-                    .font(.system(size: 12, weight: isToday ? .semibold : .medium).monospacedDigit())
+                    .font(.system(size: 11, weight: isToday ? .semibold : .medium).monospacedDigit())
                     .foregroundStyle(isToday ? .white : (isInMonth ? NotchStyle.primary : NotchStyle.tertiary))
-                    .frame(width: 22, height: 22)
+                    .frame(width: 19, height: 19)
                     .background {
                         if isToday {
                             Circle().fill(Color(red: 0.93, green: 0.3, blue: 0.29))
@@ -30,11 +30,11 @@ struct MonthDayCell: View {
                     }
                 Circle()
                     .fill(Color(red: 0.93, green: 0.3, blue: 0.29))
-                    .frame(width: 3, height: 3)
+                    .frame(width: 2.5, height: 2.5)
                     .opacity(hasEvents && !isToday ? 1 : 0)
             }
             .frame(maxWidth: .infinity)
-            .frame(height: 26)
+            .frame(height: 22)
             .contentShape(.rect)
         }
         .buttonStyle(.plain)

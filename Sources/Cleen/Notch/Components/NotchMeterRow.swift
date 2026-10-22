@@ -48,7 +48,7 @@ struct NotchMeterRow<Middle: View>: View {
             }
         }
         .padding(.horizontal, 12)
-        .frame(height: 30)
+        .frame(height: 28)
         .background(isHovered && action != nil ? NotchStyle.control.opacity(0.5) : .clear)
         .contentShape(.rect)
         .onHover { isHovered = $0 }

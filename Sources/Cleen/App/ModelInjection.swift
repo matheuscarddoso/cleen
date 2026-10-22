@@ -19,5 +19,7 @@ extension View {
             .environment(app.agenda)
             .environment(app.aiUsage)
             .environment(app.shelf)
+            .environment(app.tabs)
+            .environment(app.mirror)
     }
 }

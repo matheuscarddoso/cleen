@@ -9,6 +9,15 @@ enum MenuBarDisplay: String, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
+    var shortTitle: String {
+        switch self {
+        case .iconOnly: "Ícone"
+        case .freeSpace: "Disco"
+        case .cpu: "CPU"
+        case .memory: "Memória"
+        }
+    }
+
     var title: String {
         switch self {
         case .iconOnly: "Só o ícone"
