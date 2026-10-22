@@ -11,6 +11,9 @@ final class NotchController {
     private var monitors: [Any] = []
     private var pendingOpen: Task<Void, Never>?
     private var pendingClose: Task<Void, Never>?
+    /// The drag pasteboard's change count when the mouse went down, to tell a file drag
+    /// (it changes) from dragging a window or selecting text across the menu bar.
+    private var dragChangeCount = NSPasteboard(name: .drag).changeCount
 
     /// Springy like the system's own island: quick to arrive, settles without wobble.
     static let openAnimation = Animation.spring(response: 0.42, dampingFraction: 0.8)
@@ -82,6 +85,12 @@ final class NotchController {
 
     // MARK: Pointer
 
+    private var isDraggingFiles: Bool {
+        let pasteboard = NSPasteboard(name: .drag)
+        return pasteboard.changeCount != dragChangeCount
+            && pasteboard.types?.contains(.fileURL) == true
+    }
+
     private func installMonitors() {
         let mask: NSEvent.EventTypeMask = [.mouseMoved, .leftMouseDragged, .leftMouseDown]
         if let global = NSEvent.addGlobalMonitorForEvents(matching: mask, handler: { [weak self] event in
@@ -125,7 +134,14 @@ final class NotchController {
             return
         }
 
+        if event.type == .leftMouseDown {
+            dragChangeCount = NSPasteboard(name: .drag).changeCount
+        }
         let overNotch = geometry.hotZone(isOpen: false, showsWings: wings).contains(location)
+        if overNotch, event.type == .leftMouseDragged, isDraggingFiles {
+            open(tab: .shelf)
+            return
+        }
         guard overNotch else {
             pendingOpen?.cancel()
             pendingOpen = nil

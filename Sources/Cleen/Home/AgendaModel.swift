@@ -20,19 +20,57 @@ final class AgendaModel {
     @ObservationIgnored private let store = EKEventStore()
     @ObservationIgnored private var observer: NSObjectProtocol?
 
-    /// Asks once for access, then keeps the lists current while the caller is alive.
+    @ObservationIgnored private var refresher: Task<Void, Never>?
+
+    /// Asks once for access, then keeps the lists current. Several views call this;
+    /// they all share one refresh loop.
     func watch() async {
+        guard refresher == nil else { return }
         await requestAccess()
         await reload()
-        if observer == nil {
-            observer = NotificationCenter.default.addObserver(forName: .EKEventStoreChanged, object: store, queue: .main) { [weak self] _ in
-                Task { @MainActor in await self?.reload() }
-            }
+        observer = NotificationCenter.default.addObserver(forName: .EKEventStoreChanged, object: store, queue: .main) { [weak self] _ in
+            Task { @MainActor in await self?.reload() }
         }
         // The day rolls over and "in 10 minutes" goes stale; refresh now and then.
-        while !Task.isCancelled {
-            try? await Task.sleep(for: .seconds(60))
-            await reload()
+        refresher = Task { [weak self] in
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(60))
+                await self?.reload()
+            }
+        }
+    }
+
+    @ObservationIgnored private var loadedMonths = Set<Date>()
+
+    /// Makes sure every day of the month grid around `date` has its events.
+    func loadMonth(containing date: Date) {
+        guard calendarAccess == .granted else { return }
+        let calendar = Calendar.current
+        guard let month = calendar.dateInterval(of: .month, for: date) else { return }
+        loadedMonths.insert(month.start)
+        // The grid shows a few days of the neighbouring months too.
+        let start = calendar.date(byAdding: .day, value: -7, to: month.start) ?? month.start
+        let end = calendar.date(byAdding: .day, value: 14, to: month.end) ?? month.end
+        loadEvents(from: start, to: end)
+    }
+
+    private func loadEvents(from start: Date, to end: Date) {
+        let calendar = Calendar.current
+        let found = store.events(matching: store.predicateForEvents(withStart: start, end: end, calendars: nil))
+            .map(AgendaEvent.init)
+        var byDay: [Date: [AgendaEvent]] = [:]
+        for event in found {
+            // Multi-day events show on every day they cover.
+            var day = max(calendar.startOfDay(for: event.start), calendar.startOfDay(for: start))
+            let last = min(calendar.startOfDay(for: event.end.addingTimeInterval(-1)), end)
+            while day <= last {
+                byDay[day, default: []].append(event)
+                guard let next = calendar.date(byAdding: .day, value: 1, to: day) else { break }
+                day = next
+            }
+        }
+        for (day, events) in byDay {
+            eventsByDay[day] = events.sorted { ($0.isAllDay ? 0 : 1, $0.start) < ($1.isAllDay ? 0 : 1, $1.start) }
         }
     }
 
@@ -93,24 +131,13 @@ final class AgendaModel {
         let endOfDay = calendar.date(byAdding: .day, value: 1, to: calendar.startOfDay(for: now)) ?? now
 
         if calendarAccess == .granted {
-            // A window around today for the day strip: two weeks back, a month ahead.
+            // A window around today for the day strip, plus any month browsed since.
             let today = calendar.startOfDay(for: now)
             let start = calendar.date(byAdding: .day, value: -14, to: today) ?? today
             let end = calendar.date(byAdding: .day, value: 32, to: today) ?? endOfDay
-            let all = store.events(matching: store.predicateForEvents(withStart: start, end: end, calendars: nil))
-                .map(AgendaEvent.init)
-            var byDay: [Date: [AgendaEvent]] = [:]
-            for event in all {
-                // Multi-day events show on every day they cover.
-                var day = calendar.startOfDay(for: event.start)
-                let last = calendar.startOfDay(for: event.end.addingTimeInterval(-1))
-                while day <= last {
-                    byDay[day, default: []].append(event)
-                    guard let next = calendar.date(byAdding: .day, value: 1, to: day) else { break }
-                    day = next
-                }
-            }
-            eventsByDay = byDay.mapValues { $0.sorted { ($0.isAllDay ? 0 : 1, $0.start) < ($1.isAllDay ? 0 : 1, $1.start) } }
+            eventsByDay = [:]
+            loadEvents(from: start, to: end)
+            for month in loadedMonths { loadMonth(containing: month) }
         }
 
         if remindersAccess == .granted {

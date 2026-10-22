@@ -50,7 +50,7 @@ struct NotchWings: View {
     @ViewBuilder
     private var trailing: some View {
         if isPlaying {
-            SoundBars(tint: nowPlaying.tint.map { Color(nsColor: $0).mix(with: .white, by: 0.55) } ?? .white)
+            SoundBars(tint: .white.opacity(0.92), isPlaying: isPlaying)
                 .transition(.opacity)
         } else {
             Text(monitor.disk.map { Self.compact($0.available) } ?? "")

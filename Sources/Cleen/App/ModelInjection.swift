@@ -17,5 +17,7 @@ extension View {
             .environment(app.maintenance)
             .environment(app.nowPlaying)
             .environment(app.agenda)
+            .environment(app.aiUsage)
+            .environment(app.shelf)
     }
 }

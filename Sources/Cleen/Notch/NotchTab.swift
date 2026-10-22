@@ -1,6 +1,9 @@
 /// The tools in the notch's tab bar.
 enum NotchTab: String, CaseIterable, Identifiable {
     case home
+    case calendar
+    case shelf
+    case ai
     case overview
     case clean
     case projects
@@ -14,6 +17,9 @@ enum NotchTab: String, CaseIterable, Identifiable {
     var title: String {
         switch self {
         case .home: "Cleen"
+        case .calendar: "Calendário"
+        case .shelf: "Shelf"
+        case .ai: "Uso de IA"
         case .overview: "Visão geral"
         case .clean: "Limpeza"
         case .projects: "Projetos"
@@ -27,6 +33,9 @@ enum NotchTab: String, CaseIterable, Identifiable {
     var symbol: String {
         switch self {
         case .home: "square.grid.2x2.fill"
+        case .calendar: "calendar"
+        case .shelf: "tray.and.arrow.down.fill"
+        case .ai: "chart.bar.xaxis"
         case .overview: "internaldrive.fill"
         case .clean: "trash"
         case .projects: "chevron.left.forwardslash.chevron.right"
@@ -40,7 +49,7 @@ enum NotchTab: String, CaseIterable, Identifiable {
     /// The full-window section with the same content, for "open in window".
     var route: Route {
         switch self {
-        case .home, .overview: .overview
+        case .home, .overview, .calendar, .shelf, .ai: .overview
         case .clean: .junk
         case .projects: .projects
         case .files: .largeFiles

@@ -25,6 +25,8 @@ final class AppModel {
     let maintenance: MaintenanceModel
     let nowPlaying = NowPlayingModel()
     let agenda = AgendaModel()
+    let aiUsage = AIUsageModel()
+    let shelf = ShelfModel()
     @ObservationIgnored private(set) lazy var notch = NotchCoordinator(app: self)
 
     private init() {

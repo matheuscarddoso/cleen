@@ -14,6 +14,9 @@ struct NotchOpenContent: View {
             Group {
                 switch state.tab {
                 case .home: NotchHomeTab()
+                case .calendar: NotchCalendarTab()
+                case .shelf: NotchShelfTab()
+                case .ai: NotchAIUsageTab()
                 case .overview: NotchOverviewTab(controller: controller)
                 case .clean: NotchCleanTab()
                 case .projects: NotchProjectsTab()
