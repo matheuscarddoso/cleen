@@ -26,6 +26,8 @@ struct ShortcutIllustration: View {
                 KeyCap(glyph: "C", width: 66, isPressed: cPressed)
             }
             .padding(.top, -40)
+            // Right under the notch.
+            .offset(x: MacScreen<EmptyView>.centerShift)
         }
         .animation(.spring(response: 0.5, dampingFraction: 0.82), value: model.triedShortcut)
         .onChange(of: model.shortcutPresses) {

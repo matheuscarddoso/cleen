@@ -4,15 +4,18 @@ import SwiftUI
 /// bezel, a wallpaper, the menu bar, and whatever hangs from the camera housing at the
 /// top centre. Fades out downward, so it reads as a glimpse of the screen.
 struct MacScreen<Notch: View>: View {
-    var scale = 0.3
+    /// Zoomed in on the app: the panel fills the painting's side and most of the
+    /// screen runs off the edges.
+    var scale = 0.48
     @ViewBuilder let notch: Notch
 
     /// A MacBook's real width, so the notch and the panel keep their true size against
     /// the screen. Only the right half shows; the left dissolves into the page.
     static var displaySize: CGSize { CGSize(width: 1512, height: 700) }
     private static var bezel: Double { 14 }
-    /// How far left of the illustration's centre the screen sits.
-    static var centerShift: Double { -34 }
+    /// How far right of the illustration's centre the notch sits.
+    static var centerShift: Double { 29 }
+    static var drop: Double { 92 }
 
     var body: some View {
         let outer = CGSize(width: Self.displaySize.width + Self.bezel * 2, height: Self.displaySize.height + Self.bezel)
@@ -35,9 +38,10 @@ struct MacScreen<Notch: View>: View {
             .compositingGroup()
             .scaleEffect(scale)
             .frame(width: outer.width * scale, height: outer.height * scale)
-            // Right edge just inside the panel's: the notch lands right of the page,
-            // the left half runs under the veil.
-            .offset(x: Self.centerShift)
+            // The notch sits right of centre and a little low, where the veil is clear:
+            // the panel's right edge lands just inside the card's, its top row below
+            // the veil's curve.
+            .offset(x: Self.centerShift, y: Self.drop)
     }
 
     private var display: some View {

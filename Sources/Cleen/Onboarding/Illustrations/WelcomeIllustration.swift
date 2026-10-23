@@ -7,7 +7,6 @@ struct WelcomeIllustration: View {
             NotchPanelMock()
                 .shadow(color: .black.opacity(0.4), radius: 30, y: 16)
         }
-        .offset(y: -6)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
