@@ -42,6 +42,10 @@ final class MirrorModel {
 
     /// Mirrored, like a real mirror. Set explicitly once the connection exists, so it
     /// doesn't depend on macOS's automatic choice.
+    ///
+    /// DO NOT CHANGE: `isVideoMirrored = true` is the orientation the owner approved after
+    /// it flipped twice by accident. Leaving it to `automaticallyAdjustsVideoMirroring`, or
+    /// setting it before the session has a connection, both showed the wrong side.
     func fixOrientation() {
         guard let connection = previewLayer.connection, connection.isVideoMirroringSupported else { return }
         connection.automaticallyAdjustsVideoMirroring = false
