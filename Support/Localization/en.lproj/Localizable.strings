@@ -959,3 +959,29 @@
 "Começar agora" = "Get Started";
 "Personalizar" = "Customize";
 "hello" = "hello";
+
+/* Ações */
+"Ações" = "Stocks";
+"Perguntar" = "Ask";
+"Teleprompter" = "Teleprompter";
+"%@ já está na lista" = "%@ is already on the list";
+"%@ · Fechamento anterior %@ · %@ hoje" = "%@ · Previous close %@ · %@ today";
+"%@, %@" = "%@, %@";
+"%@, %@, %@" = "%@, %@, %@";
+"A lista já tem %lld ações" = "The list already has %lld stocks";
+"Abrir Ações" = "Open Stocks";
+"Adicionar à lista" = "Add to list";
+"Adicione ações na aba Ações." = "Add stocks in the Stocks tab.";
+"Buscar código ou empresa" = "Search symbol or company";
+"Busque um código, como PETR4 ou AAPL, e adicione com +." = "Search for a symbol, like PETR4 or AAPL, and add it with +.";
+"Carregando…" = "Loading…";
+"Código inválido" = "Invalid symbol";
+"Código não encontrado" = "Symbol not found";
+"Já está na lista" = "Already on the list";
+"Mercado fechado" = "Market closed";
+"Nada encontrado com esse nome." = "Nothing found with that name.";
+"Nada encontrado. Return tenta %@ direto." = "Nothing found. Return tries %@ directly.";
+"Nenhuma ação na lista" = "No stocks on the list";
+"Não encontrei %@" = "Couldn't find %@";
+"Remover da lista" = "Remove from list";
+"Sem conexão para buscar %@" = "No connection to look up %@";
