@@ -47,6 +47,9 @@ public final class ClaudeLogReader: Sendable {
 
         let snapshot = files.withLock { $0 }
         var updated: [String: FileState] = [:]
+        // Nothing new since last time (the usual case): skip rewriting the cache, which
+        // is the whole horizon of entries re-encoded.
+        var changed = Set(paths.map(\.0)) != Set(snapshot.keys)
         for (path, modified) in paths {
             if Task.isCancelled { break }
             var state = snapshot[path] ?? FileState(offset: 0, modified: .distantPast, entries: [])
@@ -59,12 +62,15 @@ public final class ClaudeLogReader: Sendable {
                     state.offset = end
                 }
                 state.modified = modified
+                changed = true
             }
+            let before = state.entries.count
             state.entries.removeAll { $0.timestamp < cutoff }
+            if state.entries.count != before { changed = true }
             updated[path] = state
         }
         files.withLock { $0 = updated }
-        save(updated)
+        if changed { save(updated) }
 
         var seen = Set<String>()
         return updated.values.flatMap(\.entries)

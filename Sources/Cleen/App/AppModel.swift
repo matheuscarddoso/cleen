@@ -1,5 +1,6 @@
 import AppKit
 import Observation
+import SwiftUI
 
 /// Owns every feature model for the life of the app, so scans keep running and results
 /// survive while windows and the menu bar panel open and close.
@@ -55,13 +56,17 @@ final class AppModel {
         screenshots.start()
         // The closed notch shows what's playing, so listen from the start.
         Task { [nowPlaying] in await nowPlaying.watch() }
+        Thumbnails.shared.scale = NSScreen.screens.map(\.backingScaleFactor).max() ?? 2
     }
 
     private func installNotch() {
         notch.install()
         if OnboardingModel.isNeeded, LaunchArguments.onboarding || (!LaunchArguments.settings && LaunchArguments.notchTab == nil) {
             startOnboarding()
-        } else if LaunchArguments.settings {
+            return
+        }
+        warmCharts(after: .seconds(4))
+        if LaunchArguments.settings {
             notch.primary?.state.isPinned = true
             notch.primary?.openSettings()
         } else if let tab = LaunchArguments.notchTab {
@@ -76,6 +81,16 @@ final class AppModel {
 
     /// The first-run tour, hanging from the notch. When it folds back up, the notch
     /// opens on Início so the person lands right where the tour pointed.
+    /// Swift Charts loads its framework and type metadata the first time a chart is
+    /// drawn, about 200 ms on the main thread, which used to land on the first visit to
+    /// Sistema. Draw one offscreen while nothing is on screen instead.
+    private func warmCharts(after delay: Duration) {
+        Task {
+            try? await Task.sleep(for: delay)
+            _ = ImageRenderer(content: Sparkline(values: [0.2, 0.6, 0.4]).frame(width: 40, height: 14)).cgImage
+        }
+    }
+
     private func startOnboarding() {
         guard let screen = notch.primary?.screen ?? NSScreen.main else { return }
         let onboarding = OnboardingController(screen: screen)
@@ -88,6 +103,7 @@ final class AppModel {
             self.notch.onSuspendedHotKey = nil
             self.notch.primary?.present(tab: .home)
             self.onboarding = nil
+            self.warmCharts(after: .seconds(10))
         }
     }
 

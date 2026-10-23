@@ -39,6 +39,9 @@ final class ClipboardModel {
            let saved = try? JSONDecoder().decode(ClipboardLog.self, from: data) {
             log = saved
         }
+        // The newest images, decoded ahead so the tab opens on ready cards.
+        let images = log.entries.compactMap(\.imageFile).prefix(24).map { folder.appending(path: $0) }
+        Thumbnails.shared.prefetch(Array(images))
     }
 
     var isEnabled: Bool { UserDefaults.standard.bool(forKey: Self.enabledKey) }
@@ -83,6 +86,10 @@ final class ClipboardModel {
         let source = NSWorkspace.shared.frontmostApplication
         guard source?.bundleIdentifier != Bundle.main.bundleIdentifier else { return }
         guard let entry = capture(pasteboard, source: source) else { return }
+        add(entry)
+    }
+
+    private func add(_ entry: ClipboardEntry) {
         let dropped = log.record(entry)
         deleteFiles(of: dropped)
         scheduleSave()
@@ -97,17 +104,19 @@ final class ClipboardModel {
             let joined = paths.joined(separator: "\n")
             return ClipboardEntry(kind: .files, text: joined, files: paths, byteCount: joined.utf8.count, contentHash: Self.hash(Data(joined.utf8)), sourceBundleID: bundleID, sourceName: name)
         }
-        if let data = pasteboard.data(forType: .png) ?? pasteboard.data(forType: .tiff), let image = NSImage(data: data),
-           let png = Self.pngData(image) {
-            let hash = Self.hash(png)
-            let file = "\(hash.prefix(24)).png"
-            try? png.write(to: folder.appending(path: file), options: .atomic)
-            let pixels = image.representations.first.map { ($0.pixelsWide, $0.pixelsHigh) } ?? (Int(image.size.width), Int(image.size.height))
+        if let data = pasteboard.data(forType: .png) ?? pasteboard.data(forType: .tiff) {
             // The capture service is alive while a ⌃ screenshot lands on the clipboard.
-            if !NSRunningApplication.runningApplications(withBundleIdentifier: "com.apple.screencaptureui").isEmpty {
-                onScreenshot(png)
+            let isScreenCapture = !NSRunningApplication.runningApplications(withBundleIdentifier: "com.apple.screencaptureui").isEmpty
+            let folder = folder
+            // Decoding, re-encoding and hashing a full screenshot takes a while; it runs
+            // in the background and the entry lands when it's done.
+            Task {
+                guard let made = await offMain({ Self.imageEntry(from: data, in: folder, bundleID: bundleID, name: name) }) else { return }
+                if isScreenCapture { onScreenshot(made.png) }
+                add(made.entry)
+                if let file = made.entry.imageFile { Thumbnails.shared.prefetch([folder.appending(path: file)]) }
             }
-            return ClipboardEntry(kind: .image, imageFile: file, imageWidth: pixels.0, imageHeight: pixels.1, byteCount: png.count, contentHash: hash, sourceBundleID: bundleID, sourceName: name)
+            return nil
         }
         if let string = pasteboard.string(forType: .string), !string.isEmpty {
             let text = String(string.prefix(100_000))
@@ -197,16 +206,30 @@ final class ClipboardModel {
         let url = folder.appending(path: "history.json")
         saveTask = Task {
             try? await Task.sleep(for: .seconds(1))
-            guard !Task.isCancelled, let data = try? JSONEncoder().encode(log) else { return }
-            try? data.write(to: url, options: .atomic)
+            guard !Task.isCancelled else { return }
+            // Up to 300 entries of up to 100 KB each: encode and write off the main thread.
+            await offMain {
+                guard let data = try? JSONEncoder().encode(log) else { return }
+                try? data.write(to: url, options: .atomic)
+            }
         }
     }
 
-    private static func hash(_ data: Data) -> String {
+    private nonisolated static func imageEntry(from data: Data, in folder: URL, bundleID: String?, name: String?) -> (entry: ClipboardEntry, png: Data)? {
+        guard let image = NSImage(data: data), let png = pngData(image) else { return nil }
+        let hash = hash(png)
+        let file = "\(hash.prefix(24)).png"
+        try? png.write(to: folder.appending(path: file), options: .atomic)
+        let pixels = image.representations.first.map { ($0.pixelsWide, $0.pixelsHigh) } ?? (Int(image.size.width), Int(image.size.height))
+        let entry = ClipboardEntry(kind: .image, imageFile: file, imageWidth: pixels.0, imageHeight: pixels.1, byteCount: png.count, contentHash: hash, sourceBundleID: bundleID, sourceName: name)
+        return (entry, png)
+    }
+
+    private nonisolated static func hash(_ data: Data) -> String {
         SHA256.hash(data: data).map { ($0 < 16 ? "0" : "") + String($0, radix: 16) }.joined()
     }
 
-    private static func pngData(_ image: NSImage) -> Data? {
+    private nonisolated static func pngData(_ image: NSImage) -> Data? {
         guard let tiff = image.tiffRepresentation, let bitmap = NSBitmapImageRep(data: tiff) else { return nil }
         return bitmap.representation(using: .png, properties: [:])
     }

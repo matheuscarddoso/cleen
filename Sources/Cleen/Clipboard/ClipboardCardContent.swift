@@ -19,11 +19,8 @@ struct ClipboardCardContent: View {
                 .foregroundStyle(Color(red: 0.45, green: 0.68, blue: 1))
                 .lineLimit(4)
         case .image:
-            if let url = model.imageURL(for: entry), let image = ClipboardImageCache.shared.image(at: url) {
-                Image(nsImage: image)
-                    .resizable()
-                    .scaledToFill()
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            if let url = model.imageURL(for: entry) {
+                ThumbnailImage(url: url, mode: .fill)
                     .clipShape(.rect(cornerRadius: 6, style: .continuous))
             }
         case .files:

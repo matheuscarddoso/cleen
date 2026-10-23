@@ -8,11 +8,7 @@ struct ScreenshotPreview: View {
         VStack(alignment: .leading, spacing: 5) {
             Color.white.opacity(0.04)
                 .overlay {
-                    if let image = ClipboardImageCache.shared.image(at: shot.url) {
-                        Image(nsImage: image)
-                            .resizable()
-                            .scaledToFit()
-                    }
+                    ThumbnailImage(url: shot.url, mode: .fit)
                 }
                 .clipShape(.rect(cornerRadius: 10, style: .continuous))
                 .overlay {

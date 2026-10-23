@@ -19,7 +19,10 @@ final class StartupModel {
 
     func scan() async {
         phase = .scanning
-        items = await LaunchItemScanner().scan()
+        let found = await LaunchItemScanner().scan()
+        // The rows show each app's icon; look them up before the list appears.
+        await IconCache.shared.warm(found.compactMap(\.appBundle))
+        items = found
         phase = .ready
     }
 

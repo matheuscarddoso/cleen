@@ -51,18 +51,25 @@ final class AppsModel {
             var pending = bundles.makeIterator()
             for _ in 0..<4 {
                 guard let bundle = pending.next() else { break }
-                group.addTask { await offMain { AppCatalog.load(bundle) } }
+                group.addTask { await offMain { Self.loadWarmingIcon(bundle) } }
             }
             var loaded: [InstalledApp] = []
             for await app in group {
                 if let app { loaded.append(app) }
                 if let bundle = pending.next() {
-                    group.addTask { await offMain { AppCatalog.load(bundle) } }
+                    group.addTask { await offMain { Self.loadWarmingIcon(bundle) } }
                 }
             }
             return loaded
         }
         phase = .ready
+    }
+
+    /// Reads an app and its icon together, so the list draws without a lookup per row.
+    private nonisolated static func loadWarmingIcon(_ bundle: URL) -> InstalledApp? {
+        let app = AppCatalog.load(bundle)
+        if app != nil { IconCache.shared.warm(bundle) }
+        return app
     }
 
     /// Finds what the selected app left around the Mac. Call after `selectedID` changes.

@@ -70,14 +70,24 @@ final class ScreenshotModel {
         reload(announcing: false)
     }
 
+    /// Lists the folders off the main thread (the Desktop can hold thousands of files,
+    /// each checked for the screenshot tag), then updates the list.
     private func reload(announcing: Bool) {
         let since = Date.now.addingTimeInterval(-7 * 86_400)
-        let files = ScreenshotFolderWatcher.captures(since: since).map { Screenshot(url: $0.url, date: $0.date, fromClipboard: false) }
+        Task {
+            let found = await offMain { ScreenshotFolderWatcher.captures(since: since) }
+            apply(found, announcing: announcing)
+        }
+    }
+
+    private func apply(_ found: [(url: URL, date: Date)], announcing: Bool) {
+        let files = found.map { Screenshot(url: $0.url, date: $0.date, fromClipboard: false) }
         let clipboard = items.filter(\.fromClipboard)
         let merged = (files + clipboard).sorted { $0.date > $1.date }
         let new = merged.filter { !known.contains($0.url) }
         items = Array(merged.prefix(40))
         known.formUnion(merged.map(\.url))
+        Thumbnails.shared.prefetch(items.map(\.url))
         guard announcing, let newest = new.first(where: { Date.now.timeIntervalSince($0.date) < 60 }) else { return }
         announce(newest)
     }
@@ -92,6 +102,7 @@ final class ScreenshotModel {
         let shot = Screenshot(url: url, date: .now, fromClipboard: true)
         known.insert(url)
         items.insert(shot, at: 0)
+        Thumbnails.shared.prefetch([url])
         announce(shot)
     }
 

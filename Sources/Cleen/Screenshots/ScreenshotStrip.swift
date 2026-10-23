@@ -11,11 +11,7 @@ struct ScreenshotStrip: View {
                     let isSelected = shot.id == model.selected?.id
                     Color.white.opacity(0.04)
                         .overlay {
-                            if let image = ClipboardImageCache.shared.image(at: shot.url) {
-                                Image(nsImage: image)
-                                    .resizable()
-                                    .scaledToFill()
-                            }
+                            ThumbnailImage(url: shot.url, mode: .fill)
                         }
                         .frame(height: 42)
                         .clipShape(.rect(cornerRadius: 6, style: .continuous))

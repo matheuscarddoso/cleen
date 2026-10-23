@@ -1,4 +1,5 @@
 import Foundation
+import Synchronization
 
 /// Anthropic API list prices, per million tokens. Used to put a dollar figure on
 /// Claude Code usage: what the same tokens would cost on the API, not what a
@@ -11,6 +12,17 @@ public struct ModelPricing: Sendable, Equatable {
 
     /// Picks the price for a model id like `claude-opus-5-5` or `claude-sonnet-4-6-20260101`.
     public static func forModel(_ model: String) -> ModelPricing? {
+        // Asked once per entry, tens of thousands of times per refresh, for a handful of
+        // distinct ids: remember each answer.
+        if let known = memo.withLock({ $0[model] }) { return known }
+        let found = resolve(model)
+        memo.withLock { $0[model] = found }
+        return found
+    }
+
+    private static let memo = Mutex<[String: ModelPricing?]>([:])
+
+    private static func resolve(_ model: String) -> ModelPricing? {
         let id = model.lowercased()
         func has(_ part: String) -> Bool { id.contains(part) }
         // Most specific first.

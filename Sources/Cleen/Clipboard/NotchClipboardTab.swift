@@ -38,7 +38,12 @@ struct NotchClipboardTab: View {
         }
         .onKeyPress(.leftArrow) { model.moveSelection(by: -1); return .handled }
         .onKeyPress(.rightArrow) { model.moveSelection(by: 1); return .handled }
-        .onAppear { searchFocused = true }
+        // Focus once the tab has settled: making the field first responder sets up the
+        // text system and input method, which stalled the switch when done on its frame.
+        .task {
+            try? await Task.sleep(for: .milliseconds(350))
+            searchFocused = true
+        }
     }
 
     private func pasteSelected() {

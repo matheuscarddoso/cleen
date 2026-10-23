@@ -99,7 +99,13 @@ final class BackdropBlurView: NSView {
         layer?.backgroundFilters = blur.map { [$0] }
         layer?.masksToBounds = true
         // Opaque at the outer edge, clear inward: the blur eases off like the fade.
-        fade.colors = [NSColor.black.cgColor, NSColor.black.withAlphaComponent(0.55).cgColor, NSColor.clear.cgColor]
+        // sRGB, not NSColor's calibrated spaces: those made Core Animation re-encode an
+        // ICC profile for this layer on every commit. Only the alpha is used anyway.
+        fade.colors = [
+            CGColor(srgbRed: 0, green: 0, blue: 0, alpha: 1),
+            CGColor(srgbRed: 0, green: 0, blue: 0, alpha: 0.55),
+            CGColor(srgbRed: 0, green: 0, blue: 0, alpha: 0),
+        ]
         fade.locations = [0, 0.45, 1]
         let outer: CGPoint = axis == .vertical ? (atStart ? CGPoint(x: 0.5, y: 1) : CGPoint(x: 0.5, y: 0)) : (atStart ? CGPoint(x: 0, y: 0.5) : CGPoint(x: 1, y: 0.5))
         fade.startPoint = outer

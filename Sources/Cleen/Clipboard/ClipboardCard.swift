@@ -53,7 +53,7 @@ struct ClipboardCard: View {
     }
 
     private var sourceApp: URL? {
-        entry.sourceBundleID.flatMap { NSWorkspace.shared.urlForApplication(withBundleIdentifier: $0) }
+        entry.sourceBundleID.flatMap(AppLocator.url(for:))
     }
 
     /// "1h", "2min", "3d", like OmniNotch.
