@@ -40,12 +40,12 @@ final class MirrorModel {
         if access == .granted { camera.start { [weak self] in self?.fixOrientation() } }
     }
 
-    /// The image exactly as the camera sees it. macOS mirrors front cameras on its own,
-    /// so that has to be switched off explicitly, and only once the connection exists.
+    /// Mirrored, like a real mirror. Set explicitly once the connection exists, so it
+    /// doesn't depend on macOS's automatic choice.
     func fixOrientation() {
         guard let connection = previewLayer.connection, connection.isVideoMirroringSupported else { return }
         connection.automaticallyAdjustsVideoMirroring = false
-        connection.isVideoMirrored = false
+        connection.isVideoMirrored = true
     }
 
     /// Stops a moment later: when the round mirror grows into the wide one, the new
