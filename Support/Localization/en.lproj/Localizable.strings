@@ -890,7 +890,6 @@
 "Sem ajuste pelo cabo · escurece a imagem" = "No adjustment over the cable · dims the picture";
 "Tela do Mac" = "Mac display";
 "Telas" = "Displays";
-"Ícones" = "Icons";
 "Buscar ícone" = "Search icons";
 "%@ ícones" = "%@ icons";
 "1 ícone" = "1 icon";
@@ -975,3 +974,57 @@
 "Ações" = "Stocks";
 "Perguntar" = "Ask";
 "Teleprompter" = "Teleprompter";
+
+/* Teleprompter */
+"Cole ou escreva o roteiro…" = "Paste or write the script…";
+"Roteiro" = "Script";
+"Lento" = "Slow";
+"Normal" = "Normal";
+"Rápido" = "Fast";
+"%lld ppm" = "%lld wpm";
+"ppm" = "wpm";
+"Mais devagar" = "Slower";
+"Mais rápido" = "Faster";
+"Mais devagar (↓)" = "Slower (↓)";
+"Mais rápido (↑)" = "Faster (↑)";
+"Palavras por minuto" = "Words per minute";
+"%lld palavras por minuto" = "%lld words per minute";
+"%lld pt" = "%lld pt";
+"Texto menor" = "Smaller text";
+"Texto maior" = "Larger text";
+"Tamanho do texto" = "Text size";
+"Começar (⌘↩)" = "Start (⌘↩)";
+"Escreva o roteiro para começar" = "Write a script to start";
+"1 palavra" = "1 word";
+"%lld palavras" = "%lld words";
+"%@ · cerca de %@" = "%1$@ · about %2$@";
+"Recomeçar (R)" = "Restart (R)";
+"Parar (Esc)" = "Stop (Esc)";
+"Pausar (Espaço)" = "Pause (Space)";
+"Continuar (Espaço)" = "Resume (Space)";
+"Ler de novo (Espaço)" = "Read again (Space)";
+"Pausado · Espaço continua" = "Paused · Space resumes";
+"Fim do roteiro · Espaço lê de novo" = "End of script · Space reads again";
+
+/* Perguntar */
+"Este Mac não tem Apple Intelligence" = "This Mac doesn't have Apple Intelligence";
+"Ela precisa de um Mac com chip Apple, do M1 em diante." = "It needs a Mac with Apple silicon, M1 or later.";
+"A Apple Intelligence está desligada" = "Apple Intelligence is turned off";
+"Ligue em Ajustes do Sistema › Apple Intelligence e Siri para perguntar aqui." = "Turn it on in System Settings › Apple Intelligence & Siri to ask here.";
+"O modelo está sendo baixado" = "The model is downloading";
+"A Apple Intelligence ainda está se preparando neste Mac. Isso leva alguns minutos." = "Apple Intelligence is still getting ready on this Mac. This takes a few minutes.";
+"A Apple Intelligence não está pronta" = "Apple Intelligence isn't ready";
+"Tente de novo daqui a pouco." = "Try again in a moment.";
+"Pergunte qualquer coisa" = "Ask anything";
+"A Apple Intelligence responde aqui mesmo. Nada sai do Mac." = "Apple Intelligence answers right here. Nothing leaves your Mac.";
+"Pergunte algo…" = "Ask something…";
+"Pergunta" = "Question";
+"Nova conversa" = "New conversation";
+"Perguntar (↩)" = "Ask (↩)";
+"Copiar resposta" = "Copy answer";
+"Não deu para responder. Tente de novo." = "Couldn't answer. Try again.";
+"A conversa ficou longa demais. Comece uma nova." = "The conversation got too long. Start a new one.";
+"Não posso responder a isso." = "I can't answer that.";
+"Esse idioma ainda não é compatível." = "This language isn't supported yet.";
+"Muitos pedidos seguidos. Tente de novo em instantes." = "Too many requests in a row. Try again shortly.";
+"O modelo não está disponível agora." = "The model isn't available right now.";
