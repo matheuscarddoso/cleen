@@ -9,6 +9,7 @@ struct ClosedNotchSettings: View {
     @AppStorage(LiveActivitySettings.headphonesKey) private var headphones = true
     @AppStorage(LiveActivitySettings.trackKey) private var track = true
     @AppStorage(LiveActivitySettings.meetingKey) private var meeting = true
+    @AppStorage(LiveActivitySettings.agentsKey) private var agents = true
     @AppStorage(LiveActivitySettings.hideInFullscreenKey) private var hidesInFullscreen = true
 
     var body: some View {
@@ -37,6 +38,9 @@ struct ClosedNotchSettings: View {
                     }
                     SettingRow(title: String(localized: "Próxima reunião"), note: String(localized: "Dez minutos antes de um evento do Calendário.")) {
                         NotchSwitch(label: String(localized: "Próxima reunião"), isOn: $meeting)
+                    }
+                    SettingRow(title: String(localized: "Claude Code"), note: String(localized: "Quando uma sessão termina e fica esperando você.")) {
+                        NotchSwitch(label: String(localized: "Claude Code"), isOn: $agents)
                     }
                     SettingRow(title: String(localized: "Esconder em tela cheia"), note: String(localized: "Durante um vídeo ou apresentação, o notch fica só preto.")) {
                         NotchSwitch(label: String(localized: "Esconder em tela cheia"), isOn: $hidesInFullscreen)

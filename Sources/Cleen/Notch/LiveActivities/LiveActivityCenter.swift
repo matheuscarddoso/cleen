@@ -81,6 +81,12 @@ final class LiveActivityCenter {
         show(.timerEnded(phase: phase))
     }
 
+    /// Called when a Claude Code session finishes a turn.
+    func agentFinished(_ title: String) {
+        guard LiveActivitySettings.agents else { return }
+        show(.agentFinished(title: title))
+    }
+
     /// Called by the player when what's playing changes.
     func trackChanged(_ track: NowPlayingTrack?) {
         guard let track, track.isPlaying else { return }
@@ -114,6 +120,7 @@ final class LiveActivityCenter {
         case "low": show(.power(.low, level: 0.1))
         case "headphones": show(.headphones(name: "AirPods Pro de Matheus", connected: true))
         case "track": show(.track(title: "Clair de Lune", artist: "Claude Debussy"))
+        case "agent": show(.agentFinished(title: "Refatorar o checkout"))
         case "meeting": meeting = .meeting(title: "Daily", start: .now.addingTimeInterval(5 * 60), color: .systemPurple)
         default: break
         }

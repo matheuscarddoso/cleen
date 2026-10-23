@@ -52,6 +52,11 @@ struct LiveActivityBanner: View {
                 .font(.system(size: 12, weight: .medium))
                 .foregroundStyle(NotchStyle.warning)
             label(phase)
+        case .agentFinished(let title):
+            Image(systemName: "sparkle")
+                .font(.system(size: 12, weight: .medium))
+                .foregroundStyle(ToolPalette.orange)
+            label(title)
         }
     }
 
@@ -73,6 +78,9 @@ struct LiveActivityBanner: View {
         case .timerEnded:
             Text("Concluído")
                 .foregroundStyle(NotchStyle.warning)
+        case .agentFinished:
+            Text("Terminou")
+                .foregroundStyle(NotchStyle.good)
         }
     }
 

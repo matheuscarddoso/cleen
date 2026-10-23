@@ -14,6 +14,7 @@ enum NotchTab: String, CaseIterable, Identifiable, Codable {
     case emoji
     case weather
     case shortcuts
+    case agents
     case overview
     case clean
     case projects
@@ -43,6 +44,7 @@ enum NotchTab: String, CaseIterable, Identifiable, Codable {
         case .emoji: String(localized: "Emoji")
         case .weather: String(localized: "Tempo")
         case .shortcuts: String(localized: "Atalhos")
+        case .agents: String(localized: "Agentes")
         case .overview: String(localized: "Visão geral")
         case .clean: String(localized: "Limpeza")
         case .projects: String(localized: "Projetos")
@@ -75,6 +77,7 @@ enum NotchTab: String, CaseIterable, Identifiable, Codable {
         case .emoji: "face.smiling"
         case .weather: "cloud.sun"
         case .shortcuts: "square.2.layers.3d"
+        case .agents: "sparkle"
         case .overview: "internaldrive.fill"
         case .clean: "trash"
         case .projects: "chevron.left.forwardslash.chevron.right"
@@ -94,6 +97,8 @@ enum NotchTab: String, CaseIterable, Identifiable, Codable {
     var isHiddenByDefault: Bool {
         switch self {
         case .timer, .notes, .reminders, .converter, .emoji, .weather, .shortcuts: true
+        // Shown right away to people who use Claude Code: that's who it's for.
+        case .agents: !AgentsModel.isClaudeCodeInstalled
         default: false
         }
     }

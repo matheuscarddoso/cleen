@@ -18,6 +18,7 @@ struct HomeWidgetView: View {
         case .note: NoteWidget(size: item.size)
         case .reminders: RemindersWidget(size: item.size)
         case .weather: WeatherWidget(size: item.size)
+        case .agents: AgentsWidget(size: item.size)
         }
     }
 }

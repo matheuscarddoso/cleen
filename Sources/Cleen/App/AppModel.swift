@@ -30,6 +30,7 @@ final class AppModel {
     let tabs = TabPreferences()
     let homeLayout = HomeLayout()
     let live = LiveActivityCenter()
+    let agents = AgentsModel()
     let fullscreen = FullscreenWatcher()
     let timer = TimerModel()
     let notes = NotesModel()
@@ -73,6 +74,8 @@ final class AppModel {
             }
         }
         fullscreen.start()
+        agents.onFinished = { [live] session in live.agentFinished(session.title) }
+        agents.start()
         Thumbnails.shared.scale = NSScreen.screens.map(\.backingScaleFactor).max() ?? 2
     }
 
@@ -148,7 +151,7 @@ final class AppModel {
         case .leftovers: orphans.startScan()
         case .apps: Task { await apps.load() }
         case .calendar, .shelf, .clipboard, .screenshots, .ai, .system, .startup, .maintenance,
-             .timer, .notes, .reminders, .converter, .emoji, .weather, .shortcuts: break
+             .timer, .notes, .reminders, .converter, .emoji, .weather, .shortcuts, .agents: break
         }
     }
 

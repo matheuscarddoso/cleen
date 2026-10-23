@@ -4,6 +4,7 @@ struct NotchAppearanceSettings: View {
     @AppStorage(NotchSettings.openOnHoverKey) private var opensOnHover = true
     @AppStorage(NotchSettings.hoverDelayKey) private var hoverDelay = 0.12
     @AppStorage(NotchSettings.allScreensKey) private var allScreens = false
+    @AppStorage(NotchSettings.gesturesKey) private var gestures = true
     @AppStorage(NotchSettings.panelWidthKey) private var panelWidth = 680.0
     @AppStorage(NotchSettings.panelHeightKey) private var panelHeight = 234.0
 
@@ -16,6 +17,9 @@ struct NotchAppearanceSettings: View {
                 SettingRow(title: String(localized: "Atraso")) {
                     NotchSegmented(options: [(String(localized: "Nenhum"), 0.0), (String(localized: "Curto"), 0.12), (String(localized: "Médio"), 0.3), (String(localized: "Longo"), 0.6)], selection: $hoverDelay)
                 }
+            }
+            SettingRow(title: String(localized: "Gestos no trackpad"), note: String(localized: "Dois dedos para baixo no notch abrem, para cima fecham, para os lados trocam a música.")) {
+                NotchSwitch(label: String(localized: "Gestos no trackpad"), isOn: $gestures)
             }
             SettingRow(title: String(localized: "Largura"), note: String(localized: "Mais largo cabe mais widgets no Início.")) {
                 NotchSegmented(options: NotchSettings.widths, selection: $panelWidth)

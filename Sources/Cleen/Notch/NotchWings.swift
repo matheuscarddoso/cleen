@@ -14,6 +14,8 @@ struct NotchWings: View {
     @Environment(NowPlayingModel.self) private var nowPlaying
     @Environment(LiveActivityCenter.self) private var live
     @Environment(TimerModel.self) private var timer
+    @Environment(AgentsModel.self) private var agents
+    @AppStorage(LiveActivitySettings.agentsKey) private var showsAgents = true
     @AppStorage(LiveActivitySettings.idleKey) private var idle = LiveActivitySettings.Idle.disk.rawValue
 
     var body: some View {
@@ -79,6 +81,12 @@ struct NotchWings: View {
         } else if isPlaying {
             WingArtwork(image: nowPlaying.artwork, size: artworkSize, cornerRadius: max(3, NotchStyle.closedBottomRadius - inset))
                 .transition(.scale(0.6).combined(with: .opacity))
+        } else if showsAgents, !agents.working.isEmpty {
+            Image(systemName: "sparkle")
+                .font(.system(size: 12, weight: .medium))
+                .foregroundStyle(ToolPalette.orange)
+                .symbolEffect(.pulse, options: .repeating)
+                .transition(.opacity)
         } else {
             switch idleIndicator {
             case .disk: WingRing(fraction: monitor.disk?.usedFraction ?? 0).transition(.opacity)
@@ -111,6 +119,8 @@ struct NotchWings: View {
         } else if isPlaying {
             SoundBars(isPlaying: isPlaying)
                 .transition(.opacity)
+        } else if showsAgents, !agents.working.isEmpty {
+            wingText(agents.working.count.formatted(), color: ToolPalette.orange)
         } else {
             switch idleIndicator {
             case .disk:
