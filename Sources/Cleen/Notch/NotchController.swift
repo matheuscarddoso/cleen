@@ -178,14 +178,14 @@ final class NotchController {
     }
 
     /// A request that needs an answer (Claude Code asking for permission): opens on the
-    /// tab and stays until the person comes to it or it's settled, with the keyboard so
-    /// Return and Esc reach it. The launcher and the welcome aren't interrupted; the
-    /// wing shows the request instead.
+    /// tab and stays until the person comes to it or it's settled. It doesn't take the
+    /// keyboard on arrival — you may be typing in the terminal right then; it takes it
+    /// once the pointer comes to the panel, so Return and Esc reach the card. The
+    /// launcher and the welcome aren't interrupted; the wing shows the request instead.
     func presentRequest(tab: NotchTab) {
         guard !state.showsSearch, !state.showsWelcome else { return }
         presentedUntil = .distantFuture
         open(tab: tab)
-        panel?.makeKey()
     }
 
     /// The request was settled (here, in the terminal, or it ran out of time): a panel
@@ -261,6 +261,8 @@ final class NotchController {
             if inside {
                 pendingClose?.cancel()
                 pendingClose = nil
+                // The person came to a request: now Return and Esc should answer it.
+                if presentedUntil == .distantFuture, panel?.isKeyWindow == false { panel?.makeKey() }
                 // Once the person comes to it, it behaves like any other open panel.
                 presentedUntil = nil
             } else if let until = presentedUntil, until > .now {
