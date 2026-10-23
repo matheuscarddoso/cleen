@@ -28,5 +28,7 @@ print(json.dumps({"version": version, "build": int(build), "url": url, "sha256":
                   "notes": notes or None, "minimumSystemVersion": "26.0"}, ensure_ascii=False, indent=2))
 PY
 
-gh release create "$TAG" "$DMG" build/appcast.json --repo "$RELEASES_REPO" --title "Cleen $VERSION" --notes "${NOTES:-Cleen $VERSION}"
+# The same DMG under a fixed name too, so the site's download link never changes.
+cp "$DMG" build/Cleen.dmg
+gh release create "$TAG" "$DMG" build/Cleen.dmg build/appcast.json --repo "$RELEASES_REPO" --title "Cleen $VERSION" --notes "${NOTES:-Cleen $VERSION}"
 echo "Publicado: $URL"
