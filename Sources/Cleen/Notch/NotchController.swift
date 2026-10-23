@@ -83,9 +83,33 @@ final class NotchController {
             withAnimation(Self.closeAnimation) { state.isOpen = false }
         }
         state.showsSearch = false
+        state.showsWelcome = false
         state.opensInstantly = false
         panel?.ignoresMouseEvents = true
         giveBackKeyboard()
+    }
+
+    // MARK: Welcome
+
+    /// After the tour: the "hello" island, which stays until one of its buttons.
+    func presentWelcome() {
+        pendingClose?.cancel()
+        state.showsSettings = false
+        state.showsSearch = false
+        state.showsWelcome = true
+        state.holdsOpen = true
+        panel?.ignoresMouseEvents = false
+        withAnimation(Self.openAnimation) { state.isOpen = true }
+    }
+
+    /// Grows the island into the panel on Início (in edit mode for "Personalizar").
+    func dismissWelcome(editing: Bool) {
+        withAnimation(Self.openAnimation) {
+            state.tab = .home
+            state.showsWelcome = false
+            state.holdsOpen = false
+            if editing { state.isEditingHome = true }
+        }
     }
 
     // MARK: Search
@@ -222,7 +246,7 @@ final class NotchController {
                 presentedUntil = nil
             } else if let until = presentedUntil, until > .now {
                 return
-            } else if event.type == .leftMouseDown, !state.isPinned, !(state.holdsOpen && event.window != nil) {
+            } else if event.type == .leftMouseDown, !state.isPinned, !state.showsWelcome, !(state.holdsOpen && event.window != nil) {
                 // A click elsewhere is a clear "done", except in the Cleen window that's
                 // holding the panel open (the file picker, Quick Look).
                 close()

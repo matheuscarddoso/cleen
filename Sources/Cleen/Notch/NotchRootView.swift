@@ -19,16 +19,22 @@ struct NotchRootView: View {
     var body: some View {
         if let geometry = state.geometry {
             let closed = geometry.closedSize(wingWidth: wingWidth)
-            let size = state.isOpen ? geometry.openSize : closed
+            let welcomes = state.isOpen && state.showsWelcome
+            let size = state.isOpen ? (welcomes ? geometry.welcomeSize : geometry.openSize) : closed
             let shape = NotchShape(
                 topRadius: state.isOpen ? NotchStyle.openTopRadius : NotchStyle.closedTopRadius,
-                bottomRadius: state.isOpen ? NotchStyle.openBottomRadius : NotchStyle.closedBottomRadius
+                bottomRadius: state.isOpen ? (welcomes ? 26 : NotchStyle.openBottomRadius) : NotchStyle.closedBottomRadius
             )
 
             ZStack(alignment: .top) {
                 // Content is laid out at its final size, never squeezed by the moving
                 // shape: the shape only reveals and hides it.
-                if state.isOpen {
+                if welcomes {
+                    WelcomeNotch(controller: controller)
+                        .padding(.top, geometry.notchSize.height + 6)
+                        .frame(width: geometry.welcomeSize.width, height: geometry.welcomeSize.height, alignment: .top)
+                        .transition(.notchPanel)
+                } else if state.isOpen {
                     NotchOpenContent(controller: controller, notchHeight: geometry.notchSize.height)
                         .padding(.horizontal, NotchStyle.openTopRadius)
                         .frame(width: geometry.openSize.width, height: geometry.openSize.height, alignment: .top)

@@ -22,6 +22,8 @@ final class NotchState {
     }
     /// The panel shows Ajustes instead of a tool.
     var showsSettings = false
+    /// The small "hello" island right after the first-run tour.
+    var showsWelcome = false
     /// The panel shows the launcher (⌥Space) instead of a tool.
     var showsSearch = false
     /// Opened from the keyboard: it appears and goes without animation, like a launcher.

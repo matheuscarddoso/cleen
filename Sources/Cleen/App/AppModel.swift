@@ -93,6 +93,7 @@ final class AppModel {
         // until the tour is over.
         screenshots.start()
         warmCharts(after: .seconds(4))
+        if LaunchArguments.welcome { notch.primary?.presentWelcome() }
         if let text = LaunchArguments.search {
             notch.primary?.openSearch()
             search.query = text
@@ -140,7 +141,7 @@ final class AppModel {
             guard let self else { return }
             self.notch.isSuspended = false
             self.notch.onSuspendedHotKey = nil
-            self.notch.primary?.present(tab: .home)
+            self.notch.primary?.presentWelcome()
             self.onboarding = nil
             self.screenshots.start()
             self.warmCharts(after: .seconds(10))

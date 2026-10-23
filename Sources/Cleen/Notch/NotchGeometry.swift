@@ -46,6 +46,11 @@ struct NotchGeometry: Equatable {
         )
     }
 
+    /// The greeting after the tour: a small island under the camera, NotchNook's "hello".
+    var welcomeSize: CGSize {
+        CGSize(width: max(notchSize.width + 150, 330), height: notchSize.height + 128)
+    }
+
     /// The panel window: as big as the open notch plus shadow, hanging from the top.
     var windowFrame: CGRect {
         let width = openSize.width + Self.shadowPadding * 2

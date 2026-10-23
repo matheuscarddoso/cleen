@@ -11,6 +11,8 @@ enum LaunchArguments {
     static let settingsSection = value(after: "--settings").flatMap(SettingsSection.init(rawValue:))
     static let scan = ProcessInfo.processInfo.arguments.contains("--scan")
     static let editHome = ProcessInfo.processInfo.arguments.contains("--edit")
+    /// `--welcome` shows the greeting the tour ends with.
+    static let welcome = ProcessInfo.processInfo.arguments.contains("--welcome")
     /// `--search <text>` opens the launcher with that typed.
     static let search = value(after: "--search")
     /// `--live power|headphones|track|meeting` plays that live activity on the closed notch.
