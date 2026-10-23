@@ -155,17 +155,7 @@ final class ClipboardModel {
     @discardableResult
     func paste(_ entry: ClipboardEntry) -> Bool {
         copy(entry)
-        let trusted = AXIsProcessTrustedWithOptions(["AXTrustedCheckOptionPrompt": true] as CFDictionary)
-        guard trusted else { return false }
-        let source = CGEventSource(stateID: .combinedSessionState)
-        let keyV: CGKeyCode = 9
-        let down = CGEvent(keyboardEventSource: source, virtualKey: keyV, keyDown: true)
-        let up = CGEvent(keyboardEventSource: source, virtualKey: keyV, keyDown: false)
-        down?.flags = .maskCommand
-        up?.flags = .maskCommand
-        down?.post(tap: .cghidEventTap)
-        up?.post(tap: .cghidEventTap)
-        return true
+        return PasteKeystroke.send()
     }
 
     func togglePin(_ entry: ClipboardEntry) {
