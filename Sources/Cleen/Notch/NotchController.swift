@@ -116,7 +116,7 @@ final class NotchController {
     }
 
     private func installMonitors() {
-        let mask: NSEvent.EventTypeMask = [.mouseMoved, .leftMouseDragged, .leftMouseDown]
+        let mask: NSEvent.EventTypeMask = [.mouseMoved, .leftMouseDragged, .leftMouseDown, .leftMouseUp]
         if let global = NSEvent.addGlobalMonitorForEvents(matching: mask, handler: { [weak self] event in
             self?.handlePointer(event)
         }) {
@@ -132,8 +132,9 @@ final class NotchController {
             if let install { monitors.append(install) }
         }
         if let local = NSEvent.addLocalMonitorForEvents(matching: mask.union(.keyDown), handler: { [weak self] event in
-            if event.type == .keyDown, event.keyCode == 53, self?.state.isOpen == true {
-                self?.close()
+            // Only Esc typed in the notch itself: Quick Look and the file picker close with theirs.
+            if event.type == .keyDown, event.keyCode == 53, let self, self.state.isOpen, event.window === self.panel {
+                if self.state.escapeHandler?() != true { self.close() }
                 return nil
             }
             self?.handlePointer(event)
@@ -148,8 +149,15 @@ final class NotchController {
         let location = NSEvent.mouseLocation
         let wings = NotchSettings.showsWings
 
+        if event.type == .leftMouseDown {
+            dragChangeCount = NSPasteboard(name: .drag).changeCount
+        }
+
         if state.isOpen {
             let inside = geometry.hotZone(isOpen: true, showsWings: wings).contains(location)
+            // Only the shelf takes files, so only it pays for reading the drag pasteboard.
+            let draggingFiles = inside && event.type == .leftMouseDragged && state.tab == .shelf && !state.showsSettings && isDraggingFiles
+            if state.isDraggingFiles != draggingFiles { state.isDraggingFiles = draggingFiles }
             if inside {
                 pendingClose?.cancel()
                 pendingClose = nil
@@ -157,8 +165,9 @@ final class NotchController {
                 presentedUntil = nil
             } else if let until = presentedUntil, until > .now {
                 return
-            } else if event.type == .leftMouseDown, !state.isPinned {
-                // A click elsewhere is a clear "done".
+            } else if event.type == .leftMouseDown, !state.isPinned, !(state.holdsOpen && event.window != nil) {
+                // A click elsewhere is a clear "done", except in the Cleen window that's
+                // holding the panel open (the file picker, Quick Look).
                 close()
             } else if pendingClose == nil, !state.isPinned, !state.holdsOpen {
                 pendingClose = Task { [weak self] in
@@ -171,11 +180,9 @@ final class NotchController {
             return
         }
 
-        if event.type == .leftMouseDown {
-            dragChangeCount = NSPasteboard(name: .drag).changeCount
-        }
         let overNotch = geometry.hotZone(isOpen: false, showsWings: wings).contains(location)
         if overNotch, event.type == .leftMouseDragged, isDraggingFiles {
+            state.isDraggingFiles = true
             open(tab: .shelf)
             return
         }
