@@ -1,7 +1,7 @@
 import AVFoundation
 import SwiftUI
 
-/// Hosts the mirror's shared preview layer, mirrored like a real mirror.
+/// Hosts the mirror's shared preview layer, showing the camera as macOS delivers it.
 struct CameraPreview: NSViewRepresentable {
     let layer: AVCaptureVideoPreviewLayer
 
@@ -47,10 +47,6 @@ final class CameraPreviewView: NSView {
         CATransaction.setDisableActions(true)
         if preview.superlayer !== host { host.addSublayer(preview) }
         preview.frame = bounds
-        if let connection = preview.connection, connection.isVideoMirroringSupported, !connection.isVideoMirrored {
-            connection.automaticallyAdjustsVideoMirroring = false
-            connection.isVideoMirrored = true
-        }
         CATransaction.commit()
     }
 }
