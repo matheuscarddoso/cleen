@@ -25,13 +25,13 @@ export function Tile({
   return (
     <article
       id={id}
-      className={`flex scroll-mt-20 flex-col overflow-hidden rounded-[28px] text-center ${dark ? "bg-black text-white" : "bg-tile text-ink"}`}
+      className={`flex scroll-mt-20 flex-col overflow-hidden rounded-[18px] text-center ${dark ? "bg-black text-white" : "bg-tile text-ink"}`}
     >
-      <div className="px-8 pt-12 sm:px-12">
-        <p className={`text-[17px] font-semibold ${dark ? "text-[#2997ff]" : "text-claude"}`}>{eyebrow}</p>
-        <h2 className="mx-auto mt-1 text-[clamp(28px,3.4vw,40px)] font-semibold leading-[1.1] tracking-[-0.02em]">{title}</h2>
+      <div className="px-[8.33%] pt-7 sm:pt-11">
+        <p className={`text-[21px] font-semibold leading-[1.19] tracking-[0.011em] ${dark ? "text-[#2997ff]" : "text-new"}`}>{eyebrow}</p>
+        <h2 className="mx-auto mt-1 text-[clamp(28px,3vw,36px)] font-semibold leading-[1.05]">{title}</h2>
         <p className={`mx-auto mt-4 max-w-[420px] text-[17px] leading-[1.47] ${dark ? "text-white/70" : "text-mute"}`}>{children}</p>
-        <div className="mt-6 flex flex-wrap items-center justify-center gap-5">
+        <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-3.5 sm:mt-5">
           <DownloadButton />
           {more && <MoreLink href={more}>Saiba mais</MoreLink>}
         </div>

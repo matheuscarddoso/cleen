@@ -1,8 +1,8 @@
 import Image from "next/image";
 import { DownloadButton, MoreLink, OutlineLink } from "@/components/Buttons";
+import { Gallery } from "@/components/Gallery";
 import { Navigation } from "@/components/Navigation";
 import { ClaudeStrip, Keycaps, LiveStack } from "@/components/Pieces";
-import { Reveal } from "@/components/Reveal";
 import { Shot } from "@/components/Shot";
 import { Tile } from "@/components/Tile";
 import { site } from "@/lib/site";
@@ -62,19 +62,24 @@ export default function Home() {
     <>
       <script type="application/ld+json">{JSON.stringify(structuredData)}</script>
       <Navigation />
-      <a href={site.download} className="block bg-accent px-5 py-3 text-center text-[14px] text-white hover:underline">
-        Cleen {site.version}: busca no notch com ⌥ Espaço, Claude Code ao vivo e mais. Baixe grátis ›
-      </a>
+      <div className="ribbon">
+        <p className="ribbon-text mx-auto max-w-[1000px] px-5 py-4 text-center text-[14px] leading-[1.43]">
+          Cleen {site.version}: busca no notch com ⌥ Espaço e o Claude Code ao vivo.{" "}
+          <a href={site.download} className="ribbon-link whitespace-nowrap hover:underline">
+            Baixe grátis ›
+          </a>
+        </p>
+      </div>
 
-      <main id="topo" className="mx-auto max-w-[1340px] px-3 pb-10 pt-3 sm:px-5">
+      <main id="topo" className="mx-auto max-w-[1380px] px-3 pb-10 pt-3 sm:px-6">
         {/* Hero */}
-        <section className="overflow-hidden rounded-[28px] bg-tile">
-          <Reveal className="px-6 pt-14 text-center sm:pt-16">
+        <section className="overflow-hidden rounded-[18px] bg-tile">
+          <div className="px-6 pt-14 text-center sm:pt-16">
             <Image src="/icon.png" alt="Ícone do Cleen" width={96} height={96} priority className="mx-auto" />
             <p className="mt-3 text-[17px] font-semibold text-new">Novo</p>
-            <h1 className="mt-1 text-[clamp(48px,7vw,80px)] font-semibold leading-[1.05] tracking-[-0.03em]">Cleen</h1>
-            <p className="mt-1 text-[clamp(24px,3vw,32px)] font-medium tracking-[-0.015em]">Tudo no notch.</p>
-            <p className="mx-auto mt-5 max-w-[560px] text-[19px] leading-[1.42] text-mute">
+            <h1 className="mt-1 text-[clamp(40px,5vw,56px)] font-semibold leading-[1.07] tracking-[-0.005em]">Cleen</h1>
+            <p className="mt-1 text-[clamp(22px,2.4vw,28px)] font-normal leading-[1.14] tracking-[0.007em]">Tudo no notch.</p>
+            <p className="mx-auto mt-5 max-w-[580px] text-[clamp(17px,1.6vw,21px)] leading-[1.38] tracking-[0.011em] text-mute">
               Limpeza, busca, janelas e mais de vinte ferramentas, a um olhar. Grátis, sem conta e sem assinatura.
             </p>
             <div className="mt-7 flex flex-wrap items-center justify-center gap-4">
@@ -86,44 +91,44 @@ export default function Home() {
               macOS 26 ou mais novo · Mac com chip Apple · Versão {site.version}
               <sup>1</sup>
             </p>
-          </Reveal>
+          </div>
           <div className="mx-auto mt-12 max-w-[1000px] px-4 sm:px-8">
-            <div className="notch-drop">
+            <div>
               <Shot src="/shots/home.png" alt="O Cleen aberto no notch: tempo em São Paulo, um timer e o uso de CPU e memória, com a barra de ferramentas embaixo" priority scale={0.86} rounded="rounded-t-[26px]" />
             </div>
           </div>
         </section>
 
         {/* Feature tiles */}
-        <div id="recursos" className="mt-3 grid scroll-mt-16 gap-3 lg:grid-cols-2 sm:mt-5 sm:gap-5">
-          <Reveal>
+        <div id="recursos" className="mt-3 grid scroll-mt-16 gap-3 lg:grid-cols-2 sm:mt-6 sm:gap-6">
+          <div>
             <Tile id="busca" dark eyebrow="Busca" title={<>Um launcher inteiro.<br />No notch.</>} more="#todo-motivo"
               visual={<Shot src="/shots/search.png" alt="Busca do Cleen com comandos de janela" tone="teal" scale={1} />}>
               ⌥ Espaço abre na hora. Mova janelas, abra apps, faça contas e cole emoji, ícones e cores.
             </Tile>
-          </Reveal>
-          <Reveal delay={90}>
+          </div>
+          <div>
             <Tile id="limpeza" eyebrow="Limpeza" title={<>Seu Mac mais leve.<br />Num clique.</>} more="#perguntas"
               visual={<Shot src="/shots/overview.png" alt="Visão geral do disco com o que dá para limpar" scale={1} />}>
               Caches, restos de apps, node_modules parados e duplicados. O que é seu vai para o Lixo.
             </Tile>
-          </Reveal>
-          <Reveal>
+          </div>
+          <div>
             <Tile id="claude" eyebrow="Claude Code" title={<>Seus agentes.<br />À vista.</>} more="#ferramentas" visual={<ClaudeStrip />}>
               Cada sessão ao vivo ao lado da câmera, e as permissões aprovadas direto do notch.
             </Tile>
-          </Reveal>
-          <Reveal delay={90}>
+          </div>
+          <div>
             <Tile dark eyebrow="Notch fechado" title={<>O notch fala.<br />Com você.</>} more="#ferramentas" visual={<LiveStack />}>
               Carregador, fones, a próxima reunião, a música nova e o timer. Em tela cheia, fica só preto.
             </Tile>
-          </Reveal>
+          </div>
         </div>
 
         {/* Make it yours */}
         <section className="mt-24 sm:mt-32">
-          <Reveal className="px-4 text-center">
-            <h2 className="mx-auto max-w-[760px] text-[clamp(34px,5vw,56px)] font-semibold leading-[1.07] tracking-[-0.025em]">
+          <div className="px-4 text-center">
+            <h2 className="mx-auto max-w-[760px] text-[clamp(36px,5vw,64px)] font-semibold leading-none tracking-[-0.009em]">
               Do seu jeito,
               <br />
               do tamanho certo.
@@ -131,33 +136,33 @@ export default function Home() {
             <p className="mx-auto mt-4 max-w-[600px] text-[19px] leading-[1.42] text-mute">
               Monte o Início com os widgets que importam, escolha as abas da barra e o tamanho do painel.
             </p>
-          </Reveal>
-          <Reveal className="mt-12 overflow-hidden rounded-[28px] bg-tile px-4 pt-10 sm:px-16 sm:pt-16">
+          </div>
+          <div className="mt-12 overflow-hidden rounded-[18px] bg-tile px-4 pt-10 sm:px-16 sm:pt-16">
             <Shot src="/shots/appearance.png" alt="Ajustes de aparência do notch" tone="dusk" scale={0.9} rounded="rounded-t-[26px]" />
-          </Reveal>
+          </div>
           <div className="mt-10 grid gap-8 px-2 sm:grid-cols-2 lg:grid-cols-4">
             {everyday.map((item, index) => (
-              <Reveal key={item.title} delay={index * 70} className="text-center">
+              <div key={item.title} className="text-center">
                 <span aria-hidden className="mx-auto flex h-14 w-14 items-center justify-center rounded-[16px] text-[26px] text-white" style={{ background: item.color }}>
                   {item.glyph}
                 </span>
                 <h3 className="mt-4 text-[19px] font-semibold">{item.title}</h3>
                 <p className="mx-auto mt-1 max-w-[240px] text-[15px] leading-[1.45] text-mute">{item.text}</p>
-              </Reveal>
+              </div>
             ))}
           </div>
         </section>
 
         {/* Every reason */}
         <section id="todo-motivo" className="mt-24 scroll-mt-16 sm:mt-32">
-          <Reveal className="text-center">
-            <h2 className="text-[clamp(34px,5vw,56px)] font-semibold leading-[1.07] tracking-[-0.025em]">
+          <div className="text-center">
+            <h2 className="text-[clamp(36px,5vw,64px)] font-semibold leading-none tracking-[-0.009em]">
               Todo motivo para pôr
               <br />o notch para trabalhar.
             </h2>
-          </Reveal>
+          </div>
           <div className="mt-12 grid gap-3 sm:gap-5 lg:grid-cols-3">
-            <Reveal className="flex flex-col overflow-hidden rounded-[28px] bg-tile">
+            <div className="flex flex-col overflow-hidden rounded-[18px] bg-tile">
               <div className="px-8 pt-10 text-center">
                 <h3 className="text-[24px] font-semibold leading-tight tracking-[-0.015em]">Abra de qualquer lugar,<br />com um atalho.</h3>
               </div>
@@ -166,59 +171,61 @@ export default function Home() {
                   <Keycaps />
                 </div>
               </div>
-            </Reveal>
-            <Reveal delay={80} className="flex flex-col overflow-hidden rounded-[28px] bg-tile">
+            </div>
+            <div className="flex flex-col overflow-hidden rounded-[18px] bg-tile">
               <div className="px-8 pt-10 text-center">
                 <h3 className="text-[24px] font-semibold leading-tight tracking-[-0.015em]">Escolha as ferramentas.<br />Na ordem que quiser.</h3>
               </div>
               <div className="mt-10 flex flex-1 items-end px-6">
                 <Shot src="/shots/home.png" alt="O Início do Cleen com widgets de tempo, timer e sistema" scale={1} />
               </div>
-            </Reveal>
-            <Reveal delay={160} className="flex flex-col overflow-hidden rounded-[28px] bg-tile">
+            </div>
+            <div className="flex flex-col overflow-hidden rounded-[18px] bg-tile">
               <div className="px-8 pt-10 text-center">
                 <h3 className="text-[24px] font-semibold leading-tight tracking-[-0.015em]">Brilho do monitor externo.<br />Pelo próprio cabo.</h3>
               </div>
               <div className="mt-10 flex flex-1 items-end px-6">
                 <Shot src="/shots/displays.png" alt="Ajustes de brilho da tela do Mac e do monitor externo" tone="teal" scale={1} />
               </div>
-            </Reveal>
+            </div>
           </div>
         </section>
 
         {/* Tools */}
         <section id="ferramentas" className="mt-24 scroll-mt-16 sm:mt-32">
-          <Reveal className="text-center">
-            <h2 className="text-[clamp(34px,5vw,56px)] font-semibold leading-[1.07] tracking-[-0.025em]">
+          <div className="text-center">
+            <h2 className="text-[clamp(36px,5vw,64px)] font-semibold leading-none tracking-[-0.009em]">
               Ferramentas. Em volta do notch
               <br />e ao longo do seu dia.
             </h2>
             <div className="mt-4">
               <MoreLink href="#instalar">Baixe e experimente</MoreLink>
             </div>
-          </Reveal>
-          <div className="no-scrollbar -mx-3 mt-12 flex snap-x snap-mandatory gap-5 overflow-x-auto px-3 pb-4 sm:-mx-5 sm:px-5">
-            {tools.map((tool) => (
-              <article key={tool.title} className="w-[min(420px,85vw)] shrink-0 snap-start overflow-hidden rounded-[28px] bg-tile">
-                <div className="px-5 pt-5">
-                  <Shot src={tool.shot} alt={tool.alt} tone={tool.tone} scale={1} rounded="rounded-[18px]" />
-                </div>
-                <div className="px-7 pb-8 pt-6 text-center">
-                  <h3 className="text-[21px] font-semibold tracking-[-0.01em]">{tool.title}</h3>
-                  <p className="mt-1 text-[15px] leading-[1.45] text-mute">{tool.text}</p>
-                </div>
-              </article>
-            ))}
+          </div>
+          <div className="mt-12">
+            <Gallery label="Ferramentas do Cleen">
+              {tools.map((tool) => (
+                <article key={tool.title} className="flex h-[440px] w-[min(480px,86vw)] shrink-0 snap-start flex-col overflow-hidden rounded-[18px] bg-tile sm:h-[480px]">
+                  <div className="px-[7.3%] pt-8 text-center">
+                    <h3 className="text-[24px] font-semibold leading-[1.17] tracking-[0.009em]">{tool.title}</h3>
+                    <p className="mt-1 text-[17px] leading-[1.47] text-mute">{tool.text}</p>
+                  </div>
+                  <div className="mt-auto px-6">
+                    <Shot src={tool.shot} alt={tool.alt} tone={tool.tone} scale={1} />
+                  </div>
+                </article>
+              ))}
+            </Gallery>
           </div>
         </section>
 
         {/* Get it */}
         <section id="instalar" className="mt-24 scroll-mt-16 sm:mt-32">
-          <Reveal className="text-center">
-            <h2 className="text-[clamp(34px,5vw,56px)] font-semibold leading-[1.07] tracking-[-0.025em]">Baixe o Cleen.</h2>
+          <div className="text-center">
+            <h2 className="text-[clamp(36px,5vw,64px)] font-semibold leading-none tracking-[-0.009em]">Baixe o Cleen.</h2>
             <p className="mt-3 text-[19px] text-mute">Grátis. Para sempre.</p>
-          </Reveal>
-          <Reveal className="mx-auto mt-10 max-w-[680px] rounded-[28px] bg-tile px-8 py-12 text-center">
+          </div>
+          <div className="mx-auto mt-10 max-w-[680px] rounded-[18px] bg-tile px-8 py-12 text-center">
             <Image src="/icon.png" alt="" width={84} height={84} className="mx-auto" />
             <h3 className="mt-3 text-[28px] font-semibold tracking-[-0.02em]">Cleen</h3>
             <p className="mt-1 text-[48px] font-semibold tracking-[-0.03em]">Grátis</p>
@@ -232,7 +239,7 @@ export default function Home() {
                 todas as versões
               </a>
             </p>
-          </Reveal>
+          </div>
           <div className="mx-auto mt-12 grid max-w-[900px] gap-x-8 gap-y-8 sm:grid-cols-3">
             {included.map(([title, text]) => (
               <div key={title} className="text-center">
@@ -241,9 +248,9 @@ export default function Home() {
               </div>
             ))}
           </div>
-          <Reveal className="mt-20 text-center">
+          <div className="mt-20 text-center">
             <h3 className="text-[28px] font-semibold tracking-[-0.02em]">Pronto em um minuto.</h3>
-          </Reveal>
+          </div>
           <ol className="mx-auto mt-10 grid max-w-[900px] gap-8 sm:grid-cols-3">
             {[
               ["Baixe", "O instalador vem direto dos releases do GitHub."],
@@ -261,10 +268,10 @@ export default function Home() {
 
         {/* FAQ */}
         <section id="perguntas" className="mx-auto mt-24 max-w-[980px] scroll-mt-16 sm:mt-32">
-          <Reveal className="text-center">
-            <h2 className="text-[clamp(34px,5vw,56px)] font-semibold leading-[1.07] tracking-[-0.025em]">Perguntas? Respostas.</h2>
-          </Reveal>
-          <div className="mt-10 rounded-[28px] bg-tile px-6 sm:px-10">
+          <div className="text-center">
+            <h2 className="text-[clamp(36px,5vw,64px)] font-semibold leading-none tracking-[-0.009em]">Perguntas? Respostas.</h2>
+          </div>
+          <div className="mt-10 rounded-[18px] bg-tile px-6 sm:px-10">
             {faq.map(([question, answer], index) => (
               <details key={question} className={`group py-5 ${index > 0 ? "border-t border-line/70" : ""}`}>
                 <summary className="flex cursor-pointer list-none items-center justify-between gap-6 text-[17px] font-semibold">
