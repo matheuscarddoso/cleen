@@ -10,7 +10,9 @@ import ObjectiveC
 /// plain Unicode list (with Portuguese names when CoreEmoji's name table is still there)
 /// instead of crashing. Slow-ish (tens of milliseconds): call it once, off the main thread.
 public enum EmojiLibrary {
-    public static func load(locale: String = "pt_BR") -> [EmojiSection] {
+    /// `locale` picks the names and keywords ("pt_BR", "en"); by default, the language
+    /// Cleen is running in.
+    public static func load(locale: String = currentLocale) -> [EmojiSection] {
         // The frameworks hand back autoreleased objects; a background queue has no pool
         // of its own to drain them.
         autoreleasepool {
@@ -21,20 +23,27 @@ public enum EmojiLibrary {
         }
     }
 
+    /// The app's language as CoreEmoji names its folders: "pt-BR" → "pt_BR".
+    public static var currentLocale: String {
+        (Bundle.main.preferredLocalizations.first ?? "pt-BR").replacingOccurrences(of: "-", with: "_")
+    }
+
     // MARK: System picker
 
     private static let coreEmojiResources = "/System/Library/PrivateFrameworks/CoreEmoji.framework/Versions/A/Resources"
 
-    /// EmojiFoundation's category ids, mapped to ours.
-    private static let categoryIDs: [(String, EmojiCategory)] = [
-        ("EMFEmojiCategoryPeople", .people),
-        ("EMFEmojiCategoryNature", .nature),
-        ("EMFEmojiCategoryFoodAndDrink", .food),
-        ("EMFEmojiCategoryActivity", .activity),
-        ("EMFEmojiCategoryTravelAndPlaces", .travel),
-        ("EMFEmojiCategoryObjects", .objects),
-        ("EMFEmojiCategorySymbols", .symbols),
-        ("EMFEmojiCategoryFlags", .flags),
+    /// EmojiFoundation's category lists (class methods returning the emoji in Apple's
+    /// order), mapped to ours. `emojiTokensForLocaleData:` would be the obvious door,
+    /// but on macOS 26 it hands back an empty list.
+    private static let categoryLists: [(selector: String, category: EmojiCategory)] = [
+        ("PeopleEmoji", .people),
+        ("NatureEmoji", .nature),
+        ("FoodAndDrinkEmoji", .food),
+        ("ActivityEmoji", .activity),
+        ("TravelAndPlacesEmoji", .travel),
+        ("ObjectsEmoji", .objects),
+        ("SymbolsEmoji", .symbols),
+        ("FlagsEmoji", .flags),
     ]
 
     private static func loadFromSystemPicker(locale: String) -> [EmojiSection]? {
@@ -45,17 +54,13 @@ public enum EmojiLibrary {
         else { return nil }
 
         let makeLocaleData = NSSelectorFromString("emojiLocaleDataWithLocaleIdentifier:")
-        let categoryWithID = NSSelectorFromString("categoryWithIdentifier:")
-        let tokensForLocale = NSSelectorFromString("emojiTokensForLocaleData:")
-        let tokenString = NSSelectorFromString("string")
+        let makeToken = NSSelectorFromString("emojiTokenWithString:localeData:")
         let nameForType = NSSelectorFromString("nameForType:")
         let emojiIndex = NSSelectorFromString("_emojiIndex")
         guard class_getClassMethod(localeDataClass, makeLocaleData) != nil,
-              class_getClassMethod(categoryClass, categoryWithID) != nil,
-              class_getInstanceMethod(categoryClass, tokensForLocale) != nil,
-              class_getInstanceMethod(tokenClass, tokenString) != nil,
               let localeData = (localeDataClass as AnyObject).perform(makeLocaleData, with: locale)?.takeUnretainedValue()
         else { return nil }
+        let canMakeTokens = class_getClassMethod(tokenClass, makeToken) != nil
 
         // nameForType: takes an integer; 1 is the localized short name, 0 the Unicode name.
         typealias NameIMP = @convention(c) (AnyObject, Selector, Int) -> Unmanaged<AnyObject>?
@@ -65,22 +70,24 @@ public enum EmojiLibrary {
         let indexIMP = class_getMethodImplementation(tokenClass, emojiIndex)
             .flatMap { class_getInstanceMethod(tokenClass, emojiIndex) != nil ? unsafeBitCast($0, to: IndexIMP.self) : nil }
         let keywords = indexIMP == nil ? [:] : keywordIndex(locale: locale)
+        let appleNames = NSDictionary(contentsOfFile: "\(coreEmojiResources)/\(locale).lproj/AppleName.strings") as? [String: String] ?? [:]
 
         var sections: [EmojiSection] = []
-        for (identifier, category) in categoryIDs {
-            guard let object = (categoryClass as AnyObject).perform(categoryWithID, with: identifier)?.takeUnretainedValue(),
-                  let tokens = object.perform(tokensForLocale, with: localeData)?.takeUnretainedValue() as? [AnyObject]
+        for (selectorName, category) in categoryLists {
+            let selector = NSSelectorFromString(selectorName)
+            guard class_getClassMethod(categoryClass, selector) != nil,
+                  let list = (categoryClass as AnyObject).perform(selector)?.takeUnretainedValue() as? [String]
             else { continue }
             var items: [EmojiItem] = []
-            items.reserveCapacity(tokens.count)
-            for token in tokens {
-                guard let emoji = token.perform(tokenString)?.takeUnretainedValue() as? String, !emoji.isEmpty else { continue }
-                let localized = nameIMP?(token, nameForType, 1)?.takeUnretainedValue() as? String
-                let unicode = nameIMP?(token, nameForType, 0)?.takeUnretainedValue() as? String
-                var terms = indexIMP.flatMap { keywords[$0(token, emojiIndex)] } ?? []
+            items.reserveCapacity(list.count)
+            for emoji in list where !emoji.isEmpty {
+                let token = canMakeTokens ? (tokenClass as AnyObject).perform(makeToken, with: emoji, with: localeData)?.takeUnretainedValue() : nil
+                let localized = token.flatMap { nameIMP?($0, nameForType, 1)?.takeUnretainedValue() as? String }
+                let unicode = token.flatMap { nameIMP?($0, nameForType, 0)?.takeUnretainedValue() as? String }
+                var terms = token.flatMap { token in indexIMP.flatMap { keywords[$0(token, emojiIndex)] } } ?? []
                 // The English Unicode name searches too ("heart", "smile").
                 if let unicode { terms.append(unicode) }
-                let name = capitalized(localized ?? unicode?.lowercased() ?? emoji)
+                let name = capitalized(localized ?? appleNames[emoji] ?? unicode?.lowercased() ?? emoji)
                 items.append(EmojiItem(emoji: emoji, name: name, keywords: terms))
             }
             if !items.isEmpty { sections.append(EmojiSection(category: category, items: items)) }
