@@ -11,20 +11,20 @@ struct NotchProjectsTab: View {
             NotchPrompt(
                 symbol: "chevron.left.forwardslash.chevron.right",
                 color: ToolPalette.purple,
-                title: "Dependências de projetos parados",
-                message: "node_modules, vendor, .next, target e builds em \(model.roots.map { Paths.abbreviate($0) }.listed). Voltam com um install.",
+                title: String(localized: "Dependências de projetos parados"),
+                message: String(localized: "node_modules, vendor, .next, target e builds em \(model.roots.map { Paths.abbreviate($0) }.listed). Voltam com um install."),
                 action: model.startScan
             )
         case .scanning:
-            NotchScanning(title: "Procurando projetos", detail: model.progress, cancel: model.cancel)
+            NotchScanning(title: String(localized: "Procurando projetos"), detail: model.progress, cancel: model.cancel)
         case .ready where model.projects.isEmpty:
-            NotchPrompt(symbol: "checkmark", color: ToolPalette.green, title: "Nenhuma dependência instalada", message: "Nada de node_modules, vendor ou builds nas pastas analisadas.", buttonTitle: "Analisar de novo", action: model.startScan)
+            NotchPrompt(symbol: "checkmark", color: ToolPalette.green, title: String(localized: "Nenhuma dependência instalada"), message: String(localized: "Nada de node_modules, vendor ou builds nas pastas analisadas."), buttonTitle: String(localized: "Analisar de novo"), action: model.startScan)
         case .ready:
             VStack(alignment: .leading, spacing: 8) {
-                NotchSummaryBar(value: model.selectedSize.bytes, caption: "selecionados · \(model.staleSize.bytes) em projetos parados há \(model.staleDays)+ dias") {
+                NotchSummaryBar(value: model.selectedSize.bytes, caption: String(localized: "selecionados · \(model.staleSize.bytes) em projetos parados há \(model.staleDays)+ dias")) {
                     Button("Marcar parados", action: model.selectStale)
                         .buttonStyle(.notchSecondary)
-                    ConfirmingButton(title: "Apagar", confirmTitle: "Confirmar", isWorking: model.isCleaning, action: clean)
+                    ConfirmingButton(title: String(localized: "Apagar"), confirmTitle: String(localized: "Confirmar"), isWorking: model.isCleaning, action: clean)
                         .disabled(model.selectedCount == 0)
                 }
                 if let report = model.report {
@@ -36,7 +36,7 @@ struct NotchProjectsTab: View {
                             let stale = project.isStale(threshold: model.staleThreshold)
                             NotchRow(
                                 title: project.name,
-                                subtitle: "\(project.artifacts.map(\.kind.folderName).listed) · mexido \(project.lastActivity.relative)",
+                                subtitle: String(localized: "\(project.artifacts.map(\.kind.folderName).listed) · mexido \(project.lastActivity.relative)"),
                                 subtitleColor: stale ? NotchStyle.warning.opacity(0.85) : NotchStyle.tertiary,
                                 action: { model.toggle(project) }
                             ) {

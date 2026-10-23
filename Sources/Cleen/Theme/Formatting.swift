@@ -8,9 +8,10 @@ extension Double {
     /// `0.42` → `42%`.
     var percent: String { formatted(.percent.precision(.fractionLength(0)).locale(.cleen)) }
 
-    /// A process's CPU share, already in percent: one decimal below 10, none above.
+    /// A process's CPU share, already in percent: one decimal below 10, none above. Scaled
+    /// down for the percent style so the sign sits where the Mac's language puts it.
     var cpuPercent: String {
-        formatted(.number.precision(.fractionLength(self < 10 ? 1 : 0)).locale(.cleen)) + "%"
+        (self / 100).formatted(.percent.precision(.fractionLength(self < 10 ? 1 : 0)).locale(.cleen))
     }
 }
 
@@ -32,8 +33,10 @@ extension Array where Element == String {
 }
 
 extension Int {
-    /// `1 item`, `3 itens`: picks the word for the count.
+    /// `1 item`, `3 itens`: picks the phrase for the count. Both phrases arrive localized
+    /// and with the number in them (`String(localized: "\(n) item")`), so each language
+    /// words its own plural.
     func counted(_ singular: String, _ plural: String) -> String {
-        "\(self) \(self == 1 ? singular : plural)"
+        self == 1 ? singular : plural
     }
 }

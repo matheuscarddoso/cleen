@@ -2,20 +2,39 @@ import Foundation
 
 /// Something an app left in `~/Library` (or a system launch folder).
 public struct Leftover: Sendable, Identifiable, Hashable {
-    public enum Place: String, Sendable, CaseIterable {
-        case applicationSupport = "Dados do app"
-        case caches = "Cache"
-        case preferences = "Preferências"
-        case containers = "Container"
-        case groupContainers = "Container compartilhado"
-        case savedState = "Estado das janelas"
-        case logs = "Logs"
-        case webData = "Dados da web"
-        case cookies = "Cookies"
-        case scripts = "Scripts"
-        case launchAgents = "Item de inicialização"
-        case systemLaunch = "Serviço do sistema"
-        case helpers = "Ajudante privilegiado"
+    public enum Place: Sendable, CaseIterable {
+        case applicationSupport
+        case caches
+        case preferences
+        case containers
+        case groupContainers
+        case savedState
+        case logs
+        case webData
+        case cookies
+        case scripts
+        case launchAgents
+        case systemLaunch
+        case helpers
+
+        /// What the folder is called in the interface.
+        public var title: String {
+            switch self {
+            case .applicationSupport: String(localized: "Dados do app")
+            case .caches: String(localized: "Cache")
+            case .preferences: String(localized: "Preferências")
+            case .containers: String(localized: "Container")
+            case .groupContainers: String(localized: "Container compartilhado")
+            case .savedState: String(localized: "Estado das janelas")
+            case .logs: String(localized: "Logs")
+            case .webData: String(localized: "Dados da web")
+            case .cookies: String(localized: "Cookies")
+            case .scripts: String(localized: "Scripts")
+            case .launchAgents: String(localized: "Item de inicialização")
+            case .systemLaunch: String(localized: "Serviço do sistema")
+            case .helpers: String(localized: "Ajudante privilegiado")
+            }
+        }
 
         /// Places holding things the person made, as opposed to throwaway state.
         public var holdsUserData: Bool {

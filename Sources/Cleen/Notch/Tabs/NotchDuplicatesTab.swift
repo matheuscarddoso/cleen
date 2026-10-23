@@ -12,20 +12,20 @@ struct NotchDuplicatesTab: View {
             NotchPrompt(
                 symbol: "square.on.square",
                 color: ToolPalette.teal,
-                title: "Cópias idênticas, byte a byte",
-                message: "Compara o conteúdo, não o nome, em \(model.roots.map(\.lastPathComponent).listed). Fica sempre uma cópia de cada.",
+                title: String(localized: "Cópias idênticas, byte a byte"),
+                message: String(localized: "Compara o conteúdo, não o nome, em \(model.roots.map(\.lastPathComponent).listed). Fica sempre uma cópia de cada."),
                 action: model.startScan
             )
         case .scanning:
-            NotchScanning(title: "Comparando arquivos", detail: model.progress, cancel: model.cancel)
+            NotchScanning(title: String(localized: "Comparando arquivos"), detail: model.progress, cancel: model.cancel)
         case .ready where model.groups.isEmpty:
-            NotchPrompt(symbol: "checkmark", color: ToolPalette.green, title: "Nenhum duplicado", message: "Não há arquivos repetidos acima de 1 MB nessas pastas.", buttonTitle: "Analisar de novo", action: model.startScan)
+            NotchPrompt(symbol: "checkmark", color: ToolPalette.green, title: String(localized: "Nenhum duplicado"), message: String(localized: "Não há arquivos repetidos acima de 1 MB nessas pastas."), buttonTitle: String(localized: "Analisar de novo"), action: model.startScan)
         case .ready:
             VStack(alignment: .leading, spacing: 8) {
-                NotchSummaryBar(value: model.selectedSize.bytes, caption: "em \(model.selectedCount.counted("cópia", "cópias")) · \(model.groups.count.counted("arquivo repetido", "arquivos repetidos")) · vão para o Lixo") {
+                NotchSummaryBar(value: model.selectedSize.bytes, caption: caption) {
                     Button("Analisar de novo", action: model.startScan)
                         .buttonStyle(.notchSecondary)
-                    ConfirmingButton(title: "Mover para o Lixo", confirmTitle: "Confirmar", isWorking: model.isCleaning, action: trash)
+                    ConfirmingButton(title: String(localized: "Mover para o Lixo"), confirmTitle: String(localized: "Confirmar"), isWorking: model.isCleaning, action: trash)
                         .disabled(model.selectedCount == 0)
                 }
                 if let report = model.report {
@@ -46,10 +46,10 @@ struct NotchDuplicatesTab: View {
                                         NotchCheckbox(state: removing ? .on : .off, label: file.name) { model.toggle(file) }
                                         FileIcon(url: file.url, size: 20)
                                     } trailing: {
-                                        Text(removing ? group.fileSize.bytes : "fica")
+                                        Text(removing ? group.fileSize.bytes : String(localized: "fica", comment: "The copy of a duplicate that is kept"))
                                             .font(.system(size: 11, weight: .medium).monospacedDigit())
                                             .foregroundStyle(removing ? NotchStyle.secondary : NotchStyle.good)
-                                        NotchIconButton(symbol: "magnifyingglass", help: "Mostrar no Finder") {
+                                        NotchIconButton(symbol: "magnifyingglass", help: String(localized: "Mostrar no Finder")) {
                                             NSWorkspace.shared.activateFileViewerSelecting([file.url])
                                         }
                                     }
@@ -61,6 +61,13 @@ struct NotchDuplicatesTab: View {
             }
             .animation(.smooth(duration: 0.25), value: model.report)
         }
+    }
+
+    private var caption: String {
+        let copies = model.selectedCount, groups = model.groups.count
+        let copiesText = copies.counted(String(localized: "\(copies) cópia"), String(localized: "\(copies) cópias"))
+        let groupsText = groups.counted(String(localized: "\(groups) arquivo repetido"), String(localized: "\(groups) arquivos repetidos"))
+        return String(localized: "em \(copiesText) · \(groupsText) · vão para o Lixo")
     }
 
     private func trash() {

@@ -22,22 +22,27 @@ struct ClipboardSettings: View {
 
     private var group: some View {
         NotchGroup {
-            SettingRow(title: "Histórico da área de transferência", note: "Guarda as últimas 300 cópias neste Mac. Senhas de gerenciadores ficam de fora.") {
-                NotchSwitch(label: "Histórico", isOn: $enabled)
+            SettingRow(title: String(localized: "Histórico da área de transferência"), note: String(localized: "Guarda as últimas 300 cópias neste Mac. Senhas de gerenciadores ficam de fora.")) {
+                NotchSwitch(label: String(localized: "Histórico"), isOn: $enabled)
             }
-            SettingRow(title: "Abrir o notch ao tirar um screenshot", note: "Com opções para copiar, compartilhar, enviar por AirDrop ou excluir.") {
-                NotchSwitch(label: "Screenshots", isOn: $screenshotOpens)
+            SettingRow(title: String(localized: "Abrir o notch ao tirar um screenshot"), note: String(localized: "Com opções para copiar, compartilhar, enviar por AirDrop ou excluir.")) {
+                NotchSwitch(label: String(localized: "Screenshots"), isOn: $screenshotOpens)
             }
-            SettingRow(title: "Copiar o screenshot ao tirar", note: "Vai direto para a área de transferência, pronto para colar.") {
-                NotchSwitch(label: "Copiar ao tirar", isOn: $copiesOnCapture)
+            SettingRow(title: String(localized: "Copiar o screenshot ao tirar"), note: String(localized: "Vai direto para a área de transferência, pronto para colar.")) {
+                NotchSwitch(label: String(localized: "Copiar ao tirar"), isOn: $copiesOnCapture)
             }
-            SettingRow(title: "Usar também a miniatura do macOS", note: "O Cleen a substitui. Ligada, o arquivo só é salvo quando ela some, e o Cleen abre com atraso.") {
-                NotchSwitch(label: "Miniatura do macOS", isOn: $thumbnail)
+            SettingRow(title: String(localized: "Usar também a miniatura do macOS"), note: String(localized: "O Cleen a substitui. Ligada, o arquivo só é salvo quando ela some, e o Cleen abre com atraso.")) {
+                NotchSwitch(label: String(localized: "Miniatura do macOS"), isOn: $thumbnail)
             }
-            SettingRow(title: "Apagar histórico", note: clipboard.log.entries.count.counted("item guardado", "itens guardados")) {
-                ConfirmingButton(title: "Apagar", confirmTitle: "Confirmar", action: clipboard.clear)
+            SettingRow(title: String(localized: "Apagar histórico"), note: savedCount) {
+                ConfirmingButton(title: String(localized: "Apagar"), confirmTitle: String(localized: "Confirmar"), action: clipboard.clear)
                     .disabled(clipboard.log.entries.isEmpty)
             }
         }
+    }
+
+    private var savedCount: String {
+        let count = clipboard.log.entries.count
+        return count.counted(String(localized: "\(count) item guardado"), String(localized: "\(count) itens guardados"))
     }
 }

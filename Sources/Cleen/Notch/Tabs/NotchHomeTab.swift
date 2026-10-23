@@ -53,7 +53,7 @@ struct NotchHomeTab: View {
                 Image(systemName: "square.grid.2x2")
                     .font(.system(size: 16))
                     .foregroundStyle(NotchStyle.tertiary)
-                Text(state.isEditingHome ? "Toque num widget acima para adicionar" : "Início vazio · toque para escolher widgets")
+                Text(state.isEditingHome ? String(localized: "Toque num widget acima para adicionar") : String(localized: "Início vazio · toque para escolher widgets"))
                     .font(.system(size: 11.5, weight: .medium))
                     .foregroundStyle(NotchStyle.secondary)
             }

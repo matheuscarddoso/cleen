@@ -29,12 +29,12 @@ public enum SignatureStatus: Sendable, Hashable {
         switch self {
         case .apple: "Apple"
         case .developer(let team): team
-        case .unsigned: "Sem assinatura"
-        case .adHoc: "Assinatura local"
+        case .unsigned: String(localized: "Sem assinatura")
+        case .adHoc: String(localized: "Assinatura local")
         case .packageManager(let name): name
-        case .broken: "Assinatura inválida"
-        case .missing: "Programa não existe mais"
-        case .script: "Script"
+        case .broken: String(localized: "Assinatura inválida")
+        case .missing: String(localized: "Programa não existe mais")
+        case .script: String(localized: "Script")
         }
     }
 }

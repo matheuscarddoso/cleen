@@ -17,16 +17,16 @@ struct NotchOverviewTab: View {
                 .fill(NotchStyle.separator)
                 .frame(width: 1)
             NotchGroup {
-                NotchMeterRow(symbol: "trash", label: "Lixo", value: value(app.junk.phase, app.junk.totalSize), labelWidth: nil, action: { controller.state.tab = .clean }) {
+                NotchMeterRow(symbol: "trash", label: String(localized: "Lixo"), value: value(app.junk.phase, app.junk.totalSize), labelWidth: nil, action: { controller.state.tab = .clean }) {
                     Color.clear
                 }
-                NotchMeterRow(symbol: "chevron.left.forwardslash.chevron.right", label: "Projetos parados", value: value(app.projects.phase, app.projects.staleSize), labelWidth: nil, action: { controller.state.tab = .projects }) {
+                NotchMeterRow(symbol: "chevron.left.forwardslash.chevron.right", label: String(localized: "Projetos parados"), value: value(app.projects.phase, app.projects.staleSize), labelWidth: nil, action: { controller.state.tab = .projects }) {
                     Color.clear
                 }
-                NotchMeterRow(symbol: "puzzlepiece.extension", label: "Restos de apps", value: value(app.orphans.phase, app.orphans.totalSize), labelWidth: nil, action: { controller.state.tab = .leftovers }) {
+                NotchMeterRow(symbol: "puzzlepiece.extension", label: String(localized: "Restos de apps"), value: value(app.orphans.phase, app.orphans.totalSize), labelWidth: nil, action: { controller.state.tab = .leftovers }) {
                     Color.clear
                 }
-                NotchMeterRow(symbol: "doc", label: "Arquivos grandes", value: value(app.largeFiles.phase, app.largeFiles.totalSize), labelWidth: nil, action: { controller.state.tab = .files }) {
+                NotchMeterRow(symbol: "doc", label: String(localized: "Arquivos grandes"), value: value(app.largeFiles.phase, app.largeFiles.totalSize), labelWidth: nil, action: { controller.state.tab = .files }) {
                     Color.clear
                 }
             }

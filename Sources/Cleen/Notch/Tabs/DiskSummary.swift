@@ -23,13 +23,13 @@ struct DiskSummary: View {
             HStack(spacing: 8) {
                 if app.isSmartScanning || app.isSmartCleaning {
                     ProgressView().controlSize(.small).tint(.white)
-                    Text(app.isSmartScanning ? "Analisando…" : "Limpando…")
+                    Text(app.isSmartScanning ? String(localized: "Analisando…") : String(localized: "Limpando…"))
                         .font(.system(size: 11))
                         .foregroundStyle(NotchStyle.secondary)
                 } else if app.hasSmartResults, app.smartCleanSize > 0 {
-                    ConfirmingButton(title: "Limpar \(app.smartCleanSize.bytes)", confirmTitle: "Confirmar", action: clean)
+                    ConfirmingButton(title: String(localized: "Limpar \(app.smartCleanSize.bytes)"), confirmTitle: String(localized: "Confirmar"), action: clean)
                 } else {
-                    Button(app.hasSmartResults ? "Analisar de novo" : "Analisar o Mac", action: scan)
+                    Button(app.hasSmartResults ? String(localized: "Analisar de novo") : String(localized: "Analisar o Mac"), action: scan)
                         .buttonStyle(.notchPrimary)
                 }
             }
@@ -41,8 +41,8 @@ struct DiskSummary: View {
     }
 
     private var caption: String {
-        guard let disk = monitor.disk else { return "Lendo o disco…" }
-        return "livres de \(disk.total.bytes) · \(disk.usedFraction.percent) em uso"
+        guard let disk = monitor.disk else { return String(localized: "Lendo o disco…") }
+        return String(localized: "livres de \(disk.total.bytes) · \(disk.usedFraction.percent) em uso")
     }
 
     private func scan() {

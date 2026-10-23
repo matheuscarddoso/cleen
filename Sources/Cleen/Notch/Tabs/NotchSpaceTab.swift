@@ -12,12 +12,12 @@ struct NotchSpaceTab: View {
             NotchPrompt(
                 symbol: "chart.pie.fill",
                 color: ToolPalette.indigo,
-                title: "Onde está o seu espaço",
-                message: "Mede cada pasta para você descer até o que pesa.",
-                buttonTitle: "Mapear minha pasta"
+                title: String(localized: "Onde está o seu espaço"),
+                message: String(localized: "Mede cada pasta para você descer até o que pesa."),
+                buttonTitle: String(localized: "Mapear minha pasta")
             ) { model.scan(.home) }
         case .scanning:
-            NotchScanning(title: "Medindo \(model.target.title.lowercased())", detail: model.progress.map { "\($0.items.counted) itens · \($0.bytes.bytes)" } ?? "", cancel: model.cancel)
+            NotchScanning(title: String(localized: "Medindo \(model.target.title.lowercased())"), detail: model.progress.map { String(localized: "\($0.items.counted) itens · \($0.bytes.bytes)") } ?? "", cancel: model.cancel)
         case .ready:
             if let node = model.current {
                 VStack(alignment: .leading, spacing: 8) {

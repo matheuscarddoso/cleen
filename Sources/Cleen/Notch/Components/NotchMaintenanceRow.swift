@@ -40,8 +40,8 @@ struct NotchMaintenanceRow: View {
         switch model.outcomes[task] {
         case .success(let message): message
         case .failure(let message): message
-        case nil where task == .thinSnapshots && model.snapshotCount == 0: "Nenhum snapshot agora"
-        case nil: task.needsAdministrator ? "Pede senha" : "Rápido e seguro"
+        case nil where task == .thinSnapshots && model.snapshotCount == 0: String(localized: "Nenhum snapshot agora")
+        case nil: task.needsAdministrator ? String(localized: "Pede senha") : String(localized: "Rápido e seguro")
         }
     }
 

@@ -36,8 +36,8 @@ struct AppPickerRow: View {
     }
 
     private var usage: String {
-        if app.isSystem { return "Faz parte do macOS" }
-        guard let lastUsed = app.lastUsed else { return "Sem registro de uso" }
-        return "Aberto \(lastUsed.relative)"
+        if app.isSystem { return String(localized: "Faz parte do macOS") }
+        guard let lastUsed = app.lastUsed else { return String(localized: "Sem registro de uso") }
+        return String(localized: "Aberto \(lastUsed.relative)")
     }
 }

@@ -62,7 +62,7 @@ struct LiveActivityBanner: View {
             Text(level.percent)
                 .foregroundStyle(Self.batteryColor(power))
         case .headphones(_, let connected):
-            Text(connected ? "Conectado" : "Desconectado")
+            Text(connected ? String(localized: "Conectado") : String(localized: "Desconectado"))
                 .foregroundStyle(connected ? NotchStyle.good : NotchStyle.secondary)
         case .track(_, let artist):
             Text(artist)
@@ -86,10 +86,10 @@ struct LiveActivityBanner: View {
 
     static func powerTitle(_ power: LiveActivity.Power) -> String {
         switch power {
-        case .charging: "Carregando"
-        case .unplugged: "Na bateria"
-        case .full: "Carga completa"
-        case .low: "Bateria fraca"
+        case .charging: String(localized: "Carregando")
+        case .unplugged: String(localized: "Na bateria")
+        case .full: String(localized: "Carga completa")
+        case .low: String(localized: "Bateria fraca")
         }
     }
 
@@ -136,6 +136,6 @@ struct LiveActivityBanner: View {
 enum MeetingCountdown {
     static func text(until start: Date, now: Date = .now) -> String {
         let minutes = Int((start.timeIntervalSince(now) / 60).rounded(.up))
-        return minutes <= 0 ? "agora" : "\(minutes) min"
+        return minutes <= 0 ? String(localized: "agora") : String(localized: "\(minutes) min")
     }
 }

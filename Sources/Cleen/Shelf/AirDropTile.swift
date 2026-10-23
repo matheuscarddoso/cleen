@@ -17,7 +17,7 @@ struct AirDropTile: View {
                 VStack(spacing: 2) {
                     Text("AirDrop")
                         .font(.system(size: 12.5, weight: .medium))
-                    Text(shelf.items.isEmpty ? "Envie para aparelhos por perto" : "Enviar \(shelf.items.count.counted("arquivo", "arquivos"))")
+                    Text(shelf.items.isEmpty ? String(localized: "Envie para aparelhos por perto") : sendTitle)
                         .font(NotchStyle.caption)
                         .foregroundStyle(NotchStyle.secondary)
                         .multilineTextAlignment(.center)
@@ -38,6 +38,11 @@ struct AirDropTile: View {
         .help("Solte arquivos aqui para enviar por AirDrop")
     }
 
+    private var sendTitle: String {
+        let count = shelf.items.count
+        return count.counted(String(localized: "Enviar \(count) arquivo"), String(localized: "Enviar \(count) arquivos"))
+    }
+
     /// Sends what's on the shelf, or lets you pick files when it's empty.
     private func send() {
         guard shelf.items.isEmpty else {
@@ -47,7 +52,7 @@ struct AirDropTile: View {
         let panel = NSOpenPanel()
         panel.allowsMultipleSelection = true
         panel.canChooseDirectories = true
-        panel.prompt = "Enviar por AirDrop"
+        panel.prompt = String(localized: "Enviar por AirDrop")
         NSApp.activate()
         guard panel.runModal() == .OK else { return }
         shelf.airDrop(panel.urls)

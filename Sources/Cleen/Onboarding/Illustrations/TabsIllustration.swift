@@ -11,7 +11,7 @@ struct TabsIllustration: View {
                 NotchPanelMock()
                     .shadow(color: .black.opacity(0.4), radius: 30, y: 16)
                 // Drawn in the screen's own points, like the panel above it.
-                Text(tabs.visible.count.counted("ferramenta", "ferramentas"))
+                Text(toolCount)
                     .font(.system(size: 24, weight: .medium).monospacedDigit())
                     .foregroundStyle(.white.opacity(0.85))
                     .contentTransition(.numericText())
@@ -22,5 +22,10 @@ struct TabsIllustration: View {
         }
         .animation(.spring(response: 0.36, dampingFraction: 0.82), value: tabs.visible)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private var toolCount: String {
+        let count = tabs.visible.count
+        return count.counted(String(localized: "\(count) ferramenta"), String(localized: "\(count) ferramentas"))
     }
 }
