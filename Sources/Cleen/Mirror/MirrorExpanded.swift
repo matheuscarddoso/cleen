@@ -15,7 +15,7 @@ struct MirrorExpanded: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             // Same gap at the bottom as on the sides.
-            .padding(.bottom, NotchOpenContent.inset - 6)
+            .padding(.bottom, NotchOpenContent.inset)
             .contentShape(.rect)
             .onTapGesture { notch.mirrorExpanded = false }
             .onAppear(perform: mirror.appear)
