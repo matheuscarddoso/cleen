@@ -1,3 +1,4 @@
+import AppKit
 import Observation
 
 /// Owns every feature model for the life of the app, so scans keep running and results
@@ -30,6 +31,7 @@ final class AppModel {
     let clipboard = ClipboardModel()
     let screenshots = ScreenshotModel()
     @ObservationIgnored private(set) lazy var notch = NotchCoordinator(app: self)
+    @ObservationIgnored private var onboarding: OnboardingController?
 
     private init() {
         junk = JunkModel(cleanup: cleanup)
@@ -57,7 +59,9 @@ final class AppModel {
 
     private func installNotch() {
         notch.install()
-        if LaunchArguments.settings {
+        if OnboardingModel.isNeeded, LaunchArguments.onboarding || (!LaunchArguments.settings && LaunchArguments.notchTab == nil) {
+            startOnboarding()
+        } else if LaunchArguments.settings {
             notch.primary?.state.isPinned = true
             notch.primary?.openSettings()
         } else if let tab = LaunchArguments.notchTab {
@@ -67,6 +71,23 @@ final class AppModel {
         } else if LaunchArguments.scan {
             // Closed notch, scan running: shows the wing's progress.
             startScan(for: .overview)
+        }
+    }
+
+    /// The first-run tour, hanging from the notch. When it folds back up, the notch
+    /// opens on Início so the person lands right where the tour pointed.
+    private func startOnboarding() {
+        guard let screen = notch.primary?.screen ?? NSScreen.main else { return }
+        let onboarding = OnboardingController(screen: screen)
+        self.onboarding = onboarding
+        notch.isSuspended = true
+        notch.onSuspendedHotKey = { [weak onboarding] in onboarding?.model.noteShortcut() }
+        onboarding.show(app: self) { [weak self] in
+            guard let self else { return }
+            self.notch.isSuspended = false
+            self.notch.onSuspendedHotKey = nil
+            self.notch.primary?.present(tab: .home)
+            self.onboarding = nil
         }
     }
 

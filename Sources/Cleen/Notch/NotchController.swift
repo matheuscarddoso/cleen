@@ -131,7 +131,7 @@ final class NotchController {
     }
 
     private func handlePointer(_ event: NSEvent) {
-        guard let geometry = state.geometry else { return }
+        guard let geometry = state.geometry, !app.notch.isSuspended else { return }
         let location = NSEvent.mouseLocation
         let wings = NotchSettings.showsWings
 

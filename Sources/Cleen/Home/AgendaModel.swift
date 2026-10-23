@@ -121,11 +121,20 @@ final class AgendaModel {
     // MARK: Loading
 
     private func requestAccess() async {
+        await requestCalendarAccess()
+        await requestRemindersAccess()
+    }
+
+    /// Shows the system prompt the first time; afterwards only Ajustes can change it.
+    func requestCalendarAccess() async {
         calendarAccess = switch EKEventStore.authorizationStatus(for: .event) {
         case .fullAccess: .granted
         case .notDetermined: (try? await store.requestFullAccessToEvents()) == true ? .granted : .denied
         default: .denied
         }
+    }
+
+    func requestRemindersAccess() async {
         remindersAccess = switch EKEventStore.authorizationStatus(for: .reminder) {
         case .fullAccess: .granted
         case .notDetermined: (try? await store.requestFullAccessToReminders()) == true ? .granted : .denied

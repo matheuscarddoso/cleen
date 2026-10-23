@@ -8,6 +8,10 @@ final class NotchCoordinator {
     private var hotKey: GlobalHotKey?
     private var observers: [NSObjectProtocol] = []
     private var showsOnAllScreens = NotchSettings.showsOnAllScreens
+    /// While the first-run tour is up the notch stays closed and out of its way; the
+    /// shortcut goes to the tour instead.
+    var isSuspended = false
+    var onSuspendedHotKey: (() -> Void)?
 
     init(app: AppModel) {
         self.app = app
@@ -20,7 +24,10 @@ final class NotchCoordinator {
     func install() {
         guard hotKey == nil else { return }
         rebuild()
-        hotKey = GlobalHotKey.standard { [weak self] in self?.toggleUnderPointer() }
+        hotKey = GlobalHotKey.standard { [weak self] in
+            guard let self else { return }
+            if self.isSuspended { self.onSuspendedHotKey?() } else { self.toggleUnderPointer() }
+        }
         observers.append(NotificationCenter.default.addObserver(
             forName: NSApplication.didChangeScreenParametersNotification, object: nil, queue: .main
         ) { [weak self] _ in
@@ -40,6 +47,7 @@ final class NotchCoordinator {
     /// Opens on its own (a new screenshot): where the pointer is, and it stays up for a
     /// few seconds even if the pointer is elsewhere.
     func present(tab: NotchTab) {
+        guard !isSuspended else { return }
         (controllerUnderPointer ?? primary)?.present(tab: tab)
     }
 

@@ -1,3 +1,4 @@
+import CleenKit
 import SwiftUI
 
 /// Live activity beside the closed notch. While something plays: its artwork on the
@@ -71,9 +72,17 @@ struct NotchWings: View {
         }
     }
 
-    /// `7,1 GB` → `7,1G`: the wing is small.
+    /// `7,1G`, `13,6G`, `146G`: at most three digits, so it fits beside the camera
+    /// housing (a fourth digit slid under it on the built-in display).
     static func compact(_ bytes: Int64) -> String {
-        // The formatter may separate the unit with a no-break space; \s covers both.
-        bytes.bytes.replacing(/\s*([KMGT])B/, with: { $0.output.1 })
+        let units = ["K", "M", "G", "T"]
+        var value = Double(bytes) / 1000
+        var index = 0
+        while value >= 999.5, index < units.count - 1 {
+            value /= 1000
+            index += 1
+        }
+        let digits = value < 99.95 ? 1 : 0
+        return value.formatted(.number.precision(.fractionLength(digits)).locale(.cleen)) + units[index]
     }
 }
