@@ -107,4 +107,10 @@ struct AIUsageProbe {
         let summary = UsageSummary(entries: entries)
         print("PROBE entries=\(entries.count) first=\(first) second=\(clock.now - again) today=\(summary.todayCost) month=\(summary.monthCost) block=\(summary.blockCost) models=\(summary.models.map { "\($0.name):\(Int($0.cost))" })")
     }
+
+    @Test func realProviders() async {
+        for limits in await ProviderLimits.fetchAll() {
+            print("PROBE \(limits.provider.name) \(limits.state)")
+        }
+    }
 }
