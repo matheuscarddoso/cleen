@@ -101,3 +101,46 @@
     animation: none;
   }
 }
+
+/* The closed notch's equalizer while music plays. */
+@keyframes equalizer {
+  0%, 100% { transform: scaleY(0.35); }
+  50% { transform: scaleY(1); }
+}
+.equalizer-bar {
+  transform-origin: bottom;
+  animation: equalizer 0.9s ease-in-out infinite;
+}
+
+/* The teleprompter's script rolling up under the camera. */
+@keyframes teleprompter {
+  from { transform: translateY(0); }
+  to { transform: translateY(-50%); }
+}
+.teleprompter-roll {
+  animation: teleprompter 18s linear infinite;
+}
+
+/* A file landing in the shelf. */
+@keyframes shelf-drop {
+  0% { opacity: 0; transform: translateY(-36px) scale(0.9) rotate(-6deg); }
+  60% { opacity: 1; }
+  100% { opacity: 1; transform: none; }
+}
+.shelf-drop {
+  animation: shelf-drop 0.7s cubic-bezier(0.32, 0.72, 0, 1) 0.5s both;
+}
+
+/* How long a feature stays on before the next one. */
+@keyframes progress {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .equalizer-bar,
+  .teleprompter-roll,
+  .shelf-drop {
+    animation: none;
+  }
+}

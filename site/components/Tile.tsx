@@ -25,7 +25,7 @@ export function Tile({
   return (
     <article
       id={id}
-      className={`flex scroll-mt-20 flex-col overflow-hidden rounded-[18px] text-center ${dark ? "bg-black text-white" : "bg-tile text-ink"}`}
+      className={`flex h-full scroll-mt-20 flex-col overflow-hidden rounded-[18px] text-center ${dark ? "bg-black text-white" : "bg-tile text-ink"}`}
     >
       <div className="px-[8.33%] pt-7 sm:pt-11">
         <p className={`text-[21px] font-semibold leading-[1.19] tracking-[0.011em] ${dark ? "text-[#2997ff]" : "text-new"}`}>{eyebrow}</p>

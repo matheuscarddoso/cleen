@@ -2,7 +2,10 @@ import Image from "next/image";
 import { DownloadButton, MoreLink, OutlineLink } from "@/components/Buttons";
 import { Gallery } from "@/components/Gallery";
 import { Navigation } from "@/components/Navigation";
-import { ClaudeStrip, Keycaps, LiveStack } from "@/components/Pieces";
+import { ClaudeLive } from "@/components/ClaudeLive";
+import { Everyday } from "@/components/Everyday";
+import { LiveActivities } from "@/components/LiveActivities";
+import { Keycaps } from "@/components/Pieces";
 import { Shot } from "@/components/Shot";
 import { Tile } from "@/components/Tile";
 import { site } from "@/lib/site";
@@ -15,13 +18,6 @@ const tools = [
   { title: "Emoji", text: "Busca em português e cola no app em que você está.", shot: "/shots/emoji.png", alt: "Aba Emoji com a grade de carinhas", tone: "teal" },
   { title: "Ícones Lucide", text: "Mais de 1.900 ícones. Cole o SVG ou o JSX.", shot: "/shots/icons.png", alt: "Aba Ícones com ícones do Lucide", tone: "dusk" },
   { title: "Sistema", text: "CPU, memória, rede e processos.", shot: "/shots/system.png", alt: "Aba Sistema com CPU, memória e processos", tone: "blue" },
-] as const;
-
-const everyday = [
-  { color: "#ff9500", glyph: "⏱", title: "Timer", text: "Timer simples ou Pomodoro, com a contagem no notch fechado." },
-  { color: "#34c759", glyph: "⬇", title: "Shelf e AirDrop", text: "Arraste arquivos até o notch e mande para onde quiser." },
-  { color: "#007aff", glyph: "◉", title: "Espelho", text: "A câmera frontal antes da chamada, em um toque." },
-  { color: "#af52de", glyph: "≡", title: "Teleprompter", text: "O roteiro rolando logo abaixo da câmera." },
 ] as const;
 
 const included = [
@@ -101,28 +97,20 @@ export default function Home() {
 
         {/* Feature tiles */}
         <div id="recursos" className="mt-3 grid scroll-mt-16 gap-3 lg:grid-cols-2 sm:mt-6 sm:gap-6">
-          <div>
-            <Tile id="busca" dark eyebrow="Busca" title={<>Um launcher inteiro.<br />No notch.</>} more="#todo-motivo"
+          <Tile id="busca" dark eyebrow="Busca" title={<>Um launcher inteiro.<br />No notch.</>} more="#todo-motivo"
               visual={<Shot src="/shots/search.png" alt="Busca do Cleen com comandos de janela" tone="teal" scale={1} />}>
               ⌥ Espaço abre na hora. Mova janelas, abra apps, faça contas e cole emoji, ícones e cores.
-            </Tile>
-          </div>
-          <div>
-            <Tile id="limpeza" eyebrow="Limpeza" title={<>Seu Mac mais leve.<br />Num clique.</>} more="#perguntas"
+          </Tile>
+          <Tile id="limpeza" eyebrow="Limpeza" title={<>Seu Mac mais leve.<br />Num clique.</>} more="#perguntas"
               visual={<Shot src="/shots/overview.png" alt="Visão geral do disco com o que dá para limpar" scale={1} />}>
               Caches, restos de apps, node_modules parados e duplicados. O que é seu vai para o Lixo.
-            </Tile>
-          </div>
-          <div>
-            <Tile id="claude" eyebrow="Claude Code" title={<>Seus agentes.<br />À vista.</>} more="#ferramentas" visual={<ClaudeStrip />}>
+          </Tile>
+          <Tile id="claude" eyebrow="Claude Code" title={<>Seus agentes.<br />À vista.</>} more="#ferramentas" visual={<ClaudeLive />}>
               Cada sessão ao vivo ao lado da câmera, e as permissões aprovadas direto do notch.
-            </Tile>
-          </div>
-          <div>
-            <Tile dark eyebrow="Notch fechado" title={<>O notch fala.<br />Com você.</>} more="#ferramentas" visual={<LiveStack />}>
+          </Tile>
+          <Tile dark eyebrow="Notch fechado" title={<>O notch fala.<br />Com você.</>} more="#ferramentas" visual={<LiveActivities />}>
               Carregador, fones, a próxima reunião, a música nova e o timer. Em tela cheia, fica só preto.
-            </Tile>
-          </div>
+          </Tile>
         </div>
 
         {/* Make it yours */}
@@ -140,16 +128,19 @@ export default function Home() {
           <div className="mt-12 overflow-hidden rounded-[18px] bg-tile px-4 pt-10 sm:px-16 sm:pt-16">
             <Shot src="/shots/appearance.png" alt="Ajustes de aparência do notch" tone="dusk" scale={0.9} rounded="rounded-t-[26px]" />
           </div>
-          <div className="mt-10 grid gap-8 px-2 sm:grid-cols-2 lg:grid-cols-4">
-            {everyday.map((item, index) => (
-              <div key={item.title} className="text-center">
-                <span aria-hidden className="mx-auto flex h-14 w-14 items-center justify-center rounded-[16px] text-[26px] text-white" style={{ background: item.color }}>
-                  {item.glyph}
-                </span>
-                <h3 className="mt-4 text-[19px] font-semibold">{item.title}</h3>
-                <p className="mx-auto mt-1 max-w-[240px] text-[15px] leading-[1.45] text-mute">{item.text}</p>
-              </div>
-            ))}
+        </section>
+
+        {/* Everyday features */}
+        <section id="dia-a-dia" className="mt-24 scroll-mt-16 sm:mt-32">
+          <div className="text-center">
+            <h2 className="text-[clamp(36px,5vw,64px)] font-semibold leading-none tracking-[-0.009em]">
+              As pequenas coisas.
+              <br />
+              Todo dia.
+            </h2>
+          </div>
+          <div className="mt-12">
+            <Everyday />
           </div>
         </section>
 
@@ -205,14 +196,12 @@ export default function Home() {
           <div className="mt-12">
             <Gallery label="Ferramentas do Cleen">
               {tools.map((tool) => (
-                <article key={tool.title} className="flex h-[440px] w-[min(480px,86vw)] shrink-0 snap-start flex-col overflow-hidden rounded-[18px] bg-tile sm:h-[480px]">
-                  <div className="px-[7.3%] pt-8 text-center">
+                <article key={tool.title} className="flex w-[min(680px,86vw)] shrink-0 snap-start flex-col overflow-hidden rounded-[18px] bg-tile">
+                  <div className="px-[7.3%] pb-8 pt-8 text-center">
                     <h3 className="text-[24px] font-semibold leading-[1.17] tracking-[0.009em]">{tool.title}</h3>
                     <p className="mt-1 text-[17px] leading-[1.47] text-mute">{tool.text}</p>
                   </div>
-                  <div className="mt-auto px-6">
-                    <Shot src={tool.shot} alt={tool.alt} tone={tool.tone} scale={1} />
-                  </div>
+                  <Shot src={tool.shot} alt={tool.alt} tone={tool.tone} scale={0.94} rounded="" className="mt-auto pb-6" />
                 </article>
               ))}
             </Gallery>
