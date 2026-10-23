@@ -86,14 +86,16 @@ private struct WidgetReminderRow: View {
                 .foregroundStyle(completion.isDone ? NotchStyle.tertiary : NotchStyle.primary)
                 .strikethrough(completion.isDone, color: NotchStyle.tertiary)
                 .lineLimit(1)
+                .layoutPriority(1)
                 .animation(.smooth(duration: 0.2), value: completion.isDone)
             Spacer(minLength: 4)
             if let due = reminder.due {
-                Text(ReminderDue.text(for: due, hasTime: reminder.hasTime))
+                // The title comes first in a row this narrow: only today's reminders keep
+                // their time, the rest just say the day.
+                Text(ReminderDue.text(for: due, hasTime: reminder.hasTime && Calendar.current.isDateInToday(due)))
                     .font(.system(size: 9.5).monospacedDigit())
                     .foregroundStyle(ReminderDue.isPast(due, hasTime: reminder.hasTime) ? NotchStyle.critical : NotchStyle.secondary)
                     .lineLimit(1)
-                    .fixedSize()
             }
         }
         .frame(height: 16.5)
