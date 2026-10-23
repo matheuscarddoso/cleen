@@ -53,7 +53,7 @@ public struct JunkScanner: Sendable {
     func candidates(for source: JunkSource, in category: JunkCategory, claimed: Set<String>) -> [Candidate] {
         let root = resolve(source.path)
         let ownerRunning = source.bundleID.map(runningBundleIDs.contains) ?? false
-        let runningNote = ownerRunning ? "O app está aberto" : nil
+        let runningNote = ownerRunning ? String(localized: "O app está aberto") : nil
 
         switch source.shape {
         case .whole:
@@ -84,7 +84,7 @@ public struct JunkScanner: Sendable {
             if claimed.contains(where: { $0.hasPrefix(path + "/") }) {
                 return expand(child, category: category, claimed: claimed, inheritedNote: inheritedNote)
             }
-            let note = inheritedNote ?? (runningBundleIDs.contains(name) ? "O app está aberto" : nil)
+            let note = inheritedNote ?? (runningBundleIDs.contains(name) ? String(localized: "O app está aberto") : nil)
             return [Candidate(url: child, name: name, note: note)]
         }
     }

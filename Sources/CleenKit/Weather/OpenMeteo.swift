@@ -25,12 +25,19 @@ public enum OpenMeteo {
         return components.url!
     }
 
-    public static func searchURL(name: String) -> URL {
+    /// City and country names come back in the language the interface is showing, so a
+    /// search result reads like the rest of the app.
+    public static var interfaceLanguage: String {
+        let identifier = Bundle.main.preferredLocalizations.first ?? "pt-BR"
+        return Locale(identifier: identifier).language.languageCode?.identifier ?? "pt"
+    }
+
+    public static func searchURL(name: String, language: String = interfaceLanguage) -> URL {
         var components = URLComponents(string: "https://geocoding-api.open-meteo.com/v1/search")!
         components.queryItems = [
             URLQueryItem(name: "name", value: name),
             URLQueryItem(name: "count", value: "6"),
-            URLQueryItem(name: "language", value: "pt"),
+            URLQueryItem(name: "language", value: language),
         ]
         return components.url!
     }

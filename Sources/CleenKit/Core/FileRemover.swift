@@ -122,7 +122,7 @@ public struct FileRemover: Sendable {
 
         for (request, url) in validated {
             if FileSizer.exists(url) {
-                outcome.failures.append(RemovalFailure(url: request.url, reason: "Continua no lugar depois da remoção."))
+                outcome.failures.append(RemovalFailure(url: request.url, reason: String(localized: "Continua no lugar depois da remoção.")))
             } else {
                 outcome.removed.append(request.url)
                 if request.mode == .delete { outcome.freed += request.size } else { outcome.trashed += request.size }
@@ -139,21 +139,24 @@ public struct FileRemover: Sendable {
             + (url.pathExtension.isEmpty ? "" : ".\(url.pathExtension)")
     }
 
+    /// Matched by value in `isPermissionFailure`, so it's built once per launch, in one language.
+    static let permissionReason = String(localized: "Sem permissão. Pode exigir senha de administrador ou Acesso Total ao Disco.")
+
     static func describe(_ error: any Error) -> String {
         let nsError = error as NSError
         if nsError.domain == NSCocoaErrorDomain,
            [NSFileWriteNoPermissionError, NSFileReadNoPermissionError].contains(nsError.code) {
-            return "Sem permissão. Pode exigir senha de administrador ou Acesso Total ao Disco."
+            return permissionReason
         }
         if let underlying = nsError.userInfo[NSUnderlyingErrorKey] as? NSError,
            underlying.domain == NSPOSIXErrorDomain, underlying.code == Int(EPERM) || underlying.code == Int(EACCES) {
-            return "Sem permissão. Pode exigir senha de administrador ou Acesso Total ao Disco."
+            return permissionReason
         }
         return error.localizedDescription
     }
 
     /// Whether a failure is a permission problem worth retrying with administrator rights.
     public static func isPermissionFailure(_ failure: RemovalFailure) -> Bool {
-        failure.reason.hasPrefix("Sem permissão")
+        failure.reason == permissionReason
     }
 }

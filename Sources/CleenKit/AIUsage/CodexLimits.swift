@@ -21,7 +21,7 @@ public enum CodexLimits {
         guard let object = try? JSONSerialization.jsonObject(with: line) as? [String: Any] else { return nil }
         let payload = object["payload"] as? [String: Any] ?? object
         guard let limits = payload["rate_limits"] as? [String: Any] else { return nil }
-        return [("primary", "Sessão"), ("secondary", "Semanal")].compactMap { key, name in
+        return [("primary", String(localized: "Sessão")), ("secondary", String(localized: "Semanal"))].compactMap { key, name in
             guard let window = limits[key] as? [String: Any],
                   let percent = (window["used_percent"] as? NSNumber)?.doubleValue
             else { return nil }

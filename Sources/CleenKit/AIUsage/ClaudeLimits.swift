@@ -73,7 +73,7 @@ public enum ClaudeLimits {
     static func parseWindows(_ data: Data) -> [UsageWindow]? {
         guard let object = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { return nil }
         let order = ["five_hour", "seven_day", "seven_day_opus", "seven_day_sonnet"]
-        let names = ["five_hour": "Sessão", "seven_day": "Semanal", "seven_day_opus": "Opus semanal", "seven_day_sonnet": "Sonnet semanal"]
+        let names = ["five_hour": String(localized: "Sessão"), "seven_day": String(localized: "Semanal"), "seven_day_opus": String(localized: "Opus semanal"), "seven_day_sonnet": String(localized: "Sonnet semanal")]
         let lengths: [String: TimeInterval] = ["five_hour": 5 * 3600]
         return object.compactMap { key, value -> (String, UsageWindow)? in
             guard let window = value as? [String: Any],

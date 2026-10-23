@@ -18,8 +18,8 @@ public enum JunkCatalog {
 
     static let appCaches = JunkCategory(
         id: "app-caches",
-        title: "Caches de apps",
-        summary: "Arquivos temporários que os apps recriam quando precisam.",
+        title: String(localized: "Caches de apps"),
+        summary: String(localized: "Arquivos temporários que os apps recriam quando precisam."),
         symbol: "shippingbox",
         group: .system,
         sources: [.contents(of: "~/Library/Caches")],
@@ -39,8 +39,8 @@ public enum JunkCatalog {
 
     static let logs = JunkCategory(
         id: "logs",
-        title: "Logs",
-        summary: "Registros de apps e relatórios de travamento antigos.",
+        title: String(localized: "Logs"),
+        summary: String(localized: "Registros de apps e relatórios de travamento antigos."),
         symbol: "doc.text",
         group: .system,
         // Crash reports are cleared file by file: macOS doesn't recreate the folder,
@@ -50,8 +50,8 @@ public enum JunkCatalog {
 
     static let trash = JunkCategory(
         id: "trash",
-        title: "Lixeira",
-        summary: "O que já está no Lixo continua ocupando espaço até ser esvaziado.",
+        title: String(localized: "Lixeira"),
+        summary: String(localized: "O que já está no Lixo continua ocupando espaço até ser esvaziado."),
         symbol: "trash",
         group: .system,
         sources: [.contents(of: "~/.Trash")],
@@ -61,8 +61,8 @@ public enum JunkCatalog {
 
     static let installers = JunkCategory(
         id: "installers",
-        title: "Instaladores baixados",
-        summary: "Arquivos .dmg, .pkg e .zip de apps que normalmente já foram instalados.",
+        title: String(localized: "Instaladores baixados"),
+        summary: String(localized: "Arquivos .dmg, .pkg e .zip de apps que normalmente já foram instalados."),
         symbol: "arrow.down.app",
         group: .system,
         sources: [
@@ -75,8 +75,8 @@ public enum JunkCatalog {
 
     static let mailDownloads = JunkCategory(
         id: "mail-downloads",
-        title: "Anexos abertos no Mail",
-        summary: "Cópias de anexos que o Mail guarda ao abrir. O e-mail original continua intacto.",
+        title: String(localized: "Anexos abertos no Mail"),
+        summary: String(localized: "Cópias de anexos que o Mail guarda ao abrir. O e-mail original continua intacto."),
         symbol: "paperclip",
         group: .system,
         sources: [.contents(of: "~/Library/Containers/com.apple.mail/Data/Library/Mail Downloads")],
@@ -85,8 +85,8 @@ public enum JunkCatalog {
 
     static let deviceUpdates = JunkCategory(
         id: "device-updates",
-        title: "Atualizações de iPhone e iPad",
-        summary: "Arquivos de sistema baixados para atualizar aparelhos. São baixados de novo quando preciso.",
+        title: String(localized: "Atualizações de iPhone e iPad"),
+        summary: String(localized: "Arquivos de sistema baixados para atualizar aparelhos. São baixados de novo quando preciso."),
         symbol: "iphone.gen3",
         group: .system,
         sources: [
@@ -97,8 +97,8 @@ public enum JunkCatalog {
 
     static let deviceBackups = JunkCategory(
         id: "device-backups",
-        title: "Backups de iPhone e iPad",
-        summary: "Backups locais de aparelhos. Vão para o Lixo, confira antes de esvaziar.",
+        title: String(localized: "Backups de iPhone e iPad"),
+        summary: String(localized: "Backups locais de aparelhos. Vão para o Lixo, confira antes de esvaziar."),
         symbol: "externaldrive.badge.timemachine",
         group: .system,
         sources: [.contents(of: "~/Library/Application Support/MobileSync/Backup")],
@@ -112,15 +112,15 @@ public enum JunkCatalog {
     static let xcode = JunkCategory(
         id: "xcode",
         title: "Xcode",
-        summary: "DerivedData, previews, caches do simulador e símbolos de aparelhos.",
+        summary: String(localized: "DerivedData, previews, caches do simulador e símbolos de aparelhos."),
         symbol: "hammer",
         group: .developer,
         sources: [
             .whole("~/Library/Developer/Xcode/DerivedData", label: "DerivedData"),
-            .whole("~/Library/Developer/Xcode/UserData/Previews", label: "Previews do SwiftUI"),
-            .whole("~/Library/Developer/CoreSimulator/Caches", label: "Caches do Simulador"),
-            .whole("~/Library/Developer/Xcode/DocumentationCache", label: "Cache da documentação"),
-            .whole("~/Library/Caches/com.apple.dt.Xcode", label: "Cache do Xcode", bundleID: "com.apple.dt.Xcode"),
+            .whole("~/Library/Developer/Xcode/UserData/Previews", label: String(localized: "Previews do SwiftUI")),
+            .whole("~/Library/Developer/CoreSimulator/Caches", label: String(localized: "Caches do Simulador")),
+            .whole("~/Library/Developer/Xcode/DocumentationCache", label: String(localized: "Cache da documentação")),
+            .whole("~/Library/Caches/com.apple.dt.Xcode", label: String(localized: "Cache do Xcode"), bundleID: "com.apple.dt.Xcode"),
             .contents(of: "~/Library/Developer/Xcode/iOS DeviceSupport"),
             .contents(of: "~/Library/Developer/Xcode/watchOS DeviceSupport"),
             .contents(of: "~/Library/Developer/Xcode/tvOS DeviceSupport"),
@@ -131,8 +131,8 @@ public enum JunkCatalog {
 
     static let xcodeArchives = JunkCategory(
         id: "xcode-archives",
-        title: "Archives do Xcode",
-        summary: "Builds enviados para a App Store. Guardam os símbolos para ler crashes de versões publicadas.",
+        title: String(localized: "Archives do Xcode"),
+        summary: String(localized: "Builds enviados para a App Store. Guardam os símbolos para ler crashes de versões publicadas."),
         symbol: "archivebox",
         group: .developer,
         sources: [.contents(of: "~/Library/Developer/Xcode/Archives")],
@@ -142,8 +142,8 @@ public enum JunkCatalog {
 
     static let packageManagers = JunkCategory(
         id: "package-managers",
-        title: "Gerenciadores de pacotes",
-        summary: "Pacotes baixados por npm, Composer, Homebrew e afins. Voltam no próximo install.",
+        title: String(localized: "Gerenciadores de pacotes"),
+        summary: String(localized: "Pacotes baixados por npm, Composer, Homebrew e afins. Voltam no próximo install."),
         symbol: "cube.box",
         group: .developer,
         sources: [
@@ -154,7 +154,7 @@ public enum JunkCatalog {
             .whole("~/.bun/install/cache", label: "Bun"),
             .whole("~/Library/Caches/deno", label: "Deno"),
             .whole("~/Library/Caches/composer", label: "Composer"),
-            .whole("~/.composer/cache", label: "Composer (pasta antiga)"),
+            .whole("~/.composer/cache", label: String(localized: "Composer (pasta antiga)")),
             .whole("~/Library/Caches/Homebrew", label: "Homebrew"),
             .whole("~/Library/Caches/pip", label: "pip"),
             .whole("~/Library/Caches/CocoaPods", label: "CocoaPods"),
@@ -172,8 +172,8 @@ public enum JunkCatalog {
 
     static let testBrowsers = JunkCategory(
         id: "test-browsers",
-        title: "Navegadores de teste",
-        summary: "Navegadores do Playwright, Cypress e Puppeteer. Baixados de novo no próximo teste.",
+        title: String(localized: "Navegadores de teste"),
+        summary: String(localized: "Navegadores do Playwright, Cypress e Puppeteer. Baixados de novo no próximo teste."),
         symbol: "testtube.2",
         group: .developer,
         sources: [
@@ -188,18 +188,18 @@ public enum JunkCatalog {
 
     static let browserCaches = JunkCategory(
         id: "browser-caches",
-        title: "Cache de navegadores",
-        summary: "Páginas e imagens guardadas pelos navegadores. Senhas, abas e histórico não são tocados.",
+        title: String(localized: "Cache de navegadores"),
+        summary: String(localized: "Páginas e imagens guardadas pelos navegadores. Senhas, abas e histórico não são tocados."),
         symbol: "globe",
         group: .browsers,
         sources: [
             .whole("~/Library/Caches/Google/Chrome", label: "Chrome", bundleID: "com.google.Chrome"),
             .whole("~/Library/Caches/Arc", label: "Arc", bundleID: "company.thebrowser.Browser"),
             .whole("~/Library/Caches/Dia", label: "Dia", bundleID: "company.thebrowser.dia"),
-            .whole("~/Library/Caches/company.thebrowser.dia", label: "Dia (sistema)", bundleID: "company.thebrowser.dia"),
+            .whole("~/Library/Caches/company.thebrowser.dia", label: String(localized: "Dia (sistema)"), bundleID: "company.thebrowser.dia"),
             .whole("~/Library/Caches/zen", label: "Zen", bundleID: "app.zen-browser.zen"),
             .whole("~/Library/Caches/Firefox", label: "Firefox", bundleID: "org.mozilla.firefox"),
-            .whole("~/Library/Caches/Mozilla", label: "Firefox (sistema)", bundleID: "org.mozilla.firefox"),
+            .whole("~/Library/Caches/Mozilla", label: String(localized: "Firefox (sistema)"), bundleID: "org.mozilla.firefox"),
             .whole("~/Library/Caches/BraveSoftware", label: "Brave", bundleID: "com.brave.Browser"),
             .whole("~/Library/Caches/Microsoft Edge", label: "Edge", bundleID: "com.microsoft.edgemac"),
             .whole("~/Library/Caches/com.operasoftware.Opera", label: "Opera", bundleID: "com.operasoftware.Opera"),

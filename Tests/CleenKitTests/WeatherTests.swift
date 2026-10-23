@@ -108,13 +108,15 @@ struct WeatherTests {
     }
 
     @Test func dayLabels() {
-        #expect(WeatherFormat.dayLabel("2026-10-23", today: "2026-10-23") == "Hoje")
-        #expect(WeatherFormat.dayLabel("2026-10-24", today: "2026-10-23") == "Sáb")
-        #expect(WeatherFormat.dayLabel("2026-10-25", today: "2026-10-23") == "Dom")
-        #expect(WeatherFormat.dayLabel("2026-10-26", today: "2026-10-23") == "Seg")
-        #expect(WeatherFormat.dayLabel("2024-02-29", today: "2026-10-23") == "Qui")
-        #expect(WeatherFormat.dayLabel("1969-12-31", today: "2026-10-23") == "Qua")
-        #expect(WeatherFormat.dayLabel("garbage", today: "2026-10-23") == "—")
+        let brazil = Locale(identifier: "pt_BR")
+        #expect(WeatherFormat.dayLabel("2026-10-23", today: "2026-10-23", locale: brazil) == "Hoje")
+        #expect(WeatherFormat.dayLabel("2026-10-24", today: "2026-10-23", locale: brazil) == "Sáb")
+        #expect(WeatherFormat.dayLabel("2026-10-25", today: "2026-10-23", locale: brazil) == "Dom")
+        #expect(WeatherFormat.dayLabel("2026-10-26", today: "2026-10-23", locale: brazil) == "Seg")
+        #expect(WeatherFormat.dayLabel("2024-02-29", today: "2026-10-23", locale: brazil) == "Qui")
+        #expect(WeatherFormat.dayLabel("1969-12-31", today: "2026-10-23", locale: brazil) == "Qua")
+        #expect(WeatherFormat.dayLabel("garbage", today: "2026-10-23", locale: brazil) == "—")
+        #expect(WeatherFormat.dayLabel("2026-10-26", today: "2026-10-23", locale: Locale(identifier: "en_US")) == "Mon")
         #expect(WeatherFormat.longDayLabel("2026-10-24", today: "2026-10-23") == "Amanhã")
         #expect(WeatherFormat.longDayLabel("2026-11-01", today: "2026-10-31") == "Amanhã")
         #expect(WeatherFormat.longDayLabel("2026-10-27", today: "2026-10-23") == "Terça")
@@ -159,7 +161,7 @@ struct WeatherTests {
     @Test func urls() {
         let forecast = OpenMeteo.forecastURL(latitude: -23.5475, longitude: -46.63611).absoluteString
         #expect(forecast.hasPrefix("https://api.open-meteo.com/v1/forecast?latitude=-23.5475&longitude=-46.6361&current=temperature_2m,weather_code,is_day,apparent_temperature,relative_humidity_2m,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=auto&forecast_days=7"))
-        let search = OpenMeteo.searchURL(name: "São José dos Campos").absoluteString
+        let search = OpenMeteo.searchURL(name: "São José dos Campos", language: "pt").absoluteString
         #expect(search == "https://geocoding-api.open-meteo.com/v1/search?name=S%C3%A3o%20Jos%C3%A9%20dos%20Campos&count=6&language=pt")
     }
 

@@ -23,11 +23,11 @@ public enum SimulatorCleaner {
 
         return ToolCleanup(
             kind: .simulators,
-            title: "Simuladores sem runtime",
-            summary: "Simuladores de versões do iOS que o Xcode não tem mais. Não abrem e ocupam espaço.",
+            title: String(localized: "Simuladores sem runtime"),
+            summary: String(localized: "Simuladores de versões do iOS que o Xcode não tem mais. Não abrem e ocupam espaço."),
             symbol: "iphone.slash",
             reclaimable: size,
-            detail: devices.count == 1 ? "1 simulador" : "\(devices.count) simuladores",
+            detail: devices.count == 1 ? String(localized: "1 simulador") : String(localized: "\(devices.count) simuladores"),
             selectedByDefault: true
         )
     }
