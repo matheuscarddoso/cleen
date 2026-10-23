@@ -80,11 +80,13 @@
 "Abrir Agentes" = "Open Agents";
 "Abrir Ajustes" = "Open Settings";
 "Abrir Ajustes do Sistema" = "Open System Settings";
+"Abrir Ajustes do Sistema › Privacidade › Acesso Total ao Disco" = "Open System Settings › Privacy › Full Disk Access";
 "Abrir Atalhos" = "Open Shortcuts";
 "Abrir Lembretes" = "Open Reminders";
 "Abrir Notas" = "Open Notes";
 "Abrir Sistema" = "Open System";
 "Abrir Uso de IA" = "Open AI Usage";
+"Ações" = "Actions";
 "Abrir a Visão geral" = "Open Overview";
 "Abrir ao iniciar a sessão" = "Open at login";
 "Abrir e fechar o notch" = "Open and close the notch";
@@ -178,6 +180,7 @@
 "Atualizações de iPhone e iPad" = "iPhone and iPad updates";
 "Até %lld notas" = "Up to %lld notes";
 "Aumentar" = "Increase";
+"Autocompletar" = "Completions";
 "Autorização cancelada." = "Authorization canceled.";
 "Avisar" = "Notify";
 "Avisar abaixo de" = "Notify below";
@@ -291,6 +294,8 @@
 "Copiar resultado" = "Copy Result";
 "Corrige fontes que aparecem quebradas ou trocadas. Reinicie o Mac depois." = "Fixes fonts that look broken or swapped. Restart your Mac afterward.";
 "Cotação de %@ · BCE" = "Rates from %@ · ECB";
+"Chat" = "Chat";
+"Créditos" = "Credits";
 "Crie um atalho no app Atalhos e rode daqui com um clique." = "Create a shortcut in the Shortcuts app and run it from here with one click.";
 "Curto" = "Short";
 "Céu limpo" = "Clear sky";
@@ -489,6 +494,7 @@
 "Memória já estava enxuta." = "Memory was already lean.";
 "Menor" = "Smaller";
 "Menos usados" = "Least used";
+"Mensal" = "Monthly";
 "Metros" = "Meters";
 "Metros cúbicos" = "Cubic meters";
 "Metros por segundo" = "Meters per second";
@@ -578,11 +584,12 @@
 "O Cleen a substitui. Ligada, o arquivo só é salvo quando ela some, e o Cleen abre com atraso." = "Cleen replaces it. When it's on, the file is only saved once it fades, and Cleen opens late.";
 "O Cleen já está no notch. Quando quiser, é só passar o ponteiro por lá." = "Cleen is already in the notch. Whenever you want, just move the pointer there.";
 "O Cleen lembra o que passou pela área de transferência e abre cada screenshot no notch, com as ações à mão." = "Cleen remembers what went through the clipboard and opens every screenshot in the notch, with the actions at hand.";
-"O Cleen lê o uso do Claude Code e do Codex direto dos arquivos deles no seu Mac." = "Cleen reads Claude Code and Codex usage straight from their files on your Mac.";
+"O Cleen lê o uso do Claude Code, Codex, Cursor, Copilot e Grok com o que eles já guardam no seu Mac." = "Cleen reads Claude Code, Codex, Cursor, Copilot and Grok usage from what they already keep on your Mac.";
 "O Cleen mora no notch do seu Mac. Ele deixa o disco leve e o seu dia a um gesto de distância." = "Cleen lives in your Mac's notch. It keeps your disk light and your day one gesture away.";
 "O Cleen não tem acesso à localização." = "Cleen doesn't have access to your location.";
 "O Spotlight começou a reindexar. A busca volta completa em alguns minutos." = "Spotlight started reindexing. Search will be complete again in a few minutes.";
 "O app está aberto" = "The app is open";
+"O comando demorou demais e foi interrompido." = "The command took too long and was stopped.";
 "O comando terminou com código %d." = "The command ended with code %d.";
 "O macOS pede Acessibilidade para isso" = "macOS asks for Accessibility for this";
 "O nome da faixa por um instante quando ela troca." = "The track's name for a moment when it changes.";
@@ -632,6 +639,7 @@
 "Pede senha" = "Needs password";
 "Pensando" = "Thinking";
 "Pequeno" = "Small";
+"Perguntar" = "Ask";
 "Permissões e o que o Cleen já fez." = "Permissions and what Cleen has done so far.";
 "Permita a câmera em Ajustes do Sistema" = "Allow the camera in System Settings";
 "Permita em Ajustes do Sistema › Privacidade e Segurança › Lembretes para ver e criar lembretes aqui." = "Allow it in System Settings › Privacy & Security › Reminders to see and create reminders here.";
@@ -712,7 +720,8 @@
 "Sem conexão para buscar a cotação" = "Offline, can't get the rates";
 "Sem conexão para buscar agora." = "Offline, can't search right now.";
 "Sem conexão · cotação de %@" = "Offline · rates from %@";
-"Sem permissão. Pode exigir senha de administrador ou Acesso Total ao Disco." = "No permission. It may need the administrator password or Full Disk Access.";
+"Sem Acesso Total ao Disco, ficam de fora: %@." = "Without Full Disk Access, these are left out: %@.";
+"Sem permissão. Pode exigir senha de administrador ou Acesso Total ao Disco." ="No permission. It may need the administrator password or Full Disk Access.";
 "Sem registro de uso" = "No usage record";
 "Sem título" = "Untitled";
 "Sem uso há mais tempo" = "Unused the longest";
@@ -744,6 +753,7 @@
 "Só o ícone" = "Icon only";
 "Tamanho" = "Size";
 "Taxas de referência do Banco Central Europeu, via Frankfurter" = "European Central Bank reference rates, via Frankfurter";
+"Teleprompter" = "Teleprompter";
 "Temperatura" = "Temperature";
 "Tempo" = "Weather";
 "Tempo em %@: %@, %@" = "Weather in %@: %@, %@";
@@ -818,6 +828,8 @@
 "Zerar" = "Reset";
 "Zere o timer para trocar de modo" = "Reset the timer to switch modes";
 "abra o Claude Code" = "open Claude Code";
+"abra o Cursor" = "open Cursor";
+"abra o Grok CLI" = "open the Grok CLI";
 "abrem sozinhos · %lld sem assinatura confiável" = "open on their own · %lld without a trusted signature";
 "abrem sozinhos · todos confiáveis" = "open on their own · all trusted";
 "acaba antes" = "runs out first";
@@ -835,6 +847,7 @@
 "do gasto" = "of spend";
 "em %@ · %@ · vão para o Lixo" = "in %@ · %@ · they go to the Trash";
 "em aberto" = "open";
+"entre de novo no Copilot" = "sign in to Copilot again";
 "entre no Claude Code" = "sign in to Claude Code";
 "fica" = "kept";
 "gal RU" = "gal UK";

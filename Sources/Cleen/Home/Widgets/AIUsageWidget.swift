@@ -47,10 +47,11 @@ struct AIUsageWidget: View {
         .task { await model.watch() }
     }
 
-    /// Claude's windows when signed in, otherwise Codex's.
+    /// Claude's windows when signed in, otherwise Codex's, otherwise the first other tool's.
     private var windows: [UsageWindow] {
-        let claude = model.claude?.windows ?? []
-        return claude.isEmpty ? (model.codex ?? []) : claude
+        if let claude = model.claude?.windows, !claude.isEmpty { return claude }
+        if let codex = model.codex, !codex.isEmpty { return codex }
+        return model.providers.lazy.map(model.providerWindows(of:)).first { !$0.isEmpty } ?? []
     }
 
     private func meter(_ window: UsageWindow) -> some View {

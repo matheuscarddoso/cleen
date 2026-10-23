@@ -9,6 +9,10 @@ public enum DockerCleaner {
         "/Applications/OrbStack.app/Contents/MacOS/xbin/docker",
     ]
 
+    /// `docker` answers in well under a second when the engine is up. A wedged engine (or a
+    /// VM still booting) leaves it waiting forever, and the scan with it.
+    static let inspectTimeout: Duration = .seconds(8)
+
     static var executable: String? {
         candidates.first { FileManager.default.isExecutableFile(atPath: $0) }
     }
@@ -17,7 +21,7 @@ public enum DockerCleaner {
     /// its engine isn't running — there is nothing Cleen could do either way.
     public static func inspect() async -> ToolCleanup? {
         guard let docker = executable,
-              let result = try? await Shell.run(docker, ["system", "df", "--format", "{{json .}}"]),
+              let result = try? await Shell.run(docker, ["system", "df", "--format", "{{json .}}"], timeout: inspectTimeout),
               result.succeeded
         else { return nil }
 
@@ -42,7 +46,8 @@ public enum DockerCleaner {
 
     public static func clean() async throws {
         guard let docker = executable else { return }
-        let result = try await Shell.run(docker, ["system", "prune", "--all", "--force"])
+        // Pruning a big build cache takes a while, but never this long.
+        let result = try await Shell.run(docker, ["system", "prune", "--all", "--force"], timeout: .seconds(600))
         guard result.succeeded else { throw ShellError.failed(result) }
     }
 

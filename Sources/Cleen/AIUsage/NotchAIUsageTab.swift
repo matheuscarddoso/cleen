@@ -8,12 +8,12 @@ struct NotchAIUsageTab: View {
 
     var body: some View {
         Group {
-            if !model.hasClaudeCode && model.codex == nil {
+            if !model.hasClaudeCode && model.codex == nil && model.providers.isEmpty {
                 NotchPrompt(
                     symbol: "chart.bar.xaxis",
                     color: ToolPalette.indigo,
                     title: String(localized: "Nenhuma ferramenta de IA encontrada"),
-                    message: String(localized: "O Cleen lê o uso do Claude Code e do Codex direto dos arquivos deles no seu Mac."),
+                    message: String(localized: "O Cleen lê o uso do Claude Code, Codex, Cursor, Copilot e Grok com o que eles já guardam no seu Mac."),
                     buttonTitle: String(localized: "Procurar de novo")
                 ) { Task { await model.refresh(force: true) } }
             } else if let summary = model.summary {
@@ -24,20 +24,23 @@ struct NotchAIUsageTab: View {
                     Rectangle()
                         .fill(NotchStyle.separator)
                         .frame(width: 1)
-                    NotchGroup {
-                        ForEach(limitRows.prefix(3)) { row in
-                            LimitBlock(symbol: row.symbol, label: row.label, value: row.window.used.percent, fraction: row.window.used, pace: row.window.elapsed(), color: row.color, detail: row.detail)
-                        }
-                        if model.claude == nil {
-                            LimitBlock(symbol: ClaudeLogo.symbolName, label: String(localized: "Sessão (5h)"), value: summary.blockCost.dollars, fraction: 0, detail: model.claudeProblem.map(Self.problemText))
-                        }
-                        // Fill up to three blocks with where the month's spend went.
-                        ForEach(summary.models.prefix(max(0, 3 - min(limitRows.count, 3) - (model.claude == nil ? 1 : 0)))) { share in
-                            let fraction = share.cost / max(summary.monthCost, 0.01)
-                            LimitBlock(symbol: "cube", label: share.name, value: fraction.percent, fraction: fraction, detail: String(localized: "do gasto"), isShare: true)
+                    let rows = limitRows
+                    // Three blocks fit the default panel; more tools scroll.
+                    NotchScroll {
+                        NotchGroup {
+                            ForEach(rows) { row in
+                                LimitBlock(symbol: row.symbol, label: row.label, value: row.value, fraction: row.fraction, pace: row.pace, color: row.color, detail: row.detail)
+                            }
+                            if showsClaudeFallback {
+                                LimitBlock(symbol: ClaudeLogo.symbolName, label: String(localized: "Sessão (5h)"), value: summary.blockCost.dollars, fraction: 0, detail: model.claudeProblem.map(Self.problemText))
+                            }
+                            // Fill up to three blocks with where the month's spend went.
+                            ForEach(summary.models.prefix(max(0, 3 - rows.count - (showsClaudeFallback ? 1 : 0)))) { share in
+                                let fraction = share.cost / max(summary.monthCost, 0.01)
+                                LimitBlock(symbol: "cube", label: share.name, value: fraction.percent, fraction: fraction, detail: String(localized: "do gasto"), isShare: true)
+                            }
                         }
                     }
-                    .frame(maxHeight: .infinity, alignment: .top)
                 }
                 .padding(.bottom, 4)
             } else {
@@ -47,21 +50,53 @@ struct NotchAIUsageTab: View {
         .task { await model.watch() }
     }
 
+    /// The session spent so far, standing in for Claude's limits until they load. Only
+    /// with Claude Code on this Mac: a Codex-only setup has no Claude session to show.
+    private var showsClaudeFallback: Bool {
+        model.hasClaudeCode && model.claude == nil
+    }
+
     private struct LimitRowData: Identifiable {
         var id: String { label }
         let symbol: String
         let label: String
-        let window: UsageWindow
+        let value: String
+        let fraction: Double
+        let pace: Double?
         let detail: String
         let color: Color
+
+        init(symbol: String, window: UsageWindow) {
+            self.symbol = symbol
+            label = window.name
+            value = window.used.percent
+            fraction = window.used
+            pace = window.elapsed()
+            detail = NotchAIUsageTab.detail(for: window)
+            color = NotchAIUsageTab.color(for: window)
+        }
+
+        /// A tool whose stored sign-in ran out: an empty bar and what renews it.
+        init(signInAgain provider: AIProvider) {
+            symbol = provider.symbol
+            label = provider.name
+            value = "—"
+            fraction = 0
+            pace = nil
+            detail = NotchAIUsageTab.signInText(provider)
+            color = NotchStyle.tertiary
+        }
     }
 
+    /// Claude first, then Codex, then the other tools in a fixed order, each as found.
     private var limitRows: [LimitRowData] {
-        let claude = (model.claude?.windows ?? []).prefix(3).map { (ClaudeLogo.symbolName, $0) }
-        let codex = (model.codex ?? []).prefix(2).map { ("terminal", UsageWindow(name: "Codex · \($0.name)", used: $0.used, resetsAt: $0.resetsAt, length: $0.length)) }
-        return (claude + codex).map { symbol, window in
-            LimitRowData(symbol: symbol, label: window.name, window: window, detail: Self.detail(for: window), color: Self.color(for: window))
+        let claude = (model.claude?.windows ?? []).prefix(3).map { LimitRowData(symbol: ClaudeLogo.symbolName, window: $0) }
+        let codex = (model.codex ?? []).prefix(2).map { LimitRowData(symbol: "terminal", window: UsageWindow(name: "Codex · \($0.name)", used: $0.used, resetsAt: $0.resetsAt, length: $0.length)) }
+        let others = model.providers.flatMap { limits -> [LimitRowData] in
+            guard case .windows = limits.state else { return [LimitRowData(signInAgain: limits.provider)] }
+            return model.providerWindows(of: limits).map { LimitRowData(symbol: limits.provider.symbol, window: $0) }
         }
+        return claude + codex + others
     }
 
     /// "50 min · ritmo 32%": when it resets and where the current pace lands.
@@ -98,6 +133,15 @@ struct NotchAIUsageTab: View {
         case .noCredential: String(localized: "entre no Claude Code")
         case .expired: String(localized: "abra o Claude Code")
         case .unavailable: String(localized: "limites indisponíveis")
+        }
+    }
+
+    /// Cleen never renews another tool's sign-in; the tool does when it runs.
+    static func signInText(_ provider: AIProvider) -> String {
+        switch provider {
+        case .cursor: String(localized: "abra o Cursor")
+        case .copilot: String(localized: "entre de novo no Copilot")
+        case .grok: String(localized: "abra o Grok CLI")
         }
     }
 }
