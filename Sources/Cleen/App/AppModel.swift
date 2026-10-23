@@ -153,7 +153,7 @@ final class AppModel {
         case .leftovers: orphans.startScan()
         case .apps: Task { await apps.load() }
         case .calendar, .shelf, .clipboard, .screenshots, .ai, .system, .startup, .maintenance,
-             .timer, .notes, .reminders, .converter, .emoji, .weather, .shortcuts, .agents: break
+             .timer, .notes, .reminders, .converter, .emoji, .weather, .shortcuts, .agents, .icons: break
         }
     }
 

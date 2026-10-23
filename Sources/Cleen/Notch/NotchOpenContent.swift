@@ -61,6 +61,7 @@ struct NotchOpenContent: View {
         case .weather: NotchWeatherTab()
         case .shortcuts: NotchShortcutsTab()
         case .agents: NotchAgentsTab()
+        case .icons: NotchIconsTab()
         case .overview: NotchOverviewTab(controller: controller)
         case .clean: NotchCleanTab()
         case .projects: NotchProjectsTab()
