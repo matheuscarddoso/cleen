@@ -9,7 +9,7 @@ public enum SimulatorCleaner {
         let root = home.appending(path: "Library/Developer/CoreSimulator/Devices")
         guard FileManager.default.fileExists(atPath: root.path(percentEncoded: false)),
               FileManager.default.isExecutableFile(atPath: "/usr/bin/xcrun"),
-              let result = try? await Shell.run("/usr/bin/xcrun", ["simctl", "list", "devices", "unavailable", "--json"]),
+              let result = try? await Shell.run("/usr/bin/xcrun", ["simctl", "list", "devices", "unavailable", "--json"], timeout: .seconds(20)),
               result.succeeded
         else { return nil }
 

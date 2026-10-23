@@ -38,7 +38,7 @@ final class AIUsageModel {
         // Without a sign-in to read (or with the Keychain prompt turned down) it waits for
         // the refresh button, so a "Deny" isn't asked again every few minutes.
         let interval: TimeInterval = claudeProblem == .noCredential ? .infinity : 180
-        guard force || Date.now.timeIntervalSince(lastLimitsCheck) > interval else { return }
+        guard hasClaudeCode, force || Date.now.timeIntervalSince(lastLimitsCheck) > interval else { return }
         lastLimitsCheck = .now
         switch await ClaudeLimits.fetch() {
         case .success(let report):

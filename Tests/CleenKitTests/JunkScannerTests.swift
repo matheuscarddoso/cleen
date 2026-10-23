@@ -96,3 +96,11 @@ struct DiagnosticReportsTests {
         #expect(Set(logs.items.map(\.name)) == ["App-2026.ips", "SomeApp"])
     }
 }
+
+struct FullDiskAccessCatalogTests {
+    @Test func namesWhatTheScanCannotSeeWithoutAccess() {
+        let hidden = JunkCatalog.hiddenWithoutFullDiskAccess(granted: false).map(\.id)
+        #expect(hidden == ["trash", "mail-downloads", "device-backups"])
+        #expect(JunkCatalog.hiddenWithoutFullDiskAccess(granted: true).isEmpty)
+    }
+}

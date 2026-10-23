@@ -28,11 +28,11 @@ struct NotchAIUsageTab: View {
                         ForEach(limitRows.prefix(3)) { row in
                             LimitBlock(symbol: row.symbol, label: row.label, value: row.window.used.percent, fraction: row.window.used, pace: row.window.elapsed(), color: row.color, detail: row.detail)
                         }
-                        if model.claude == nil {
+                        if showsClaudeFallback {
                             LimitBlock(symbol: ClaudeLogo.symbolName, label: String(localized: "Sessão (5h)"), value: summary.blockCost.dollars, fraction: 0, detail: model.claudeProblem.map(Self.problemText))
                         }
                         // Fill up to three blocks with where the month's spend went.
-                        ForEach(summary.models.prefix(max(0, 3 - min(limitRows.count, 3) - (model.claude == nil ? 1 : 0)))) { share in
+                        ForEach(summary.models.prefix(max(0, 3 - min(limitRows.count, 3) - (showsClaudeFallback ? 1 : 0)))) { share in
                             let fraction = share.cost / max(summary.monthCost, 0.01)
                             LimitBlock(symbol: "cube", label: share.name, value: fraction.percent, fraction: fraction, detail: String(localized: "do gasto"), isShare: true)
                         }
@@ -45,6 +45,12 @@ struct NotchAIUsageTab: View {
             }
         }
         .task { await model.watch() }
+    }
+
+    /// The session spent so far, standing in for Claude's limits until they load. Only
+    /// with Claude Code on this Mac: a Codex-only setup has no Claude session to show.
+    private var showsClaudeFallback: Bool {
+        model.hasClaudeCode && model.claude == nil
     }
 
     private struct LimitRowData: Identifiable {

@@ -80,6 +80,7 @@
 "Abrir Agentes" = "Open Agents";
 "Abrir Ajustes" = "Open Settings";
 "Abrir Ajustes do Sistema" = "Open System Settings";
+"Abrir Ajustes do Sistema › Privacidade › Acesso Total ao Disco" = "Open System Settings › Privacy › Full Disk Access";
 "Abrir Atalhos" = "Open Shortcuts";
 "Abrir Lembretes" = "Open Reminders";
 "Abrir Notas" = "Open Notes";
@@ -583,6 +584,7 @@
 "O Cleen não tem acesso à localização." = "Cleen doesn't have access to your location.";
 "O Spotlight começou a reindexar. A busca volta completa em alguns minutos." = "Spotlight started reindexing. Search will be complete again in a few minutes.";
 "O app está aberto" = "The app is open";
+"O comando demorou demais e foi interrompido." = "The command took too long and was stopped.";
 "O comando terminou com código %d." = "The command ended with code %d.";
 "O macOS pede Acessibilidade para isso" = "macOS asks for Accessibility for this";
 "O nome da faixa por um instante quando ela troca." = "The track's name for a moment when it changes.";
@@ -712,7 +714,8 @@
 "Sem conexão para buscar a cotação" = "Offline, can't get the rates";
 "Sem conexão para buscar agora." = "Offline, can't search right now.";
 "Sem conexão · cotação de %@" = "Offline · rates from %@";
-"Sem permissão. Pode exigir senha de administrador ou Acesso Total ao Disco." = "No permission. It may need the administrator password or Full Disk Access.";
+"Sem Acesso Total ao Disco, ficam de fora: %@." = "Without Full Disk Access, these are left out: %@.";
+"Sem permissão. Pode exigir senha de administrador ou Acesso Total ao Disco." ="No permission. It may need the administrator password or Full Disk Access.";
 "Sem registro de uso" = "No usage record";
 "Sem título" = "Untitled";
 "Sem uso há mais tempo" = "Unused the longest";

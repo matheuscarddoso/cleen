@@ -19,7 +19,12 @@ struct NotchCleanTab: View {
         case .scanning:
             NotchScanning(title: String(localized: "Procurando lixo"), detail: model.progress, cancel: model.cancel)
         case .ready where model.results.isEmpty && model.tools.isEmpty:
-            NotchPrompt(symbol: "checkmark", color: ToolPalette.green, title: String(localized: "Nada para limpar"), message: String(localized: "Não sobrou cache nem log que valha a pena remover."), buttonTitle: String(localized: "Analisar de novo"), action: model.startScan)
+            VStack(spacing: 6) {
+                NotchPrompt(symbol: "checkmark", color: ToolPalette.green, title: String(localized: "Nada para limpar"), message: String(localized: "Não sobrou cache nem log que valha a pena remover."), buttonTitle: String(localized: "Analisar de novo"), action: model.startScan)
+                if !model.hiddenByPermission.isEmpty {
+                    FullDiskAccessNote(hidden: model.hiddenByPermission)
+                }
+            }
         case .ready:
             VStack(alignment: .leading, spacing: 8) {
                 NotchSummaryBar(value: model.selectedSize.bytes, caption: caption) {
@@ -66,6 +71,9 @@ struct NotchCleanTab: View {
                         }
                     }
                 }
+                if !model.hiddenByPermission.isEmpty {
+                    FullDiskAccessNote(hidden: model.hiddenByPermission)
+                }
             }
             .animation(.smooth(duration: 0.25), value: model.report)
         }
@@ -94,5 +102,43 @@ struct NotchCleanTab: View {
 
     private func clean() {
         Task { await model.clean() }
+    }
+}
+
+/// A quiet line under the list naming what macOS kept out of the scan, with the way in.
+private struct FullDiskAccessNote: View {
+    let hidden: [JunkCategory]
+    @Environment(\.openURL) private var openURL
+    @State private var isHovered = false
+
+    var body: some View {
+        HStack(spacing: 6) {
+            Image(systemName: "lock")
+                .font(.system(size: 10, weight: .medium))
+                .foregroundStyle(NotchStyle.tertiary)
+            Text("Sem Acesso Total ao Disco, ficam de fora: \(hidden.map(\.title).listed).")
+                .font(NotchStyle.caption)
+                .foregroundStyle(NotchStyle.tertiary)
+                .lineLimit(1)
+                .truncationMode(.middle)
+            Spacer(minLength: 8)
+            Button {
+                openURL(FullDiskAccess.settingsURL)
+            } label: {
+                HStack(spacing: 3) {
+                    Text("Permitir")
+                    Image(systemName: "arrow.up.forward")
+                        .font(.system(size: 8.5, weight: .semibold))
+                }
+                .font(.system(size: 10.5, weight: .medium))
+                .foregroundStyle(isHovered ? NotchStyle.primary : NotchStyle.secondary)
+                .contentShape(.rect)
+            }
+            .buttonStyle(.plain)
+            .onHover { isHovered = $0 }
+            .animation(.smooth(duration: 0.15), value: isHovered)
+            .help("Abrir Ajustes do Sistema › Privacidade › Acesso Total ao Disco")
+        }
+        .padding(.horizontal, 4)
     }
 }

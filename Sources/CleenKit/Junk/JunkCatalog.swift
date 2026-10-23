@@ -14,6 +14,13 @@ public enum JunkCatalog {
         browserCaches,
     ]
 
+    /// Categories whose folders macOS hides from apps without Full Disk Access. A scan
+    /// without it finds them empty, so the list says what was left out instead of
+    /// quietly reporting less.
+    public static func hiddenWithoutFullDiskAccess(granted: Bool, in categories: [JunkCategory] = all) -> [JunkCategory] {
+        granted ? [] : categories.filter(\.needsFullDiskAccess)
+    }
+
     // MARK: Sistema
 
     static let appCaches = JunkCategory(

@@ -11,6 +11,8 @@ final class JunkModel {
     private(set) var isCleaning = false
     private(set) var report: CleanupReport?
     private(set) var lastScan: Date?
+    /// What the last scan couldn't see for lack of Full Disk Access.
+    private(set) var hiddenByPermission: [JunkCategory] = []
 
     var selection = Set<URL>()
     var selectedTools = Set<ToolCleanup.Kind>()
@@ -79,6 +81,7 @@ final class JunkModel {
         phase = .scanning
         report = nil
         progress = ""
+        let hidden = JunkCatalog.hiddenWithoutFullDiskAccess(granted: FullDiskAccess.isGranted)
         let running = Set(NSWorkspace.shared.runningApplications.compactMap(\.bundleIdentifier))
         let scanner = JunkScanner(runningBundleIDs: running)
 
@@ -93,6 +96,7 @@ final class JunkModel {
         guard !Task.isCancelled else { return }
 
         results = found
+        hiddenByPermission = hidden
         tools = foundTools.sorted { $0.reclaimable > $1.reclaimable }
         selection = Set(found.flatMap(\.items).filter(\.selectedByDefault).map(\.url))
         selectedTools = Set(foundTools.filter(\.selectedByDefault).map(\.kind))
