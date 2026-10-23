@@ -1,0 +1,41 @@
+import Foundation
+
+/// A Claude Code session as its transcript tells it: what it's called, where it runs,
+/// and whether it's working or waiting for the person.
+public struct ClaudeSession: Sendable, Equatable, Identifiable {
+    public enum State: Sendable, Equatable {
+        /// The model is writing (a prompt or a tool result just went in).
+        case thinking
+        /// A tool call is out and hasn't come back: running, or waiting for permission.
+        case running(tool: String)
+        /// The turn ended: Claude is waiting for the next message.
+        case waiting
+
+        public var isBusy: Bool { self != .waiting }
+    }
+
+    /// The transcript's file name: Claude Code's session id.
+    public let id: String
+    /// Claude Code's own title for the conversation, or the folder it runs in.
+    public let title: String
+    /// The working directory.
+    public let directory: String?
+    public let state: State
+    /// When the transcript last changed.
+    public let updatedAt: Date
+    /// When the current state began (the last event's timestamp).
+    public let since: Date
+
+    public var projectName: String? {
+        directory.map { URL(filePath: $0).lastPathComponent }
+    }
+
+    public init(id: String, title: String, directory: String?, state: State, updatedAt: Date, since: Date) {
+        self.id = id
+        self.title = title
+        self.directory = directory
+        self.state = state
+        self.updatedAt = updatedAt
+        self.since = since
+    }
+}
