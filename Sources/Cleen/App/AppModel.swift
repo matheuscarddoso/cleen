@@ -67,9 +67,9 @@ final class AppModel {
         live.start(agenda: agenda)
         timer.onPhaseEnd = { [live] ended in
             switch ended {
-            case .countdown: live.timerEnded(phase: "Timer")
-            case .focus: live.timerEnded(phase: "Foco")
-            case .shortBreak, .longBreak: live.timerEnded(phase: "Pausa")
+            case .countdown: live.timerEnded(phase: String(localized: "Timer"))
+            case .focus: live.timerEnded(phase: String(localized: "Foco"))
+            case .shortBreak, .longBreak: live.timerEnded(phase: String(localized: "Pausa"))
             }
         }
         fullscreen.start()

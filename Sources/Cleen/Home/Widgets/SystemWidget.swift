@@ -25,9 +25,9 @@ struct SystemWidget: View {
                 .frame(width: 80, height: 80)
             case .medium, .large:
                 VStack(alignment: .leading, spacing: 7) {
-                    HomeWidgetLabel(title: "Sistema", symbol: "cpu")
+                    HomeWidgetLabel(title: String(localized: "Sistema"), symbol: "cpu")
                     meter("CPU", fraction: cpu)
-                    meter("Memória", fraction: memory)
+                    meter(String(localized: "Memória"), fraction: memory)
                     Sparkline(values: monitor.cpuHistory, maximum: 1)
                         .frame(height: 18)
                 }

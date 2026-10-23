@@ -10,14 +10,14 @@ struct CalendarDayAgenda: View {
         let reminders = Calendar.current.isDateInToday(day) ? Array(agenda.reminders.prefix(2)) : []
         Group {
             if agenda.calendarAccess == .denied {
-                AgendaAccessLink(text: "Permitir acesso ao Calendário")
+                AgendaAccessLink(text: String(localized: "Permitir acesso ao Calendário"))
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if events.isEmpty && reminders.isEmpty {
                 VStack(spacing: 6) {
                     Image(systemName: "calendar.badge.checkmark")
                         .font(.system(size: 13))
                         .foregroundStyle(NotchStyle.tertiary)
-                    Text(Calendar.current.isDateInToday(day) ? "Nada para hoje" : "Nada neste dia")
+                    Text(Calendar.current.isDateInToday(day) ? String(localized: "Nada para hoje") : String(localized: "Nada neste dia"))
                         .font(.system(size: 11, weight: .medium))
                         .foregroundStyle(NotchStyle.secondary)
                 }

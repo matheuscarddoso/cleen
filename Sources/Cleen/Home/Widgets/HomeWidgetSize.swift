@@ -18,17 +18,17 @@ enum HomeWidgetSize: String, Codable, CaseIterable, Identifiable {
     /// The letter on the size switch in edit mode.
     var shortLabel: String {
         switch self {
-        case .small: "P"
-        case .medium: "M"
-        case .large: "G"
+        case .small: String(localized: "P", comment: "Initial of the small widget size")
+        case .medium: String(localized: "M", comment: "Initial of the medium widget size")
+        case .large: String(localized: "G", comment: "Initial of the large widget size")
         }
     }
 
     var label: String {
         switch self {
-        case .small: "Pequeno"
-        case .medium: "Médio"
-        case .large: "Grande"
+        case .small: String(localized: "Pequeno")
+        case .medium: String(localized: "Médio")
+        case .large: String(localized: "Grande")
         }
     }
 }

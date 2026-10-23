@@ -12,7 +12,7 @@ struct DayEventList: View {
                 .foregroundStyle(NotchStyle.secondary)
             let events = agenda.eventsByDay[Calendar.current.startOfDay(for: day)] ?? []
             if agenda.calendarAccess == .denied {
-                AgendaAccessLink(text: "Permitir acesso ao Calendário")
+                AgendaAccessLink(text: String(localized: "Permitir acesso ao Calendário"))
             } else if events.isEmpty {
                 Text("Nada marcado")
                     .font(NotchStyle.body)
@@ -34,9 +34,9 @@ struct DayEventList: View {
 
     private var title: String {
         let calendar = Calendar.current
-        if calendar.isDateInToday(day) { return "Hoje" }
-        if calendar.isDateInTomorrow(day) { return "Amanhã" }
-        if calendar.isDateInYesterday(day) { return "Ontem" }
+        if calendar.isDateInToday(day) { return String(localized: "Hoje") }
+        if calendar.isDateInTomorrow(day) { return String(localized: "Amanhã") }
+        if calendar.isDateInYesterday(day) { return String(localized: "Ontem") }
         return day.formatted(.dateTime.weekday(.wide).day().month(.wide).locale(.cleen)).capitalized
     }
 }

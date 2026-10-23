@@ -18,7 +18,7 @@ struct AIUsageWidget: View {
                         Text(session?.used.percent ?? "—")
                             .font(.system(size: 15, weight: .semibold).monospacedDigit())
                             .contentTransition(.numericText())
-                        Text(session == nil ? "IA" : "sessão")
+                        Text(session == nil ? String(localized: "IA") : String(localized: "sessão"))
                             .font(.system(size: 9.5, weight: .medium))
                             .foregroundStyle(NotchStyle.secondary)
                     }
@@ -26,7 +26,7 @@ struct AIUsageWidget: View {
                 .frame(width: 80, height: 80)
             case .medium, .large:
                 VStack(alignment: .leading, spacing: 7) {
-                    HomeWidgetLabel(title: model.claude?.plan.map { "Claude \($0)" } ?? "Uso de IA", symbol: "chart.bar.xaxis")
+                    HomeWidgetLabel(title: model.claude?.plan.map { "Claude \($0)" } ?? String(localized: "Uso de IA"), symbol: "chart.bar.xaxis")
                     if windows.isEmpty {
                         Text(model.summary.map { $0.monthCost.dollars } ?? "—")
                             .font(.system(size: 17, weight: .semibold).monospacedDigit())

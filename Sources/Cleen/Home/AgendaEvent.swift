@@ -12,7 +12,7 @@ nonisolated struct AgendaEvent: Identifiable, Equatable, Sendable {
 
     init(_ event: EKEvent) {
         id = event.eventIdentifier ?? UUID().uuidString
-        title = event.title ?? "Sem título"
+        title = event.title ?? String(localized: "Sem título")
         start = event.startDate
         end = event.endDate
         isAllDay = event.isAllDay
@@ -20,7 +20,7 @@ nonisolated struct AgendaEvent: Identifiable, Equatable, Sendable {
     }
 
     var timeText: String {
-        if isAllDay { return "Dia todo" }
+        if isAllDay { return String(localized: "Dia todo") }
         let style = Date.FormatStyle.dateTime.hour().minute().locale(.cleen)
         return "\(start.formatted(style)) – \(end.formatted(style))"
     }

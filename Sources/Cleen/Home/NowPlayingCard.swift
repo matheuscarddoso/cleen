@@ -11,7 +11,7 @@ struct NowPlayingCard: View {
             NowPlayingArtwork(image: model.artwork, appURL: model.appURL, isIcon: model.artworkIsIcon)
                 .frame(width: 88, height: 88)
             VStack(alignment: .leading, spacing: 2) {
-                Text(model.track?.title ?? "Nada tocando")
+                Text(model.track?.title ?? String(localized: "Nada tocando"))
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundStyle(NotchStyle.primary)
                 Text(secondLine)
@@ -33,7 +33,7 @@ struct NowPlayingCard: View {
 
     /// Album, or the app when there is none (a video in a browser).
     private var secondLine: String {
-        guard let track = model.track else { return "Toque algo em qualquer app" }
+        guard let track = model.track else { return String(localized: "Toque algo em qualquer app") }
         return track.album.isEmpty ? (model.appName ?? "") : track.album
     }
 

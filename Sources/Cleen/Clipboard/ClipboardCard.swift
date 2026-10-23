@@ -22,10 +22,10 @@ struct ClipboardCard: View {
                     .foregroundStyle(NotchStyle.secondary)
                 Spacer(minLength: 0)
                 if isHovered || entry.pinned {
-                    CardButton(symbol: entry.pinned ? "pin.fill" : "pin", help: entry.pinned ? "Desafixar" : "Fixar") { model.togglePin(entry) }
+                    CardButton(symbol: entry.pinned ? "pin.fill" : "pin", help: entry.pinned ? String(localized: "Desafixar") : String(localized: "Fixar")) { model.togglePin(entry) }
                 }
                 if isHovered {
-                    CardButton(symbol: "xmark", help: "Apagar do histórico") { model.delete(entry) }
+                    CardButton(symbol: "xmark", help: String(localized: "Apagar do histórico")) { model.delete(entry) }
                 }
             }
             .frame(height: 16)
@@ -45,7 +45,7 @@ struct ClipboardCard: View {
         .contextMenu {
             Button("Colar", action: paste)
             Button("Copiar") { model.copy(entry) }
-            Button(entry.pinned ? "Desafixar" : "Fixar") { model.togglePin(entry) }
+            Button(entry.pinned ? String(localized: "Desafixar") : String(localized: "Fixar")) { model.togglePin(entry) }
             Divider()
             Button("Apagar do histórico", role: .destructive) { model.delete(entry) }
         }
@@ -60,10 +60,10 @@ struct ClipboardCard: View {
     private var age: String {
         let seconds = Date.now.timeIntervalSince(entry.lastCopied)
         switch seconds {
-        case ..<60: return "agora"
-        case ..<3600: return "\(Int(seconds / 60))min"
-        case ..<86_400: return "\(Int(seconds / 3600))h"
-        default: return "\(Int(seconds / 86_400))d"
+        case ..<60: return String(localized: "agora")
+        case ..<3600: return String(localized: "\(Int(seconds / 60))min")
+        case ..<86_400: return String(localized: "\(Int(seconds / 3600))h")
+        default: return String(localized: "\(Int(seconds / 86_400))d")
         }
     }
 }

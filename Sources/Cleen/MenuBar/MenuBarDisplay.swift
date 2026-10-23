@@ -11,19 +11,19 @@ enum MenuBarDisplay: String, CaseIterable, Identifiable {
 
     var shortTitle: String {
         switch self {
-        case .iconOnly: "Ícone"
-        case .freeSpace: "Disco"
+        case .iconOnly: String(localized: "Ícone")
+        case .freeSpace: String(localized: "Disco")
         case .cpu: "CPU"
-        case .memory: "Memória"
+        case .memory: String(localized: "Memória")
         }
     }
 
     var title: String {
         switch self {
-        case .iconOnly: "Só o ícone"
-        case .freeSpace: "Espaço livre"
-        case .cpu: "Uso de CPU"
-        case .memory: "Uso de memória"
+        case .iconOnly: String(localized: "Só o ícone")
+        case .freeSpace: String(localized: "Espaço livre")
+        case .cpu: String(localized: "Uso de CPU")
+        case .memory: String(localized: "Uso de memória")
         }
     }
 }

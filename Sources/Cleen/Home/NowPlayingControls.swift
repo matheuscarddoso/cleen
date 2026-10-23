@@ -8,9 +8,9 @@ struct NowPlayingControls: View {
 
     var body: some View {
         HStack(spacing: 4) {
-            PlayerButton(symbol: "backward.end.fill", label: "Anterior") { send(.previous) }
-            PlayerButton(symbol: isPlaying ? "pause.fill" : "play.fill", label: isPlaying ? "Pausar" : "Tocar") { send(.playPause) }
-            PlayerButton(symbol: "forward.end.fill", label: "Próxima") { send(.next) }
+            PlayerButton(symbol: "backward.end.fill", label: String(localized: "Anterior")) { send(.previous) }
+            PlayerButton(symbol: isPlaying ? "pause.fill" : "play.fill", label: isPlaying ? String(localized: "Pausar") : String(localized: "Tocar")) { send(.playPause) }
+            PlayerButton(symbol: "forward.end.fill", label: String(localized: "Próxima")) { send(.next) }
         }
         .disabled(!isEnabled)
         .opacity(isEnabled ? 1 : 0.35)
