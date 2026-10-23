@@ -4,7 +4,9 @@ import SwiftUI
 /// NotchNook's Mirror: a grey disc with a webcam glyph; once the camera is allowed it
 /// becomes a live round mirror.
 struct MirrorButton: View {
+    let namespace: Namespace.ID
     @Environment(MirrorModel.self) private var mirror
+    @Environment(NotchState.self) private var notch
     @State private var isHovered = false
 
     var body: some View {
@@ -13,7 +15,8 @@ struct MirrorButton: View {
                 Circle().fill(Color.white.opacity(isHovered ? 0.14 : 0.1))
                 if mirror.access == .granted {
                     CameraPreview(session: mirror.camera.session)
-                        .clipShape(.circle)
+                        .clipShape(.rect(cornerRadius: 44, style: .continuous))
+                        .matchedGeometryEffect(id: "mirror", in: namespace)
                         .transition(.opacity)
                 } else {
                     VStack(spacing: 5) {
@@ -40,7 +43,7 @@ struct MirrorButton: View {
     private var help: String {
         switch mirror.access {
         case .notAsked: "Ver como você está antes de uma chamada"
-        case .granted: "Espelho"
+        case .granted: "Ampliar o espelho"
         case .denied: "Permita a câmera em Ajustes do Sistema"
         }
     }
@@ -54,7 +57,7 @@ struct MirrorButton: View {
                 NSWorkspace.shared.open(url)
             }
         case .granted:
-            break
+            notch.mirrorExpanded = true
         }
     }
 }

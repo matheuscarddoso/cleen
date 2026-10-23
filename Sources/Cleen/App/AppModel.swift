@@ -27,6 +27,7 @@ final class AppModel {
     let shelf = ShelfModel()
     let tabs = TabPreferences()
     let mirror = MirrorModel()
+    let clipboard = ClipboardModel()
     @ObservationIgnored private(set) lazy var notch = NotchCoordinator(app: self)
 
     private init() {
@@ -45,6 +46,7 @@ final class AppModel {
         monitor.start()
         // After the app finishes launching, so screens and the menu bar are in place.
         Task { [weak self] in self?.installNotch() }
+        clipboard.start()
         // The closed notch shows what's playing, so listen from the start.
         Task { [nowPlaying] in await nowPlaying.watch() }
     }
@@ -72,7 +74,7 @@ final class AppModel {
         case .space: spaceLens.scan(.home)
         case .leftovers: orphans.startScan()
         case .apps: Task { await apps.load() }
-        case .calendar, .shelf, .ai, .system, .startup, .maintenance: break
+        case .calendar, .shelf, .clipboard, .ai, .system, .startup, .maintenance: break
         }
     }
 

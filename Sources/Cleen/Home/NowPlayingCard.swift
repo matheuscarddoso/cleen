@@ -8,7 +8,7 @@ struct NowPlayingCard: View {
 
     var body: some View {
         HStack(alignment: .center, spacing: 14) {
-            NowPlayingArtwork(image: model.artwork, appURL: model.appURL)
+            NowPlayingArtwork(image: model.artwork, appURL: model.appURL, isIcon: model.artworkIsIcon)
                 .frame(width: 88, height: 88)
             VStack(alignment: .leading, spacing: 2) {
                 Text(model.track?.title ?? "Nada tocando")

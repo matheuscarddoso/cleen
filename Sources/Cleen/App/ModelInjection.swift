@@ -21,5 +21,6 @@ extension View {
             .environment(app.shelf)
             .environment(app.tabs)
             .environment(app.mirror)
+            .environment(app.clipboard)
     }
 }

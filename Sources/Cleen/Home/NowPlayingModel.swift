@@ -13,6 +13,10 @@ final class NowPlayingModel {
     /// The app playing it, for its name and icon.
     private(set) var appName: String?
     private(set) var appURL: URL?
+    /// The artwork is a site's icon rather than cover art; shown inset, not cropped.
+    private(set) var artworkIsIcon = false
+    @ObservationIgnored private var appBundleID: String?
+    @ObservationIgnored private var iconIdentity: String?
 
     @ObservationIgnored private let bridge = NowPlayingBridge()
     @ObservationIgnored private var isStreaming = false
@@ -48,12 +52,35 @@ final class NowPlayingModel {
             tint = nil
             appName = nil
             appURL = nil
+            artworkIsIcon = false
+            iconIdentity = nil
             return
         }
         if reading.pid != track?.pid {
             let app = NSRunningApplication(processIdentifier: reading.pid)
             appName = app?.localizedName
             appURL = app?.bundleURL
+            appBundleID = app?.bundleIdentifier
+        }
+        // A page playing with no metadata of its own: the browser's artwork is just its
+        // engine logo, so show the tab's site icon instead.
+        if BrowserTabIcon.isBrowser(appBundleID), reading.artist.isEmpty, reading.album.isEmpty {
+            track = reading
+            guard reading.identity != iconIdentity, let bundleID = appBundleID else { return }
+            iconIdentity = reading.identity
+            Task {
+                guard let icon = await BrowserTabIcon.icon(bundleID: bundleID, tabTitle: reading.title),
+                      self.track?.identity == reading.identity
+                else { return }
+                self.artwork = icon
+                self.artworkIsIcon = true
+                self.tint = Self.averageColor(of: icon)
+            }
+            return
+        }
+        if artworkIsIcon, reading.identity != iconIdentity {
+            artworkIsIcon = false
+            iconIdentity = nil
         }
         if let artworkData, let image = NSImage(data: artworkData) {
             artwork = image

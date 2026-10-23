@@ -43,6 +43,7 @@ struct NotchOpenContent: View {
         case .home: NotchHomeTab()
         case .calendar: NotchCalendarTab()
         case .shelf: NotchShelfTab()
+        case .clipboard: NotchClipboardTab()
         case .ai: NotchAIUsageTab()
         case .overview: NotchOverviewTab(controller: controller)
         case .clean: NotchCleanTab()

@@ -115,3 +115,42 @@ struct PackageManagerTrustTests {
         #expect(CodeSignature.packageManager(for: path, home: "/Users/me") == manager)
     }
 }
+
+struct ClipboardLogTests {
+    private func text(_ value: String) -> ClipboardEntry {
+        ClipboardEntry(kind: .text, text: value, byteCount: value.utf8.count, contentHash: value, sourceBundleID: nil, sourceName: nil)
+    }
+
+    @Test func copyingAgainMovesToTopAndCounts() {
+        var log = ClipboardLog()
+        log.record(text("a"))
+        log.record(text("b"))
+        log.record(text("a"))
+        #expect(log.entries.map(\.text) == ["a", "b"])
+        #expect(log.entries[0].timesCopied == 2)
+    }
+
+    @Test func oldestFallOffPastTheLimit() {
+        var log = ClipboardLog(limit: 2)
+        log.record(text("1"))
+        log.record(text("2"))
+        let dropped = log.record(text("3"))
+        #expect(log.entries.map(\.text) == ["3", "2"])
+        #expect(dropped.map(\.text) == ["1"])
+    }
+
+    @Test func pinnedCopiesNeverFallOff() {
+        var log = ClipboardLog(limit: 2)
+        log.record(text("keep"))
+        log.togglePin(log.entries[0].id)
+        log.record(text("2"))
+        log.record(text("3"))
+        #expect(Set(log.entries.compactMap(\.text)) == ["keep", "3"])
+    }
+
+    @Test func titlesReadLikeRaycast() {
+        let image = ClipboardEntry(kind: .image, imageFile: "x.png", imageWidth: 2416, imageHeight: 1057, byteCount: 1, contentHash: "h", sourceBundleID: nil, sourceName: nil)
+        #expect(image.title == "Imagem (2416×1057)")
+        #expect(text("  first line\nsecond").title == "first line")
+    }
+}

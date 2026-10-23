@@ -4,6 +4,7 @@ enum NotchTab: String, CaseIterable, Identifiable, Codable {
     case home
     case calendar
     case shelf
+    case clipboard
     case ai
     case overview
     case clean
@@ -24,6 +25,7 @@ enum NotchTab: String, CaseIterable, Identifiable, Codable {
         case .home: "Cleen"
         case .calendar: "Calendário"
         case .shelf: "Shelf"
+        case .clipboard: "Área de transferência"
         case .ai: "Uso de IA"
         case .overview: "Visão geral"
         case .clean: "Limpeza"
@@ -47,6 +49,7 @@ enum NotchTab: String, CaseIterable, Identifiable, Codable {
         case .home: "square.grid.2x2.fill"
         case .calendar: "calendar"
         case .shelf: "tray.and.arrow.down.fill"
+        case .clipboard: "doc.on.clipboard"
         case .ai: "chart.bar.xaxis"
         case .overview: "internaldrive.fill"
         case .clean: "trash"

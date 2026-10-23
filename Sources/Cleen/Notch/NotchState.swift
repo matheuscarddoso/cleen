@@ -6,7 +6,11 @@ import Observation
 final class NotchState {
     var isOpen = false
     var isPinned = false
-    var tab = NotchTab.home
+    var tab = NotchTab.home {
+        didSet { if tab != oldValue { mirrorExpanded = false } }
+    }
+    /// The home tab's mirror grown to fill the panel.
+    var mirrorExpanded = false
     /// The panel shows Ajustes instead of a tool.
     var showsSettings = false
     var settingsSection = SettingsSection.general

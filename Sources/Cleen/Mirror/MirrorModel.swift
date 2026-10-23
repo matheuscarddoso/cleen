@@ -33,9 +33,14 @@ final class MirrorModel {
         if access == .granted { camera.start() }
     }
 
+    /// Stops a moment later: when the round mirror grows into the wide one, the new
+    /// view can appear before the old one disappears, and the camera must stay on.
     func disappear() {
         viewers = max(0, viewers - 1)
-        if viewers == 0 { camera.stop() }
+        Task {
+            try? await Task.sleep(for: .milliseconds(600))
+            if viewers == 0 { camera.stop() }
+        }
     }
 
     private static func currentAccess() -> Access {

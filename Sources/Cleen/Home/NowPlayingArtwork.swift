@@ -6,11 +6,20 @@ import SwiftUI
 struct NowPlayingArtwork: View {
     let image: NSImage?
     let appURL: URL?
+    var isIcon = false
 
     var body: some View {
         Color(white: 0.16)
             .overlay {
-                if let image {
+                if let image, isIcon {
+                    Image(nsImage: image)
+                        .resizable()
+                        .interpolation(.high)
+                        .scaledToFit()
+                        .clipShape(.rect(cornerRadius: 12, style: .continuous))
+                        .padding(18)
+                        .transition(.opacity)
+                } else if let image {
                     Image(nsImage: image)
                         .resizable()
                         .scaledToFill()

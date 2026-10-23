@@ -36,6 +36,7 @@ struct NotchSettingsView: View {
         switch state.settingsSection {
         case .general:
             GeneralSettings()
+            ClipboardSettings()
             AlertSettings()
         case .notch: NotchAppearanceSettings()
         case .tabs: TabSettings()

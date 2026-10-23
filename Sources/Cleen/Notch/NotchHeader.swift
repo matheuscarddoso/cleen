@@ -7,7 +7,7 @@ struct NotchHeader: View {
 
     var body: some View {
         HStack(spacing: 4) {
-            Text(state.showsSettings ? "Ajustes" : state.tab.title)
+            Text(state.showsSettings ? "Ajustes" : (state.mirrorExpanded && state.tab == .home ? "Espelho" : state.tab.title))
                 .font(NotchStyle.title)
                 .contentTransition(.opacity)
             Spacer()

@@ -70,6 +70,7 @@ final class NotchController {
         pendingOpen?.cancel()
         guard state.isOpen else { return }
         state.holdsOpen = false
+        state.mirrorExpanded = false
         withAnimation(Self.closeAnimation) { state.isOpen = false }
         panel?.ignoresMouseEvents = true
     }

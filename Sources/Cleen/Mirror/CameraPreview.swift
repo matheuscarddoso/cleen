@@ -31,6 +31,9 @@ final class CameraPreviewView: NSView {
         fatalError("init(coder:) is not used")
     }
 
+    /// Clicks go to the SwiftUI button around the preview, not to this layer host.
+    override func hitTest(_ point: NSPoint) -> NSView? { nil }
+
     override func layout() {
         super.layout()
         CATransaction.begin()
