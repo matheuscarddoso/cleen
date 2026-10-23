@@ -28,6 +28,7 @@ final class AppModel {
     let aiUsage = AIUsageModel()
     let shelf = ShelfModel()
     let tabs = TabPreferences()
+    let homeLayout = HomeLayout()
     let mirror = MirrorModel()
     let clipboard = ClipboardModel()
     let screenshots = ScreenshotModel()
@@ -75,6 +76,7 @@ final class AppModel {
         } else if let tab = LaunchArguments.notchTab {
             notch.primary?.state.isPinned = true
             notch.primary?.open(tab: tab)
+            if tab == .home, LaunchArguments.editHome { notch.primary?.state.isEditingHome = true }
             if LaunchArguments.scan { startScan(for: tab) }
         } else if LaunchArguments.scan {
             // Closed notch, scan running: shows the wing's progress.

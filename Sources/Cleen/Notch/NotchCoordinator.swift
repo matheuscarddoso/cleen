@@ -8,6 +8,7 @@ final class NotchCoordinator {
     private var hotKey: GlobalHotKey?
     private var observers: [NSObjectProtocol] = []
     private var showsOnAllScreens = NotchSettings.showsOnAllScreens
+    private var panelSize = NotchSettings.panelSize
     /// While the first-run tour is up the notch stays closed and out of its way; the
     /// shortcut goes to the tour instead.
     var isSuspended = false
@@ -68,9 +69,13 @@ final class NotchCoordinator {
 
     private func settingsChanged() {
         let wanted = NotchSettings.showsOnAllScreens
-        guard wanted != showsOnAllScreens else { return }
+        let size = NotchSettings.panelSize
+        guard wanted != showsOnAllScreens || size != panelSize else { return }
         showsOnAllScreens = wanted
+        panelSize = size
         rebuild()
+        // The change came from Aparência, open under the pointer: bring it back there.
+        if !isSuspended { (controllerUnderPointer ?? primary)?.openSettings(.notch) }
     }
 
     private func rebuild() {

@@ -5,6 +5,8 @@ import SwiftUI
 /// becomes a live round mirror.
 struct MirrorButton: View {
     let namespace: Namespace.ID
+    /// 88 is the round mirror; wider makes it a pill.
+    var width = 88.0
     @Environment(MirrorModel.self) private var mirror
     @Environment(NotchState.self) private var notch
     @State private var isHovered = false
@@ -12,7 +14,7 @@ struct MirrorButton: View {
     var body: some View {
         Button(action: tap) {
             ZStack {
-                Circle().fill(Color.white.opacity(isHovered ? 0.14 : 0.1))
+                Capsule().fill(Color.white.opacity(isHovered ? 0.14 : 0.1))
                 if mirror.access == .granted {
                     CameraPreview(layer: mirror.previewLayer)
                         .clipShape(.rect(cornerRadius: 44, style: .continuous))
@@ -28,8 +30,8 @@ struct MirrorButton: View {
                     .foregroundStyle(NotchStyle.primary.opacity(0.55))
                 }
             }
-            .frame(width: 88, height: 88)
-            .contentShape(.circle)
+            .frame(width: width, height: 88)
+            .contentShape(.capsule)
         }
         .buttonStyle(.plain)
         .onHover { isHovered = $0 }

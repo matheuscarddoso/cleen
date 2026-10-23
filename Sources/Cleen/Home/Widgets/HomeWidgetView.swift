@@ -1,0 +1,19 @@
+import SwiftUI
+
+/// One widget's content at its size.
+struct HomeWidgetView: View {
+    let item: HomeWidgetItem
+    let mirrorSpace: Namespace.ID
+
+    var body: some View {
+        switch item.kind {
+        case .nowPlaying: NowPlayingWidget(size: item.size)
+        case .agenda:
+            if item.size == .small { AgendaGlance() } else { NotchCalendar() }
+        case .mirror: MirrorButton(namespace: mirrorSpace, width: item.size.width)
+        case .disk: DiskWidget(size: item.size)
+        case .aiUsage: AIUsageWidget(size: item.size)
+        case .system: SystemWidget(size: item.size)
+        }
+    }
+}

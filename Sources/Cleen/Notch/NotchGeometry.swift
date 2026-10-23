@@ -10,8 +10,9 @@ struct NotchGeometry: Equatable {
 
     /// Width each live-activity wing adds beside the notch when it's closed.
     static let wingWidth = 46.0
-    /// One size for every tool: switching tabs never resizes the panel.
-    static let openPanelSize = CGSize(width: 680, height: 234)
+    /// One size for every tool, so switching tabs never resizes the panel. Wider and
+    /// taller are a choice in Aparência.
+    static var openPanelSize: CGSize { NotchSettings.panelSize }
     /// Room around the open panel for its shadow; the window is this much larger.
     static let shadowPadding = 36.0
 

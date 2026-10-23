@@ -20,6 +20,7 @@ extension View {
             .environment(app.aiUsage)
             .environment(app.shelf)
             .environment(app.tabs)
+            .environment(app.homeLayout)
             .environment(app.mirror)
             .environment(app.clipboard)
             .environment(app.screenshots)

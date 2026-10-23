@@ -2,11 +2,13 @@ import Foundation
 
 /// Launch flags for opening straight into a screen, used when checking the UI:
 /// `--notch <tab>` opens the notch pinned on that tool, `--settings` opens Ajustes,
-/// `--scan` starts that tool's scan right away, `--onboarding` replays the first-run tour.
+/// `--scan` starts that tool's scan right away, `--edit` opens Início in edit mode,
+/// `--onboarding` replays the first-run tour.
 enum LaunchArguments {
     static let notchTab: NotchTab? = value(after: "--notch").flatMap(NotchTab.init(rawValue:))
     static let settings = ProcessInfo.processInfo.arguments.contains("--settings")
     static let scan = ProcessInfo.processInfo.arguments.contains("--scan")
+    static let editHome = ProcessInfo.processInfo.arguments.contains("--edit")
     static let onboarding = ProcessInfo.processInfo.arguments.contains("--onboarding")
 
     private static func value(after flag: String) -> String? {

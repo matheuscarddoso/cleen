@@ -26,8 +26,8 @@ struct NotchOpenContent: View {
                     .frame(maxWidth: .infinity, minHeight: 0, maxHeight: .infinity, alignment: .top)
                     .clipped()
                     .padding(.top, 6)
-                // The expanded mirror takes the tab bar's room too.
-                if !mirrorFillsPanel {
+                // The expanded mirror and Início's edit mode take the tab bar's room too.
+                if !hidesTabBar {
                     NotchTabBar()
                         .padding(.bottom, 10)
                         .padding(.top, 6)
@@ -36,10 +36,10 @@ struct NotchOpenContent: View {
             }
         }
         .foregroundStyle(NotchStyle.primary)
-        .animation(.spring(response: 0.45, dampingFraction: 0.86), value: mirrorFillsPanel)
+        .animation(.spring(response: 0.45, dampingFraction: 0.86), value: hidesTabBar)
     }
 
-    private var mirrorFillsPanel: Bool { state.mirrorExpanded && state.tab == .home }
+    private var hidesTabBar: Bool { state.tab == .home && (state.mirrorExpanded || state.isEditingHome) }
 
     /// Room between the panel's rounded edge and its content.
     static let inset = 20.0

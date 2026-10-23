@@ -7,10 +7,15 @@ struct NotchHeader: View {
 
     var body: some View {
         HStack(spacing: 4) {
-            Text(state.showsSettings ? "Ajustes" : (state.mirrorExpanded && state.tab == .home ? "Espelho" : state.tab.title))
+            Text(headerTitle)
                 .font(NotchStyle.title)
                 .contentTransition(.opacity)
             Spacer()
+            if state.tab == .home, !state.showsSettings, !state.mirrorExpanded {
+                NotchIconButton(symbol: state.isEditingHome ? "checkmark" : "square.grid.2x2", help: state.isEditingHome ? "Concluir" : "Editar o Início", isActive: state.isEditingHome) {
+                    withAnimation(.smooth(duration: 0.3)) { state.isEditingHome.toggle() }
+                }
+            }
             NotchIconButton(symbol: state.isPinned ? "pin.fill" : "pin", help: state.isPinned ? "Soltar" : "Manter aberto", isActive: state.isPinned) {
                 controller.togglePin()
             }
@@ -18,5 +23,12 @@ struct NotchHeader: View {
                 withAnimation(.smooth(duration: 0.25)) { state.showsSettings.toggle() }
             }
         }
+    }
+
+    private var headerTitle: String {
+        if state.showsSettings { return "Ajustes" }
+        if state.tab == .home, state.mirrorExpanded { return "Espelho" }
+        if state.tab == .home, state.isEditingHome { return "Editar o Início" }
+        return state.tab.title
     }
 }
