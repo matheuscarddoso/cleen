@@ -5,6 +5,7 @@ enum SettingsSection: String, CaseIterable, Identifiable {
     case notch
     case tabs
     case cleaning
+    case agents
     case about
 
     var id: String { rawValue }
@@ -16,6 +17,7 @@ enum SettingsSection: String, CaseIterable, Identifiable {
         case .notch: String(localized: "Aparência")
         case .tabs: String(localized: "Abas")
         case .cleaning: String(localized: "Limpeza")
+        case .agents: String(localized: "Claude Code")
         case .about: String(localized: "Sobre")
         }
     }
@@ -27,6 +29,7 @@ enum SettingsSection: String, CaseIterable, Identifiable {
         case .notch: String(localized: "Como o notch abre e o que mostra fechado.")
         case .tabs: String(localized: "As ferramentas na barra do notch e a ordem delas.")
         case .cleaning: String(localized: "O que conta como projeto parado e arquivo grande.")
+        case .agents: String(localized: "Os pedidos de permissão, respondidos no notch.")
         case .about: String(localized: "Permissões e o que o Cleen já fez.")
         }
     }
@@ -38,6 +41,7 @@ enum SettingsSection: String, CaseIterable, Identifiable {
         case .notch: "rectangle.topthird.inset.filled"
         case .tabs: "square.grid.2x2"
         case .cleaning: "trash"
+        case .agents: ClaudeLogo.symbolName
         case .about: "info.circle"
         }
     }
@@ -46,7 +50,7 @@ enum SettingsSection: String, CaseIterable, Identifiable {
     static let groups: [(title: String?, sections: [SettingsSection])] = [
         (nil, [.general, .displays]),
         (String(localized: "Notch"), [.notch, .tabs]),
-        (String(localized: "Ferramentas"), [.cleaning]),
+        (String(localized: "Ferramentas"), [.cleaning, .agents]),
         ("Cleen", [.about]),
     ]
 }

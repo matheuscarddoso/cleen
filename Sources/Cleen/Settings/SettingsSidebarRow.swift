@@ -9,9 +9,15 @@ struct SettingsSidebarRow: View {
     var body: some View {
         Button(action: select) {
             HStack(spacing: 8) {
-                Image(systemName: section.symbol)
-                    .font(.system(size: 11, weight: .medium))
-                    .frame(width: 16)
+                Group {
+                    if section.symbol == ClaudeLogo.symbolName {
+                        ClaudeLogo(size: 12, tint: isSelected ? NotchStyle.primary : NotchStyle.primary.opacity(0.7))
+                    } else {
+                        Image(systemName: section.symbol)
+                            .font(.system(size: 11, weight: .medium))
+                    }
+                }
+                .frame(width: 16)
                 Text(section.title)
                     .font(.system(size: 12, weight: .medium))
                 Spacer(minLength: 0)

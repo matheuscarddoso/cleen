@@ -82,6 +82,8 @@ final class AppModel {
             }
         }
         fullscreen.start()
+        agents.onApprovalRequested = { [weak self] in self?.notch.presentRequest(tab: .agents) }
+        agents.onApprovalsCleared = { [weak self] in self?.notch.endRequest() }
         agents.start()
         displays.restoreDimming()
         updates.start()

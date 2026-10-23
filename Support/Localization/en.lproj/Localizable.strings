@@ -1056,3 +1056,38 @@
 "Volume e brilho no notch" = "Volume and brightness in the notch";
 "Permita o Cleen em Ajustes do Sistema › Privacidade › Acessibilidade para começar." = "Allow Cleen in System Settings › Privacy › Accessibility to start.";
 "As teclas de volume e brilho mostram o nível aqui, no lugar do aviso do macOS. Precisa da permissão de Acessibilidade." = "The volume and brightness keys show the level here instead of the macOS overlay. Needs Accessibility permission.";
+
+/* Claude Code permission requests */
+"Ajustes do Claude Code" = "Claude Code settings";
+"Aprovar permissões pelo notch" = "Approve permissions from the notch";
+"Claude Code não encontrado neste Mac." = "Claude Code isn't on this Mac.";
+"Claude pede permissão" = "Claude is asking for permission";
+"Instalar" = "Install";
+"Ligado. O original ficou guardado em settings.json.cleen-backup." = "On. The original is saved as settings.json.cleen-backup.";
+"Mais %lld pedidos esperando" = "%lld more requests waiting";
+"Negar" = "Deny";
+"No settings.json, %@ está num formato que o Claude Code não espera. O Cleen não mexeu no arquivo." = "In settings.json, %@ is in a shape Claude Code doesn't expect. Cleen left the file alone.";
+"Não deu para abrir a conexão local. Os pedidos continuam no terminal." = "Couldn't open the local connection. Requests stay in the terminal.";
+"Não deu para salvar: %@" = "Couldn't save: %@";
+"O script do Cleen sumiu. Reinstale para voltar a funcionar." = "Cleen's script is missing. Reinstall to turn it back on.";
+"O settings.json mudou enquanto o Cleen editava. Tente de novo." = "settings.json changed while Cleen was editing it. Try again.";
+"O settings.json tem um erro na linha %lld. O Cleen não mexe num arquivo que não consegue ler: corrija e tente de novo." = "settings.json has an error on line %lld. Cleen won't touch a file it can't read: fix it and try again.";
+"Os pedidos de permissão, respondidos no notch." = "Permission requests, answered in the notch.";
+"Outro Cleen já está recebendo os pedidos." = "Another Cleen is already receiving the requests.";
+"Pedido de permissão do Claude Code" = "Claude Code permission request";
+"Permite e não pergunta de novo: %@" = "Allows and won't ask again: %@";
+"Permitir sempre" = "Always allow";
+"Quando o Claude Code pedir permissão, o pedido aparece no notch. Com o Cleen fechado, ele pergunta no terminal, como sempre." = "When Claude Code asks for permission, the request shows up in the notch. With Cleen closed, it asks in the terminal as usual.";
+"Quer abrir um endereço" = "Wants to open a URL";
+"Quer editar um arquivo" = "Wants to edit a file";
+"Quer escrever um arquivo" = "Wants to write a file";
+"Quer fazer uma busca" = "Wants to search";
+"Quer iniciar um agente" = "Wants to start an agent";
+"Quer ler um arquivo" = "Wants to read a file";
+"Quer rodar um comando" = "Wants to run a command";
+"Quer usar %@" = "Wants to use %@";
+"Quer usar %@ do %@" = "Wants to use %1$@ from %2$@";
+"Reinstalar" = "Reinstall";
+"Sem resposta, o pedido volta para o terminal" = "With no answer, the request goes back to the terminal";
+
+/* Tab titles from the scaffolding on main */

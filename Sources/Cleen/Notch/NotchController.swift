@@ -177,6 +177,25 @@ final class NotchController {
         }
     }
 
+    /// A request that needs an answer (Claude Code asking for permission): opens on the
+    /// tab and stays until the person comes to it or it's settled, with the keyboard so
+    /// Return and Esc reach it. The launcher and the welcome aren't interrupted; the
+    /// wing shows the request instead.
+    func presentRequest(tab: NotchTab) {
+        guard !state.showsSearch, !state.showsWelcome else { return }
+        presentedUntil = .distantFuture
+        open(tab: tab)
+        panel?.makeKey()
+    }
+
+    /// The request was settled (here, in the terminal, or it ran out of time): a panel
+    /// that opened only for it goes back up; one the person came to stays.
+    func endRequest() {
+        guard presentedUntil == .distantFuture else { return }
+        presentedUntil = nil
+        if !state.isPinned, !state.holdsOpen, !pointerIsInside { close() }
+    }
+
     private var pointerIsInside: Bool {
         state.geometry?.hotZone(isOpen: true, showsWings: NotchSettings.showsWings).contains(NSEvent.mouseLocation) ?? false
     }
