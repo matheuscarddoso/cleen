@@ -9,6 +9,11 @@ cd "$(dirname "$0")/.."
 ROOT="$(pwd)"
 OUT="$ROOT/build/strings"
 rm -rf "$OUT" && mkdir -p "$OUT"
-swift build -c release --product Cleen \
+# A build of its own: the strings are only written when a file compiles, so a cached
+# build would report nothing.
+SCRATCH="$ROOT/build/strings-build"
+rm -rf "$SCRATCH"
+swift build -c release --product Cleen --scratch-path "$SCRATCH" \
   -Xswiftc -emit-localized-strings -Xswiftc -emit-localized-strings-path -Xswiftc "$OUT" >/dev/null
+rm -rf "$SCRATCH"
 swift "$ROOT/scripts/strings-check.swift" "$OUT" "$ROOT/Support/Localization/en.lproj/Localizable.strings" "${1:-}" "$ROOT/build/strings-missing.json"

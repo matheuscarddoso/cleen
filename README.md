@@ -19,6 +19,14 @@ O Cleen passa a abrir junto com o Mac (desliga em Ajustes, no próprio notch).
 
 Para desinstalar: saia pelo ícone da barra de menus e mova o Cleen para o Lixo.
 
+## Idiomas
+
+O Cleen segue o idioma e a região do Mac: português ou inglês (qualquer outro idioma
+cai no inglês), com datas, horas, números e moeda no formato da região. O texto em
+português é a chave de tradução; o inglês fica em
+`Support/Localization/en.lproj/Localizable.strings`. Depois de mexer em textos, rode
+`./scripts/strings.sh` para ver o que falta traduzir.
+
 ## O notch
 
 Passe o mouse no notch (ou ⌃⌥C) e o painel desce dele. A primeira página é a do dia:
