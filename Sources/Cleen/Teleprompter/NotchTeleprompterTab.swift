@@ -125,7 +125,6 @@ private struct TeleprompterEditor: View {
     }
 
     private var controls: some View {
-        @Bindable var model = model
         let preset = Binding<Int?>(
             get: { TeleprompterPace.presets.contains(model.wordsPerMinute) ? model.wordsPerMinute : nil },
             set: { if let value = $0 { model.wordsPerMinute = value } }
