@@ -23,6 +23,10 @@ clang -dynamiclib -fobjc-arc -O2 -framework Foundation \
   "$ROOT/Support/NowPlaying/CleenNowPlaying.m" -o "$APP/Contents/Resources/libCleenNowPlaying.dylib"
 cp "$ROOT/Support/NowPlaying/now-playing.pl" "$APP/Contents/Resources/now-playing.pl"
 
+# Translations: the Portuguese text is the key, en.lproj maps it to English
+# (see scripts/strings.sh).
+cp -R "$ROOT/Support/Localization/"*.lproj "$APP/Contents/Resources/"
+
 # Icon: regenerate only when the script changed.
 ICONSET="$ROOT/build/AppIcon.iconset"
 ICNS="$ROOT/build/AppIcon.icns"
@@ -45,7 +49,8 @@ cat > "$APP/Contents/Info.plist" <<PLIST
   <key>CFBundleIconFile</key><string>AppIcon</string>
   <key>CFBundleShortVersionString</key><string>${VERSION}</string>
   <key>CFBundleVersion</key><string>${BUILD_NUMBER}</string>
-  <key>CFBundleDevelopmentRegion</key><string>pt-BR</string>
+  <!-- Portuguese and English ship; any other language falls back to English. -->
+  <key>CFBundleDevelopmentRegion</key><string>en</string>
   <key>LSMinimumSystemVersion</key><string>26.0</string>
   <key>LSApplicationCategoryType</key><string>public.app-category.utilities</string>
   <key>LSUIElement</key><true/>
@@ -58,6 +63,7 @@ cat > "$APP/Contents/Info.plist" <<PLIST
   <key>NSCameraUsageDescription</key><string>O Espelho do Cleen mostra a câmera frontal para você se ver antes de uma chamada. Nada é gravado.</string>
   <key>NSCalendarsFullAccessUsageDescription</key><string>O Cleen mostra os eventos de hoje no notch.</string>
   <key>NSLocationUsageDescription</key><string>O Cleen usa sua localização só para mostrar o tempo onde você está, e só quando você pede.</string>
+  <key>NSLocationWhenInUseUsageDescription</key><string>O Cleen usa sua localização só para mostrar o tempo onde você está, e só quando você pede.</string>
   <key>NSRemindersFullAccessUsageDescription</key><string>O Cleen mostra seus lembretes no notch e deixa você marcá-los como feitos.</string>
 </dict>
 </plist>
