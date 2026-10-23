@@ -31,4 +31,10 @@ final class NotchState {
     /// While true the panel stays open even if the pointer leaves (a confirmation is
     /// waiting, a sheet or open panel is up).
     var holdsOpen = false
+    /// Files from another app are being dragged over the open panel: the shelf swaps
+    /// its tray for drop zones.
+    var isDraggingFiles = false
+    /// Lets the tab on screen use Esc before it closes the panel (the shelf lets go of
+    /// its selection first). Returns true when it did something.
+    @ObservationIgnored var escapeHandler: (() -> Bool)?
 }

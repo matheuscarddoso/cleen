@@ -1,5 +1,6 @@
 /* English. The keys are Cleen's Portuguese text; check what's missing with scripts/strings.sh. */
 " · apps abertos ficam de fora" = " · open apps are left out";
+"%@ · ficam por um dia" = "%@ · they stay for a day";
 "%@ %@" = "%@ %@";
 "%@ (espaço)" = "%@ (space)";
 "%@ GB" = "%@ GB";
@@ -22,6 +23,10 @@
 "%@/dia" = "%@/day";
 "%@: %@" = "%@: %@";
 "%@: %@, máxima %@, mínima %@" = "%@: %@, high %@, low %@";
+"%lld arquivo" = "%lld file";
+"%lld arquivos" = "%lld files";
+"%lld de %lld selecionado" = "%lld of %lld selected";
+"%lld de %lld selecionados" = "%lld of %lld selected";
 "%lld" = "%lld";
 "%lld GB" = "%lld GB";
 "%lld aba no notch" = "%lld tab in the notch";
@@ -96,6 +101,9 @@
 "Acesso Total ao Disco" = "Full Disk Access";
 "Acesso concedido" = "Access granted";
 "Acres" = "Acres";
+"Adicionar à Shelf" = "Add to Shelf";
+"Adicionar arquivos" = "Add files";
+"Adicionar arquivos…" = "Add Files…";
 "Adicionar" = "Add";
 "Adicionar %@" = "Add %@";
 "Adicionar pasta" = "Add folder";
@@ -147,6 +155,7 @@
 "Arquivos grandes" = "Large Files";
 "Arquivos temporários que os apps recriam quando precisam." = "Temporary files that apps recreate when they need them.";
 "Arrastar um app para o Lixo deixa caches, preferências e dados para trás. O Cleen acha o que pertence a apps que não estão mais no Mac." = "Dragging an app to the Trash leaves caches, preferences, and data behind. Cleen finds what belongs to apps that are no longer on your Mac.";
+"Arraste arquivos ou clique para escolher" = "Drag files here or click to choose";
 "Arraste o Cleen para a pasta Aplicativos e abra por lá. (%@)" = "Drag Cleen to the Applications folder and open it from there. (%@)";
 "Arraste ou role para escolher os minutos" = "Drag or scroll to choose the minutes";
 "Arraste para mudar a ordem." = "Drag to reorder.";
@@ -324,8 +333,8 @@
 "Editar o Início" = "Edit Home";
 "Ele abre sozinho e fecha quando você sai" = "It opens on its own and closes when you leave";
 "Emoji" = "Emoji";
-"Enviar %lld arquivo" = "Send %lld file";
-"Enviar %lld arquivos" = "Send %lld files";
+"Enviar %lld arquivo por AirDrop" = "Send %lld file with AirDrop";
+"Enviar %lld arquivos por AirDrop" = "Send %lld files with AirDrop";
 "Enviar por AirDrop" = "Send with AirDrop";
 "Envie para aparelhos por perto" = "Send to nearby devices";
 "Escolha as ferramentas da barra. A ordem e o resto ficam em Ajustes › Abas." = "Choose the tools in the bar. Their order and the rest are in Settings › Tabs.";
@@ -333,6 +342,7 @@
 "Escolha uma cidade" = "Choose a city";
 "Escolha uma cidade para ver a previsão." = "Choose a city to see the forecast.";
 "Escolha uma pasta com projetos de código." = "Choose a folder with code projects.";
+"Escolher arquivos para enviar por AirDrop" = "Choose files to send with AirDrop";
 "Esconder %@" = "Hide %@";
 "Esconder em tela cheia" = "Hide in full screen";
 "Esconder itens" = "Hide items";
@@ -344,6 +354,7 @@
 "Estado das janelas" = "Window state";
 "Estrela" = "Star";
 "Esvazia o cache de arquivos da memória. Útil antes de abrir algo pesado, o macOS volta a encher sozinho." = "Empties the file cache from memory. Useful before opening something heavy; macOS fills it back up on its own.";
+"Esvaziar a Shelf" = "Empty the Shelf";
 "Eventos de hoje e do mês" = "Today's and this month's events";
 "Excluir" = "Delete";
 "Executar" = "Run";
@@ -357,7 +368,6 @@
 "Fechar ajustes" = "Close Settings";
 "Ferramentas" = "Tools";
 "Ferramentas do Dart" = "Dart tools";
-"Ficam por um dia · segure ⌥ e clique para tirar" = "They stay for a day · hold ⌥ and click to remove";
 "Finder" = "Finder";
 "Firefox (sistema)" = "Firefox (system)";
 "Fixado" = "Pinned";
@@ -387,6 +397,7 @@
 "Grãos de neve" = "Snow grains";
 "Guarda as últimas 300 cópias neste Mac. Senhas de gerenciadores ficam de fora." = "Keeps the last 300 copies on this Mac. Passwords from password managers are left out.";
 "Guardar o que eu copiar" = "Keep what I copy";
+"Guarde por um dia" = "Keep for a day";
 "Hectares" = "Hectares";
 "Histórico" = "History";
 "Histórico da área de transferência" = "Clipboard history";
@@ -395,6 +406,7 @@
 "Hora de focar: rodada %lld de %lld." = "Time to focus: round %lld of %lld.";
 "Horas" = "Hours";
 "IA" = "AI";
+"Ícones" = "Icons";
 "Imagem" = "Image";
 "Imagem (%@×%@)" = "Image (%@×%@)";
 "Imagens" = "Images";
@@ -589,6 +601,8 @@
 "Onças" = "Ounces";
 "Onças líquidas" = "Fluid ounces";
 "Opus semanal" = "Weekly Opus";
+"Os arquivos continuam onde estão; a Shelf guarda só o caminho por um dia." = "Files stay where they are; the Shelf only keeps the path for a day.";
+"Os arquivos ficam aqui por um dia, sem sair do lugar" = "Files stay here for a day without being moved";
 "Outros" = "Other";
 "P" = "S";
 "PASTAS DE PROJETOS" = "PROJECT FOLDERS";
@@ -653,6 +667,7 @@
 "Quando nada acontece" = "When nothing's happening";
 "Quando uma sessão termina e fica esperando você." = "When a session finishes and waits for you.";
 "Quarta" = "Wednesday";
+"Quick Look" = "Quick Look";
 "Quilos" = "Kilograms";
 "Quilômetros" = "Kilometers";
 "Quilômetros por hora" = "Kilometers per hour";
@@ -689,6 +704,7 @@
 "Scripts" = "Scripts";
 "Segunda" = "Monday";
 "Segundos" = "Seconds";
+"Selecionar tudo" = "Select All";
 "Sem acesso aos Lembretes" = "No access to Reminders";
 "Sem assinatura" = "Unsigned";
 "Sem conexão" = "Offline";
@@ -719,8 +735,6 @@
 "Sistema" = "System";
 "Sobre" = "About";
 "Soltar" = "Unpin";
-"Solte arquivos aqui" = "Drop files here";
-"Solte arquivos aqui para enviar por AirDrop" = "Drop files here to send with AirDrop";
 "Sonnet semanal" = "Weekly Sonnet";
 "Stones" = "Stones";
 "Sua pasta pessoal" = "Your home folder";
@@ -745,9 +759,12 @@
 "Timer de %@" = "%@ timer";
 "Timer simples ou Pomodoro" = "Simple timer or Pomodoro";
 "Tirar %@ do Início" = "Remove %@ from Home";
+"Tirar %lld da Shelf" = "Remove %lld from Shelf";
 "Tirar a estrela" = "Unstar";
+"Tirar da Shelf" = "Remove from Shelf";
 "Tirar do Início" = "Remove from Home";
 "Tirar o som" = "Mute";
+"Tirar os selecionados da Shelf" = "Remove the selected from the Shelf";
 "Tire um com ⌘⇧3, ⌘⇧4 ou ⌘⇧5 e ele abre aqui." = "Take one with ⌘⇧3, ⌘⇧4, or ⌘⇧5 and it opens here.";
 "Tocando agora" = "Now Playing";
 "Tocar" = "Play";
