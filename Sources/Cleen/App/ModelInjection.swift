@@ -37,5 +37,6 @@ extension View {
             .environment(app.icons)
             .environment(app.teleprompter)
             .environment(app.assistant)
+            .environment(app.stocks)
     }
 }
