@@ -959,3 +959,34 @@
 "Começar agora" = "Get Started";
 "Personalizar" = "Customize";
 "hello" = "hello";
+
+/* Teleprompter */
+"Cole ou escreva o roteiro…" = "Paste or write the script…";
+"Roteiro" = "Script";
+"Lento" = "Slow";
+"Normal" = "Normal";
+"Rápido" = "Fast";
+"%lld ppm" = "%lld wpm";
+"ppm" = "wpm";
+"Mais devagar" = "Slower";
+"Mais rápido" = "Faster";
+"Mais devagar (↓)" = "Slower (↓)";
+"Mais rápido (↑)" = "Faster (↑)";
+"Palavras por minuto" = "Words per minute";
+"%lld palavras por minuto" = "%lld words per minute";
+"%lld pt" = "%lld pt";
+"Texto menor" = "Smaller text";
+"Texto maior" = "Larger text";
+"Tamanho do texto" = "Text size";
+"Começar (⌘↩)" = "Start (⌘↩)";
+"Escreva o roteiro para começar" = "Write a script to start";
+"1 palavra" = "1 word";
+"%lld palavras" = "%lld words";
+"%@ · cerca de %@" = "%1$@ · about %2$@";
+"Recomeçar (R)" = "Restart (R)";
+"Parar (Esc)" = "Stop (Esc)";
+"Pausar (Espaço)" = "Pause (Space)";
+"Continuar (Espaço)" = "Resume (Space)";
+"Ler de novo (Espaço)" = "Read again (Space)";
+"Pausado · Espaço continua" = "Paused · Space resumes";
+"Fim do roteiro · Espaço lê de novo" = "End of script · Space reads again";

@@ -34,5 +34,6 @@ extension View {
             .environment(app.clipboard)
             .environment(app.screenshots)
             .environment(app.icons)
+            .environment(app.teleprompter)
     }
 }

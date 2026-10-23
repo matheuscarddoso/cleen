@@ -42,6 +42,7 @@ final class AppModel {
     let clipboard = ClipboardModel()
     let screenshots = ScreenshotModel()
     let icons = LucideModel()
+    let teleprompter = TeleprompterModel()
     @ObservationIgnored private(set) lazy var notch = NotchCoordinator(app: self)
     @ObservationIgnored private var onboarding: OnboardingController?
 
