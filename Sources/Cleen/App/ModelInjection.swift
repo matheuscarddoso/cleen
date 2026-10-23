@@ -25,6 +25,7 @@ extension View {
             .environment(app.agents)
             .environment(app.displays)
             .environment(app.updates)
+            .environment(app.mediaKeys)
             .environment(app.search)
             .environment(app.fullscreen)
             .environment(app.timer)

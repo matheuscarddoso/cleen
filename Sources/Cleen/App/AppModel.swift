@@ -33,6 +33,7 @@ final class AppModel {
     let agents = AgentsModel()
     let displays = DisplaysModel()
     let updates = UpdateModel()
+    @ObservationIgnored private(set) lazy var mediaKeys = MediaKeyHUD(displays: displays)
     @ObservationIgnored private(set) lazy var search = SearchModel(app: self)
     let fullscreen = FullscreenWatcher()
     let timer = TimerModel()
@@ -84,6 +85,7 @@ final class AppModel {
         agents.start()
         displays.restoreDimming()
         updates.start()
+        mediaKeys.start()
         Thumbnails.shared.scale = NSScreen.screens.map(\.backingScaleFactor).max() ?? 2
     }
 

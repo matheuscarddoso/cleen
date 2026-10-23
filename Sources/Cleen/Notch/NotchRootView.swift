@@ -15,6 +15,7 @@ struct NotchRootView: View {
     @Environment(AppModel.self) private var app
     @Environment(TimerModel.self) private var timer
     @Environment(AgentsModel.self) private var agents
+    @Environment(MediaKeyHUD.self) private var mediaKeys
 
     var body: some View {
         if let geometry = state.geometry {
@@ -39,6 +40,11 @@ struct NotchRootView: View {
                         .padding(.horizontal, NotchStyle.openTopRadius)
                         .frame(width: geometry.openSize.width, height: geometry.openSize.height, alignment: .top)
                         .transition(state.opensInstantly ? .identity : .notchPanel)
+                } else if let reading = mediaKeys.reading(on: controller.screen) {
+                    MediaKeyHUDWings(reading: reading, notchWidth: geometry.notchSize.width, notchHeight: geometry.notchSize.height)
+                        .padding(.horizontal, NotchStyle.closedTopRadius)
+                        .frame(width: closed.width, height: closed.height)
+                        .transition(.opacity.animation(.smooth(duration: 0.2)))
                 } else if wingWidth > 0 {
                     NotchWings(notchWidth: geometry.notchSize.width, notchHeight: geometry.notchSize.height)
                         .padding(.horizontal, NotchStyle.closedTopRadius)
@@ -54,6 +60,13 @@ struct NotchRootView: View {
                     .fill(NotchStyle.background)
                     .shadow(color: .black.opacity(state.isOpen ? 0.55 : 0), radius: 22, y: 10)
             }
+            .overlay(alignment: .top) {
+                if state.isOpen, !welcomes, let reading = mediaKeys.reading(on: controller.screen) {
+                    MediaKeyHUDPill(reading: reading)
+                        .padding(.top, geometry.notchSize.height + 4)
+                        .transition(.scale(0.85, anchor: .top).combined(with: .opacity).animation(.spring(response: 0.36, dampingFraction: 0.84)))
+                }
+            }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             .animation(.spring(response: 0.42, dampingFraction: 0.82), value: wingWidth)
             .environment(\.colorScheme, .dark)
@@ -65,6 +78,9 @@ struct NotchRootView: View {
     /// banner, the usual wing when there's something to show, none otherwise (also
     /// during full screen, unless the person wants the wings there).
     private var wingWidth: Double {
+        // Volume and brightness stand in for the system's display, so they show even
+        // with the wings off or in full screen.
+        if mediaKeys.reading(on: controller.screen) != nil { return MediaKeyHUD.wingWidth }
         guard showsWings else { return 0 }
         if hidesInFullscreen, fullscreen.isFullscreen(controller.screen) { return 0 }
         let busy = junk.phase == .scanning || junk.isCleaning || app.isSmartScanning || app.isSmartCleaning

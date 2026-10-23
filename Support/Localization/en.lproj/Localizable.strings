@@ -1051,3 +1051,8 @@
 "Não encontrei %@" = "Couldn't find %@";
 "Remover da lista" = "Remove from list";
 "Sem conexão para buscar %@" = "No connection to look up %@";
+
+/* Volume e brilho no notch */
+"Volume e brilho no notch" = "Volume and brightness in the notch";
+"Permita o Cleen em Ajustes do Sistema › Privacidade › Acessibilidade para começar." = "Allow Cleen in System Settings › Privacy › Accessibility to start.";
+"As teclas de volume e brilho mostram o nível aqui, no lugar do aviso do macOS. Precisa da permissão de Acessibilidade." = "The volume and brightness keys show the level here instead of the macOS overlay. Needs Accessibility permission.";
