@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-# Cuts a release: tags it, builds the DMG, writes appcast.json and publishes both to
-# the public releases repo the updater reads (UpdateModel.feedURL).
+# Cuts a release: tags it, builds the DMG, writes appcast.json and publishes both as a
+# GitHub release of this repo, where the updater reads them (UpdateModel.feedURL).
 #   ./scripts/release.sh 1.2.0 "O que mudou, numa linha"
 # Needs a clean tree and `gh` signed in to the personal account.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 VERSION="${1:?versão, ex.: 1.2.0}"
 NOTES="${2:-}"
-RELEASES_REPO="matheuscarddoso/cleen-releases"
+RELEASES_REPO="matheuscarddoso/cleen"
 TAG="v$VERSION"
 
 [[ -z "$(git status --porcelain)" ]] || { echo "Há mudanças sem commit."; exit 1; }

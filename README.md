@@ -7,7 +7,7 @@ dependências.
 
 Precisa de um Mac com chip Apple e macOS 26 ou mais novo.
 
-1. Abra o `Cleen.dmg` e arraste o Cleen para Aplicativos.
+1. Baixe o `Cleen-<versão>.dmg` da [última versão](https://github.com/matheuscarddoso/cleen/releases/latest), abra e arraste o Cleen para Aplicativos.
 2. Abra o Cleen em Aplicativos. O app não é notarizado pela Apple, então na primeira
    vez o macOS avisa que não pôde verificá-lo. Clique em **OK**, vá em **Ajustes do
    Sistema › Privacidade e Segurança**, role até o fim e clique em **Abrir Mesmo
@@ -15,7 +15,9 @@ Precisa de um Mac com chip Apple e macOS 26 ou mais novo.
 3. O tour de boas-vindas pede as permissões, uma de cada vez, e explica para que
    serve cada uma. Todas são opcionais.
 
-O Cleen passa a abrir junto com o Mac (desliga em Ajustes, no próprio notch).
+O Cleen passa a abrir junto com o Mac (desliga em Ajustes, no próprio notch) e se
+atualiza sozinho: a cada seis horas procura uma versão nova nos releases deste
+repositório, confere o SHA-256 e a assinatura, e troca o app (Ajustes › Sobre).
 
 Para desinstalar: saia pelo ícone da barra de menus e mova o Cleen para o Lixo.
 
@@ -88,8 +90,9 @@ swift test                      # testes da CleenKit (Swift Testing)
 ./scripts/dmg.sh                # gera build/Cleen.dmg
 ```
 
-A versão do app vem da última tag (`v1.0.0` → 1.0.0). Para lançar uma versão: crie a
-tag e rode `./scripts/dmg.sh`.
+A versão do app vem da última tag (`v1.0.0` → 1.0.0). Para lançar uma versão:
+`./scripts/release.sh 1.2.0 "o que mudou"` (cria a tag, gera o DMG e publica o release
+com o `appcast.json` que a atualização automática lê).
 
 Para conferir telas: `--notch <aba>` abre o notch fixado numa aba, `--settings` abre
 Ajustes, `--scan` já analisa, `--onboarding` repete o tour;

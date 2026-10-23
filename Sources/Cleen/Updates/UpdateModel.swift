@@ -23,7 +23,7 @@ final class UpdateModel {
     private(set) var phase = Phase.idle
 
     /// Published with every release by `scripts/release.sh`.
-    static let feedURL = URL(string: "https://github.com/matheuscarddoso/cleen-releases/releases/latest/download/appcast.json")!
+    static let feedURL = URL(string: "https://github.com/matheuscarddoso/cleen/releases/latest/download/appcast.json")!
     static let automaticKey = "updatesAutomatic"
     private static let interval: Duration = .seconds(6 * 3600)
 
