@@ -13,6 +13,7 @@ struct NotchWings: View {
     @Environment(AppModel.self) private var app
     @Environment(NowPlayingModel.self) private var nowPlaying
     @Environment(LiveActivityCenter.self) private var live
+    @Environment(TimerModel.self) private var timer
     @AppStorage(LiveActivitySettings.idleKey) private var idle = LiveActivitySettings.Idle.disk.rawValue
 
     var body: some View {
@@ -37,6 +38,7 @@ struct NotchWings: View {
         .frame(maxHeight: .infinity)
         .animation(.smooth(duration: 0.3), value: isPlaying)
         .animation(.smooth(duration: 0.3), value: live.meeting)
+        .animation(.smooth(duration: 0.3), value: timer.isActive)
         .accessibilityElement(children: .combine)
         .accessibilityLabel("Cleen")
     }
@@ -64,6 +66,11 @@ struct NotchWings: View {
             WingSpinner(size: artworkSize - 2)
                 .frame(width: artworkSize, height: artworkSize)
                 .transition(.opacity)
+        } else if timer.isActive {
+            TimelineView(.periodic(from: .now, by: 1)) { context in
+                WingRing(fraction: 1 - timer.progress(at: context.date), color: timer.isRunning ? NotchStyle.warning : NotchStyle.secondary)
+            }
+            .transition(.opacity)
         } else if case .meeting(_, _, let color) = live.meeting {
             Image(systemName: "calendar")
                 .font(.system(size: 12, weight: .medium))
@@ -91,7 +98,12 @@ struct NotchWings: View {
 
     @ViewBuilder
     private var trailing: some View {
-        if case .meeting(_, let start, _) = live.meeting, !isBusy {
+        if timer.isActive, !isBusy {
+            TimelineView(.periodic(from: .now, by: 1)) { context in
+                wingText(TimerClock.string(timer.remaining(at: context.date)), color: timer.isRunning ? NotchStyle.primary : NotchStyle.secondary)
+            }
+            .transition(.opacity)
+        } else if case .meeting(_, let start, _) = live.meeting, !isBusy {
             TimelineView(.periodic(from: .now, by: 15)) { context in
                 wingText(MeetingCountdown.text(until: start, now: context.date), color: NotchStyle.primary)
             }

@@ -47,6 +47,11 @@ struct LiveActivityBanner: View {
                 .font(.system(size: 12, weight: .medium))
                 .foregroundStyle(Color(nsColor: color))
             label(title)
+        case .timerEnded(let phase):
+            Image(systemName: "timer")
+                .font(.system(size: 12, weight: .medium))
+                .foregroundStyle(NotchStyle.warning)
+            label(phase)
         }
     }
 
@@ -65,6 +70,9 @@ struct LiveActivityBanner: View {
         case .meeting(_, let start, _):
             Text(MeetingCountdown.text(until: start))
                 .foregroundStyle(NotchStyle.primary)
+        case .timerEnded:
+            Text("Concluído")
+                .foregroundStyle(NotchStyle.warning)
         }
     }
 

@@ -13,6 +13,7 @@ struct NotchRootView: View {
     @Environment(NowPlayingModel.self) private var nowPlaying
     @Environment(JunkModel.self) private var junk
     @Environment(AppModel.self) private var app
+    @Environment(TimerModel.self) private var timer
 
     var body: some View {
         if let geometry = state.geometry {
@@ -61,7 +62,7 @@ struct NotchRootView: View {
         if hidesInFullscreen, fullscreen.isFullscreen(controller.screen) { return 0 }
         let busy = junk.phase == .scanning || junk.isCleaning || app.isSmartScanning || app.isSmartCleaning
         if live.banner != nil, !busy { return LiveActivity.bannerWingWidth }
-        let hasContent = busy || live.meeting != nil || nowPlaying.track?.isPlaying == true
+        let hasContent = busy || timer.isActive || live.meeting != nil || nowPlaying.track?.isPlaying == true
             || LiveActivitySettings.Idle(rawValue: idle) != LiveActivitySettings.Idle.none
         return hasContent ? NotchGeometry.wingWidth : 0
     }

@@ -7,6 +7,8 @@ enum LiveActivity: Equatable {
     case headphones(name: String, connected: Bool)
     case track(title: String, artist: String)
     case meeting(title: String, start: Date, color: NSColor)
+    /// A timer or Pomodoro phase that just ran out ("Foco", "Pausa", "Timer").
+    case timerEnded(phase: String)
 
     enum Power: Equatable {
         case charging

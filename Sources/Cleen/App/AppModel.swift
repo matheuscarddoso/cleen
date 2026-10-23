@@ -65,6 +65,13 @@ final class AppModel {
         LiveActivitySettings.register()
         nowPlaying.onTrackChange = { [live] track in live.trackChanged(track) }
         live.start(agenda: agenda)
+        timer.onPhaseEnd = { [live] ended in
+            switch ended {
+            case .countdown: live.timerEnded(phase: "Timer")
+            case .focus: live.timerEnded(phase: "Foco")
+            case .shortBreak, .longBreak: live.timerEnded(phase: "Pausa")
+            }
+        }
         fullscreen.start()
         Thumbnails.shared.scale = NSScreen.screens.map(\.backingScaleFactor).max() ?? 2
     }

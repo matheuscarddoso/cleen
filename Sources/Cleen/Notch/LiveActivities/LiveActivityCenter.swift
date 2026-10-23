@@ -76,6 +76,11 @@ final class LiveActivityCenter {
         }
     }
 
+    /// Called by the timer when a countdown or a Pomodoro phase runs out.
+    func timerEnded(phase: String) {
+        show(.timerEnded(phase: phase))
+    }
+
     /// Called by the player when what's playing changes.
     func trackChanged(_ track: NowPlayingTrack?) {
         guard let track, track.isPlaying else { return }
