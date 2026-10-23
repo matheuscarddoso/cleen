@@ -26,13 +26,20 @@ struct NotchOpenContent: View {
                     .frame(maxWidth: .infinity, minHeight: 0, maxHeight: .infinity, alignment: .top)
                     .clipped()
                     .padding(.top, 6)
-                NotchTabBar()
-                    .padding(.bottom, 10)
-                    .padding(.top, 6)
+                // The expanded mirror takes the tab bar's room too.
+                if !mirrorFillsPanel {
+                    NotchTabBar()
+                        .padding(.bottom, 10)
+                        .padding(.top, 6)
+                        .transition(.opacity)
+                }
             }
         }
         .foregroundStyle(NotchStyle.primary)
+        .animation(.spring(response: 0.45, dampingFraction: 0.86), value: mirrorFillsPanel)
     }
+
+    private var mirrorFillsPanel: Bool { state.mirrorExpanded && state.tab == .home }
 
     /// Room between the panel's rounded edge and its content.
     static let inset = 20.0

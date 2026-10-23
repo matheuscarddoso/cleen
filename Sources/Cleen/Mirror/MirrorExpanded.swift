@@ -14,6 +14,8 @@ struct MirrorExpanded: View {
                 RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(NotchStyle.cardStroke)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+            // Same gap at the bottom as on the sides.
+            .padding(.bottom, NotchOpenContent.inset - 6)
             .contentShape(.rect)
             .onTapGesture { notch.mirrorExpanded = false }
             .onAppear(perform: mirror.appear)

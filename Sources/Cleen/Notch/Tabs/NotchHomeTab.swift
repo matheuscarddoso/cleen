@@ -12,7 +12,6 @@ struct NotchHomeTab: View {
         ZStack(alignment: .top) {
             if state.mirrorExpanded {
                 MirrorExpanded(namespace: mirrorSpace)
-                    .padding(.bottom, 4)
             } else {
                 VStack(alignment: .leading, spacing: 12) {
                     NotchGreeting()
