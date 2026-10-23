@@ -75,7 +75,24 @@ PLIST
 # ties privacy permissions (Calendar, Reminders, Full Disk Access, Keychain "Always
 # Allow") to the signature, so every rebuild would silently lose them.
 # Override with CLEEN_SIGN_IDENTITY; falls back to ad-hoc when no certificate exists.
-IDENTITY="${CLEEN_SIGN_IDENTITY:-$(security find-identity -v -p codesigning 2>/dev/null | grep -m1 'Apple Development' | awk '{print $2}')}"
+# The Apple Development certificate of the personal team (9QGGX38JS2), picked by team
+# rather than by name so no account details live in the script.
+TEAM_ID="${CLEEN_TEAM_ID:-9QGGX38JS2}"
+team_identity() {
+  local hash
+  for hash in $(security find-identity -v -p codesigning 2>/dev/null | awk '/Apple Development/ {print $2}'); do
+    if security find-certificate -a -Z -p 2>/dev/null | awk -v h="$hash" '
+        /^SHA-1 hash:/ { keep = ($3 == h); next }
+        keep && /BEGIN CERT/ { pem = 1 }
+        pem { print }
+        /END CERT/ { pem = 0; if (keep) exit }' \
+      | openssl x509 -noout -subject 2>/dev/null | grep -q "OU *= *$TEAM_ID"; then
+      echo "$hash"
+      return
+    fi
+  done
+}
+IDENTITY="${CLEEN_SIGN_IDENTITY:-$(team_identity)}"
 IDENTITY="${IDENTITY:--}"
 codesign --force --sign "$IDENTITY" --timestamp=none "$APP/Contents/Resources/libCleenNowPlaying.dylib" >/dev/null
 codesign --force --sign "$IDENTITY" --timestamp=none "$APP" >/dev/null
