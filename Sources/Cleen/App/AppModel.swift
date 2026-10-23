@@ -31,6 +31,7 @@ final class AppModel {
     let homeLayout = HomeLayout()
     let live = LiveActivityCenter()
     let agents = AgentsModel()
+    let displays = DisplaysModel()
     let fullscreen = FullscreenWatcher()
     let timer = TimerModel()
     let notes = NotesModel()
@@ -76,6 +77,7 @@ final class AppModel {
         fullscreen.start()
         agents.onFinished = { [live] session in live.agentFinished(session.title) }
         agents.start()
+        displays.restoreDimming()
         Thumbnails.shared.scale = NSScreen.screens.map(\.backingScaleFactor).max() ?? 2
     }
 

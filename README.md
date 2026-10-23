@@ -57,6 +57,7 @@ painel, sem diálogo.
 | Restos de apps | Dados de apps que já foram apagados | Lixo |
 | Inicialização | Launch agents/daemons com verificação de assinatura | Desativar (reversível) ou Lixo |
 | Sistema | CPU, memória, rede, processos | — |
+| Telas (Ajustes) | Brilho de cada tela: a do Mac, e o monitor externo pelo próprio cabo (DDC); sem DDC, escurece a imagem | — |
 | Manutenção | Liberar RAM, snapshots locais, DNS, Spotlight, Abrir Com, fontes, verificar disco | — |
 
 ## Segurança

@@ -1,6 +1,7 @@
 /// The pages of Ajustes, grouped like OmniNotch's settings sidebar.
 enum SettingsSection: String, CaseIterable, Identifiable {
     case general
+    case displays
     case notch
     case tabs
     case cleaning
@@ -11,6 +12,7 @@ enum SettingsSection: String, CaseIterable, Identifiable {
     var title: String {
         switch self {
         case .general: String(localized: "Geral")
+        case .displays: String(localized: "Telas")
         case .notch: String(localized: "Aparência")
         case .tabs: String(localized: "Abas")
         case .cleaning: String(localized: "Limpeza")
@@ -21,6 +23,7 @@ enum SettingsSection: String, CaseIterable, Identifiable {
     var subtitle: String {
         switch self {
         case .general: String(localized: "Como o Cleen começa, onde aparece e quando avisa.")
+        case .displays: String(localized: "O brilho de cada tela, inclusive a do monitor externo.")
         case .notch: String(localized: "Como o notch abre e o que mostra fechado.")
         case .tabs: String(localized: "As ferramentas na barra do notch e a ordem delas.")
         case .cleaning: String(localized: "O que conta como projeto parado e arquivo grande.")
@@ -31,6 +34,7 @@ enum SettingsSection: String, CaseIterable, Identifiable {
     var symbol: String {
         switch self {
         case .general: "gearshape"
+        case .displays: "sun.max"
         case .notch: "rectangle.topthird.inset.filled"
         case .tabs: "square.grid.2x2"
         case .cleaning: "trash"
@@ -40,7 +44,7 @@ enum SettingsSection: String, CaseIterable, Identifiable {
 
     /// Sidebar headings, as in OmniNotch: "NOTCH", "FERRAMENTAS".
     static let groups: [(title: String?, sections: [SettingsSection])] = [
-        (nil, [.general]),
+        (nil, [.general, .displays]),
         (String(localized: "Notch"), [.notch, .tabs]),
         (String(localized: "Ferramentas"), [.cleaning]),
         ("Cleen", [.about]),

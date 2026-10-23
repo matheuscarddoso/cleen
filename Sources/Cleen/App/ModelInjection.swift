@@ -23,6 +23,7 @@ extension View {
             .environment(app.homeLayout)
             .environment(app.live)
             .environment(app.agents)
+            .environment(app.displays)
             .environment(app.fullscreen)
             .environment(app.timer)
             .environment(app.notes)

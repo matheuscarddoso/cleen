@@ -866,3 +866,12 @@
 "Ícone" = "Icon";
 "↓" = "↓";
 "⌃ ⌥ C" = "⌃ ⌥ C";
+"Brilho" = "Brightness";
+"Igual às teclas de brilho" = "Same as the brightness keys";
+"Lendo as telas…" = "Reading displays…";
+"O brilho de cada tela, inclusive a do monitor externo." = "The brightness of every display, the external monitor's too.";
+"O monitor externo recebe o brilho pelo próprio cabo, como nos botões dele. Se ele não aceitar, o Cleen escurece a imagem." = "The external monitor gets its brightness over the cable itself, just like its own buttons. If it doesn't accept it, Cleen dims the picture.";
+"Pelo cabo, direto no monitor" = "Over the cable, straight to the monitor";
+"Sem ajuste pelo cabo · escurece a imagem" = "No adjustment over the cable · dims the picture";
+"Tela do Mac" = "Mac display";
+"Telas" = "Displays";
