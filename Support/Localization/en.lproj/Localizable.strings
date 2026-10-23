@@ -696,7 +696,6 @@
 "Restos" = "Leftovers";
 "Restos de apps" = "App Leftovers";
 "Return adiciona" = "Return adds";
-"Return copia o resultado" = "Return copies the result";
 "Reunião movida para quinta, 15h. Levar os números do trimestre." = "Meeting moved to Thursday, 3 PM. Bring the quarter's numbers.";
 "Revisar o PR do checkout" = "Review the checkout PR";
 "Roda o atalho" = "Runs the shortcut";
@@ -1104,3 +1103,4 @@
 "Sem resposta, o pedido volta para o terminal" = "With no answer, the request goes back to the terminal";
 
 /* Tab titles from the scaffolding on main */
+"Return cola o resultado" = "Return pastes the result";

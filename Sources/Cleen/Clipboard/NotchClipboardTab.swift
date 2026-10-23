@@ -6,6 +6,7 @@ import SwiftUI
 struct NotchClipboardTab: View {
     @Environment(ClipboardModel.self) private var model
     @Environment(NotchState.self) private var notch
+    @Environment(AppModel.self) private var app
     @FocusState private var searchFocused: Bool
 
     var body: some View {
@@ -50,8 +51,10 @@ struct NotchClipboardTab: View {
         if let entry = model.selected { paste(entry) }
     }
 
+    /// Back on the clipboard, then pasted where you were typing, with the notch closed.
     private func paste(_ entry: ClipboardEntry) {
         notch.isPinned = false
-        model.paste(entry)
+        model.copy(entry)
+        app.notch.closeAndPaste()
     }
 }

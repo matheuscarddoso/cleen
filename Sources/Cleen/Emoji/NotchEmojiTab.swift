@@ -6,6 +6,7 @@ import SwiftUI
 struct NotchEmojiTab: View {
     @State private var model = EmojiModel.shared
     @Environment(NotchState.self) private var notch
+    @Environment(AppModel.self) private var app
     @FocusState private var searchFocused: Bool
     @State private var confirmation: Confirmation?
 
@@ -93,15 +94,11 @@ struct NotchEmojiTab: View {
         }
     }
 
+    /// Pastes the emoji where you were typing and gets out of the way.
     private func use(_ item: EmojiItem) {
         notch.isPinned = false
-        let pasted = model.use(item)
-        let shown = Confirmation(emoji: item.emoji, pasted: pasted, stamp: .now)
-        withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) { confirmation = shown }
-        Task {
-            try? await Task.sleep(for: .seconds(1.2))
-            if confirmation == shown { withAnimation(.smooth(duration: 0.2)) { confirmation = nil } }
-        }
+        model.copy(item)
+        app.notch.closeAndPaste()
     }
 }
 

@@ -17,7 +17,7 @@ struct ConverterFootnote: View {
             if model.category == .currency {
                 ratesStatus
             } else {
-                Text("Return copia o resultado")
+                Text("Return cola o resultado")
             }
         }
         .font(NotchStyle.caption)

@@ -3,11 +3,12 @@ import CleenKit
 import SwiftUI
 
 /// The Conversor tab, as in OmniNotch: categories on top, then the value you type and
-/// its conversion side by side with a swap between them. Return copies the result.
+/// its conversion side by side with a swap between them. Return pastes the result.
 struct NotchConverterTab: View {
     @State private var model = ConverterModel.shared
     @FocusState private var inputFocused: Bool
     @State private var copiedAt: Date?
+    @Environment(AppModel.self) private var app
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -36,7 +37,7 @@ struct NotchConverterTab: View {
                     .font(.converterValue)
                     .foregroundStyle(model.value == nil && !model.input.isEmpty ? NotchStyle.critical : NotchStyle.primary)
                     .focused($inputFocused)
-                    .onSubmit(copyResult)
+                    .onSubmit(pasteResult)
                     .accessibilityLabel("Valor em \(model.from.name)")
             }
             ConverterSwapButton(action: swap)
@@ -62,6 +63,13 @@ struct NotchConverterTab: View {
 
     private func swap() {
         withAnimation(.smooth(duration: 0.22)) { model.swap() }
+    }
+
+    /// Return: the result pasted where you were typing, the notch closed.
+    private func pasteResult() {
+        guard model.result != nil else { return }
+        copyResult()
+        app.notch.closeAndPaste()
     }
 
     /// Copies the converted number as shown, without the unit, ready to paste.

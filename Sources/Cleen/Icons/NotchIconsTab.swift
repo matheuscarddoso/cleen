@@ -7,6 +7,7 @@ import SwiftUI
 /// Return copies the top match's.
 struct NotchIconsTab: View {
     @Environment(LucideModel.self) private var model
+    @Environment(AppModel.self) private var app
     @FocusState private var searchFocused: Bool
     @State private var confirmation: Confirmation?
 
@@ -118,9 +119,16 @@ struct NotchIconsTab: View {
 
     // MARK: Copying
 
+    /// Return: the top result's SVG, pasted where you were typing.
     private func copyTopResult() {
         guard model.isSearching, let first = model.results.first else { return }
-        copy(first, .svg)
+        Task {
+            if await model.copySVG(first) {
+                app.notch.closeAndPaste()
+            } else {
+                confirm(Confirmation(icon: first, message: String(localized: "Sem conexão para baixar o SVG"), failed: true, stamp: .now))
+            }
+        }
     }
 
     private func copy(_ icon: LucideIcon, _ kind: LucideCopyKind) {

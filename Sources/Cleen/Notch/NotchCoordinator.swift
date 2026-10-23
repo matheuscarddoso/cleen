@@ -69,6 +69,13 @@ final class NotchCoordinator {
         controllers.forEach { $0.endRequest() }
     }
 
+    /// Closes whichever notch is open, hands the keyboard back to the app you were in,
+    /// and pastes what was just put on the clipboard there (emoji, clipboard entries,
+    /// icons, results).
+    func closeAndPaste() {
+        (controllers.first { $0.state.isOpen } ?? primary)?.closeSearch(paste: true)
+    }
+
     func openSettings() {
         (controllerUnderPointer ?? primary)?.openSettings()
     }

@@ -60,6 +60,16 @@ final class EmojiModel {
 
     // MARK: Using one
 
+    /// Puts the emoji on the clipboard (marked transient) and counts it as used; the
+    /// notch then closes and pastes it into the app in front.
+    func copy(_ item: EmojiItem) {
+        let pasteboard = NSPasteboard.general
+        pasteboard.clearContents()
+        pasteboard.setString(item.emoji, forType: .string)
+        pasteboard.setData(Data(), forType: NSPasteboard.PasteboardType("org.nspasteboard.TransientType"))
+        noteUsed(item)
+    }
+
     /// Copies the emoji and pastes it into the app in front. Returns whether it pasted
     /// (false without Accessibility: the emoji is still on the clipboard).
     @discardableResult
