@@ -46,6 +46,7 @@ struct ClosedNotchSettings: View {
                         NotchSwitch(label: String(localized: "Esconder em tela cheia"), isOn: $hidesInFullscreen)
                     }
                 }
+                MediaKeySettingRow()
             }
         }
         .animation(.smooth(duration: 0.25), value: showsWings)
