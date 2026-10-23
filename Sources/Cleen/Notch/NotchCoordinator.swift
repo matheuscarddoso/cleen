@@ -88,6 +88,7 @@ final class NotchCoordinator {
         let others = NSScreen.screens.filter { $0.safeAreaInsets.top == 0 }
         if all { return notched + others }
         if let first = notched.first { return [first] }
-        return [NSScreen.main ?? NSScreen.screens[0]]
+        // Briefly none at all while the lid closes with no display attached.
+        return (NSScreen.main ?? NSScreen.screens.first).map { [$0] } ?? []
     }
 }

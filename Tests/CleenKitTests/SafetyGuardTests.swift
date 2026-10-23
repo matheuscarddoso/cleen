@@ -32,6 +32,27 @@ struct SafetyGuardTests {
         }
     }
 
+    @Test(arguments: [
+        "Library/Mobile Documents/com~apple~CloudDocs", "Library/Mobile Documents/iCloud~md~obsidian",
+        "Library/CloudStorage/Dropbox", "Pictures/Photos Library.photoslibrary",
+    ])
+    func refusesSyncedRootsAndPhotosLibraries(_ path: String) throws {
+        let folder = try sandbox.folder(path)
+        #expect(throws: SafetyGuard.Violation.self) { try safety.validate(folder) }
+    }
+
+    @Test func allowsFilesInsideSyncedFolders() throws {
+        let file = try sandbox.file("Library/Mobile Documents/com~apple~CloudDocs/old.zip")
+        #expect(try safety.validate(file).lastPathComponent == "old.zip")
+    }
+
+    @Test func judgesDataVolumePathsByTheirUsualPath() throws {
+        let file = try sandbox.file("Downloads/setup.dmg")
+        let onDataVolume = URL(filePath: "/System/Volumes/Data" + file.resolvingSymlinksInPath().path(percentEncoded: false))
+        #expect(try safety.validate(onDataVolume).lastPathComponent == "setup.dmg")
+        #expect(throws: SafetyGuard.Violation.self) { try safety.validate(URL(filePath: "/System/Volumes/Data/System/Library")) }
+    }
+
     @Test func allowsItemsInsideCleanableFolders() throws {
         let cache = try sandbox.folder("Library/Caches/com.example.app")
         #expect(try safety.validate(cache).lastPathComponent == "com.example.app")

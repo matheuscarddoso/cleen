@@ -146,6 +146,9 @@ final class AgendaModel {
         let calendar = Calendar.current
         let now = Date.now
         let endOfDay = calendar.date(byAdding: .day, value: 1, to: calendar.startOfDay(for: now)) ?? now
+        // Access granted later in Ajustes do Sistema counts without a relaunch.
+        if EKEventStore.authorizationStatus(for: .event) == .fullAccess { calendarAccess = .granted }
+        if EKEventStore.authorizationStatus(for: .reminder) == .fullAccess { remindersAccess = .granted }
 
         if calendarAccess == .granted {
             // A window around today for the day strip, plus any month browsed since.

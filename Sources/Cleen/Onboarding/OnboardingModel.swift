@@ -2,6 +2,7 @@ import AppKit
 import ApplicationServices
 import CleenKit
 import Observation
+import ServiceManagement
 import SwiftUI
 import UserNotifications
 
@@ -157,6 +158,10 @@ final class OnboardingModel {
         guard phase != .leaving else { return }
         UserDefaults.standard.set(true, forKey: Self.completedKey)
         UserDefaults.standard.removeObject(forKey: Self.stepKey)
+        // A notch app is meant to be there every time; Ajustes turns this off.
+        if !AppLocation.needsMove, SMAppService.mainApp.status != .enabled {
+            try? SMAppService.mainApp.register()
+        }
         poller?.cancel()
         withAnimation(.spring(response: 0.55, dampingFraction: 0.9)) { phase = .leaving }
         Task { [weak self] in

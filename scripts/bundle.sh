@@ -7,7 +7,9 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 ROOT="$(pwd)"
 APP="$ROOT/build/Cleen.app"
-VERSION="$(git describe --tags --always 2>/dev/null || echo 0.1.0)"
+# The last release tag, without its "v" (v1.0.0 → 1.0.0); 0.1.0 before the first one.
+VERSION="$(git describe --tags --abbrev=0 2>/dev/null || echo 0.1.0)"
+VERSION="${VERSION#v}"
 BUILD_NUMBER="$(git rev-list --count HEAD 2>/dev/null || echo 1)"
 
 swift build -c release --product Cleen

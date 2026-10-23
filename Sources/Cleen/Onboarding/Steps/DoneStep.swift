@@ -18,6 +18,7 @@ struct DoneStep: View {
                 summary("Calendário e Lembretes", on: EKEventStore.authorizationStatus(for: .event) == .fullAccess)
                 summary("Colar com um clique", on: model.accessibility)
                 summary(tabs.visible.count.counted("aba no notch", "abas no notch"), on: true)
+                summary("Abre junto com o Mac", on: true)
             }
         }
     }

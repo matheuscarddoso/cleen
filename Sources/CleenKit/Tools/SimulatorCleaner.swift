@@ -4,7 +4,11 @@ import Foundation
 /// anymore, yet each keeps its whole disk image.
 public enum SimulatorCleaner {
     public static func inspect(home: URL = Paths.home) async -> ToolCleanup? {
-        guard FileManager.default.isExecutableFile(atPath: "/usr/bin/xcrun"),
+        // Without Xcode, /usr/bin/xcrun is only a stub that offers to install the
+        // developer tools, so it's never called unless there are simulators at all.
+        let root = home.appending(path: "Library/Developer/CoreSimulator/Devices")
+        guard FileManager.default.fileExists(atPath: root.path(percentEncoded: false)),
+              FileManager.default.isExecutableFile(atPath: "/usr/bin/xcrun"),
               let result = try? await Shell.run("/usr/bin/xcrun", ["simctl", "list", "devices", "unavailable", "--json"]),
               result.succeeded
         else { return nil }
@@ -12,7 +16,6 @@ public enum SimulatorCleaner {
         let devices = parseUnavailable(result.stdout)
         guard !devices.isEmpty else { return nil }
 
-        let root = home.appending(path: "Library/Developer/CoreSimulator/Devices")
         let size = await BlockingIO.run {
             devices.reduce(Int64(0)) { total, udid in total + FileSizer.allocatedSize(of: root.appending(path: udid)) }
         }

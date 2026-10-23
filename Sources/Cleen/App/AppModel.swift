@@ -53,18 +53,21 @@ final class AppModel {
         clipboard.start()
         clipboard.onScreenshot = { [screenshots] png in screenshots.addClipboardCapture(png) }
         screenshots.onNewScreenshot = { [weak self] _ in self?.notch.present(tab: .screenshots) }
-        screenshots.start()
         // The closed notch shows what's playing, so listen from the start.
         Task { [nowPlaying] in await nowPlaying.watch() }
         Thumbnails.shared.scale = NSScreen.screens.map(\.backingScaleFactor).max() ?? 2
     }
 
     private func installNotch() {
+        if AppLocation.needsMove, AppLocation.offerMove() { return }
         notch.install()
         if OnboardingModel.isNeeded, LaunchArguments.onboarding || (!LaunchArguments.settings && LaunchArguments.notchTab == nil) {
             startOnboarding()
             return
         }
+        // Watching the Mesa is what asks for access to it, so on a first run that waits
+        // until the tour is over.
+        screenshots.start()
         warmCharts(after: .seconds(4))
         if LaunchArguments.settings {
             notch.primary?.state.isPinned = true
@@ -103,6 +106,7 @@ final class AppModel {
             self.notch.onSuspendedHotKey = nil
             self.notch.primary?.present(tab: .home)
             self.onboarding = nil
+            self.screenshots.start()
             self.warmCharts(after: .seconds(10))
         }
     }

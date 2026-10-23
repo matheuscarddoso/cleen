@@ -65,10 +65,25 @@ public struct SafetyGuard: Sendable {
         ]
     }
 
+    /// Folders whose direct children are synced to a server: trashing one (the iCloud
+    /// Drive root, an app's iCloud container, a Dropbox or OneDrive folder) deletes it
+    /// in the cloud and on every other device too.
+    private var syncedParents: [String] {
+        [home + "/Library/Mobile Documents", home + "/Library/CloudStorage"]
+    }
+
     @discardableResult
     public func validate(_ url: URL) throws(Violation) -> URL {
-        let raw = url.path(percentEncoded: false)
+        var url = url
+        var raw = url.path(percentEncoded: false)
         guard raw.hasPrefix("/") else { throw .notAbsolute(raw) }
+        // The whole-disk map walks the Data volume, where /Users/… shows up as
+        // /System/Volumes/Data/Users/…: the same files, judged by their usual path.
+        let dataVolume = "/System/Volumes/Data"
+        if raw.hasPrefix(dataVolume + "/") {
+            raw = String(raw.dropFirst(dataVolume.count))
+            url = URL(filePath: raw)
+        }
 
         // Resolve symlinks in the *parent* only: removing a link must remove the link,
         // but a link elsewhere in the path must not smuggle us into a protected place.
@@ -79,6 +94,11 @@ public struct SafetyGuard: Sendable {
 
         for candidate in [standardized.path(percentEncoded: false).trimmingSuffix("/"), resolved] {
             if protected.contains(candidate) || candidate.hasPrefix("/System/") {
+                throw .protectedLocation(candidate)
+            }
+            let parentPath = (candidate as NSString).deletingLastPathComponent
+            // A whole Photos library goes through Photos, never the Lixo.
+            if syncedParents.contains(parentPath) || candidate.hasSuffix(".photoslibrary") {
                 throw .protectedLocation(candidate)
             }
         }
