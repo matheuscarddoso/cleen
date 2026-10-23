@@ -35,7 +35,7 @@ struct ConverterFootnote: View {
                 Text("Atualizando cotação")
             case .failed:
                 Image(systemName: "wifi.slash")
-                Text(publishedText.map { "Sem conexão · cotação de \($0)" } ?? "Sem conexão")
+                Text(publishedText.map { String(localized: "Sem conexão · cotação de \($0)") } ?? String(localized: "Sem conexão"))
             case .idle:
                 if let publishedText { Text("Cotação de \(publishedText) · BCE") }
             }

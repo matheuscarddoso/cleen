@@ -28,11 +28,11 @@ public enum ReminderDue {
         let day: String
         if calendar.isDate(due, inSameDayAs: now) {
             if hasTime { return due.formatted(time) }
-            day = "Hoje"
+            day = String(localized: "Hoje")
         } else if let tomorrow = calendar.date(byAdding: .day, value: 1, to: now), calendar.isDate(due, inSameDayAs: tomorrow) {
-            day = "Amanhã"
+            day = String(localized: "Amanhã")
         } else if let yesterday = calendar.date(byAdding: .day, value: -1, to: now), calendar.isDate(due, inSameDayAs: yesterday) {
-            day = "Ontem"
+            day = String(localized: "Ontem")
         } else {
             var style = Date.FormatStyle(locale: locale, calendar: calendar, timeZone: calendar.timeZone).day().month(.abbreviated)
             if calendar.component(.year, from: due) != calendar.component(.year, from: now) { style = style.year() }

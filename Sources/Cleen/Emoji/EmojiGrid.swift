@@ -8,7 +8,7 @@ enum EmojiJumpTarget: Hashable {
 
     var title: String {
         switch self {
-        case .recents: "Recentes"
+        case .recents: String(localized: "Recentes")
         case .category(let category): category.title
         }
     }

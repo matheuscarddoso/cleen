@@ -11,14 +11,14 @@ struct RemindersWidget: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 5) {
             HStack(spacing: 6) {
-                HomeWidgetLabel(title: "Lembretes", symbol: "checklist")
+                HomeWidgetLabel(title: String(localized: "Lembretes"), symbol: "checklist")
                 Spacer(minLength: 0)
                 if agenda.reminders.count > shown.count {
                     Text(agenda.reminders.count.counted)
                         .font(.system(size: 10.5, weight: .medium).monospacedDigit())
                         .foregroundStyle(NotchStyle.tertiary)
                         .contentTransition(.numericText())
-                        .accessibilityLabel(agenda.reminders.count.counted("lembrete em aberto", "lembretes em aberto"))
+                        .accessibilityLabel(agenda.reminders.count.counted(String(localized: "\(agenda.reminders.count) lembrete em aberto"), String(localized: "\(agenda.reminders.count) lembretes em aberto")))
                 }
             }
             content
@@ -37,7 +37,7 @@ struct RemindersWidget: View {
     @ViewBuilder
     private var content: some View {
         if agenda.remindersAccess == .denied {
-            AgendaAccessLink(text: "Permitir acesso aos Lembretes", action: AgendaModel.openRemindersPrivacySettings)
+            AgendaAccessLink(text: String(localized: "Permitir acesso aos Lembretes"), action: AgendaModel.openRemindersPrivacySettings)
         } else if shown.isEmpty {
             if agenda.remindersAccess == .granted {
                 HStack(spacing: 5) {

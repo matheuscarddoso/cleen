@@ -13,7 +13,7 @@ nonisolated struct AgendaReminder: Identifiable, Equatable, Sendable, ReminderSo
 
     init(_ reminder: EKReminder) {
         id = reminder.calendarItemIdentifier
-        title = reminder.title ?? "Sem título"
+        title = reminder.title ?? String(localized: "Sem título")
         due = reminder.dueDateComponents.flatMap { Calendar.current.date(from: $0) }
         hasTime = reminder.dueDateComponents?.hour != nil
         isStarred = (1...4).contains(reminder.priority)

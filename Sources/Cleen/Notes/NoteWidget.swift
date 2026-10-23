@@ -10,7 +10,7 @@ struct NoteWidget: View {
     var body: some View {
         Button { state.tab = .notes } label: {
             VStack(alignment: .leading, spacing: 5) {
-                HomeWidgetLabel(title: "Nota", symbol: "note.text")
+                HomeWidgetLabel(title: String(localized: "Nota"), symbol: "note.text")
                 let preview = notes.selected.preview
                 if preview.isEmpty {
                     Text("Toque para escrever")

@@ -43,8 +43,8 @@ struct NoteDeleteButton: View {
         .onHover { isHovered = $0 }
         .disabled(isDisabled)
         .opacity(isDisabled ? 0.4 : 1)
-        .help(isArmed ? "Clique de novo para apagar" : "Apagar nota")
-        .accessibilityLabel(isArmed ? "Confirmar: apagar nota" : "Apagar nota")
+        .help(isArmed ? String(localized: "Clique de novo para apagar") : String(localized: "Apagar nota"))
+        .accessibilityLabel(isArmed ? String(localized: "Confirmar: apagar nota") : String(localized: "Apagar nota"))
         .animation(.smooth(duration: 0.18), value: isArmed)
         .animation(.smooth(duration: 0.15), value: isHovered)
         .onChange(of: noteID) { reset() }

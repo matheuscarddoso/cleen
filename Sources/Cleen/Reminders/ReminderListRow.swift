@@ -30,7 +30,7 @@ struct ReminderListRow: View {
                     .layoutPriority(1)
             }
             if isHovered {
-                NotchIconButton(symbol: "arrow.up.forward.app", help: "Abrir no Lembretes", action: AgendaModel.openReminders)
+                NotchIconButton(symbol: "arrow.up.forward.app", help: String(localized: "Abrir no Lembretes"), action: AgendaModel.openReminders)
                     .transition(.opacity)
             }
             ReminderStarButton(isStarred: reminder.isStarred) {
@@ -66,7 +66,7 @@ struct ReminderStarButton: View {
         }
         .buttonStyle(.plain)
         .onHover { isHovered = $0 }
-        .help(isStarred ? "Tirar a estrela" : "Marcar com estrela")
+        .help(isStarred ? String(localized: "Tirar a estrela") : String(localized: "Marcar com estrela"))
         .accessibilityLabel("Estrela")
         .accessibilityValue(isStarred ? "marcado" : "desmarcado")
         .accessibilityAddTraits(.isToggle)

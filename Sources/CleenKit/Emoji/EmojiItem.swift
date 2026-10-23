@@ -44,15 +44,15 @@ public enum EmojiCategory: String, CaseIterable, Sendable {
 
     public var title: String {
         switch self {
-        case .people: "Carinhas e pessoas"
-        case .nature: "Animais e natureza"
-        case .food: "Comidas e bebidas"
-        case .activity: "Atividades"
-        case .travel: "Viagens e lugares"
-        case .objects: "Objetos"
-        case .symbols: "Símbolos"
-        case .flags: "Bandeiras"
-        case .all: "Emoji"
+        case .people: String(localized: "Carinhas e pessoas")
+        case .nature: String(localized: "Animais e natureza")
+        case .food: String(localized: "Comidas e bebidas")
+        case .activity: String(localized: "Atividades")
+        case .travel: String(localized: "Viagens e lugares")
+        case .objects: String(localized: "Objetos")
+        case .symbols: String(localized: "Símbolos")
+        case .flags: String(localized: "Bandeiras")
+        case .all: String(localized: "Emoji")
         }
     }
 }

@@ -32,9 +32,9 @@ struct ReminderCheckbox: View {
         .onHover { isHovered = $0 }
         .animation(.spring(response: 0.28, dampingFraction: 0.6), value: isDone)
         .animation(.smooth(duration: 0.15), value: isHovered)
-        .help(isDone ? "Desfazer" : "Concluir")
+        .help(isDone ? String(localized: "Desfazer") : String(localized: "Concluir"))
         .accessibilityLabel("Concluir \(title)")
-        .accessibilityValue(isDone ? "concluído" : "em aberto")
+        .accessibilityValue(isDone ? String(localized: "concluído") : String(localized: "em aberto"))
         .accessibilityAddTraits(.isToggle)
     }
 }

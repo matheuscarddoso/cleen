@@ -18,16 +18,16 @@ struct NotchRemindersTab: View {
                 NotchPrompt(
                     symbol: "checklist",
                     color: ToolPalette.orange,
-                    title: "Sem acesso aos Lembretes",
-                    message: "Permita em Ajustes do Sistema › Privacidade e Segurança › Lembretes para ver e criar lembretes aqui.",
-                    buttonTitle: "Abrir Ajustes do Sistema",
+                    title: String(localized: "Sem acesso aos Lembretes"),
+                    message: String(localized: "Permita em Ajustes do Sistema › Privacidade e Segurança › Lembretes para ver e criar lembretes aqui."),
+                    buttonTitle: String(localized: "Abrir Ajustes do Sistema"),
                     action: AgendaModel.openRemindersPrivacySettings
                 )
             } else {
                 VStack(alignment: .leading, spacing: 8) {
                     HStack(spacing: 6) {
                         field
-                        NotchIconButton(symbol: "arrow.up.forward.app", help: "Abrir o app Lembretes", action: AgendaModel.openReminders)
+                        NotchIconButton(symbol: "arrow.up.forward.app", help: String(localized: "Abrir o app Lembretes"), action: AgendaModel.openReminders)
                     }
                     list
                 }

@@ -105,14 +105,14 @@ private struct NoteHeader: View {
                 ScrollView(.horizontal) {
                     HStack(spacing: 2) {
                         ForEach(notes.notebook.notes) { note in
-                            NoteChip(title: note.title ?? "Nova nota", isSelected: note.id == selected.id) {
+                            NoteChip(title: note.title ?? String(localized: "Nova nota"), isSelected: note.id == selected.id) {
                                 withAnimation(.smooth(duration: 0.2)) { notes.select(note) }
                                 focusEditor()
                             }
                             .id(note.id)
                             .transition(.scale(scale: 0.85).combined(with: .opacity))
                         }
-                        NotchIconButton(symbol: "plus", help: notes.canAdd ? "Nova nota" : "Até \(QuickNotebook.limit) notas", action: add)
+                        NotchIconButton(symbol: "plus", help: notes.canAdd ? String(localized: "Nova nota") : String(localized: "Até \(QuickNotebook.limit) notas"), action: add)
                             .disabled(selected.isBlank || !notes.canAdd)
                             .opacity(selected.isBlank || !notes.canAdd ? 0.4 : 1)
                             .keyboardShortcut("n", modifiers: .command)
@@ -124,7 +124,7 @@ private struct NoteHeader: View {
                     withAnimation(.smooth(duration: 0.2)) { proxy.scrollTo(id) }
                 }
             }
-            NotchIconButton(symbol: copied ? "checkmark" : "doc.on.doc", help: copied ? "Copiada" : "Copiar nota", isActive: copied) {
+            NotchIconButton(symbol: copied ? "checkmark" : "doc.on.doc", help: copied ? String(localized: "Copiada") : String(localized: "Copiar nota"), isActive: copied) {
                 copy(selected)
             }
             .contentTransition(.symbolEffect(.replace))

@@ -64,7 +64,7 @@ struct ConverterBox<Value: View>: View {
                 .frame(height: 22)
                 .background(NotchStyle.control, in: .capsule)
         } else {
-            NotchIconButton(symbol: "doc.on.doc", help: "Copiar resultado", action: copy)
+            NotchIconButton(symbol: "doc.on.doc", help: String(localized: "Copiar resultado"), action: copy)
         }
     }
 }

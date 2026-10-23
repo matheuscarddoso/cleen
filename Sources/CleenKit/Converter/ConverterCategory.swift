@@ -17,15 +17,15 @@ public enum ConverterCategory: String, CaseIterable, Codable, Sendable, Identifi
 
     public var title: String {
         switch self {
-        case .length: "Comprimento"
-        case .mass: "Massa"
-        case .temperature: "Temperatura"
-        case .volume: "Volume"
-        case .speed: "Velocidade"
-        case .area: "Área"
-        case .data: "Dados"
-        case .time: "Tempo"
-        case .currency: "Moeda"
+        case .length: String(localized: "Comprimento")
+        case .mass: String(localized: "Massa")
+        case .temperature: String(localized: "Temperatura")
+        case .volume: String(localized: "Volume")
+        case .speed: String(localized: "Velocidade")
+        case .area: String(localized: "Área")
+        case .data: String(localized: "Dados")
+        case .time: String(localized: "Tempo")
+        case .currency: String(localized: "Moeda")
         }
     }
 
@@ -34,41 +34,41 @@ public enum ConverterCategory: String, CaseIterable, Codable, Sendable, Identifi
     public var units: [ConverterUnit] {
         switch self {
         case .length: [
-            .init("mm", "Milímetros", "mm"), .init("cm", "Centímetros", "cm"), .init("m", "Metros", "m"),
-            .init("km", "Quilômetros", "km"), .init("in", "Polegadas", "pol"), .init("ft", "Pés", "pés"),
-            .init("yd", "Jardas", "jd"), .init("mi", "Milhas", "mi"), .init("nmi", "Milhas náuticas", "mn"),
+            .init("mm", String(localized: "Milímetros"), "mm"), .init("cm", String(localized: "Centímetros"), "cm"), .init("m", String(localized: "Metros"), "m"),
+            .init("km", String(localized: "Quilômetros"), "km"), .init("in", String(localized: "Polegadas"), "pol"), .init("ft", String(localized: "Pés"), String(localized: "pés")),
+            .init("yd", String(localized: "Jardas"), "jd"), .init("mi", String(localized: "Milhas"), "mi"), .init("nmi", String(localized: "Milhas náuticas"), "mn"),
         ]
         case .mass: [
-            .init("mg", "Miligramas", "mg"), .init("g", "Gramas", "g"), .init("kg", "Quilos", "kg"),
-            .init("t", "Toneladas", "t"), .init("oz", "Onças", "oz"), .init("lb", "Libras", "lb"),
-            .init("st", "Stones", "st"),
+            .init("mg", String(localized: "Miligramas"), "mg"), .init("g", String(localized: "Gramas"), "g"), .init("kg", String(localized: "Quilos"), "kg"),
+            .init("t", String(localized: "Toneladas"), "t"), .init("oz", String(localized: "Onças"), "oz"), .init("lb", String(localized: "Libras"), "lb"),
+            .init("st", String(localized: "Stones"), "st"),
         ]
         case .temperature: [
-            .init("c", "Celsius", "°C"), .init("f", "Fahrenheit", "°F"), .init("k", "Kelvin", "K"),
+            .init("c", String(localized: "Celsius"), "°C"), .init("f", String(localized: "Fahrenheit"), "°F"), .init("k", String(localized: "Kelvin"), "K"),
         ]
         case .volume: [
-            .init("ml", "Mililitros", "ml"), .init("l", "Litros", "l"), .init("m3", "Metros cúbicos", "m³"),
-            .init("tsp", "Colheres de chá", "c. chá"), .init("tbsp", "Colheres de sopa", "c. sopa"),
-            .init("cup", "Xícaras", "xíc."), .init("floz", "Onças líquidas", "fl oz"),
-            .init("gal", "Galões (EUA)", "gal"), .init("galuk", "Galões (RU)", "gal RU"),
+            .init("ml", String(localized: "Mililitros"), "ml"), .init("l", String(localized: "Litros"), "l"), .init("m3", String(localized: "Metros cúbicos"), "m³"),
+            .init("tsp", String(localized: "Colheres de chá"), String(localized: "c. chá")), .init("tbsp", String(localized: "Colheres de sopa"), String(localized: "c. sopa")),
+            .init("cup", String(localized: "Xícaras"), "xíc."), .init("floz", String(localized: "Onças líquidas"), "fl oz"),
+            .init("gal", String(localized: "Galões (EUA)"), "gal"), .init("galuk", String(localized: "Galões (RU)"), String(localized: "gal RU")),
         ]
         case .speed: [
-            .init("mps", "Metros por segundo", "m/s"), .init("kmh", "Quilômetros por hora", "km/h"),
-            .init("mph", "Milhas por hora", "mph"), .init("kn", "Nós", "nós"),
+            .init("mps", String(localized: "Metros por segundo"), "m/s"), .init("kmh", String(localized: "Quilômetros por hora"), "km/h"),
+            .init("mph", String(localized: "Milhas por hora"), "mph"), .init("kn", String(localized: "Nós"), String(localized: "nós")),
         ]
         case .area: [
-            .init("cm2", "Centímetros quadrados", "cm²"), .init("m2", "Metros quadrados", "m²"),
-            .init("ha", "Hectares", "ha"), .init("km2", "Quilômetros quadrados", "km²"),
-            .init("ft2", "Pés quadrados", "pés²"), .init("ac", "Acres", "ac"), .init("mi2", "Milhas quadradas", "mi²"),
+            .init("cm2", String(localized: "Centímetros quadrados"), "cm²"), .init("m2", String(localized: "Metros quadrados"), "m²"),
+            .init("ha", String(localized: "Hectares"), "ha"), .init("km2", String(localized: "Quilômetros quadrados"), "km²"),
+            .init("ft2", String(localized: "Pés quadrados"), String(localized: "pés²")), .init("ac", String(localized: "Acres"), "ac"), .init("mi2", String(localized: "Milhas quadradas"), "mi²"),
         ]
         case .data: [
-            .init("bit", "Bits", "bit"), .init("B", "Bytes", "B"), .init("KB", "Kilobytes", "KB"),
-            .init("MB", "Megabytes", "MB"), .init("GB", "Gigabytes", "GB"), .init("TB", "Terabytes", "TB"),
-            .init("PB", "Petabytes", "PB"), .init("MiB", "Mebibytes", "MiB"), .init("GiB", "Gibibytes", "GiB"),
+            .init("bit", String(localized: "Bits"), "bit"), .init("B", String(localized: "Bytes"), "B"), .init("KB", String(localized: "Kilobytes"), "KB"),
+            .init("MB", String(localized: "Megabytes"), "MB"), .init("GB", String(localized: "Gigabytes"), "GB"), .init("TB", String(localized: "Terabytes"), "TB"),
+            .init("PB", String(localized: "Petabytes"), "PB"), .init("MiB", String(localized: "Mebibytes"), "MiB"), .init("GiB", String(localized: "Gibibytes"), "GiB"),
         ]
         case .time: [
-            .init("ms", "Milissegundos", "ms"), .init("s", "Segundos", "s"), .init("min", "Minutos", "min"),
-            .init("h", "Horas", "h"), .init("d", "Dias", "d"), .init("wk", "Semanas", "sem"), .init("yr", "Anos", "anos"),
+            .init("ms", String(localized: "Milissegundos"), "ms"), .init("s", String(localized: "Segundos"), "s"), .init("min", String(localized: "Minutos"), "min"),
+            .init("h", String(localized: "Horas"), "h"), .init("d", String(localized: "Dias"), "d"), .init("wk", String(localized: "Semanas"), "sem"), .init("yr", String(localized: "Anos"), "anos"),
         ]
         case .currency: []
         }

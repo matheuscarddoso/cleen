@@ -115,7 +115,7 @@ private struct EmojiConfirmation: View {
             Text(emoji)
                 .font(.system(size: 14))
             // Without Accessibility it couldn't paste: say how to finish the job.
-            Text(pasted ? "Copiado" : "Copiado, cole com ⌘V")
+            Text(pasted ? String(localized: "Copiado") : String(localized: "Copiado, cole com ⌘V"))
                 .font(.system(size: 11.5, weight: .medium))
                 .foregroundStyle(NotchStyle.primary)
         }
