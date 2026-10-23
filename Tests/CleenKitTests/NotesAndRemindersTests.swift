@@ -151,12 +151,12 @@ struct ReminderDueTests {
 
     @Test func readsLikeReminders() {
         let now = date(2026, 10, 23, 9)
-        #expect(ReminderDue.text(for: date(2026, 10, 23, 14), hasTime: true, now: now, calendar: calendar) == "14:00")
-        #expect(ReminderDue.text(for: date(2026, 10, 23), hasTime: false, now: now, calendar: calendar) == "Hoje")
-        #expect(ReminderDue.text(for: date(2026, 10, 24, 8, 30), hasTime: true, now: now, calendar: calendar) == "Amanhã, 08:30")
-        #expect(ReminderDue.text(for: date(2026, 10, 22), hasTime: false, now: now, calendar: calendar) == "Ontem")
-        #expect(ReminderDue.text(for: date(2026, 10, 30), hasTime: false, now: now, calendar: calendar) == "30 de out.")
-        #expect(ReminderDue.text(for: date(2027, 1, 5), hasTime: false, now: now, calendar: calendar).contains("2027"))
+        #expect(ReminderDue.text(for: date(2026, 10, 23, 14), hasTime: true, now: now, calendar: calendar, locale: Locale(identifier: "pt_BR")) == "14:00")
+        #expect(ReminderDue.text(for: date(2026, 10, 23), hasTime: false, now: now, calendar: calendar, locale: Locale(identifier: "pt_BR")) == "Hoje")
+        #expect(ReminderDue.text(for: date(2026, 10, 24, 8, 30), hasTime: true, now: now, calendar: calendar, locale: Locale(identifier: "pt_BR")) == "Amanhã, 08:30")
+        #expect(ReminderDue.text(for: date(2026, 10, 22), hasTime: false, now: now, calendar: calendar, locale: Locale(identifier: "pt_BR")) == "Ontem")
+        #expect(ReminderDue.text(for: date(2026, 10, 30), hasTime: false, now: now, calendar: calendar, locale: Locale(identifier: "pt_BR")) == "30 de out.")
+        #expect(ReminderDue.text(for: date(2027, 1, 5), hasTime: false, now: now, calendar: calendar, locale: Locale(identifier: "pt_BR")).contains("2027"))
     }
 
     @Test func pastDue() {

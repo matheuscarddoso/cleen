@@ -23,13 +23,13 @@ struct ConverterNumberTests {
         (2.0, "2"), (0.001, "0,001"), (1_234_567.891, "1.234.568"), (0.0, "0"), (-40.0, "-40"),
     ])
     func formatsWithoutTrailingZeros(value: Double, expected: String) {
-        #expect(ConverterNumber.format(value) == expected)
+        #expect(ConverterNumber.format(value, locale: Locale(identifier: "pt_BR")) == expected)
     }
 
     @Test func formatsMoneyWithCents() {
-        #expect(ConverterNumber.format(5, isCurrency: true) == "5,00")
-        #expect(ConverterNumber.format(1234.5, isCurrency: true) == "1.234,50")
-        #expect(ConverterNumber.format(0.004, isCurrency: true) == "0,004")
+        #expect(ConverterNumber.format(5, isCurrency: true, locale: Locale(identifier: "pt_BR")) == "5,00")
+        #expect(ConverterNumber.format(1234.5, isCurrency: true, locale: Locale(identifier: "pt_BR")) == "1.234,50")
+        #expect(ConverterNumber.format(0.004, isCurrency: true, locale: Locale(identifier: "pt_BR")) == "0,004")
     }
 
     @Test func extremesGoScientific() {
@@ -118,7 +118,7 @@ struct CurrencyRatesTests {
         let ids = rates.units.map(\.id)
         #expect(Array(ids.prefix(4)) == ["BRL", "USD", "EUR", "JPY"])
         #expect(ids.contains("ZAR"))
-        #expect(rates.units.first?.name == "Real brasileiro")
+        #expect(rates.units.first?.name == Locale.cleen.localizedString(forCurrencyCode: "BRL"))
     }
 
     @Test func roundTripsThroughCodable() throws {

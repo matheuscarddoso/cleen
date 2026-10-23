@@ -55,7 +55,7 @@ struct EmojiRecentsTests {
 
 struct EmojiLibraryTests {
     @Test func loadsSmileysFirstWithNames() throws {
-        let sections = EmojiLibrary.load()
+        let sections = EmojiLibrary.load(locale: "pt_BR")
         let first = try #require(sections.first)
         #expect(!first.items.isEmpty)
         #expect(first.items.allSatisfy { !$0.name.isEmpty })

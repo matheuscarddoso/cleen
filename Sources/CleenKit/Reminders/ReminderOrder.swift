@@ -23,8 +23,8 @@ extension Sequence where Element: ReminderSortable {
 
 /// How a reminder's due date reads in a row: "14:00", "Amanhã", "23 de out.".
 public enum ReminderDue {
-    public static func text(for due: Date, hasTime: Bool, now: Date = .now, calendar: Calendar = .current) -> String {
-        let time = Date.FormatStyle(locale: .cleen, calendar: calendar, timeZone: calendar.timeZone).hour().minute()
+    public static func text(for due: Date, hasTime: Bool, now: Date = .now, calendar: Calendar = .current, locale: Locale = .cleen) -> String {
+        let time = Date.FormatStyle(locale: locale, calendar: calendar, timeZone: calendar.timeZone).hour().minute()
         let day: String
         if calendar.isDate(due, inSameDayAs: now) {
             if hasTime { return due.formatted(time) }
@@ -34,7 +34,7 @@ public enum ReminderDue {
         } else if let yesterday = calendar.date(byAdding: .day, value: -1, to: now), calendar.isDate(due, inSameDayAs: yesterday) {
             day = "Ontem"
         } else {
-            var style = Date.FormatStyle(locale: .cleen, calendar: calendar, timeZone: calendar.timeZone).day().month(.abbreviated)
+            var style = Date.FormatStyle(locale: locale, calendar: calendar, timeZone: calendar.timeZone).day().month(.abbreviated)
             if calendar.component(.year, from: due) != calendar.component(.year, from: now) { style = style.year() }
             day = due.formatted(style)
         }

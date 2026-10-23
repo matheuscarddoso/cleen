@@ -59,21 +59,21 @@ public enum ConverterNumber {
     ///
     /// Around six significant digits, never trailing zeros. Money always shows cents
     /// (unless the amount is smaller than a cent).
-    public static func format(_ value: Double, isCurrency: Bool = false) -> String {
+    public static func format(_ value: Double, isCurrency: Bool = false, locale: Locale = .cleen) -> String {
         guard value.isFinite else { return "—" }
         if value == 0 { return "0" }
         let magnitude = abs(value)
         if magnitude >= 1e15 || magnitude < 1e-9 {
-            return value.formatted(.number.notation(.scientific).precision(.significantDigits(1...4)).locale(.cleen))
+            return value.formatted(.number.notation(.scientific).precision(.significantDigits(1...4)).locale(locale))
         }
         if isCurrency, magnitude >= 0.01 {
-            return value.formatted(.number.precision(.fractionLength(2)).locale(.cleen))
+            return value.formatted(.number.precision(.fractionLength(2)).locale(locale))
         }
         if magnitude >= 1 {
             let integerDigits = Int(log10(magnitude)) + 1
             let fraction = max(0, min(4, 6 - integerDigits))
-            return value.formatted(.number.precision(.fractionLength(0...fraction)).locale(.cleen))
+            return value.formatted(.number.precision(.fractionLength(0...fraction)).locale(locale))
         }
-        return value.formatted(.number.precision(.significantDigits(1...4)).locale(.cleen))
+        return value.formatted(.number.precision(.significantDigits(1...4)).locale(locale))
     }
 }
