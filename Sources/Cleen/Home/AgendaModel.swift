@@ -1,4 +1,5 @@
 import AppKit
+import CleenKit
 import EventKit
 import Observation
 
@@ -100,6 +101,36 @@ final class AgendaModel {
         reminders.removeAll { $0.id == reminder.id }
     }
 
+    /// Adds a reminder to the default list, as typing in Reminders' own field does.
+    /// False when there's no access or no list to put it in.
+    @discardableResult
+    func createReminder(title: String) -> Bool {
+        let title = title.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !title.isEmpty, remindersAccess == .granted, let list = store.defaultCalendarForNewReminders() else { return false }
+        let item = EKReminder(eventStore: store)
+        item.title = title
+        item.calendar = list
+        do {
+            try store.save(item, commit: true)
+        } catch {
+            return false
+        }
+        // Shown right away; the store's change signal refreshes the rest.
+        reminders = (reminders + [AgendaReminder(item)]).sortedForReminders()
+        return true
+    }
+
+    /// Stars (high priority) or unstars a reminder; starred ones lead the list.
+    func setStarred(_ reminder: AgendaReminder, _ starred: Bool) {
+        guard let item = store.calendarItem(withIdentifier: reminder.id) as? EKReminder else { return }
+        item.priority = starred ? 1 : 0
+        guard (try? store.save(item, commit: true)) != nil else { return }
+        if let index = reminders.firstIndex(where: { $0.id == reminder.id }) {
+            reminders[index].isStarred = starred
+        }
+        reminders = reminders.sortedForReminders()
+    }
+
     static func openCalendar() {
         if let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: "com.apple.iCal") {
             NSWorkspace.shared.openApplication(at: url, configuration: .init())
@@ -109,6 +140,12 @@ final class AgendaModel {
     static func openReminders() {
         if let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: "com.apple.reminders") {
             NSWorkspace.shared.openApplication(at: url, configuration: .init())
+        }
+    }
+
+    static func openRemindersPrivacySettings() {
+        if let url = URL(string: "x-apple.systempreferences:com.apple.settings.PrivacySecurity.extension?Privacy_Reminders") {
+            NSWorkspace.shared.open(url)
         }
     }
 
@@ -170,8 +207,8 @@ final class AgendaModel {
                     continuation.resume(returning: mapped)
                 }
             }
-            // Due soonest first; undated ones after, as Reminders' own Today view does.
-            reminders = fetched.sorted { ($0.due ?? .distantFuture) < ($1.due ?? .distantFuture) }
+            // Starred first, then due soonest; undated ones last.
+            reminders = fetched.sortedForReminders()
         }
     }
 }
