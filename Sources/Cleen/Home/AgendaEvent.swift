@@ -21,7 +21,7 @@ nonisolated struct AgendaEvent: Identifiable, Equatable, Sendable {
 
     var timeText: String {
         if isAllDay { return "Dia todo" }
-        let style = Date.FormatStyle.dateTime.hour().minute().locale(.init(identifier: "pt_BR"))
+        let style = Date.FormatStyle.dateTime.hour().minute().locale(.cleen)
         return "\(start.formatted(style)) – \(end.formatted(style))"
     }
 }

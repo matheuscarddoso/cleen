@@ -1,9 +1,9 @@
 import Foundation
 
 extension Locale {
-    /// Cleen speaks Brazilian Portuguese, so numbers and dates follow it too, whatever
-    /// the system region is ("7,4 GB", not "7.4 GB" next to Portuguese text).
-    public static let cleen = Locale(identifier: "pt_BR")
+    /// Numbers, dates and times follow the Mac's own language and region, and change
+    /// with them while Cleen runs (24-hour clock, decimal comma, first weekday…).
+    public static var cleen: Locale { .autoupdatingCurrent }
 }
 
 extension Int64 {

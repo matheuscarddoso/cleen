@@ -72,7 +72,7 @@ struct MacScreen<Notch: View>: View {
             ForEach(["magnifyingglass", "switch.2", "wifi", "battery.75percent"], id: \.self) { symbol in
                 Image(systemName: symbol).font(.system(size: 14))
             }
-            Text(Date.now.formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated).hour().minute().locale(.init(identifier: "pt_BR"))))
+            Text(Date.now.formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated).hour().minute().locale(.cleen)))
                 .font(.system(size: 13))
         }
         .foregroundStyle(.white.opacity(0.92))

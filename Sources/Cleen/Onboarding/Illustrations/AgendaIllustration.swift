@@ -18,7 +18,7 @@ struct AgendaIllustration: View {
 
     /// "Sexta-feira": only the first letter goes up.
     private var weekday: String {
-        let name = Date.now.formatted(.dateTime.weekday(.wide).locale(.init(identifier: "pt_BR")))
+        let name = Date.now.formatted(.dateTime.weekday(.wide).locale(.cleen))
         return name.prefix(1).uppercased() + name.dropFirst()
     }
 
@@ -29,7 +29,7 @@ struct AgendaIllustration: View {
                     .font(.system(size: 13, weight: .medium))
                     .foregroundStyle(.white.opacity(0.55))
                 Spacer()
-                Text(Date.now.formatted(.dateTime.day().month(.wide).locale(.init(identifier: "pt_BR"))))
+                Text(Date.now.formatted(.dateTime.day().month(.wide).locale(.cleen)))
                     .font(.system(size: 13, weight: .medium))
                     .foregroundStyle(.white.opacity(0.4))
             }
