@@ -25,7 +25,7 @@ struct TimerWidget: View {
             ring(now: now, lineWidth: 6) {
                 VStack(spacing: -1) {
                     clock(now: now, size: 15)
-                    Text(model.isPaused ? "pausado" : model.phaseTitle.lowercased())
+                    Text(model.isPaused ? String(localized: "pausado") : model.phaseTitle.lowercased())
                         .font(.system(size: 9.5, weight: .medium))
                         .foregroundStyle(NotchStyle.secondary)
                 }
@@ -34,7 +34,7 @@ struct TimerWidget: View {
             .contentShape(.circle)
         }
         .buttonStyle(.plain)
-        .help(model.isActive ? (model.isRunning ? "Pausar" : "Continuar") : "Abrir o Timer")
+        .help(model.isActive ? (model.isRunning ? String(localized: "Pausar") : String(localized: "Continuar")) : String(localized: "Abrir o Timer"))
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(model.phaseTitle)
         .accessibilityValue(TimerClock.string(model.remaining(at: now)))
@@ -47,7 +47,7 @@ struct TimerWidget: View {
                 .frame(width: 72, height: 72)
             Button { state.tab = .timer } label: {
                 VStack(alignment: .leading, spacing: 2) {
-                    HomeWidgetLabel(title: model.mode == .pomodoro ? "\(model.phaseTitle) · \(model.round)/\(model.rounds)" : "Timer", symbol: model.phase.symbol)
+                    HomeWidgetLabel(title: model.mode == .pomodoro ? "\(model.phaseTitle) · \(model.round)/\(model.rounds)" : String(localized: "Timer"), symbol: model.phase.symbol)
                     clock(now: now, size: 17)
                     Text(status)
                         .font(.system(size: 11))
@@ -63,8 +63,8 @@ struct TimerWidget: View {
     }
 
     private var status: String {
-        if let end = model.endDate { return "até \(end.formatted(.dateTime.hour().minute().locale(.cleen)))" }
-        return model.isPaused ? "pausado" : "pronto"
+        if let end = model.endDate { return String(localized: "até \(end.formatted(.dateTime.hour().minute().locale(.cleen)))") }
+        return model.isPaused ? String(localized: "pausado") : String(localized: "pronto")
     }
 
     private func clock(now: Date, size: Double) -> some View {
@@ -102,7 +102,7 @@ private struct TimerPlayButton: View {
         }
         .buttonStyle(.plain)
         .onHover { hovering in withAnimation(.smooth(duration: 0.18)) { isHovered = hovering } }
-        .help(model.isRunning ? "Pausar" : (model.isPaused ? "Continuar" : "Iniciar"))
-        .accessibilityLabel(model.isRunning ? "Pausar" : (model.isPaused ? "Continuar" : "Iniciar"))
+        .help(model.isRunning ? String(localized: "Pausar") : (model.isPaused ? String(localized: "Continuar") : String(localized: "Iniciar")))
+        .accessibilityLabel(model.isRunning ? String(localized: "Pausar") : (model.isPaused ? String(localized: "Continuar") : String(localized: "Iniciar")))
     }
 }

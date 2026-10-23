@@ -86,7 +86,7 @@ final class JunkModel {
             Task { @MainActor [weak self] in self?.progress = title }
         }
         guard !Task.isCancelled else { return }
-        progress = "Docker e simuladores"
+        progress = String(localized: "Docker e simuladores")
         async let docker = DockerCleaner.inspect()
         async let simulators = SimulatorCleaner.inspect()
         let foundTools = await [docker, simulators].compactMap { $0 }

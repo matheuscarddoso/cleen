@@ -109,7 +109,7 @@ struct WeatherWidget: View {
             return forecast.updatedNote
         }
         guard let day = forecast.todayDay(at: .now) else { return "" }
-        return "Máx \(WeatherFormat.temperature(day.high)) · Mín \(WeatherFormat.temperature(day.low))"
+        return String(localized: "Máx \(WeatherFormat.temperature(day.high)) · Mín \(WeatherFormat.temperature(day.low))")
     }
 
     // MARK: Without a forecast
@@ -117,8 +117,8 @@ struct WeatherWidget: View {
     /// No place yet, or the first forecast is on its way (or failed).
     @ViewBuilder
     private var placeholder: some View {
-        let title = model.place?.name ?? "Tempo"
-        let message = model.place == nil ? "Escolha uma cidade" : (model.lastRefreshFailed ? "Sem conexão" : "Buscando…")
+        let title = model.place?.name ?? String(localized: "Tempo")
+        let message = model.place == nil ? String(localized: "Escolha uma cidade") : (model.lastRefreshFailed ? String(localized: "Sem conexão") : String(localized: "Buscando…"))
         switch size {
         case .small:
             VStack(spacing: 4) {
@@ -137,7 +137,7 @@ struct WeatherWidget: View {
                     WeatherSymbol(code: 2, size: 22)
                         .padding(.leading, -3)
                         .opacity(model.place == nil ? 1 : 0.5)
-                    Text(model.place == nil ? "Escolha uma cidade para ver a previsão." : message)
+                    Text(model.place == nil ? String(localized: "Escolha uma cidade para ver a previsão.") : message)
                         .font(.system(size: 11))
                         .foregroundStyle(NotchStyle.secondary)
                         .fixedSize(horizontal: false, vertical: true)

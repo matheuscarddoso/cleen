@@ -16,8 +16,8 @@ final class OneShotLocation: NSObject, CLLocationManagerDelegate {
 
         var message: String {
             switch self {
-            case .denied: "O Cleen não tem acesso à localização."
-            case .unavailable: "Não deu para encontrar sua localização agora."
+            case .denied: String(localized: "O Cleen não tem acesso à localização.")
+            case .unavailable: String(localized: "Não deu para encontrar sua localização agora.")
             }
         }
     }
@@ -110,6 +110,6 @@ final class OneShotLocation: NSObject, CLLocationManagerDelegate {
                 }
             }
         }
-        return WeatherPlace(name: city ?? "Minha localização", country: country, latitude: coordinate.latitude, longitude: coordinate.longitude)
+        return WeatherPlace(name: city ?? String(localized: "Minha localização"), country: country, latitude: coordinate.latitude, longitude: coordinate.longitude)
     }
 }

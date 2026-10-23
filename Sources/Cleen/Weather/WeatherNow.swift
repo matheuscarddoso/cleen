@@ -16,7 +16,7 @@ struct WeatherNow: View {
                     .foregroundStyle(NotchStyle.secondary)
                     .lineLimit(1)
                     .help([place.name, place.subtitle].filter { !$0.isEmpty }.joined(separator: " — "))
-                NotchIconButton(symbol: isSearching ? "xmark" : "magnifyingglass", help: isSearching ? "Fechar a busca" : "Trocar de cidade", isActive: isSearching) {
+                NotchIconButton(symbol: isSearching ? "xmark" : "magnifyingglass", help: isSearching ? String(localized: "Fechar a busca") : String(localized: "Trocar de cidade"), isActive: isSearching) {
                     withAnimation(.smooth(duration: 0.25)) { isSearching.toggle() }
                 }
             }
@@ -64,8 +64,8 @@ struct WeatherNow: View {
             return forecast.updatedNote
         }
         var parts: [String] = []
-        if let feels = forecast.current.apparentTemperature { parts.append("Sensação \(WeatherFormat.temperature(feels))") }
-        if let humidity = forecast.current.humidity { parts.append("Umidade \(Int(humidity.rounded()))%") }
+        if let feels = forecast.current.apparentTemperature { parts.append(String(localized: "Sensação \(WeatherFormat.temperature(feels))")) }
+        if let humidity = forecast.current.humidity { parts.append(String(localized: "Umidade \(Int(humidity.rounded()))%")) }
         return parts.joined(separator: " · ")
     }
 

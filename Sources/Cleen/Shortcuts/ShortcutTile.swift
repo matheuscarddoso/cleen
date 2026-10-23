@@ -39,7 +39,7 @@ struct ShortcutTile: View {
         // Outside the button's label so a click on it pins instead of running.
         .overlay(alignment: .topTrailing) {
             if isHovered {
-                CardButton(symbol: pinned ? "pin.slash" : "pin", help: pinned ? "Desafixar" : "Fixar") { model.togglePin(entry) }
+                CardButton(symbol: pinned ? "pin.slash" : "pin", help: pinned ? String(localized: "Desafixar") : String(localized: "Fixar")) { model.togglePin(entry) }
                     .padding(5)
                     .transition(.opacity)
             } else if pinned {
@@ -60,7 +60,7 @@ struct ShortcutTile: View {
             } else {
                 Button("Rodar") { model.run(entry) }
             }
-            Button(pinned ? "Desafixar" : "Fixar") { model.togglePin(entry) }
+            Button(pinned ? String(localized: "Desafixar") : String(localized: "Fixar")) { model.togglePin(entry) }
             Divider()
             Button("Abrir no Atalhos") { model.openInShortcuts(entry) }
         }
@@ -73,7 +73,7 @@ struct ShortcutTile: View {
     private func help(for state: ShortcutsModel.RunState) -> String {
         switch state {
         case .failed(let message): "\(entry.name): \(message)"
-        case .running: "\(entry.name) está rodando"
+        case .running: String(localized: "\(entry.name) está rodando")
         default: entry.name
         }
     }
@@ -81,11 +81,11 @@ struct ShortcutTile: View {
     private func accessibilityValue(for state: ShortcutsModel.RunState, pinned: Bool) -> String {
         let status = switch state {
         case .idle: ""
-        case .running: "Rodando"
-        case .done: "Concluído"
-        case .failed(let message): "Falhou: \(message)"
+        case .running: String(localized: "Rodando")
+        case .done: String(localized: "Concluído")
+        case .failed(let message): String(localized: "Falhou: \(message)")
         }
-        return [pinned ? "Fixado" : "", status].filter { !$0.isEmpty }.joined(separator: ", ")
+        return [pinned ? String(localized: "Fixado") : "", status].filter { !$0.isEmpty }.joined(separator: ", ")
     }
 }
 

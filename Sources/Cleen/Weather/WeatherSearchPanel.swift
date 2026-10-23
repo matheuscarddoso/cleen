@@ -91,7 +91,7 @@ struct WeatherSearchPanel: View {
                 } else {
                     Image(systemName: "location.fill").font(.system(size: 10, weight: .medium))
                 }
-                Text(model.isLocating ? "Localizando…" : "Usar minha localização")
+                Text(model.isLocating ? String(localized: "Localizando…") : String(localized: "Usar minha localização"))
             }
         }
         .buttonStyle(.notchSecondary)
@@ -134,10 +134,10 @@ struct WeatherSearchPanel: View {
 
     private var hint: String {
         switch status {
-        case .idle: "Digite o nome de uma cidade."
-        case .searching: "Buscando…"
-        case .done: "Nenhuma cidade com esse nome."
-        case .failed: "Sem conexão para buscar agora."
+        case .idle: String(localized: "Digite o nome de uma cidade.")
+        case .searching: String(localized: "Buscando…")
+        case .done: String(localized: "Nenhuma cidade com esse nome.")
+        case .failed: String(localized: "Sem conexão para buscar agora.")
         }
     }
 

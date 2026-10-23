@@ -65,7 +65,7 @@ struct MacScreen<Notch: View>: View {
         HStack(spacing: 20) {
             Image(systemName: "apple.logo").font(.system(size: 15))
             Text("Finder").font(.system(size: 13, weight: .semibold))
-            ForEach(["Arquivo", "Editar", "Visualizar", "Ir", "Janela", "Ajuda"], id: \.self) { item in
+            ForEach([String(localized: "Arquivo"), String(localized: "Editar"), String(localized: "Visualizar"), String(localized: "Ir"), String(localized: "Janela"), String(localized: "Ajuda")], id: \.self) { item in
                 Text(item).font(.system(size: 13))
             }
             Spacer()

@@ -55,8 +55,8 @@ struct WeatherDayColumn: View {
 
     /// "Amanhã: Chuva fraca, máxima 22°, mínima 16°, 85% de chance de chuva".
     private var summary: String {
-        var text = "\(WeatherFormat.longDayLabel(day.date, today: today)): \(day.weather.description), máxima \(WeatherFormat.temperature(day.high)), mínima \(WeatherFormat.temperature(day.low))"
-        if let chance = day.precipitationChance, chance > 0 { text += ", \(chance)% de chance de chuva" }
+        var text = String(localized: "\(WeatherFormat.longDayLabel(day.date, today: today)): \(day.weather.description), máxima \(WeatherFormat.temperature(day.high)), mínima \(WeatherFormat.temperature(day.low))")
+        if let chance = day.precipitationChance, chance > 0 { text += String(localized: ", \(chance)% de chance de chuva") }
         return text
     }
 }

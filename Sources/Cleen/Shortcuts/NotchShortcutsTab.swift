@@ -16,18 +16,18 @@ struct NotchShortcutsTab: View {
                 NotchPrompt(
                     symbol: "exclamationmark.triangle.fill",
                     color: ToolPalette.orange,
-                    title: "Não deu para ler seus atalhos",
+                    title: String(localized: "Não deu para ler seus atalhos"),
                     message: message,
-                    buttonTitle: "Tentar de novo",
+                    buttonTitle: String(localized: "Tentar de novo"),
                     action: model.refresh
                 )
             case .loaded where model.library.shortcuts.isEmpty:
                 NotchPrompt(
                     symbol: "square.2.layers.3d",
                     color: ToolPalette.indigo,
-                    title: "Nenhum atalho ainda",
-                    message: "Crie um atalho no app Atalhos e rode daqui com um clique.",
-                    buttonTitle: "Abrir Atalhos",
+                    title: String(localized: "Nenhum atalho ainda"),
+                    message: String(localized: "Crie um atalho no app Atalhos e rode daqui com um clique."),
+                    buttonTitle: String(localized: "Abrir Atalhos"),
                     action: model.openShortcutsApp
                 )
                 .overlay(alignment: .topTrailing) { refreshButton }
@@ -104,7 +104,7 @@ struct NotchShortcutsTab: View {
                     .transition(.opacity)
             }
             refreshButton
-            NotchIconButton(symbol: "arrow.up.forward.app", help: "Abrir o app Atalhos", action: model.openShortcutsApp)
+            NotchIconButton(symbol: "arrow.up.forward.app", help: String(localized: "Abrir o app Atalhos"), action: model.openShortcutsApp)
         }
         .frame(height: 26)
         .animation(.smooth(duration: 0.2), value: model.lastFailure)
@@ -114,7 +114,7 @@ struct NotchShortcutsTab: View {
     private var folderPills: some View {
         ScrollView(.horizontal) {
             HStack(spacing: 2) {
-                ClipboardKindPill(title: "Todos", isSelected: model.folderID == nil) { model.folderID = nil }
+                ClipboardKindPill(title: String(localized: "Todos"), isSelected: model.folderID == nil) { model.folderID = nil }
                 ForEach(model.library.folders) { folder in
                     ClipboardKindPill(title: folder.name, isSelected: model.folderID == folder.id) { model.folderID = folder.id }
                 }
@@ -135,7 +135,7 @@ struct NotchShortcutsTab: View {
                 .frame(width: 26, height: 24)
                 .accessibilityLabel("Atualizando")
         } else {
-            NotchIconButton(symbol: "arrow.clockwise", help: "Atualizar lista", action: model.refresh)
+            NotchIconButton(symbol: "arrow.clockwise", help: String(localized: "Atualizar lista"), action: model.refresh)
         }
     }
 

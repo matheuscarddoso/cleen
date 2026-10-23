@@ -4,16 +4,23 @@ import SwiftUI
 /// their calendar colours, and a reminder waiting to be ticked.
 struct AgendaIllustration: View {
     private struct Sample: Identifiable {
-        let time: String
+        let hour: Int
+        let minute: Int
         let title: String
         let color: Color
         var id: String { title }
+
+        /// Today at that time, in the Mac's clock style ("09:30" or "9:30 AM").
+        var time: String {
+            let date = Calendar.current.date(bySettingHour: hour, minute: minute, second: 0, of: .now) ?? .now
+            return date.formatted(.dateTime.hour().minute().locale(.cleen))
+        }
     }
 
     private let samples = [
-        Sample(time: "09:30", title: "Daily do time", color: Color(red: 0.36, green: 0.67, blue: 1)),
-        Sample(time: "12:30", title: "Almoço", color: Color(red: 1, green: 0.62, blue: 0.24)),
-        Sample(time: "16:00", title: "Revisar o PR do checkout", color: Color(red: 0.69, green: 0.45, blue: 0.95)),
+        Sample(hour: 9, minute: 30, title: String(localized: "Daily do time"), color: Color(red: 0.36, green: 0.67, blue: 1)),
+        Sample(hour: 12, minute: 30, title: String(localized: "Almoço"), color: Color(red: 1, green: 0.62, blue: 0.24)),
+        Sample(hour: 16, minute: 0, title: String(localized: "Revisar o PR do checkout"), color: Color(red: 0.69, green: 0.45, blue: 0.95)),
     ]
 
     /// "Sexta-feira": only the first letter goes up.

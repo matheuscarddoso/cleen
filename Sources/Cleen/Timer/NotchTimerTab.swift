@@ -41,12 +41,12 @@ struct NotchTimerTab: View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 10) {
                 NotchSegmented(
-                    options: [("Timer", TimerMode.countdown), ("Pomodoro", TimerMode.pomodoro)],
+                    options: [(String(localized: "Timer"), TimerMode.countdown), ("Pomodoro", TimerMode.pomodoro)],
                     selection: Binding(get: { model.mode }, set: { model.setMode($0) })
                 )
                 .disabled(model.isActive)
                 .opacity(model.isActive ? 0.4 : 1)
-                .help(model.isActive ? "Zere o timer para trocar de modo" : "Timer simples ou Pomodoro")
+                .help(model.isActive ? String(localized: "Zere o timer para trocar de modo") : String(localized: "Timer simples ou Pomodoro"))
                 Spacer(minLength: 0)
                 if model.mode == .countdown {
                     wheel
@@ -99,9 +99,9 @@ struct NotchTimerTab: View {
     /// The rhythm, with the phase under way lifted, and the rounds of the cycle.
     private var pomodoroPlan: some View {
         HStack(spacing: 2) {
-            step("Foco", length: model.plan.focus, isCurrent: model.phase == .focus)
-            step("Pausa", length: model.plan.shortBreak, isCurrent: model.phase == .shortBreak)
-            step("Longa", length: model.plan.longBreak, isCurrent: model.phase == .longBreak)
+            step(String(localized: "Foco"), length: model.plan.focus, isCurrent: model.phase == .focus)
+            step(String(localized: "Pausa"), length: model.plan.shortBreak, isCurrent: model.phase == .shortBreak)
+            step(String(localized: "Longa", comment: "Short label for the long Pomodoro break"), length: model.plan.longBreak, isCurrent: model.phase == .longBreak)
             TimerTicks { now in
                 TimerRounds(
                     rounds: model.rounds,
@@ -147,7 +147,7 @@ struct NotchTimerTab: View {
             if model.mode == .pomodoro {
                 Button("Pular", action: model.skip)
                     .buttonStyle(.notchSecondary)
-                    .help(model.phase.isBreak ? "Pular a pausa" : "Pular para a pausa")
+                    .help(model.phase.isBreak ? String(localized: "Pular a pausa") : String(localized: "Pular para a pausa"))
                     .transition(.opacity)
             }
         }
@@ -155,8 +155,8 @@ struct NotchTimerTab: View {
     }
 
     private var primaryTitle: String {
-        if model.isRunning { return "Pausar" }
-        return model.isPaused ? "Continuar" : "Iniciar"
+        if model.isRunning { return String(localized: "Pausar") }
+        return model.isPaused ? String(localized: "Continuar") : String(localized: "Iniciar")
     }
 }
 
@@ -181,7 +181,7 @@ private struct TimerClockFace: View {
             }
             .buttonStyle(.plain)
             .onHover { hovering in withAnimation(.smooth(duration: 0.18)) { isHovered = hovering } }
-            .accessibilityLabel(model.isRunning ? "Pausar" : "Iniciar")
+            .accessibilityLabel(model.isRunning ? String(localized: "Pausar") : String(localized: "Iniciar"))
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(model.phaseDetail)
@@ -210,8 +210,8 @@ private struct TimerClockFace: View {
 
     private var status: String {
         if let end = model.endDate {
-            return "termina às \(end.formatted(.dateTime.hour().minute().locale(.cleen)))"
+            return String(localized: "termina às \(end.formatted(.dateTime.hour().minute().locale(.cleen)))")
         }
-        return model.isPaused ? "pausado" : "pronto para começar"
+        return model.isPaused ? String(localized: "pausado") : String(localized: "pronto para começar")
     }
 }

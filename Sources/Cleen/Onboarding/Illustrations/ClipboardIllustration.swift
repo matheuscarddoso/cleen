@@ -5,7 +5,7 @@ import SwiftUI
 struct ClipboardIllustration: View {
     var body: some View {
         ZStack {
-            card(kind: "Texto", symbol: "text.alignleft") {
+            card(kind: String(localized: "Texto"), symbol: "text.alignleft") {
                 Text("Reunião movida para quinta, 15h. Levar os números do trimestre.")
                     .font(.system(size: 12))
                     .foregroundStyle(.white.opacity(0.8))
@@ -14,7 +14,7 @@ struct ClipboardIllustration: View {
             .rotationEffect(.degrees(-11), anchor: .bottom)
             .offset(x: -88, y: 22)
 
-            card(kind: "Link", symbol: "link") {
+            card(kind: String(localized: "Link"), symbol: "link") {
                 VStack(alignment: .leading, spacing: 6) {
                     Text("github.com").font(.system(size: 13, weight: .medium)).foregroundStyle(.white)
                     Text("cleen / pull / 42").font(.system(size: 11.5)).foregroundStyle(.white.opacity(0.5))
@@ -23,7 +23,7 @@ struct ClipboardIllustration: View {
             .rotationEffect(.degrees(1), anchor: .bottom)
             .offset(x: 10, y: -6)
 
-            card(kind: "Imagem", symbol: "photo") {
+            card(kind: String(localized: "Imagem"), symbol: "photo") {
                 RoundedRectangle(cornerRadius: 8, style: .continuous)
                     .fill(LinearGradient(colors: [PaintPalette.night.glow, PaintPalette.night.haze], startPoint: .topLeading, endPoint: .bottomTrailing))
                     .overlay { Image(systemName: "camera.viewfinder").font(.system(size: 22)).foregroundStyle(.white.opacity(0.7)) }

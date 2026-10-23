@@ -24,8 +24,8 @@ extension Forecast {
     /// forecast may be behind, so it's quiet the rest of the time.
     var updatedNote: String {
         let time = fetchedAt.formatted(Date.FormatStyle(date: .omitted, time: .shortened).locale(.cleen))
-        if Calendar.current.isDateInToday(fetchedAt) { return "Atualizado às \(time)" }
+        if Calendar.current.isDateInToday(fetchedAt) { return String(localized: "Atualizado às \(time)") }
         let day = fetchedAt.formatted(.dateTime.day(.twoDigits).month(.twoDigits).locale(.cleen))
-        return "Atualizado em \(day) às \(time)"
+        return String(localized: "Atualizado em \(day) às \(time)")
     }
 }
