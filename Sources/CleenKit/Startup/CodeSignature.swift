@@ -73,6 +73,6 @@ public enum CodeSignature {
         if let open = name.lastIndex(of: "("), name.hasSuffix(")") {
             name = name[..<open].trimmingCharacters(in: .whitespaces)
         }
-        return name.isEmpty ? (team ?? "Desenvolvedor identificado") : name
+        return name.isEmpty ? (team ?? String(localized: "Desenvolvedor identificado")) : name
     }
 }

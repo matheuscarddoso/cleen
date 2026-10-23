@@ -21,7 +21,7 @@ struct WeatherDayColumn: View {
             WeatherSymbol(code: day.code, size: 19)
                 .padding(.top, 2)
             // Always takes its line, so the temperatures sit level across the week.
-            Text(chance.map { "\($0)%" } ?? " ")
+            Text(chance.map { (Double($0) / 100).formatted(.percent.locale(.cleen)) } ?? " ")
                 .font(.system(size: 9.5, weight: .medium).monospacedDigit())
                 .foregroundStyle(NotchStyle.secondary)
             VStack(spacing: 1) {
