@@ -77,6 +77,8 @@ final class AppModel {
             }
         }
         fullscreen.start()
+        agents.onApprovalRequested = { [weak self] in self?.notch.presentRequest(tab: .agents) }
+        agents.onApprovalsCleared = { [weak self] in self?.notch.endRequest() }
         agents.start()
         displays.restoreDimming()
         Thumbnails.shared.scale = NSScreen.screens.map(\.backingScaleFactor).max() ?? 2

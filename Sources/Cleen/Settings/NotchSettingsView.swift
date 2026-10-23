@@ -45,6 +45,7 @@ struct NotchSettingsView: View {
             ClosedNotchSettings()
         case .tabs: TabSettings()
         case .cleaning: CleaningSettings()
+        case .agents: ClaudeCodeSettings()
         case .about:
             PermissionSettings()
             AboutSettings()

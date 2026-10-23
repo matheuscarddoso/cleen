@@ -32,7 +32,7 @@ struct NotchWings: View {
             HStack(spacing: 6) {
                 // Claude first, even beside what's playing: it's what you're waiting on.
                 if showsClaude {
-                    ClaudeWingIndicator(isWorking: !agents.working.isEmpty, justFinished: agents.justFinished)
+                    ClaudeWingIndicator(isWorking: !agents.working.isEmpty, justFinished: agents.justFinished, needsApproval: !agents.approvals.isEmpty)
                         .transition(.scale(scale: 0.5).combined(with: .opacity))
                 }
                 leading
@@ -66,9 +66,10 @@ struct NotchWings: View {
         junk.phase == .scanning || junk.isCleaning || app.isSmartScanning || app.isSmartCleaning
     }
 
-    /// A session working, or one that just finished (its check is still up).
+    /// A session working, or one that just finished (its check is still up). A request
+    /// waiting for permission always shows: it's holding a session up.
     private var showsClaude: Bool {
-        showsAgents && (!agents.working.isEmpty || agents.justFinished)
+        showsAgents && (!agents.working.isEmpty || agents.justFinished) || !agents.approvals.isEmpty
     }
 
     private var idleIndicator: LiveActivitySettings.Idle {

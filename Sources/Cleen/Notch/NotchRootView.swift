@@ -69,7 +69,7 @@ struct NotchRootView: View {
         if hidesInFullscreen, fullscreen.isFullscreen(controller.screen) { return 0 }
         let busy = junk.phase == .scanning || junk.isCleaning || app.isSmartScanning || app.isSmartCleaning
         if live.banner != nil, !busy { return LiveActivity.bannerWingWidth }
-        let claude = LiveActivitySettings.agents && (!agents.working.isEmpty || agents.justFinished)
+        let claude = LiveActivitySettings.agents && (!agents.working.isEmpty || agents.justFinished) || !agents.approvals.isEmpty
         let hasContent = busy || timer.isActive || live.meeting != nil || claude || nowPlaying.track?.isPlaying == true
             || LiveActivitySettings.Idle(rawValue: idle) != LiveActivitySettings.Idle.none
         // Claude's glyph sits before whatever else is on the left wing.

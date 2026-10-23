@@ -60,6 +60,15 @@ final class NotchCoordinator {
         (controllerUnderPointer ?? primary)?.present(tab: tab)
     }
 
+    func presentRequest(tab: NotchTab) {
+        guard !isSuspended else { return }
+        (controllerUnderPointer ?? primary)?.presentRequest(tab: tab)
+    }
+
+    func endRequest() {
+        controllers.forEach { $0.endRequest() }
+    }
+
     func openSettings() {
         (controllerUnderPointer ?? primary)?.openSettings()
     }
