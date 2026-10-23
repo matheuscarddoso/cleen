@@ -40,8 +40,8 @@ MOUNT="/Volumes/$VOLUME"
 cp "$ROOT/build/AppIcon.icns" "$MOUNT/.VolumeIcon.icns"
 SetFile -c icnC "$MOUNT/.VolumeIcon.icns"
 SetFile -a C "$MOUNT"
-# "Cleen", not "Cleen.app".
-SetFile -a E "$MOUNT/Cleen.app"
+# No hidden-extension flag on the app: it's Finder info on the bundle, which breaks
+# the signature ("detritus") and makes macOS call a downloaded copy damaged.
 
 osascript <<APPLESCRIPT
 tell application "Finder"
