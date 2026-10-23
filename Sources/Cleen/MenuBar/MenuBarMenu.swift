@@ -11,6 +11,9 @@ struct MenuBarMenu: View {
         if let disk = monitor.disk {
             Text("\(disk.available.bytes) livres de \(disk.total.bytes)")
         }
+        if let feed = app.updates.available {
+            Button(String(localized: "Atualizar para \(feed.version)")) { Task { await app.updates.install() } }
+        }
         Divider()
         Button("Ajustes…", action: openSettings)
             .keyboardShortcut(",")

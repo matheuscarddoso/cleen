@@ -959,3 +959,16 @@
 "Começar agora" = "Get Started";
 "Personalizar" = "Customize";
 "hello" = "hello";
+"Não deu para procurar atualizações agora." = "Couldn't check for updates right now.";
+"A atualização não terminou: %@" = "The update didn't finish: %@";
+"O arquivo baixado veio corrompido. Nada foi trocado." = "The download is damaged. Nothing was changed.";
+"A nova versão não tem a mesma assinatura desta. Nada foi trocado." = "The new version isn't signed like this one. Nothing was changed.";
+"O arquivo baixado não tem o Cleen dentro. Nada foi trocado." = "The download doesn't contain Cleen. Nothing was changed.";
+"Atualizar para %@" = "Update to %@";
+"Procurar agora" = "Check Now";
+"Atualizar sozinho" = "Update automatically";
+"Procura uma versão nova a cada seis horas." = "Checks for a new version every six hours.";
+"Esta é a versão mais nova." = "This is the latest version.";
+"Uma versão nova está pronta." = "A new version is ready.";
+"Baixando…" = "Downloading…";
+"Instalando, o Cleen abre de novo em seguida." = "Installing; Cleen will reopen right after.";

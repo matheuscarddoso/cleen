@@ -32,6 +32,7 @@ final class AppModel {
     let live = LiveActivityCenter()
     let agents = AgentsModel()
     let displays = DisplaysModel()
+    let updates = UpdateModel()
     @ObservationIgnored private(set) lazy var search = SearchModel(app: self)
     let fullscreen = FullscreenWatcher()
     let timer = TimerModel()
@@ -79,6 +80,7 @@ final class AppModel {
         fullscreen.start()
         agents.start()
         displays.restoreDimming()
+        updates.start()
         Thumbnails.shared.scale = NSScreen.screens.map(\.backingScaleFactor).max() ?? 2
     }
 

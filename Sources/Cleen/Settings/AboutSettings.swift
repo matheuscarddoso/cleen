@@ -7,11 +7,7 @@ struct AboutSettings: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             NotchGroup {
-                SettingRow(title: String(localized: "Versão")) {
-                    Text(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "—")
-                        .font(.system(size: 11, weight: .medium).monospacedDigit())
-                        .foregroundStyle(NotchStyle.secondary)
-                }
+                UpdateSettingsRows()
                 SettingRow(title: String(localized: "Liberado pelo Cleen")) {
                     Text(cleanup.lifetimeFreed.bytes)
                         .font(.system(size: 11, weight: .semibold).monospacedDigit())
