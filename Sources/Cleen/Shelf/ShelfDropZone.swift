@@ -35,6 +35,7 @@ struct ShelfDropZone: View {
                     .padding(10)
                 }
                 .scrollIndicators(.hidden)
+                .scrollEdgeFade(.horizontal)
             }
         }
         .dropDestination(for: URL.self) { urls, _ in

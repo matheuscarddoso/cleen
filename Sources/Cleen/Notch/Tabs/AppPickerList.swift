@@ -16,5 +16,6 @@ struct AppPickerList: View {
             }
         }
         .scrollIndicators(.hidden)
+        .scrollEdgeFade()
     }
 }

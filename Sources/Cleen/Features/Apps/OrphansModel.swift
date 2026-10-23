@@ -53,6 +53,10 @@ final class OrphansModel {
         CheckState(selected: group.items.count { selection.contains($0.url) }, of: group.items.count)
     }
 
+    func toggle(_ item: Leftover) {
+        if selection.contains(item.url) { selection.remove(item.url) } else { selection.insert(item.url) }
+    }
+
     func toggle(_ group: OrphanGroup) {
         let urls = group.items.map(\.url)
         if state(of: group) == .on { selection.subtract(urls) } else { selection.formUnion(urls) }

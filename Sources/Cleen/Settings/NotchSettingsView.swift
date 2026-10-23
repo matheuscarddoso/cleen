@@ -26,6 +26,7 @@ struct NotchSettingsView: View {
                 .padding(.bottom, 4)
             }
             .scrollIndicators(.hidden)
+            .scrollEdgeFade()
             .scrollBounceBehavior(.basedOnSize)
             .id(state.settingsSection)
         }

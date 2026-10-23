@@ -9,10 +9,12 @@ nonisolated final class CameraSession: @unchecked Sendable {
     private let queue = DispatchQueue(label: "app.cleen.camera")
     private var configured = false
 
-    func start() {
+    /// `started` runs on the main thread once frames flow (the preview connection exists then).
+    func start(started: @escaping @MainActor @Sendable () -> Void = {}) {
         queue.async { [self] in
             if !configured { configure() }
             if !session.isRunning { session.startRunning() }
+            DispatchQueue.main.async { MainActor.assumeIsolated { started() } }
         }
     }
 

@@ -30,5 +30,6 @@ struct ScreenshotStrip: View {
             }
         }
         .scrollIndicators(.hidden)
+        .scrollEdgeFade()
     }
 }

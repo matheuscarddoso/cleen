@@ -3,6 +3,7 @@ import SwiftUI
 
 struct NotchProjectsTab: View {
     @Environment(ProjectsModel.self) private var model
+    @State private var expanded = Set<URL>()
 
     var body: some View {
         switch model.phase {
@@ -36,7 +37,8 @@ struct NotchProjectsTab: View {
                             NotchRow(
                                 title: project.name,
                                 subtitle: "\(project.artifacts.map(\.kind.folderName).listed) · mexido \(project.lastActivity.relative)",
-                                subtitleColor: stale ? NotchStyle.warning.opacity(0.85) : NotchStyle.tertiary
+                                subtitleColor: stale ? NotchStyle.warning.opacity(0.85) : NotchStyle.tertiary,
+                                action: { model.toggle(project) }
                             ) {
                                 NotchCheckbox(state: model.state(of: project), label: project.name) { model.toggle(project) }
                                 ToolIcon(symbol: "folder.fill", color: stale ? ToolPalette.purple : ToolPalette.graphite)
@@ -44,12 +46,26 @@ struct NotchProjectsTab: View {
                                 Text(project.totalSize.bytes)
                                     .font(NotchStyle.bodyMedium.monospacedDigit())
                                     .foregroundStyle(NotchStyle.secondary)
+                                DisclosureChevron(isExpanded: expanded.contains(project.id)) { toggleExpanded(project.id) }
+                            }
+                            if expanded.contains(project.id) {
+                                ForEach(project.artifacts) { artifact in
+                                    NotchChildRow(title: artifact.kind.title, path: artifact.url, size: artifact.size, isOn: model.selection.contains(artifact.url), note: artifact.kind.restoreHint) {
+                                        model.toggle(artifact)
+                                    }
+                                }
                             }
                         }
                     }
                 }
             }
             .animation(.smooth(duration: 0.25), value: model.report)
+        }
+    }
+
+    private func toggleExpanded(_ id: URL) {
+        withAnimation(.smooth(duration: 0.2)) {
+            if expanded.contains(id) { expanded.remove(id) } else { expanded.insert(id) }
         }
     }
 

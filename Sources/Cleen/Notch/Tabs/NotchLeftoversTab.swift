@@ -4,6 +4,7 @@ import SwiftUI
 /// What deleted apps left behind, one line per app.
 struct NotchLeftoversTab: View {
     @Environment(OrphansModel.self) private var model
+    @State private var expanded = Set<String>()
 
     var body: some View {
         switch model.phase {
@@ -36,13 +37,26 @@ struct NotchLeftoversTab: View {
                             NotchRow(
                                 title: group.displayName,
                                 subtitle: "\(group.bundleID) · \(group.items.map(\.place.rawValue).uniqued().listed.lowercased())",
-                                verticalPadding: 4
+                                verticalPadding: 4,
+                                action: { model.toggle(group) }
                             ) {
                                 NotchCheckbox(state: model.state(of: group), label: group.displayName) { model.toggle(group) }
                             } trailing: {
                                 Text(group.totalSize.bytes)
                                     .font(.system(size: 11, weight: .medium).monospacedDigit())
                                     .foregroundStyle(NotchStyle.secondary)
+                                DisclosureChevron(isExpanded: expanded.contains(group.id)) {
+                                    withAnimation(.smooth(duration: 0.2)) {
+                                        if expanded.contains(group.id) { expanded.remove(group.id) } else { expanded.insert(group.id) }
+                                    }
+                                }
+                            }
+                            if expanded.contains(group.id) {
+                                ForEach(group.items) { item in
+                                    NotchChildRow(title: item.place.rawValue, path: item.url, size: item.size, isOn: model.selection.contains(item.url)) {
+                                        model.toggle(item)
+                                    }
+                                }
                             }
                         }
                     }

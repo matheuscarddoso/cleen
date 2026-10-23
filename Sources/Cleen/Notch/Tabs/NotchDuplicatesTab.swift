@@ -40,7 +40,8 @@ struct NotchDuplicatesTab: View {
                                     NotchRow(
                                         title: file.name,
                                         subtitle: Paths.abbreviate(file.url.deletingLastPathComponent()),
-                                        verticalPadding: 4
+                                        verticalPadding: 4,
+                                        action: { model.toggle(file) }
                                     ) {
                                         NotchCheckbox(state: removing ? .on : .off, label: file.name) { model.toggle(file) }
                                         FileIcon(url: file.url, size: 20)

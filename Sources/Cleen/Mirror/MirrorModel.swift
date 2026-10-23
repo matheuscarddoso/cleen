@@ -30,14 +30,22 @@ final class MirrorModel {
     func requestAccess() async {
         let granted = await AVCaptureDevice.requestAccess(for: .video)
         access = granted ? .granted : .denied
-        if granted, viewers > 0 { camera.start() }
+        if granted, viewers > 0 { camera.start { [weak self] in self?.fixOrientation() } }
     }
 
     /// Runs the camera while the calling view is visible.
     func appear() {
         viewers += 1
         access = Self.currentAccess()
-        if access == .granted { camera.start() }
+        if access == .granted { camera.start { [weak self] in self?.fixOrientation() } }
+    }
+
+    /// The image exactly as the camera sees it. macOS mirrors front cameras on its own,
+    /// so that has to be switched off explicitly, and only once the connection exists.
+    func fixOrientation() {
+        guard let connection = previewLayer.connection, connection.isVideoMirroringSupported else { return }
+        connection.automaticallyAdjustsVideoMirroring = false
+        connection.isVideoMirrored = false
     }
 
     /// Stops a moment later: when the round mirror grows into the wide one, the new

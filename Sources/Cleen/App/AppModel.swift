@@ -64,6 +64,9 @@ final class AppModel {
             notch.primary?.state.isPinned = true
             notch.primary?.open(tab: tab)
             if LaunchArguments.scan { startScan(for: tab) }
+        } else if LaunchArguments.scan {
+            // Closed notch, scan running: shows the wing's progress.
+            startScan(for: .overview)
         }
     }
 

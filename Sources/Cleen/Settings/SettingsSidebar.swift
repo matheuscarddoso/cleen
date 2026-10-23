@@ -26,6 +26,7 @@ struct SettingsSidebar: View {
             }
         }
         .scrollIndicators(.hidden)
+        .scrollEdgeFade()
         .scrollBounceBehavior(.basedOnSize)
     }
 }

@@ -29,6 +29,11 @@ struct ClipboardCards: View {
                     }
                 }
                 .scrollIndicators(.hidden)
+                // Cards run to the panel's edges, not the content inset: the first card
+                // still starts aligned with the search field.
+                .contentMargins(.horizontal, NotchOpenContent.inset, for: .scrollContent)
+                .scrollEdgeFade(.horizontal, length: 36)
+                .padding(.horizontal, -NotchOpenContent.inset)
                 .onChange(of: model.selectedID) { _, id in
                     if let id { withAnimation(.smooth(duration: 0.2)) { proxy.scrollTo(id, anchor: .center) } }
                 }

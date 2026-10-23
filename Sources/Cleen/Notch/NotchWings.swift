@@ -43,9 +43,9 @@ struct NotchWings: View {
     @ViewBuilder
     private var leading: some View {
         if isBusy {
-            ProgressView()
-                .controlSize(.mini)
-                .tint(.white)
+            WingSpinner(size: artworkSize - 2)
+                .frame(width: artworkSize, height: artworkSize)
+                .transition(.opacity)
         } else if isPlaying {
             WingArtwork(image: nowPlaying.artwork, size: artworkSize, cornerRadius: max(3, NotchStyle.closedBottomRadius - inset))
                 .transition(.scale(0.6).combined(with: .opacity))

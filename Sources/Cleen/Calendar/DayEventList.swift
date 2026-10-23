@@ -26,6 +26,7 @@ struct DayEventList: View {
                     }
                 }
                 .scrollIndicators(.hidden)
+                .scrollEdgeFade()
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)

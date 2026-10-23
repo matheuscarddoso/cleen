@@ -33,7 +33,7 @@ struct NotchFilesTab: View {
                 NotchScroll {
                     VStack(spacing: 0) {
                         ForEach(model.files.prefix(40)) { file in
-                            NotchRow(title: file.name, subtitle: "\(Paths.abbreviate(file.url.deletingLastPathComponent())) · usado \(file.lastUsed.relative)") {
+                            NotchRow(title: file.name, subtitle: "\(Paths.abbreviate(file.url.deletingLastPathComponent())) · usado \(file.lastUsed.relative)", action: { model.toggle(file) }) {
                                 NotchCheckbox(state: model.selection.contains(file.url) ? .on : .off, label: file.name) { model.toggle(file) }
                                 FileIcon(url: file.url, size: 22)
                             } trailing: {

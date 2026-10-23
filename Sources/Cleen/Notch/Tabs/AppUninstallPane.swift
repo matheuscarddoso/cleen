@@ -38,7 +38,7 @@ struct AppUninstallPane: View {
                     NotchScroll {
                         NotchGroup {
                             ForEach(model.leftovers) { leftover in
-                                NotchRow(title: leftover.place.rawValue, subtitle: Paths.abbreviate(leftover.url), verticalPadding: 3) {
+                                NotchRow(title: leftover.place.rawValue, subtitle: Paths.abbreviate(leftover.url), verticalPadding: 3, action: { model.toggle(leftover) }) {
                                     NotchCheckbox(state: model.leftoverSelection.contains(leftover.url) ? .on : .off, label: leftover.url.lastPathComponent) { model.toggle(leftover) }
                                 } trailing: {
                                     Text(leftover.size.bytes)

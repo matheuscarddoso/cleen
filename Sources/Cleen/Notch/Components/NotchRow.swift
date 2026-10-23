@@ -1,11 +1,13 @@
 import SwiftUI
 
 /// A dense list row with hover highlight: leading content, title, subtitle, trailing value.
+/// With `action`, a click anywhere on the row does what its checkbox does.
 struct NotchRow<Leading: View, Trailing: View>: View {
     let title: String
     var subtitle: String?
     var subtitleColor: Color = NotchStyle.tertiary
     var verticalPadding = 6.0
+    var action: (() -> Void)?
     @ViewBuilder let leading: Leading
     @ViewBuilder let trailing: Trailing
     @State private var isHovered = false
@@ -34,5 +36,6 @@ struct NotchRow<Leading: View, Trailing: View>: View {
         .background(isHovered ? NotchStyle.control.opacity(0.6) : .clear, in: .rect(cornerRadius: 9, style: .continuous))
         .contentShape(.rect)
         .onHover { isHovered = $0 }
+        .onTapGesture { action?() }
     }
 }
