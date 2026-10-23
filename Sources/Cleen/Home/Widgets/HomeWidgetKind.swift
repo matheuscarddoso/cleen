@@ -43,7 +43,7 @@ enum HomeWidgetKind: String, Codable, CaseIterable, Identifiable {
         case .note: "note.text"
         case .reminders: "checklist"
         case .weather: "cloud.sun"
-        case .agents: "sparkle"
+        case .agents: "asterisk"
         }
     }
 

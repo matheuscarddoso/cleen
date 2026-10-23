@@ -11,7 +11,7 @@ struct NotchAgentsTab: View {
         Group {
             if !AgentsModel.isClaudeCodeInstalled {
                 NotchPrompt(
-                    symbol: "sparkles",
+                    symbol: "asterisk",
                     color: ToolPalette.orange,
                     title: String(localized: "Claude Code não encontrado"),
                     message: String(localized: "As sessões aparecem aqui assim que o Claude Code rodar neste Mac."),
@@ -19,7 +19,7 @@ struct NotchAgentsTab: View {
                 ) { Task { await agents.refresh() } }
             } else if agents.sessions.isEmpty {
                 VStack(spacing: 6) {
-                    Image(systemName: "sparkles")
+                    Image(systemName: "asterisk")
                         .font(.system(size: 16))
                         .foregroundStyle(NotchStyle.tertiary)
                     Text("Nenhuma sessão na última meia hora")
@@ -47,7 +47,7 @@ private struct AgentRow: View {
 
     var body: some View {
         HStack(spacing: 10) {
-            Image(systemName: "sparkle")
+            Image(systemName: "asterisk")
                 .font(.system(size: 12, weight: .medium))
                 .foregroundStyle(ToolPalette.orange)
                 .frame(width: 16)

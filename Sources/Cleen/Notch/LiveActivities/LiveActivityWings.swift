@@ -53,7 +53,7 @@ struct LiveActivityBanner: View {
                 .foregroundStyle(NotchStyle.warning)
             label(phase)
         case .agentFinished(let title):
-            Image(systemName: "sparkle")
+            Image(systemName: "asterisk")
                 .font(.system(size: 12, weight: .medium))
                 .foregroundStyle(ToolPalette.orange)
             label(title)

@@ -77,7 +77,7 @@ enum NotchTab: String, CaseIterable, Identifiable, Codable {
         case .emoji: "face.smiling"
         case .weather: "cloud.sun"
         case .shortcuts: "square.2.layers.3d"
-        case .agents: "sparkle"
+        case .agents: "asterisk"
         case .overview: "internaldrive.fill"
         case .clean: "trash"
         case .projects: "chevron.left.forwardslash.chevron.right"

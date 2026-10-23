@@ -13,7 +13,7 @@ struct AgentsWidget: View {
             switch size {
             case .small:
                 VStack(spacing: 4) {
-                    Image(systemName: "sparkle")
+                    Image(systemName: "asterisk")
                         .font(.system(size: 20, weight: .medium))
                         .foregroundStyle(ToolPalette.orange)
                     Text(agents.working.count.formatted())
@@ -26,7 +26,7 @@ struct AgentsWidget: View {
                 .frame(width: 88, height: 88)
             case .medium, .large:
                 VStack(alignment: .leading, spacing: 6) {
-                    HomeWidgetLabel(title: String(localized: "Claude Code"), symbol: "sparkle")
+                    HomeWidgetLabel(title: String(localized: "Claude Code"), symbol: "asterisk")
                     if agents.sessions.isEmpty {
                         Text("Nenhuma sessão agora")
                             .font(.system(size: 11))

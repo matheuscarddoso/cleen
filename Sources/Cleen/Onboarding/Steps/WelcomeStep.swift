@@ -9,7 +9,7 @@ struct WelcomeStep: View {
             footnote: String(localized: "Seus arquivos são analisados aqui mesmo e nunca saem do Mac.")
         ) {
             VStack(alignment: .leading, spacing: 6) {
-                OnboardingRow(symbol: "sparkles", title: String(localized: "Limpeza em um clique"), note: String(localized: "Caches, restos de apps e projetos parados"))
+                OnboardingRow(symbol: "asterisk", title: String(localized: "Limpeza em um clique"), note: String(localized: "Caches, restos de apps e projetos parados"))
                 OnboardingRow(symbol: "calendar", title: String(localized: "Seu dia no notch"), note: String(localized: "Agenda, música e o Espelho antes da chamada"))
                 OnboardingRow(symbol: "doc.on.clipboard", title: String(localized: "Tudo o que você copiou"), note: String(localized: "Histórico da área de transferência e screenshots"))
             }

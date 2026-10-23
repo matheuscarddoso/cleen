@@ -82,7 +82,7 @@ struct NotchWings: View {
             WingArtwork(image: nowPlaying.artwork, size: artworkSize, cornerRadius: max(3, NotchStyle.closedBottomRadius - inset))
                 .transition(.scale(0.6).combined(with: .opacity))
         } else if showsAgents, !agents.working.isEmpty {
-            Image(systemName: "sparkle")
+            Image(systemName: "asterisk")
                 .font(.system(size: 12, weight: .medium))
                 .foregroundStyle(ToolPalette.orange)
                 .symbolEffect(.pulse, options: .repeating)

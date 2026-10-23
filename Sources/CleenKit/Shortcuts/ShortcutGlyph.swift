@@ -49,7 +49,7 @@ public struct ShortcutGlyph: Sendable, Equatable {
     ]
 
     static let fallbackSymbols = [
-        "sparkles", "bolt.fill", "wand.and.stars", "square.stack.3d.up", "command",
+        "asterisk", "bolt.fill", "wand.and.stars", "square.stack.3d.up", "command",
         "paperplane", "star", "flag", "bookmark", "gearshape", "square.2.layers.3d", "circle.hexagongrid",
     ]
 
