@@ -14,8 +14,10 @@ final class TabPreferences {
     init() {
         let defaults = UserDefaults.standard
         let saved = (defaults.stringArray(forKey: Self.orderKey) ?? []).compactMap(NotchTab.init(rawValue:))
-        order = saved + NotchTab.allCases.filter { !saved.contains($0) }
+        let added = NotchTab.allCases.filter { !saved.contains($0) }
+        order = saved + added
         hidden = Set((defaults.stringArray(forKey: Self.hiddenKey) ?? []).compactMap(NotchTab.init(rawValue:)))
+            .union(added.filter(\.isHiddenByDefault))
     }
 
     var visible: [NotchTab] { order.filter { !hidden.contains($0) } }
@@ -39,7 +41,7 @@ final class TabPreferences {
 
     func reset() {
         order = NotchTab.allCases
-        hidden = []
+        hidden = Set(NotchTab.allCases.filter(\.isHiddenByDefault))
         save()
     }
 

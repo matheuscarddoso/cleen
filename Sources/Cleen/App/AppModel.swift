@@ -29,6 +29,10 @@ final class AppModel {
     let shelf = ShelfModel()
     let tabs = TabPreferences()
     let homeLayout = HomeLayout()
+    let timer = TimerModel()
+    let notes = NotesModel()
+    let weather = WeatherModel()
+    let shortcuts = ShortcutsModel()
     let mirror = MirrorModel()
     let clipboard = ClipboardModel()
     let screenshots = ScreenshotModel()
@@ -124,7 +128,8 @@ final class AppModel {
         case .space: spaceLens.scan(.home)
         case .leftovers: orphans.startScan()
         case .apps: Task { await apps.load() }
-        case .calendar, .shelf, .clipboard, .screenshots, .ai, .system, .startup, .maintenance: break
+        case .calendar, .shelf, .clipboard, .screenshots, .ai, .system, .startup, .maintenance,
+             .timer, .notes, .reminders, .converter, .emoji, .weather, .shortcuts: break
         }
     }
 

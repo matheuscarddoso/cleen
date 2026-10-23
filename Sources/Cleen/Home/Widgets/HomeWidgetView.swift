@@ -14,6 +14,10 @@ struct HomeWidgetView: View {
         case .disk: DiskWidget(size: item.size)
         case .aiUsage: AIUsageWidget(size: item.size)
         case .system: SystemWidget(size: item.size)
+        case .timer: TimerWidget(size: item.size)
+        case .note: NoteWidget(size: item.size)
+        case .reminders: RemindersWidget(size: item.size)
+        case .weather: WeatherWidget(size: item.size)
         }
     }
 }

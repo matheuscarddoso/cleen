@@ -7,6 +7,10 @@ enum HomeWidgetKind: String, Codable, CaseIterable, Identifiable {
     case disk
     case aiUsage
     case system
+    case timer
+    case note
+    case reminders
+    case weather
 
     var id: String { rawValue }
 
@@ -18,6 +22,10 @@ enum HomeWidgetKind: String, Codable, CaseIterable, Identifiable {
         case .disk: "Disco"
         case .aiUsage: "Uso de IA"
         case .system: "Sistema"
+        case .timer: "Timer"
+        case .note: "Nota"
+        case .reminders: "Lembretes"
+        case .weather: "Tempo"
         }
     }
 
@@ -29,6 +37,10 @@ enum HomeWidgetKind: String, Codable, CaseIterable, Identifiable {
         case .disk: "internaldrive"
         case .aiUsage: "chart.bar.xaxis"
         case .system: "cpu"
+        case .timer: "timer"
+        case .note: "note.text"
+        case .reminders: "checklist"
+        case .weather: "cloud.sun"
         }
     }
 
@@ -41,14 +53,18 @@ enum HomeWidgetKind: String, Codable, CaseIterable, Identifiable {
         case .disk: [.small, .medium]
         case .aiUsage: [.small, .medium]
         case .system: [.small, .medium]
+        case .timer: [.small, .medium]
+        case .note: [.medium, .large]
+        case .reminders: [.medium, .large]
+        case .weather: [.small, .medium, .large]
         }
     }
 
     var defaultSize: HomeWidgetSize {
         switch self {
         case .nowPlaying: .large
-        case .agenda, .disk, .aiUsage, .system: .medium
-        case .mirror: .small
+        case .agenda, .disk, .aiUsage, .system, .note, .reminders, .weather: .medium
+        case .mirror, .timer: .small
         }
     }
 
@@ -56,8 +72,8 @@ enum HomeWidgetKind: String, Codable, CaseIterable, Identifiable {
     /// their shape.
     func isFlexible(at size: HomeWidgetSize) -> Bool {
         switch self {
-        case .agenda, .aiUsage, .system: size != .small
-        case .nowPlaying, .mirror, .disk: false
+        case .agenda, .aiUsage, .system, .note, .reminders, .weather: size != .small
+        case .nowPlaying, .mirror, .disk, .timer: false
         }
     }
 }
