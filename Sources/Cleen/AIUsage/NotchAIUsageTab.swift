@@ -1,33 +1,13 @@
 import CleenKit
 import SwiftUI
 
-/// Every AI limit at a glance: spend on top, then one grouped list — limits with their
-/// pace, where the month's spend went, and the last two weeks.
+/// Every AI limit at a glance: today's spend and the trend on the left, the limits with
+/// their pace on the right (topped up with where the month's spend went).
 struct NotchAIUsageTab: View {
     @Environment(AIUsageModel.self) private var model
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 10) {
-                if let summary = model.summary {
-                    SpendLabel(title: "Hoje", value: summary.todayCost.dollars)
-                    SpendLabel(title: "30 dias", value: summary.monthCost.dollars)
-                    Text("em preço de API")
-                        .font(.system(size: 10.5))
-                        .foregroundStyle(NotchStyle.tertiary)
-                }
-                Spacer()
-                if let plan = model.claude?.plan {
-                    Text("Claude \(plan)")
-                        .font(.system(size: 10.5, weight: .semibold))
-                        .foregroundStyle(NotchStyle.secondary)
-                }
-                NotchIconButton(symbol: "arrow.clockwise", help: "Atualizar") {
-                    Task { await model.refresh(force: true) }
-                }
-                .rotationEffect(.degrees(model.isLoading ? 360 : 0))
-                .animation(model.isLoading ? .linear(duration: 1).repeatForever(autoreverses: false) : .default, value: model.isLoading)
-            }
+        Group {
             if !model.hasClaudeCode && model.codex == nil {
                 NotchPrompt(
                     symbol: "chart.bar.xaxis",
@@ -37,33 +17,29 @@ struct NotchAIUsageTab: View {
                     buttonTitle: "Procurar de novo"
                 ) { Task { await model.refresh(force: true) } }
             } else if let summary = model.summary {
-                NotchGroup {
-                    ForEach(limitRows.prefix(3)) { row in
-                        NotchMeterRow(symbol: row.symbol, label: row.label, value: row.window.used.percent, valueColor: row.color, detail: row.detail) {
-                            ZStack {
-                                UsageBar(fraction: row.window.used, height: 3.5, tint: row.color == NotchStyle.primary ? nil : row.color)
-                                if let pace = row.window.elapsed() {
-                                    PaceTick(fraction: pace)
-                                }
-                            }
+                HStack(alignment: .top, spacing: 18) {
+                    AISpendSummary(summary: summary)
+                        .padding(.leading, 4)
+                        .frame(width: 220)
+                    Rectangle()
+                        .fill(NotchStyle.separator)
+                        .frame(width: 1)
+                    NotchGroup {
+                        ForEach(limitRows.prefix(3)) { row in
+                            LimitBlock(symbol: row.symbol, label: row.label, value: row.window.used.percent, fraction: row.window.used, pace: row.window.elapsed(), color: row.color, detail: row.detail)
+                        }
+                        if model.claude == nil {
+                            LimitBlock(symbol: "asterisk", label: "Sessão (5h)", value: summary.blockCost.dollars, fraction: 0, detail: model.claudeProblem.map(Self.problemText))
+                        }
+                        // Fill up to three blocks with where the month's spend went.
+                        ForEach(summary.models.prefix(max(0, 3 - min(limitRows.count, 3) - (model.claude == nil ? 1 : 0)))) { share in
+                            let fraction = share.cost / max(summary.monthCost, 0.01)
+                            LimitBlock(symbol: "cube", label: share.name, value: fraction.percent, fraction: fraction, detail: "do gasto", isShare: true)
                         }
                     }
-                    if model.claude == nil {
-                        NotchMeterRow(symbol: "asterisk", label: "Sessão (5h)", value: summary.blockCost.dollars, detail: model.claudeProblem.map(Self.problemText)) {
-                            Color.clear
-                        }
-                    }
-                    // Fill what's left of five rows with the biggest models.
-                    ForEach(summary.models.prefix(max(0, 3 - min(limitRows.count, 3) - (model.claude == nil ? 1 : 0)))) { share in
-                        NotchMeterRow(symbol: "cube", label: share.name, value: (share.cost / max(summary.monthCost, 0.01)).percent, detail: "do gasto") {
-                            UsageBar(fraction: share.cost / max(summary.monthCost, 0.01), height: 3.5, tint: NotchStyle.barFill)
-                        }
-                    }
-                    NotchMeterRow(symbol: "chart.bar", label: "Tendência", value: "\((summary.monthCost / 30).dollars)/dia") {
-                        UsageTrend(days: summary.days)
-                            .frame(height: 16)
-                    }
+                    .frame(maxHeight: .infinity, alignment: .top)
                 }
+                .padding(.bottom, 4)
             } else {
                 NotchScanning(title: "Lendo o histórico do Claude Code", detail: "Só demora na primeira vez")
             }

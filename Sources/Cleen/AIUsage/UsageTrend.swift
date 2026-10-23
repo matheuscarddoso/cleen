@@ -4,6 +4,7 @@ import SwiftUI
 /// Fourteen thin bars, one per day, today brightest.
 struct UsageTrend: View {
     let days: [UsageSummary.Day]
+    var height = 16.0
 
     var body: some View {
         let peak = max(days.map(\.cost).max() ?? 1, 0.01)
@@ -11,7 +12,7 @@ struct UsageTrend: View {
             ForEach(days) { day in
                 RoundedRectangle(cornerRadius: 1)
                     .fill(NotchStyle.primary.opacity(day.id == days.last?.id ? 0.85 : 0.3))
-                    .frame(height: max(1.5, 16 * day.cost / peak))
+                    .frame(height: max(1.5, height * day.cost / peak))
                     .help("\(day.day.formatted(.dateTime.day().month(.abbreviated).locale(.cleen))): \(day.cost.dollars)")
             }
         }
