@@ -14,7 +14,7 @@ struct MirrorButton: View {
             ZStack {
                 Circle().fill(Color.white.opacity(isHovered ? 0.14 : 0.1))
                 if mirror.access == .granted {
-                    CameraPreview(session: mirror.camera.session)
+                    CameraPreview(layer: mirror.previewLayer)
                         .clipShape(.rect(cornerRadius: 44, style: .continuous))
                         .matchedGeometryEffect(id: "mirror", in: namespace)
                         .transition(.opacity)

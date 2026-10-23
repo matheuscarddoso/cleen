@@ -13,6 +13,13 @@ final class MirrorModel {
 
     private(set) var access: Access
     @ObservationIgnored let camera = CameraSession()
+    /// One preview layer for the session, handed between the round and the wide mirror.
+    /// A fresh layer per view stops receiving frames after the session restarts.
+    @ObservationIgnored lazy var previewLayer: AVCaptureVideoPreviewLayer = {
+        let layer = AVCaptureVideoPreviewLayer(session: camera.session)
+        layer.videoGravity = .resizeAspectFill
+        return layer
+    }()
     @ObservationIgnored private var viewers = 0
 
     init() {

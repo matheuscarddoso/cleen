@@ -7,7 +7,7 @@ struct MirrorExpanded: View {
     @Environment(NotchState.self) private var notch
 
     var body: some View {
-        CameraPreview(session: mirror.camera.session)
+        CameraPreview(layer: mirror.previewLayer)
             .clipShape(.rect(cornerRadius: 16, style: .continuous))
             .matchedGeometryEffect(id: "mirror", in: namespace)
             .overlay {

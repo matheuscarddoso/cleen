@@ -1,30 +1,26 @@
 import AVFoundation
 import SwiftUI
 
-/// The live camera image, mirrored like a real mirror, filling its frame.
+/// Hosts the mirror's shared preview layer, mirrored like a real mirror.
 struct CameraPreview: NSViewRepresentable {
-    let session: AVCaptureSession
+    let layer: AVCaptureVideoPreviewLayer
 
     func makeNSView(context: Context) -> CameraPreviewView {
-        CameraPreviewView(session: session)
+        CameraPreviewView(preview: layer)
     }
 
-    func updateNSView(_ view: CameraPreviewView, context: Context) {}
+    func updateNSView(_ view: CameraPreviewView, context: Context) {
+        view.claim()
+    }
 }
 
 final class CameraPreviewView: NSView {
     private let preview: AVCaptureVideoPreviewLayer
 
-    init(session: AVCaptureSession) {
-        preview = AVCaptureVideoPreviewLayer(session: session)
+    init(preview: AVCaptureVideoPreviewLayer) {
+        self.preview = preview
         super.init(frame: .zero)
         wantsLayer = true
-        preview.videoGravity = .resizeAspectFill
-        if let connection = preview.connection, connection.isVideoMirroringSupported {
-            connection.automaticallyAdjustsVideoMirroring = false
-            connection.isVideoMirrored = true
-        }
-        layer?.addSublayer(preview)
     }
 
     required init?(coder: NSCoder) {
@@ -34,11 +30,27 @@ final class CameraPreviewView: NSView {
     /// Clicks go to the SwiftUI button around the preview, not to this layer host.
     override func hitTest(_ point: NSPoint) -> NSView? { nil }
 
+    override func viewDidMoveToWindow() {
+        super.viewDidMoveToWindow()
+        if window != nil { claim() }
+    }
+
     override func layout() {
         super.layout()
+        claim()
+    }
+
+    /// Moves the shared layer into this view (the newest view on screen wins).
+    func claim() {
+        guard let host = layer else { return }
         CATransaction.begin()
         CATransaction.setDisableActions(true)
+        if preview.superlayer !== host { host.addSublayer(preview) }
         preview.frame = bounds
+        if let connection = preview.connection, connection.isVideoMirroringSupported, !connection.isVideoMirrored {
+            connection.automaticallyAdjustsVideoMirroring = false
+            connection.isVideoMirrored = true
+        }
         CATransaction.commit()
     }
 }
