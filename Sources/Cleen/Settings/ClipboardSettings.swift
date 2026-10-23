@@ -31,7 +31,7 @@ struct ClipboardSettings: View {
             SettingRow(title: "Copiar o screenshot ao tirar", note: "Vai direto para a área de transferência, pronto para colar.") {
                 NotchSwitch(label: "Copiar ao tirar", isOn: $copiesOnCapture)
             }
-            SettingRow(title: "Miniatura do macOS", note: "Enquanto ela aparece, o arquivo não existe; desligada, o Cleen abre na hora.") {
+            SettingRow(title: "Usar também a miniatura do macOS", note: "O Cleen a substitui. Ligada, o arquivo só é salvo quando ela some, e o Cleen abre com atraso.") {
                 NotchSwitch(label: "Miniatura do macOS", isOn: $thumbnail)
             }
             SettingRow(title: "Apagar histórico", note: clipboard.log.entries.count.counted("item guardado", "itens guardados")) {

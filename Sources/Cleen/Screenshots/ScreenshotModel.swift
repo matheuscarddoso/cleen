@@ -9,6 +9,8 @@ import Observation
 final class ScreenshotModel {
     static let opensNotchKey = "screenshotOpensNotch"
     static let copiesOnCaptureKey = "screenshotCopiesOnCapture"
+    /// Set once Cleen has replaced the native thumbnail, so it only happens on install.
+    private static let tookOverThumbnailKey = "screenshotTookOverThumbnail"
 
     private(set) var items: [Screenshot] = []
     var selectedID: URL?
@@ -43,12 +45,23 @@ final class ScreenshotModel {
         nativeThumbnailOn = Self.readNativeThumbnail()
     }
 
+    /// Cleen's own screenshot panel replaces the native floating thumbnail: with it on,
+    /// macOS holds the file back until it fades. Done once; the switch in Ajustes brings
+    /// the native one back.
+    private func takeOverThumbnailOnFirstRun() async {
+        let defaults = UserDefaults.standard
+        guard !defaults.bool(forKey: Self.tookOverThumbnailKey) else { return }
+        defaults.set(true, forKey: Self.tookOverThumbnailKey)
+        if nativeThumbnailOn { await setNativeThumbnail(false) }
+    }
+
     func refreshNativeThumbnail() {
         nativeThumbnailOn = Self.readNativeThumbnail()
     }
 
     func start() {
         guard watcher == nil else { return }
+        Task { await takeOverThumbnailOnFirstRun() }
         let watcher = ScreenshotFolderWatcher { [weak self] in
             Task { @MainActor in self?.reload(announcing: true) }
         }
