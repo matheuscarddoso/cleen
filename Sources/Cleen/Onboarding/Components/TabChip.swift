@@ -10,11 +10,11 @@ struct TabChip: View {
     /// Short enough for a third of the column.
     private var name: String {
         switch tab {
-        case .clipboard: "Transferência"
-        case .files: "Arquivos"
-        case .apps: "Desinstalar"
-        case .leftovers: "Restos"
-        case .space: "Mapa do disco"
+        case .clipboard: String(localized: "Transferência")
+        case .files: String(localized: "Arquivos")
+        case .apps: String(localized: "Desinstalar")
+        case .leftovers: String(localized: "Restos")
+        case .space: String(localized: "Mapa do disco")
         default: tab.settingsTitle
         }
     }

@@ -21,7 +21,7 @@ struct WeatherDayColumn: View {
             WeatherSymbol(code: day.code, size: 19)
                 .padding(.top, 2)
             // Always takes its line, so the temperatures sit level across the week.
-            Text(chance.map { "\($0)%" } ?? " ")
+            Text(chance.map { (Double($0) / 100).formatted(.percent.locale(.cleen)) } ?? " ")
                 .font(.system(size: 9.5, weight: .medium).monospacedDigit())
                 .foregroundStyle(NotchStyle.secondary)
             VStack(spacing: 1) {
@@ -55,8 +55,8 @@ struct WeatherDayColumn: View {
 
     /// "Amanhã: Chuva fraca, máxima 22°, mínima 16°, 85% de chance de chuva".
     private var summary: String {
-        var text = "\(WeatherFormat.longDayLabel(day.date, today: today)): \(day.weather.description), máxima \(WeatherFormat.temperature(day.high)), mínima \(WeatherFormat.temperature(day.low))"
-        if let chance = day.precipitationChance, chance > 0 { text += ", \(chance)% de chance de chuva" }
+        var text = String(localized: "\(WeatherFormat.longDayLabel(day.date, today: today)): \(day.weather.description), máxima \(WeatherFormat.temperature(day.high)), mínima \(WeatherFormat.temperature(day.low))")
+        if let chance = day.precipitationChance, chance > 0 { text += String(localized: ", \(chance)% de chance de chuva") }
         return text
     }
 }

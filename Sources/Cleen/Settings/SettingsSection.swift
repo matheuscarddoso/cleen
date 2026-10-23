@@ -10,21 +10,21 @@ enum SettingsSection: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .general: "Geral"
-        case .notch: "Aparência"
-        case .tabs: "Abas"
-        case .cleaning: "Limpeza"
-        case .about: "Sobre"
+        case .general: String(localized: "Geral")
+        case .notch: String(localized: "Aparência")
+        case .tabs: String(localized: "Abas")
+        case .cleaning: String(localized: "Limpeza")
+        case .about: String(localized: "Sobre")
         }
     }
 
     var subtitle: String {
         switch self {
-        case .general: "Como o Cleen começa, onde aparece e quando avisa."
-        case .notch: "Como o notch abre e o que mostra fechado."
-        case .tabs: "As ferramentas na barra do notch e a ordem delas."
-        case .cleaning: "O que conta como projeto parado e arquivo grande."
-        case .about: "Permissões e o que o Cleen já fez."
+        case .general: String(localized: "Como o Cleen começa, onde aparece e quando avisa.")
+        case .notch: String(localized: "Como o notch abre e o que mostra fechado.")
+        case .tabs: String(localized: "As ferramentas na barra do notch e a ordem delas.")
+        case .cleaning: String(localized: "O que conta como projeto parado e arquivo grande.")
+        case .about: String(localized: "Permissões e o que o Cleen já fez.")
         }
     }
 
@@ -41,8 +41,8 @@ enum SettingsSection: String, CaseIterable, Identifiable {
     /// Sidebar headings, as in OmniNotch: "NOTCH", "FERRAMENTAS".
     static let groups: [(title: String?, sections: [SettingsSection])] = [
         (nil, [.general]),
-        ("Notch", [.notch, .tabs]),
-        ("Ferramentas", [.cleaning]),
+        (String(localized: "Notch"), [.notch, .tabs]),
+        (String(localized: "Ferramentas"), [.cleaning]),
         ("Cleen", [.about]),
     ]
 }

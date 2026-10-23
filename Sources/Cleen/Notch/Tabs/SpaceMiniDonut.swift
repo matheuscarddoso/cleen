@@ -34,7 +34,7 @@ struct SpaceMiniDonut: View {
         }
         let rest = node.size - top.reduce(0) { $0 + $1.size }
         if rest > 0 {
-            slices.append(SpaceSlice(id: "rest", name: "Outros", size: rest, color: .white.opacity(0.12)))
+            slices.append(SpaceSlice(id: "rest", name: String(localized: "Outros"), size: rest, color: .white.opacity(0.12)))
         }
         return slices
     }

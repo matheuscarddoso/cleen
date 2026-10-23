@@ -19,10 +19,10 @@ enum LiveActivitySettings {
 
         var label: String {
             switch self {
-            case .disk: "Disco"
-            case .battery: "Bateria"
+            case .disk: String(localized: "Disco")
+            case .battery: String(localized: "Bateria")
             case .cpu: "CPU"
-            case .none: "Nada"
+            case .none: String(localized: "Nada")
             }
         }
     }

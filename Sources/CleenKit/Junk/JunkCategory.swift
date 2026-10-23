@@ -1,10 +1,10 @@
 import Foundation
 
 public struct JunkCategory: Sendable, Identifiable, Hashable {
-    public enum Group: String, Sendable, CaseIterable {
-        case system = "Sistema"
-        case developer = "Desenvolvimento"
-        case browsers = "Navegadores"
+    public enum Group: Sendable, CaseIterable {
+        case system
+        case developer
+        case browsers
     }
 
     public let id: String

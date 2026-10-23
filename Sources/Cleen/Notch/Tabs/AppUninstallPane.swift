@@ -20,7 +20,7 @@ struct AppUninstallPane: View {
                     }
                     Spacer(minLength: 6)
                     if !app.isSystem {
-                        ConfirmingButton(title: "Desinstalar", confirmTitle: "Confirmar", isWorking: model.isUninstalling, action: uninstall)
+                        ConfirmingButton(title: String(localized: "Desinstalar"), confirmTitle: String(localized: "Confirmar"), isWorking: model.isUninstalling, action: uninstall)
                     }
                 }
                 if app.isSystem {
@@ -38,7 +38,7 @@ struct AppUninstallPane: View {
                     NotchScroll {
                         NotchGroup {
                             ForEach(model.leftovers) { leftover in
-                                NotchRow(title: leftover.place.rawValue, subtitle: Paths.abbreviate(leftover.url), verticalPadding: 3, action: { model.toggle(leftover) }) {
+                                NotchRow(title: leftover.place.title, subtitle: Paths.abbreviate(leftover.url), verticalPadding: 3, action: { model.toggle(leftover) }) {
                                     NotchCheckbox(state: model.leftoverSelection.contains(leftover.url) ? .on : .off, label: leftover.url.lastPathComponent) { model.toggle(leftover) }
                                 } trailing: {
                                     Text(leftover.size.bytes)

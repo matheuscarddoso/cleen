@@ -9,13 +9,13 @@ struct NotchStepper: View {
 
     var body: some View {
         HStack(spacing: 0) {
-            stepButton("minus", label: "Diminuir") { value = max(range.lowerBound, value - step) }
+            stepButton("minus", label: String(localized: "Diminuir")) { value = max(range.lowerBound, value - step) }
                 .disabled(value <= range.lowerBound)
             Text(format(value))
                 .font(.system(size: 11, weight: .semibold).monospacedDigit())
                 .frame(minWidth: 52)
                 .contentTransition(.numericText())
-            stepButton("plus", label: "Aumentar") { value = min(range.upperBound, value + step) }
+            stepButton("plus", label: String(localized: "Aumentar")) { value = min(range.upperBound, value + step) }
                 .disabled(value >= range.upperBound)
         }
         .frame(height: 24)

@@ -13,9 +13,9 @@ public struct SafetyGuard: Sendable {
 
         public var errorDescription: String? {
             switch self {
-            case .notAbsolute(let path): "Caminho inválido: \(path)"
-            case .protectedLocation(let path): "Pasta protegida, não pode ser removida: \(path)"
-            case .outsideAllowedRoots(let path): "Fora das áreas que o Cleen pode limpar: \(path)"
+            case .notAbsolute(let path): String(localized: "Caminho inválido: \(path)")
+            case .protectedLocation(let path): String(localized: "Pasta protegida, não pode ser removida: \(path)")
+            case .outsideAllowedRoots(let path): String(localized: "Fora das áreas que o Cleen pode limpar: \(path)")
             }
         }
     }

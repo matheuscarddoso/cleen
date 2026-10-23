@@ -7,11 +7,11 @@ struct NotchStartupTab: View {
 
     var body: some View {
         if model.phase != .ready {
-            NotchScanning(title: "Lendo o que abre sozinho", detail: "")
+            NotchScanning(title: String(localized: "Lendo o que abre sozinho"), detail: "")
                 .task { if model.phase == .idle { await model.scan() } }
         } else {
             VStack(alignment: .leading, spacing: 8) {
-                NotchSummaryBar(value: "\(model.items.count) itens", caption: caption) {
+                NotchSummaryBar(value: String(localized: "\(model.items.count) itens"), caption: caption) {
                     Button("Atualizar", action: refresh)
                         .buttonStyle(.notchSecondary)
                 }
@@ -25,7 +25,7 @@ struct NotchStartupTab: View {
                         ForEach(model.items) { item in
                             NotchRow(
                                 title: item.displayName,
-                                subtitle: "\(item.signature.title) · \(item.scope.rawValue)",
+                                subtitle: "\(item.signature.title) · \(item.scope.title)",
                                 subtitleColor: item.signature.isSuspicious ? NotchStyle.warning.opacity(0.9) : NotchStyle.tertiary
                             ) {
                                 LaunchItemIcon(item: item)
@@ -46,7 +46,7 @@ struct NotchStartupTab: View {
 
     private var caption: String {
         let suspicious = model.suspicious.count
-        return suspicious == 0 ? "abrem sozinhos · todos confiáveis" : "abrem sozinhos · \(suspicious) sem assinatura confiável"
+        return suspicious == 0 ? String(localized: "abrem sozinhos · todos confiáveis") : String(localized: "abrem sozinhos · \(suspicious) sem assinatura confiável")
     }
 
     private func refresh() {

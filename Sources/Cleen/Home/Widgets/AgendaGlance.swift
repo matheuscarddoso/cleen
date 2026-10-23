@@ -20,7 +20,7 @@ struct AgendaGlance: View {
                     Text(next.title)
                         .font(.system(size: 10.5, weight: .medium))
                         .lineLimit(1)
-                    Text(next.isAllDay ? "Dia todo" : next.start.formatted(.dateTime.hour().minute().locale(.cleen)))
+                    Text(next.isAllDay ? String(localized: "Dia todo") : next.start.formatted(.dateTime.hour().minute().locale(.cleen)))
                         .font(.system(size: 9.5))
                         .foregroundStyle(NotchStyle.secondary)
                 } else {

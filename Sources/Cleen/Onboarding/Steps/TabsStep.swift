@@ -5,9 +5,9 @@ struct TabsStep: View {
 
     var body: some View {
         OnboardingPage(
-            title: "Monte o seu notch",
-            message: "Escolha as ferramentas da barra. A ordem e o resto ficam em Ajustes › Abas.",
-            primary: "Continuar"
+            title: String(localized: "Monte o seu notch"),
+            message: String(localized: "Escolha as ferramentas da barra. A ordem e o resto ficam em Ajustes › Abas."),
+            primary: String(localized: "Continuar")
         ) {
             LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 6), count: 3), alignment: .leading, spacing: 6) {
                 ForEach(tabs.order) { tab in

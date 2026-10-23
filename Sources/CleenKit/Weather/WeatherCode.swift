@@ -14,35 +14,35 @@ public struct WeatherCode: Hashable, Sendable {
     /// tooltip and the current-conditions line.
     public var description: String {
         switch rawValue {
-        case 0: "Céu limpo"
-        case 1: "Predominantemente limpo"
-        case 2: "Parcialmente nublado"
-        case 3: "Nublado"
-        case 45: "Neblina"
-        case 48: "Neblina com geada"
-        case 51: "Garoa fraca"
-        case 53: "Garoa"
-        case 55: "Garoa forte"
-        case 56: "Garoa congelante fraca"
-        case 57: "Garoa congelante"
-        case 61: "Chuva fraca"
-        case 63: "Chuva"
-        case 65: "Chuva forte"
-        case 66: "Chuva congelante fraca"
-        case 67: "Chuva congelante"
-        case 71: "Neve fraca"
-        case 73: "Neve"
-        case 75: "Neve forte"
-        case 77: "Grãos de neve"
-        case 80: "Pancadas de chuva fracas"
-        case 81: "Pancadas de chuva"
-        case 82: "Pancadas de chuva fortes"
-        case 85: "Pancadas de neve fracas"
-        case 86: "Pancadas de neve"
-        case 95: "Trovoada"
-        case 96: "Trovoada com granizo"
-        case 99: "Trovoada com granizo forte"
-        default: "Tempo indefinido"
+        case 0: String(localized: "Céu limpo")
+        case 1: String(localized: "Predominantemente limpo")
+        case 2: String(localized: "Parcialmente nublado")
+        case 3: String(localized: "Nublado")
+        case 45: String(localized: "Neblina")
+        case 48: String(localized: "Neblina com geada")
+        case 51: String(localized: "Garoa fraca")
+        case 53: String(localized: "Garoa")
+        case 55: String(localized: "Garoa forte")
+        case 56: String(localized: "Garoa congelante fraca")
+        case 57: String(localized: "Garoa congelante")
+        case 61: String(localized: "Chuva fraca")
+        case 63: String(localized: "Chuva")
+        case 65: String(localized: "Chuva forte")
+        case 66: String(localized: "Chuva congelante fraca")
+        case 67: String(localized: "Chuva congelante")
+        case 71: String(localized: "Neve fraca")
+        case 73: String(localized: "Neve")
+        case 75: String(localized: "Neve forte")
+        case 77: String(localized: "Grãos de neve")
+        case 80: String(localized: "Pancadas de chuva fracas")
+        case 81: String(localized: "Pancadas de chuva")
+        case 82: String(localized: "Pancadas de chuva fortes")
+        case 85: String(localized: "Pancadas de neve fracas")
+        case 86: String(localized: "Pancadas de neve")
+        case 95: String(localized: "Trovoada")
+        case 96: String(localized: "Trovoada com granizo")
+        case 99: String(localized: "Trovoada com granizo forte")
+        default: String(localized: "Tempo indefinido")
         }
     }
 

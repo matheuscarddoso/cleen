@@ -6,8 +6,8 @@ enum FileSort: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .size: "Maiores primeiro"
-        case .oldest: "Sem uso há mais tempo"
+        case .size: String(localized: "Maiores primeiro")
+        case .oldest: String(localized: "Sem uso há mais tempo")
         }
     }
 }

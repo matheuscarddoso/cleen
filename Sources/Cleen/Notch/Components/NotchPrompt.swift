@@ -6,7 +6,7 @@ struct NotchPrompt: View {
     let color: Color
     let title: String
     let message: String
-    var buttonTitle = "Analisar"
+    var buttonTitle = String(localized: "Analisar")
     let action: () -> Void
 
     var body: some View {

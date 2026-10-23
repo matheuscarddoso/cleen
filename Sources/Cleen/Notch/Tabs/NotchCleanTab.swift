@@ -12,20 +12,20 @@ struct NotchCleanTab: View {
             NotchPrompt(
                 symbol: "trash.fill",
                 color: ToolPalette.pink,
-                title: "Caches, logs e restos de desenvolvimento",
-                message: "O que os apps recriam sozinhos e o que ficou para trás: DerivedData, npm, Composer, instaladores esquecidos.",
+                title: String(localized: "Caches, logs e restos de desenvolvimento"),
+                message: String(localized: "O que os apps recriam sozinhos e o que ficou para trás: DerivedData, npm, Composer, instaladores esquecidos."),
                 action: model.startScan
             )
         case .scanning:
-            NotchScanning(title: "Procurando lixo", detail: model.progress, cancel: model.cancel)
+            NotchScanning(title: String(localized: "Procurando lixo"), detail: model.progress, cancel: model.cancel)
         case .ready where model.results.isEmpty && model.tools.isEmpty:
-            NotchPrompt(symbol: "checkmark", color: ToolPalette.green, title: "Nada para limpar", message: "Não sobrou cache nem log que valha a pena remover.", buttonTitle: "Analisar de novo", action: model.startScan)
+            NotchPrompt(symbol: "checkmark", color: ToolPalette.green, title: String(localized: "Nada para limpar"), message: String(localized: "Não sobrou cache nem log que valha a pena remover."), buttonTitle: String(localized: "Analisar de novo"), action: model.startScan)
         case .ready:
             VStack(alignment: .leading, spacing: 8) {
                 NotchSummaryBar(value: model.selectedSize.bytes, caption: caption) {
                     Button("Analisar de novo", action: model.startScan)
                         .buttonStyle(.notchSecondary)
-                    ConfirmingButton(title: "Limpar", confirmTitle: "Confirmar", isWorking: model.isCleaning, action: clean)
+                    ConfirmingButton(title: String(localized: "Limpar"), confirmTitle: String(localized: "Confirmar"), isWorking: model.isCleaning, action: clean)
                         .disabled(model.selectedCount == 0)
                 }
                 if let report = model.report {
@@ -72,17 +72,17 @@ struct NotchCleanTab: View {
     }
 
     private var caption: String {
-        let destination = model.selectionDeletes ? "caches saem de vez, o resto vai para o Lixo" : "vai para o Lixo"
-        return "selecionados de \(model.totalSize.bytes) · \(destination)"
+        let destination = model.selectionDeletes ? String(localized: "caches saem de vez, o resto vai para o Lixo") : String(localized: "vai para o Lixo")
+        return String(localized: "selecionados de \(model.totalSize.bytes) · \(destination)")
     }
 
     private func subtitle(for result: JunkCategoryResult) -> String {
         let selected = result.items.count { model.selection.contains($0.url) }
         let running = result.items.contains { $0.note != nil }
-        var text = selected == result.items.count
-            ? result.items.count.counted("item", "itens")
-            : "\(selected) de \(result.items.count.counted("item", "itens"))"
-        if running { text += " · apps abertos ficam de fora" }
+        let total = result.items.count
+        let items = total.counted(String(localized: "\(total) item"), String(localized: "\(total) itens"))
+        var text = selected == total ? items : String(localized: "\(selected) de \(items)")
+        if running { text += String(localized: " · apps abertos ficam de fora") }
         return text
     }
 

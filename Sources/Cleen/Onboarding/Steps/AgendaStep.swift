@@ -7,12 +7,12 @@ struct AgendaStep: View {
 
     var body: some View {
         OnboardingPage(
-            title: "Seu dia, no notch",
-            message: "Com o Calendário e os Lembretes, o Início mostra o próximo compromisso e o que falta fazer hoje.",
-            primary: "Continuar"
+            title: String(localized: "Seu dia, no notch"),
+            message: String(localized: "Com o Calendário e os Lembretes, o Início mostra o próximo compromisso e o que falta fazer hoje."),
+            primary: String(localized: "Continuar")
         ) {
             VStack(alignment: .leading, spacing: 4) {
-                OnboardingRow(symbol: "calendar", title: "Calendário", note: "Eventos de hoje e do mês") {
+                OnboardingRow(symbol: "calendar", title: String(localized: "Calendário"), note: String(localized: "Eventos de hoje e do mês")) {
                     PermissionControl(granted: calendarGranted) {
                         Task {
                             await agenda.requestCalendarAccess()
@@ -20,7 +20,7 @@ struct AgendaStep: View {
                         }
                     }
                 }
-                OnboardingRow(symbol: "checklist", title: "Lembretes", note: "Marque como feito direto do notch") {
+                OnboardingRow(symbol: "checklist", title: String(localized: "Lembretes"), note: String(localized: "Marque como feito direto do notch")) {
                     PermissionControl(granted: remindersGranted) {
                         Task {
                             await agenda.requestRemindersAccess()
@@ -28,7 +28,7 @@ struct AgendaStep: View {
                         }
                     }
                 }
-                OnboardingRow(symbol: "bell.badge", title: "Notificações", note: "Um aviso quando o disco estiver quase cheio") {
+                OnboardingRow(symbol: "bell.badge", title: String(localized: "Notificações"), note: String(localized: "Um aviso quando o disco estiver quase cheio")) {
                     PermissionControl(granted: model.notifications) {
                         Task { await model.requestNotifications() }
                     }

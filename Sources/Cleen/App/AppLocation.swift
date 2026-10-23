@@ -19,18 +19,18 @@ enum AppLocation {
     static func offerMove() -> Bool {
         NSApp.activate()
         let alert = NSAlert()
-        alert.messageText = "Mover o Cleen para Aplicativos?"
-        alert.informativeText = "Aberto daqui, o Cleen some quando o disco for ejetado e não consegue abrir junto com o Mac."
-        alert.addButton(withTitle: "Mover para Aplicativos")
-        alert.addButton(withTitle: "Agora não")
+        alert.messageText = String(localized: "Mover o Cleen para Aplicativos?")
+        alert.informativeText = String(localized: "Aberto daqui, o Cleen some quando o disco for ejetado e não consegue abrir junto com o Mac.")
+        alert.addButton(withTitle: String(localized: "Mover para Aplicativos"))
+        alert.addButton(withTitle: String(localized: "Agora não"))
         guard alert.runModal() == .alertFirstButtonReturn else { return false }
 
         do {
             try move()
         } catch {
             let failure = NSAlert()
-            failure.messageText = "Não deu para mover o Cleen"
-            failure.informativeText = "Arraste o Cleen para a pasta Aplicativos e abra por lá. (\(error.localizedDescription))"
+            failure.messageText = String(localized: "Não deu para mover o Cleen")
+            failure.informativeText = String(localized: "Arraste o Cleen para a pasta Aplicativos e abra por lá. (\(error.localizedDescription))")
             failure.runModal()
             return false
         }

@@ -35,8 +35,8 @@ final class LowDiskAlert {
         let center = UNUserNotificationCenter.current()
         guard await center.notificationSettings().authorizationStatus == .authorized else { return }
         let content = UNMutableNotificationContent()
-        content.title = "Pouco espaço no disco"
-        content.body = "Restam \(available.bytes). Abra o Cleen para ver o que dá para limpar."
+        content.title = String(localized: "Pouco espaço no disco")
+        content.body = String(localized: "Restam \(available.bytes). Abra o Cleen para ver o que dá para limpar.")
         let request = UNNotificationRequest(identifier: "low-disk", content: content, trigger: nil)
         try? await center.add(request)
     }

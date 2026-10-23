@@ -15,7 +15,7 @@ struct DisclosureChevron: View {
                 .contentShape(.rect)
         }
         .buttonStyle(.plain)
-        .help(isExpanded ? "Esconder itens" : "Ver o que sai")
-        .accessibilityLabel(isExpanded ? "Esconder itens" : "Ver itens")
+        .help(isExpanded ? String(localized: "Esconder itens") : String(localized: "Ver o que sai"))
+        .accessibilityLabel(isExpanded ? String(localized: "Esconder itens") : String(localized: "Ver itens"))
     }
 }

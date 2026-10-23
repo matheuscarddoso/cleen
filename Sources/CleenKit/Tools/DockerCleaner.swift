@@ -32,7 +32,7 @@ public enum DockerCleaner {
         return ToolCleanup(
             kind: .docker,
             title: "Docker",
-            summary: "Imagens sem uso, containers parados e cache de build. Volumes não são tocados.",
+            summary: String(localized: "Imagens sem uso, containers parados e cache de build. Volumes não são tocados."),
             symbol: "shippingbox.circle",
             reclaimable: reclaimable,
             detail: detail,
@@ -75,10 +75,10 @@ public enum DockerCleaner {
 
     private static func localized(_ type: String) -> String {
         switch type {
-        case "Images": "Imagens"
-        case "Containers": "Containers"
-        case "Local Volumes": "Volumes"
-        case "Build Cache": "Cache de build"
+        case "Images": String(localized: "Imagens")
+        case "Containers": String(localized: "Containers")
+        case "Local Volumes": String(localized: "Volumes")
+        case "Build Cache": String(localized: "Cache de build")
         default: type
         }
     }

@@ -8,20 +8,34 @@ public enum WeatherFormat {
         return "\(rounded == 0 ? 0 : rounded)°"
     }
 
-    private static let shortWeekdays = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"]
-    private static let weekdays = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"]
-
-    /// "Hoje" for today, otherwise "Seg", "Ter"… Both dates in the API's `yyyy-MM-dd`.
-    public static func dayLabel(_ date: String, today: String) -> String {
-        if date == today { return "Hoje" }
-        return weekdayIndex(date).map { shortWeekdays[$0] } ?? "—"
+    /// "Hoje" for today, otherwise the weekday's short name in the Mac's language ("Seg",
+    /// "Mon"). Both dates in the API's `yyyy-MM-dd`.
+    public static func dayLabel(_ date: String, today: String, locale: Locale = .cleen) -> String {
+        if date == today { return String(localized: "Hoje") }
+        guard let index = weekdayIndex(date) else { return "—" }
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.locale = locale
+        // "seg." → "Seg": the abbreviation's dot and lowercase start read as clutter on a column label.
+        let symbol = calendar.shortStandaloneWeekdaySymbols[index].replacing(".", with: "")
+        return symbol.prefix(1).uppercased(with: locale) + symbol.dropFirst()
     }
 
-    /// "Hoje", "Amanhã", "Sábado": for tooltips and VoiceOver, where there's room.
+    /// "Hoje", "Amanhã", "Sábado": for tooltips and VoiceOver, where there's room. The
+    /// weekdays are localized words rather than the calendar's names, which in Portuguese
+    /// carry a "-feira" that's too long here.
     public static func longDayLabel(_ date: String, today: String) -> String {
-        if date == today { return "Hoje" }
-        if let day = dayNumber(date), let now = dayNumber(today), day == now + 1 { return "Amanhã" }
-        return weekdayIndex(date).map { weekdays[$0] } ?? date
+        if date == today { return String(localized: "Hoje") }
+        if let day = dayNumber(date), let now = dayNumber(today), day == now + 1 { return String(localized: "Amanhã") }
+        switch weekdayIndex(date) {
+        case 0: return String(localized: "Domingo")
+        case 1: return String(localized: "Segunda", comment: "Monday")
+        case 2: return String(localized: "Terça", comment: "Tuesday")
+        case 3: return String(localized: "Quarta", comment: "Wednesday")
+        case 4: return String(localized: "Quinta", comment: "Thursday")
+        case 5: return String(localized: "Sexta", comment: "Friday")
+        case 6: return String(localized: "Sábado")
+        default: return date
+        }
     }
 
     /// 0 = Sunday. Worked out on a fixed Gregorian calendar in UTC, so the system's

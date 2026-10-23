@@ -18,8 +18,8 @@ enum SpaceTarget: Hashable {
 
     var title: String {
         switch self {
-        case .home: "Sua pasta pessoal"
-        case .disk: "Disco inteiro"
+        case .home: String(localized: "Sua pasta pessoal")
+        case .disk: String(localized: "Disco inteiro")
         case .folder(let url): url.lastPathComponent
         }
     }

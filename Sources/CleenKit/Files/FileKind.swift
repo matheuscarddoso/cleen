@@ -12,13 +12,13 @@ public enum FileKind: String, CaseIterable, Sendable, Hashable {
 
     public var title: String {
         switch self {
-        case .video: "Vídeos"
-        case .image: "Imagens"
-        case .audio: "Áudio"
-        case .archive: "Compactados"
-        case .installer: "Instaladores e imagens de disco"
-        case .document: "Documentos"
-        case .other: "Outros"
+        case .video: String(localized: "Vídeos")
+        case .image: String(localized: "Imagens")
+        case .audio: String(localized: "Áudio")
+        case .archive: String(localized: "Compactados")
+        case .installer: String(localized: "Instaladores e imagens de disco")
+        case .document: String(localized: "Documentos")
+        case .other: String(localized: "Outros")
         }
     }
 

@@ -11,10 +11,10 @@ struct CleaningSettings: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             NotchGroup {
-                SettingRow(title: "Projeto parado depois de", note: "Dependências desses projetos já vêm marcadas.") {
-                    NotchStepper(value: $staleDays, range: 7...365, step: 7) { "\($0) dias" }
+                SettingRow(title: String(localized: "Projeto parado depois de"), note: String(localized: "Dependências desses projetos já vêm marcadas.")) {
+                    NotchStepper(value: $staleDays, range: 7...365, step: 7) { String(localized: "\($0) dias") }
                 }
-                SettingRow(title: "Arquivo grande a partir de") {
+                SettingRow(title: String(localized: "Arquivo grande a partir de")) {
                     NotchChoiceStepper(choices: [25, 50, 100, 250, 500, 1000], selection: $largeFileMinimum) { Int64($0 * 1_000_000).bytes }
                 }
             }
@@ -27,7 +27,7 @@ struct CleaningSettings: View {
                 ForEach(projects.roots, id: \.self) { root in
                     SettingRow(title: Paths.abbreviate(root)) {
                         if projects.isCustomRoot(root) {
-                            NotchIconButton(symbol: "minus.circle", help: "Remover") { projects.removeRoot(root) }
+                            NotchIconButton(symbol: "minus.circle", help: String(localized: "Remover")) { projects.removeRoot(root) }
                         } else {
                             Text("Padrão")
                                 .font(.system(size: 10))
@@ -35,8 +35,8 @@ struct CleaningSettings: View {
                         }
                     }
                 }
-                SettingRow(title: "Adicionar pasta…") {
-                    NotchIconButton(symbol: "plus.circle", help: "Adicionar pasta", action: addFolder)
+                SettingRow(title: String(localized: "Adicionar pasta…")) {
+                    NotchIconButton(symbol: "plus.circle", help: String(localized: "Adicionar pasta"), action: addFolder)
                 }
             }
         }
@@ -46,8 +46,8 @@ struct CleaningSettings: View {
         let panel = NSOpenPanel()
         panel.canChooseDirectories = true
         panel.canChooseFiles = false
-        panel.prompt = "Adicionar"
-        panel.message = "Escolha uma pasta com projetos de código."
+        panel.prompt = String(localized: "Adicionar")
+        panel.message = String(localized: "Escolha uma pasta com projetos de código.")
         notch.holdsOpen = true
         NSApp.activate()
         defer { notch.holdsOpen = false }

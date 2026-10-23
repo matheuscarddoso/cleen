@@ -10,7 +10,7 @@ struct MonthGrid: View {
     var body: some View {
         VStack(spacing: 2) {
             HStack {
-                MonthArrow(symbol: "chevron.left", label: "Mês anterior") { shift(-1) }
+                MonthArrow(symbol: "chevron.left", label: String(localized: "Mês anterior")) { shift(-1) }
                 Spacer()
                 Text(monthTitle)
                     .font(.system(size: 13, weight: .semibold))
@@ -19,7 +19,7 @@ struct MonthGrid: View {
                     .onTapGesture(perform: goToToday)
                     .help("Voltar para hoje")
                 Spacer()
-                MonthArrow(symbol: "chevron.right", label: "Próximo mês") { shift(1) }
+                MonthArrow(symbol: "chevron.right", label: String(localized: "Próximo mês")) { shift(1) }
             }
             .frame(height: 18)
             HStack(spacing: 0) {

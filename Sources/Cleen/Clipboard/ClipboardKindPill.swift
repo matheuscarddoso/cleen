@@ -24,10 +24,10 @@ struct ClipboardKindPill: View {
 extension ClipboardEntry.Kind {
     var title: String {
         switch self {
-        case .text: "Texto"
-        case .link: "Links"
-        case .image: "Imagens"
-        case .files: "Arquivos"
+        case .text: String(localized: "Texto")
+        case .link: String(localized: "Links")
+        case .image: String(localized: "Imagens")
+        case .files: String(localized: "Arquivos")
         }
     }
 

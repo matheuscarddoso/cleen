@@ -31,34 +31,34 @@ enum NotchTab: String, CaseIterable, Identifiable, Codable {
     var title: String {
         switch self {
         case .home: "Cleen"
-        case .calendar: "Calendário"
-        case .shelf: "Shelf"
-        case .clipboard: "Área de transferência"
-        case .screenshots: "Screenshots"
-        case .ai: "Uso de IA"
-        case .timer: "Timer"
-        case .notes: "Notas"
-        case .reminders: "Lembretes"
-        case .converter: "Conversor"
-        case .emoji: "Emoji"
-        case .weather: "Tempo"
-        case .shortcuts: "Atalhos"
-        case .overview: "Visão geral"
-        case .clean: "Limpeza"
-        case .projects: "Projetos"
-        case .files: "Arquivos grandes"
-        case .duplicates: "Duplicados"
-        case .space: "Mapa do disco"
-        case .apps: "Desinstalar apps"
-        case .leftovers: "Restos de apps"
-        case .system: "Sistema"
-        case .startup: "Inicialização"
-        case .maintenance: "Manutenção"
+        case .calendar: String(localized: "Calendário")
+        case .shelf: String(localized: "Shelf")
+        case .clipboard: String(localized: "Área de transferência")
+        case .screenshots: String(localized: "Screenshots")
+        case .ai: String(localized: "Uso de IA")
+        case .timer: String(localized: "Timer")
+        case .notes: String(localized: "Notas")
+        case .reminders: String(localized: "Lembretes")
+        case .converter: String(localized: "Conversor")
+        case .emoji: String(localized: "Emoji")
+        case .weather: String(localized: "Tempo")
+        case .shortcuts: String(localized: "Atalhos")
+        case .overview: String(localized: "Visão geral")
+        case .clean: String(localized: "Limpeza")
+        case .projects: String(localized: "Projetos")
+        case .files: String(localized: "Arquivos grandes")
+        case .duplicates: String(localized: "Duplicados")
+        case .space: String(localized: "Mapa do disco")
+        case .apps: String(localized: "Desinstalar apps")
+        case .leftovers: String(localized: "Restos de apps")
+        case .system: String(localized: "Sistema")
+        case .startup: String(localized: "Inicialização")
+        case .maintenance: String(localized: "Manutenção")
         }
     }
 
     /// Name in the Abas settings list (Home reads better there than the app's name).
-    var settingsTitle: String { self == .home ? "Início" : title }
+    var settingsTitle: String { self == .home ? String(localized: "Início") : title }
 
     var symbol: String {
         switch self {

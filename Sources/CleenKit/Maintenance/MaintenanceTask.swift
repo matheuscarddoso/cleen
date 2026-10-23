@@ -15,32 +15,32 @@ public enum MaintenanceTask: String, CaseIterable, Sendable, Identifiable {
 
     public var title: String {
         switch self {
-        case .freeMemory: "Liberar memória"
-        case .thinSnapshots: "Liberar espaço reservado"
-        case .flushDNS: "Limpar cache de DNS"
-        case .reindexSpotlight: "Reindexar o Spotlight"
-        case .rebuildLaunchServices: "Refazer o Abrir Com"
-        case .resetFontCache: "Limpar cache de fontes"
-        case .verifyDisk: "Verificar o disco"
+        case .freeMemory: String(localized: "Liberar memória")
+        case .thinSnapshots: String(localized: "Liberar espaço reservado")
+        case .flushDNS: String(localized: "Limpar cache de DNS")
+        case .reindexSpotlight: String(localized: "Reindexar o Spotlight")
+        case .rebuildLaunchServices: String(localized: "Refazer o Abrir Com")
+        case .resetFontCache: String(localized: "Limpar cache de fontes")
+        case .verifyDisk: String(localized: "Verificar o disco")
         }
     }
 
     public var summary: String {
         switch self {
         case .freeMemory:
-            "Esvazia o cache de arquivos da memória. Útil antes de abrir algo pesado, o macOS volta a encher sozinho."
+            String(localized: "Esvazia o cache de arquivos da memória. Útil antes de abrir algo pesado, o macOS volta a encher sozinho.")
         case .thinSnapshots:
-            "Apaga os snapshots locais do Time Machine, que seguram espaço apagado como \u{201C}purgeable\u{201D}. Os backups no disco externo não são tocados."
+            String(localized: "Apaga os snapshots locais do Time Machine, que seguram espaço apagado como \u{201C}purgeable\u{201D}. Os backups no disco externo não são tocados.")
         case .flushDNS:
-            "Resolve sites que não abrem depois de trocar de rede, VPN ou DNS."
+            String(localized: "Resolve sites que não abrem depois de trocar de rede, VPN ou DNS.")
         case .reindexSpotlight:
-            "Recria o índice de busca do zero. Use quando o Spotlight não acha arquivos que existem. Leva alguns minutos."
+            String(localized: "Recria o índice de busca do zero. Use quando o Spotlight não acha arquivos que existem. Leva alguns minutos.")
         case .rebuildLaunchServices:
-            "Remove apps duplicados ou que já não existem do menu Abrir Com."
+            String(localized: "Remove apps duplicados ou que já não existem do menu Abrir Com.")
         case .resetFontCache:
-            "Corrige fontes que aparecem quebradas ou trocadas. Reinicie o Mac depois."
+            String(localized: "Corrige fontes que aparecem quebradas ou trocadas. Reinicie o Mac depois.")
         case .verifyDisk:
-            "Confere a estrutura do disco sem alterar nada. Pode levar alguns minutos."
+            String(localized: "Confere a estrutura do disco sem alterar nada. Pode levar alguns minutos.")
         }
     }
 
@@ -72,42 +72,42 @@ public enum MaintenanceTask: String, CaseIterable, Sendable, Identifiable {
             _ = try await Shell.runAsAdministrator("/usr/sbin/purge")
             let after = MemoryStats.read()?.cached ?? before
             let freed = max(0, before - after)
-            return freed > 0 ? "\(freed.memoryBytes) liberados." : "Memória já estava enxuta."
+            return freed > 0 ? String(localized: "\(freed.memoryBytes) liberados.") : String(localized: "Memória já estava enxuta.")
 
         case .thinSnapshots:
             let before = await Self.localSnapshotCount()
-            guard before > 0 else { return "Não havia snapshots locais." }
+            guard before > 0 else { return String(localized: "Não havia snapshots locais.") }
             let arguments = ["thinlocalsnapshots", "/", "999999999999", "4"]
             let result = try await Shell.run("/usr/bin/tmutil", arguments)
             if !result.succeeded {
                 _ = try await Shell.runAsAdministrator("/usr/bin/tmutil " + arguments.joined(separator: " "))
             }
             let removed = before - (await Self.localSnapshotCount())
-            return removed == 1 ? "1 snapshot removido." : "\(removed) snapshots removidos."
+            return removed == 1 ? String(localized: "1 snapshot removido.") : String(localized: "\(removed) snapshots removidos.")
 
         case .flushDNS:
             _ = try await Shell.runAsAdministrator("/usr/bin/dscacheutil -flushcache; /usr/bin/killall -HUP mDNSResponder")
-            return "Cache de DNS limpo."
+            return String(localized: "Cache de DNS limpo.")
 
         case .reindexSpotlight:
             _ = try await Shell.runAsAdministrator("/usr/bin/mdutil -E /")
-            return "O Spotlight começou a reindexar. A busca volta completa em alguns minutos."
+            return String(localized: "O Spotlight começou a reindexar. A busca volta completa em alguns minutos.")
 
         case .rebuildLaunchServices:
             let tool = "/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister"
             let result = try await Shell.run(tool, ["-r", "-domain", "local", "-domain", "system", "-domain", "user"])
             guard result.succeeded else { throw ShellError.failed(result) }
-            return "Lista de apps reconstruída."
+            return String(localized: "Lista de apps reconstruída.")
 
         case .resetFontCache:
             let result = try await Shell.run("/usr/bin/atsutil", ["databases", "-removeUser"])
             guard result.succeeded else { throw ShellError.failed(result) }
-            return "Cache de fontes limpo. Reinicie o Mac para concluir."
+            return String(localized: "Cache de fontes limpo. Reinicie o Mac para concluir.")
 
         case .verifyDisk:
             let result = try await Shell.run("/usr/sbin/diskutil", ["verifyVolume", "/"])
             guard result.succeeded else { throw ShellError.failed(result) }
-            return "Disco verificado, nenhum problema encontrado."
+            return String(localized: "Disco verificado, nenhum problema encontrado.")
         }
     }
 

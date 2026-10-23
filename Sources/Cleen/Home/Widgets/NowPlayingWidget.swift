@@ -17,9 +17,9 @@ struct NowPlayingWidget: View {
                     NowPlayingArtwork(image: model.artwork, appURL: model.appURL, isIcon: model.artworkIsIcon, side: 50)
                         .frame(width: 50, height: 50)
                     VStack(alignment: .leading, spacing: 1) {
-                        Text(model.track?.title ?? "Nada tocando")
+                        Text(model.track?.title ?? String(localized: "Nada tocando"))
                             .font(.system(size: 13, weight: .semibold))
-                        Text(model.track.map { $0.artist.isEmpty ? (model.appName ?? "") : $0.artist } ?? "Toque algo em qualquer app")
+                        Text(model.track.map { $0.artist.isEmpty ? (model.appName ?? "") : $0.artist } ?? String(localized: "Toque algo em qualquer app"))
                             .font(.system(size: 12, weight: .medium))
                             .foregroundStyle(NotchStyle.primary.opacity(0.55))
                     }
@@ -45,7 +45,7 @@ struct NowPlayingWidget: View {
                     }
                 }
                 .onHover { hovering in withAnimation(.smooth(duration: 0.18)) { isHovered = hovering } }
-                .help(model.track.map { "\($0.title) — \($0.artist)" } ?? "Nada tocando")
+                .help(model.track.map { "\($0.title) — \($0.artist)" } ?? String(localized: "Nada tocando"))
         }
     }
 }

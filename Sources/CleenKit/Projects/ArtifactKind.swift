@@ -46,23 +46,23 @@ public enum ArtifactKind: String, CaseIterable, Sendable, Hashable {
     public var title: String {
         switch self {
         case .nodeModules: "node_modules"
-        case .next: "Build do Next.js"
-        case .nuxt: "Build do Nuxt"
-        case .turbo: "Cache do Turborepo"
-        case .svelteKit: "Build do SvelteKit"
-        case .parcelCache: "Cache do Parcel"
-        case .angularCache: "Cache do Angular"
-        case .expo: "Cache do Expo"
-        case .composerVendor: "vendor do Composer"
-        case .cargoTarget: "target do Cargo"
-        case .swiftBuild: "Build do SwiftPM"
+        case .next: String(localized: "Build do Next.js")
+        case .nuxt: String(localized: "Build do Nuxt")
+        case .turbo: String(localized: "Cache do Turborepo")
+        case .svelteKit: String(localized: "Build do SvelteKit")
+        case .parcelCache: String(localized: "Cache do Parcel")
+        case .angularCache: String(localized: "Cache do Angular")
+        case .expo: String(localized: "Cache do Expo")
+        case .composerVendor: String(localized: "vendor do Composer")
+        case .cargoTarget: String(localized: "target do Cargo")
+        case .swiftBuild: String(localized: "Build do SwiftPM")
         case .cocoaPods: "Pods"
-        case .gradleBuild: "Build do Gradle"
-        case .gradleCache: "Cache do Gradle"
-        case .flutterBuild: "Build do Flutter"
-        case .dartTool: "Ferramentas do Dart"
+        case .gradleBuild: String(localized: "Build do Gradle")
+        case .gradleCache: String(localized: "Cache do Gradle")
+        case .flutterBuild: String(localized: "Build do Flutter")
+        case .dartTool: String(localized: "Ferramentas do Dart")
         case .derivedData: "DerivedData"
-        case .pythonVenv: "Ambiente virtual Python"
+        case .pythonVenv: String(localized: "Ambiente virtual Python")
         }
     }
 
@@ -70,15 +70,15 @@ public enum ArtifactKind: String, CaseIterable, Sendable, Hashable {
     public var restoreHint: String {
         switch self {
         case .nodeModules: "npm install"
-        case .next, .nuxt, .svelteKit: "volta no próximo build"
-        case .turbo, .parcelCache, .angularCache, .expo: "recriado automaticamente"
+        case .next, .nuxt, .svelteKit: String(localized: "volta no próximo build")
+        case .turbo, .parcelCache, .angularCache, .expo: String(localized: "recriado automaticamente")
         case .composerVendor: "composer install"
         case .cargoTarget: "cargo build"
         case .swiftBuild: "swift build"
         case .cocoaPods: "pod install"
         case .gradleBuild, .gradleCache: "./gradlew build"
         case .flutterBuild, .dartTool: "flutter pub get"
-        case .derivedData: "recriado pelo Xcode"
+        case .derivedData: String(localized: "recriado pelo Xcode")
         case .pythonVenv: "python -m venv + pip install"
         }
     }

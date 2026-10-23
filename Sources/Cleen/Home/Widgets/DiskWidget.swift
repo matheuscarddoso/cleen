@@ -15,11 +15,11 @@ struct DiskWidget: View {
                 HStack(spacing: 12) {
                     ring.frame(width: 72, height: 72)
                     VStack(alignment: .leading, spacing: 2) {
-                        HomeWidgetLabel(title: "Disco", symbol: "internaldrive")
+                        HomeWidgetLabel(title: String(localized: "Disco"), symbol: "internaldrive")
                         Text(monitor.disk.map { $0.available.bytes } ?? "—")
                             .font(.system(size: 17, weight: .semibold).monospacedDigit())
                             .contentTransition(.numericText())
-                        Text(monitor.disk.map { "livres de \(Self.roundedSize($0.total))" } ?? "")
+                        Text(monitor.disk.map { String(localized: "livres de \(Self.roundedSize($0.total))") } ?? "")
                             .font(.system(size: 11))
                             .foregroundStyle(NotchStyle.secondary)
                     }
@@ -36,9 +36,11 @@ struct DiskWidget: View {
     static func roundedSize(_ bytes: Int64) -> String {
         let gigabytes = Double(bytes) / 1_000_000_000
         if gigabytes >= 1000 {
-            return (gigabytes / 1000).formatted(.number.precision(.fractionLength(0...1)).locale(.cleen)) + " TB"
+            let terabytes = (gigabytes / 1000).formatted(.number.precision(.fractionLength(0...1)).locale(.cleen))
+            return String(localized: "\(terabytes) TB")
         }
-        return gigabytes.formatted(.number.precision(.fractionLength(0)).locale(.cleen)) + " GB"
+        let rounded = gigabytes.formatted(.number.precision(.fractionLength(0)).locale(.cleen))
+        return String(localized: "\(rounded) GB")
     }
 
     private var fraction: Double { monitor.disk?.usedFraction ?? 0 }

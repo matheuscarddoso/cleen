@@ -16,11 +16,11 @@ public enum ShellError: Error, LocalizedError {
 
     public var errorDescription: String? {
         switch self {
-        case .launchFailed(let message): "Não foi possível executar: \(message)"
-        case .cancelledByUser: "Autorização cancelada."
+        case .launchFailed(let message): String(localized: "Não foi possível executar: \(message)")
+        case .cancelledByUser: String(localized: "Autorização cancelada.")
         case .failed(let result):
             result.stderr.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty
-                ?? "O comando terminou com código \(result.status)."
+                ?? String(localized: "O comando terminou com código \(result.status).")
         }
     }
 }

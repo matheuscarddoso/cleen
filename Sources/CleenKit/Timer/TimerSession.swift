@@ -224,7 +224,7 @@ public enum TimerClock {
     /// `25 min`, `1h`, `1h 30min`: a length as the person picked it.
     public static func length(_ seconds: TimeInterval) -> String {
         let minutes = Int((seconds / 60).rounded())
-        if minutes < 60 { return "\(minutes) min" }
-        return minutes % 60 == 0 ? "\(minutes / 60)h" : "\(minutes / 60)h \(minutes % 60)min"
+        if minutes < 60 { return String(localized: "\(minutes) min") }
+        return minutes % 60 == 0 ? String(localized: "\(minutes / 60)h") : String(localized: "\(minutes / 60)h \(minutes % 60)min")
     }
 }

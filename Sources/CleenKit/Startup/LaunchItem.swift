@@ -2,15 +2,24 @@ import Foundation
 
 /// A launchd job: something macOS starts on its own, at login or at boot.
 public struct LaunchItem: Sendable, Identifiable, Hashable {
-    public enum Scope: String, Sendable, CaseIterable {
+    public enum Scope: Sendable, CaseIterable {
         /// `~/Library/LaunchAgents`: runs as you, removable without a password.
-        case user = "Seu usuário"
+        case user
         /// `/Library/LaunchAgents`: runs as every user who logs in.
-        case allUsers = "Todos os usuários"
+        case allUsers
         /// `/Library/LaunchDaemons`: runs as root, before anyone logs in.
-        case system = "Sistema"
+        case system
 
         public var needsAdministrator: Bool { self != .user }
+
+        /// Who the item runs as, in the interface.
+        public var title: String {
+            switch self {
+            case .user: String(localized: "Seu usuário")
+            case .allUsers: String(localized: "Todos os usuários")
+            case .system: String(localized: "Sistema")
+            }
+        }
     }
 
     public var id: URL { plist }

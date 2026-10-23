@@ -12,9 +12,9 @@ struct NotchAIUsageTab: View {
                 NotchPrompt(
                     symbol: "chart.bar.xaxis",
                     color: ToolPalette.indigo,
-                    title: "Nenhuma ferramenta de IA encontrada",
-                    message: "O Cleen lê o uso do Claude Code e do Codex direto dos arquivos deles no seu Mac.",
-                    buttonTitle: "Procurar de novo"
+                    title: String(localized: "Nenhuma ferramenta de IA encontrada"),
+                    message: String(localized: "O Cleen lê o uso do Claude Code e do Codex direto dos arquivos deles no seu Mac."),
+                    buttonTitle: String(localized: "Procurar de novo")
                 ) { Task { await model.refresh(force: true) } }
             } else if let summary = model.summary {
                 HStack(alignment: .top, spacing: 18) {
@@ -29,19 +29,19 @@ struct NotchAIUsageTab: View {
                             LimitBlock(symbol: row.symbol, label: row.label, value: row.window.used.percent, fraction: row.window.used, pace: row.window.elapsed(), color: row.color, detail: row.detail)
                         }
                         if model.claude == nil {
-                            LimitBlock(symbol: "asterisk", label: "Sessão (5h)", value: summary.blockCost.dollars, fraction: 0, detail: model.claudeProblem.map(Self.problemText))
+                            LimitBlock(symbol: "asterisk", label: String(localized: "Sessão (5h)"), value: summary.blockCost.dollars, fraction: 0, detail: model.claudeProblem.map(Self.problemText))
                         }
                         // Fill up to three blocks with where the month's spend went.
                         ForEach(summary.models.prefix(max(0, 3 - min(limitRows.count, 3) - (model.claude == nil ? 1 : 0)))) { share in
                             let fraction = share.cost / max(summary.monthCost, 0.01)
-                            LimitBlock(symbol: "cube", label: share.name, value: fraction.percent, fraction: fraction, detail: "do gasto", isShare: true)
+                            LimitBlock(symbol: "cube", label: share.name, value: fraction.percent, fraction: fraction, detail: String(localized: "do gasto"), isShare: true)
                         }
                     }
                     .frame(maxHeight: .infinity, alignment: .top)
                 }
                 .padding(.bottom, 4)
             } else {
-                NotchScanning(title: "Lendo o histórico do Claude Code", detail: "Só demora na primeira vez")
+                NotchScanning(title: String(localized: "Lendo o histórico do Claude Code"), detail: String(localized: "Só demora na primeira vez"))
             }
         }
         .task { await model.watch() }
@@ -69,7 +69,7 @@ struct NotchAIUsageTab: View {
         var parts: [String] = []
         if let reset = window.resetsAt { parts.append(countdown(to: reset)) }
         if let projected = window.projected() {
-            parts.append(projected > 1 ? "acaba antes" : "ritmo \(projected.percent)")
+            parts.append(projected > 1 ? String(localized: "acaba antes") : String(localized: "ritmo \(projected.percent)"))
         }
         return parts.joined(separator: " · ")
     }
@@ -86,18 +86,18 @@ struct NotchAIUsageTab: View {
         let seconds = max(0, date.timeIntervalSinceNow)
         if seconds >= 86_400 {
             let days = Int((seconds / 86_400).rounded())
-            return days == 1 ? "1 dia" : "\(days) dias"
+            return days == 1 ? String(localized: "1 dia") : String(localized: "\(days) dias")
         }
         let minutes = Int(seconds / 60)
-        if minutes < 60 { return "\(max(1, minutes)) min" }
-        return minutes % 60 == 0 ? "\(minutes / 60)h" : "\(minutes / 60)h \(minutes % 60)min"
+        if minutes < 60 { return String(localized: "\(max(1, minutes)) min") }
+        return minutes % 60 == 0 ? String(localized: "\(minutes / 60)h") : String(localized: "\(minutes / 60)h \(minutes % 60)min")
     }
 
     static func problemText(_ failure: ClaudeLimits.Failure) -> String {
         switch failure {
-        case .noCredential: "entre no Claude Code"
-        case .expired: "abra o Claude Code"
-        case .unavailable: "limites indisponíveis"
+        case .noCredential: String(localized: "entre no Claude Code")
+        case .expired: String(localized: "abra o Claude Code")
+        case .unavailable: String(localized: "limites indisponíveis")
         }
     }
 }

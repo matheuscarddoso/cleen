@@ -19,7 +19,7 @@ struct NotchChildRow: View {
             Text(size.bytes)
                 .font(NotchStyle.captionMedium.monospacedDigit())
                 .foregroundStyle(NotchStyle.tertiary)
-            NotchIconButton(symbol: "magnifyingglass", help: "Mostrar no Finder") {
+            NotchIconButton(symbol: "magnifyingglass", help: String(localized: "Mostrar no Finder")) {
                 NSWorkspace.shared.activateFileViewerSelecting([path])
             }
         }

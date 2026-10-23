@@ -19,7 +19,7 @@ struct AISpendSummary: View {
                         .font(.system(size: 10.5, weight: .medium))
                         .foregroundStyle(NotchStyle.tertiary)
                 }
-                NotchIconButton(symbol: "arrow.clockwise", help: "Atualizar") {
+                NotchIconButton(symbol: "arrow.clockwise", help: String(localized: "Atualizar")) {
                     Task { await model.refresh(force: true) }
                 }
                 .rotationEffect(.degrees(model.isLoading ? 360 : 0))

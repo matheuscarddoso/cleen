@@ -7,7 +7,7 @@ struct SpaceBreadcrumbs: View {
         let crumbs = model.breadcrumbs
         HStack(spacing: 5) {
             if crumbs.count > 1 {
-                NotchIconButton(symbol: "chevron.left", help: "Voltar", action: model.goUp)
+                NotchIconButton(symbol: "chevron.left", help: String(localized: "Voltar"), action: model.goUp)
             }
             ScrollView(.horizontal) {
                 HStack(spacing: 4) {

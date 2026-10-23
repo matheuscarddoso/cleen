@@ -27,7 +27,7 @@ struct NotchClipboardTab: View {
                 .overlay {
                     RoundedRectangle(cornerRadius: 7, style: .continuous).strokeBorder(NotchStyle.primary.opacity(0.18))
                 }
-                ClipboardKindPill(title: "Tudo", isSelected: model.kind == nil) { model.kind = nil }
+                ClipboardKindPill(title: String(localized: "Tudo"), isSelected: model.kind == nil) { model.kind = nil }
                 ForEach(ClipboardEntry.Kind.allCases, id: \.self) { kind in
                     ClipboardKindPill(title: kind.title, isSelected: model.kind == kind) { model.kind = kind }
                 }

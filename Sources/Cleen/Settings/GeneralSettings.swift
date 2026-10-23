@@ -8,13 +8,13 @@ struct GeneralSettings: View {
 
     var body: some View {
         NotchGroup {
-            SettingRow(title: "Abrir ao iniciar a sessão", note: loginError) {
-                NotchSwitch(label: "Abrir ao iniciar a sessão", isOn: $launchesAtLogin)
+            SettingRow(title: String(localized: "Abrir ao iniciar a sessão"), note: loginError) {
+                NotchSwitch(label: String(localized: "Abrir ao iniciar a sessão"), isOn: $launchesAtLogin)
             }
-            SettingRow(title: "Na barra de menus") {
+            SettingRow(title: String(localized: "Na barra de menus")) {
                 NotchSegmented(options: MenuBarDisplay.allCases.map { ($0.shortTitle, $0) }, selection: $menuBarDisplay)
             }
-            SettingRow(title: "Abrir e fechar o notch", note: "Funciona em qualquer app.") {
+            SettingRow(title: String(localized: "Abrir e fechar o notch"), note: String(localized: "Funciona em qualquer app.")) {
                 Text("⌃ ⌥ C")
                     .font(.system(size: 11, weight: .semibold))
                     .padding(.horizontal, 8)
@@ -30,7 +30,7 @@ struct GeneralSettings: View {
         do {
             if enabled { try SMAppService.mainApp.register() } else { try SMAppService.mainApp.unregister() }
         } catch {
-            loginError = "Não deu para mudar: \(error.localizedDescription)"
+            loginError = String(localized: "Não deu para mudar: \(error.localizedDescription)")
             launchesAtLogin = SMAppService.mainApp.status == .enabled
         }
     }

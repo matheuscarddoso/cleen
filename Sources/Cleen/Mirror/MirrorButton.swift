@@ -44,9 +44,9 @@ struct MirrorButton: View {
 
     private var help: String {
         switch mirror.access {
-        case .notAsked: "Ver como você está antes de uma chamada"
-        case .granted: "Ampliar o espelho"
-        case .denied: "Permita a câmera em Ajustes do Sistema"
+        case .notAsked: String(localized: "Ver como você está antes de uma chamada")
+        case .granted: String(localized: "Ampliar o espelho")
+        case .denied: String(localized: "Permita a câmera em Ajustes do Sistema")
         }
     }
 

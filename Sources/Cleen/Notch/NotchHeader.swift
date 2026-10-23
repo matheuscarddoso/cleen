@@ -12,23 +12,23 @@ struct NotchHeader: View {
                 .contentTransition(.opacity)
             Spacer()
             if state.tab == .home, !state.showsSettings, !state.mirrorExpanded {
-                NotchIconButton(symbol: state.isEditingHome ? "checkmark" : "square.grid.2x2", help: state.isEditingHome ? "Concluir" : "Editar o Início", isActive: state.isEditingHome) {
+                NotchIconButton(symbol: state.isEditingHome ? "checkmark" : "square.grid.2x2", help: state.isEditingHome ? String(localized: "Concluir") : String(localized: "Editar o Início"), isActive: state.isEditingHome) {
                     withAnimation(.smooth(duration: 0.3)) { state.isEditingHome.toggle() }
                 }
             }
-            NotchIconButton(symbol: state.isPinned ? "pin.fill" : "pin", help: state.isPinned ? "Soltar" : "Manter aberto", isActive: state.isPinned) {
+            NotchIconButton(symbol: state.isPinned ? "pin.fill" : "pin", help: state.isPinned ? String(localized: "Soltar") : String(localized: "Manter aberto"), isActive: state.isPinned) {
                 controller.togglePin()
             }
-            NotchIconButton(symbol: state.showsSettings ? "xmark" : "gearshape", help: state.showsSettings ? "Fechar ajustes" : "Ajustes", isActive: state.showsSettings) {
+            NotchIconButton(symbol: state.showsSettings ? "xmark" : "gearshape", help: state.showsSettings ? String(localized: "Fechar ajustes") : String(localized: "Ajustes"), isActive: state.showsSettings) {
                 withAnimation(.smooth(duration: 0.25)) { state.showsSettings.toggle() }
             }
         }
     }
 
     private var headerTitle: String {
-        if state.showsSettings { return "Ajustes" }
-        if state.tab == .home, state.mirrorExpanded { return "Espelho" }
-        if state.tab == .home, state.isEditingHome { return "Editar o Início" }
+        if state.showsSettings { return String(localized: "Ajustes") }
+        if state.tab == .home, state.mirrorExpanded { return String(localized: "Espelho") }
+        if state.tab == .home, state.isEditingHome { return String(localized: "Editar o Início") }
         return state.tab.title
     }
 }

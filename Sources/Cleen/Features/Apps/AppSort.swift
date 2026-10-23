@@ -7,9 +7,9 @@ enum AppSort: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .size: "Tamanho"
-        case .name: "Nome"
-        case .lastUsed: "Menos usados"
+        case .size: String(localized: "Tamanho")
+        case .name: String(localized: "Nome")
+        case .lastUsed: String(localized: "Menos usados")
         }
     }
 }

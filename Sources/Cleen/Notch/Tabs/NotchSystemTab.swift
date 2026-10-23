@@ -12,7 +12,7 @@ struct NotchSystemTab: View {
             }
             NotchMeterRow(
                 symbol: "memorychip",
-                label: "Memória",
+                label: String(localized: "Memória"),
                 value: monitor.memory?.used.memoryBytes ?? "—",
                 valueColor: memoryColor ?? NotchStyle.primary
             ) {
@@ -20,13 +20,13 @@ struct NotchSystemTab: View {
             }
             NotchMeterRow(
                 symbol: "internaldrive",
-                label: "Disco",
-                value: "\(monitor.disk?.available.bytes ?? "—") livres",
+                label: String(localized: "Disco"),
+                value: String(localized: "\(monitor.disk?.available.bytes ?? "—") livres"),
                 valueColor: NotchStyle.level(monitor.disk?.usedFraction ?? 0) == NotchStyle.barFill ? NotchStyle.primary : NotchStyle.level(monitor.disk?.usedFraction ?? 0)
             ) {
                 UsageBar(fraction: monitor.disk?.usedFraction ?? 0, height: 3.5)
             }
-            NotchMeterRow(symbol: "network", label: "Rede", value: "↑ \(monitor.network?.upload.rate ?? "—")") {
+            NotchMeterRow(symbol: "network", label: String(localized: "Rede"), value: "↑ \(monitor.network?.upload.rate ?? "—")") {
                 HStack(spacing: 8) {
                     Text("↓")
                         .font(.system(size: 10.5))
@@ -42,9 +42,9 @@ struct NotchSystemTab: View {
             if let battery = monitor.battery {
                 NotchMeterRow(
                     symbol: battery.isCharging ? "battery.100.bolt" : "battery.75",
-                    label: "Bateria",
+                    label: String(localized: "Bateria"),
                     value: battery.level.percent,
-                    detail: battery.health.map { "saúde \($0.percent)" }
+                    detail: battery.health.map { String(localized: "saúde \($0.percent)") }
                 ) {
                     UsageBar(fraction: battery.level, height: 3.5, tint: battery.level < 0.2 ? NotchStyle.critical : NotchStyle.barFill)
                 }

@@ -118,7 +118,7 @@ public struct SpaceLensScanner: Sendable {
         if builder.foldedSize > 0 {
             children.append(SpaceNode(
                 id: builder.path + "/\u{0}folded",
-                name: builder.foldedCount == 1 ? "1 item menor" : "\(builder.foldedCount) itens menores",
+                name: builder.foldedCount == 1 ? String(localized: "1 item menor") : String(localized: "\(builder.foldedCount) itens menores"),
                 size: builder.foldedSize,
                 isDirectory: false,
                 isAggregate: true,

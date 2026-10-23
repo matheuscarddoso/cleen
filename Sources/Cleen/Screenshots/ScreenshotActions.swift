@@ -10,7 +10,7 @@ struct ScreenshotActions: View {
         Grid(horizontalSpacing: 6, verticalSpacing: 6) {
             GridRow {
                 Button(action: copy) {
-                    Label(copied ? "Copiado" : "Copiar", systemImage: copied ? "checkmark" : "doc.on.doc")
+                    Label(copied ? String(localized: "Copiado") : String(localized: "Copiar"), systemImage: copied ? "checkmark" : "doc.on.doc")
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.notchPrimary)

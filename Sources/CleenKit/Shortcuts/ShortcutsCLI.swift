@@ -89,7 +89,7 @@ public enum ShortcutsCLI {
         let lines = stderr.split(whereSeparator: \.isNewline)
             .map { $0.trimmingCharacters(in: .whitespaces) }
             .filter { !$0.isEmpty }
-        guard var line = lines.first else { return "Terminou com código \(status)." }
+        guard var line = lines.first else { return String(localized: "Terminou com código \(status).") }
         for prefix in ["Error:", "error:", "Erro:"] where line.hasPrefix(prefix) {
             line = line.dropFirst(prefix.count).trimmingCharacters(in: .whitespaces)
         }
@@ -97,7 +97,7 @@ public enum ShortcutsCLI {
             let message = line[..<range.lowerBound].trimmingCharacters(in: .whitespaces)
             if !message.isEmpty { line = message }
         }
-        if line.isEmpty { return "Terminou com código \(status)." }
+        if line.isEmpty { return String(localized: "Terminou com código \(status).") }
         return line.count > 140 ? String(line.prefix(139)) + "…" : line
     }
 

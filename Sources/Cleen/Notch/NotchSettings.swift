@@ -12,8 +12,8 @@ enum NotchSettings {
     static let panelWidthKey = "notchPanelWidth"
     static let panelHeightKey = "notchPanelHeight"
 
-    static let widths: [(label: String, value: Double)] = [("Padrão", 680), ("Largo", 780), ("Extra", 880)]
-    static let heights: [(label: String, value: Double)] = [("Padrão", 234), ("Alto", 274), ("Mais alto", 314)]
+    static let widths: [(label: String, value: Double)] = [(String(localized: "Padrão"), 680), (String(localized: "Largo"), 780), (String(localized: "Extra"), 880)]
+    static let heights: [(label: String, value: Double)] = [(String(localized: "Padrão"), 234), (String(localized: "Alto"), 274), (String(localized: "Mais alto"), 314)]
 
     static func register() {
         UserDefaults.standard.register(defaults: [

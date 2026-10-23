@@ -23,7 +23,7 @@ struct NotchCheckbox: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel(label)
-        .accessibilityValue(state == .on ? "selecionado" : state == .mixed ? "parcialmente selecionado" : "não selecionado")
+        .accessibilityValue(state == .on ? String(localized: "selecionado") : state == .mixed ? String(localized: "parcialmente selecionado") : String(localized: "não selecionado"))
         .accessibilityAddTraits(.isToggle)
     }
 }

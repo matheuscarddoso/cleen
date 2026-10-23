@@ -7,16 +7,16 @@ struct AboutSettings: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             NotchGroup {
-                SettingRow(title: "Versão") {
+                SettingRow(title: String(localized: "Versão")) {
                     Text(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "—")
                         .font(.system(size: 11, weight: .medium).monospacedDigit())
                         .foregroundStyle(NotchStyle.secondary)
                 }
-                SettingRow(title: "Liberado pelo Cleen") {
+                SettingRow(title: String(localized: "Liberado pelo Cleen")) {
                     Text(cleanup.lifetimeFreed.bytes)
                         .font(.system(size: 11, weight: .semibold).monospacedDigit())
                 }
-                SettingRow(title: "Privacidade", note: "Nada sai do seu Mac. Seus arquivos sempre vão para o Lixo; só caches que se recriam são apagados de vez.") {
+                SettingRow(title: String(localized: "Privacidade"), note: String(localized: "Nada sai do seu Mac. Seus arquivos sempre vão para o Lixo; só caches que se recriam são apagados de vez.")) {
                     EmptyView()
                 }
             }

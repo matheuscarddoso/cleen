@@ -3,7 +3,7 @@ import SwiftUI
 /// The right side of a permission line: "Permitir" until it's granted, then a check.
 struct PermissionControl: View {
     let granted: Bool
-    var label = "Permitir"
+    var label = String(localized: "Permitir")
     let action: () -> Void
 
     var body: some View {

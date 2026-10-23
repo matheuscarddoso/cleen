@@ -58,19 +58,19 @@ final class TimerModel {
 
     var phaseTitle: String {
         switch session.phase {
-        case .countdown: "Timer"
-        case .focus: "Foco"
-        case .shortBreak, .longBreak: "Pausa"
+        case .countdown: String(localized: "Timer")
+        case .focus: String(localized: "Foco")
+        case .shortBreak, .longBreak: String(localized: "Pausa")
         }
     }
 
     /// "Foco · rodada 2 de 4", "Pausa longa", "Timer de 10 min".
     var phaseDetail: String {
         switch session.phase {
-        case .countdown: "Timer de \(TimerClock.length(session.duration))"
-        case .focus: "Foco · rodada \(session.round) de \(rounds)"
-        case .shortBreak: "Pausa · rodada \(session.round) de \(rounds)"
-        case .longBreak: "Pausa longa"
+        case .countdown: String(localized: "Timer de \(TimerClock.length(session.duration))")
+        case .focus: String(localized: "Foco · rodada \(session.round) de \(rounds)")
+        case .shortBreak: String(localized: "Pausa · rodada \(session.round) de \(rounds)")
+        case .longBreak: String(localized: "Pausa longa")
         }
     }
 
@@ -139,11 +139,11 @@ final class TimerModel {
     private func announcement(ended: TimerPhase, length: TimeInterval) -> (String, String) {
         let next = TimerClock.length(session.duration)
         switch ended {
-        case .countdown: return ("Timer concluído", "O timer de \(TimerClock.length(length)) terminou.")
+        case .countdown: return (String(localized: "Timer concluído"), String(localized: "O timer de \(TimerClock.length(length)) terminou."))
         case .focus where session.phase == .longBreak:
-            return ("Ciclo concluído", "\(rounds) rodadas de foco. Pausa longa de \(next).")
-        case .focus: return ("Foco concluído", "Pausa de \(next) começou.")
-        case .shortBreak, .longBreak: return ("Pausa concluída", "Hora de focar: rodada \(session.round) de \(rounds).")
+            return (String(localized: "Ciclo concluído"), String(localized: "\(rounds) rodadas de foco. Pausa longa de \(next)."))
+        case .focus: return (String(localized: "Foco concluído"), String(localized: "Pausa de \(next) começou."))
+        case .shortBreak, .longBreak: return (String(localized: "Pausa concluída"), String(localized: "Hora de focar: rodada \(session.round) de \(rounds)."))
         }
     }
 

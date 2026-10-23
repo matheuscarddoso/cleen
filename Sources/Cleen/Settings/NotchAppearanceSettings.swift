@@ -9,22 +9,22 @@ struct NotchAppearanceSettings: View {
 
     var body: some View {
         NotchGroup {
-            SettingRow(title: "Abrir") {
-                NotchSegmented(options: [("Ao passar o mouse", true), ("Ao clicar", false)], selection: $opensOnHover)
+            SettingRow(title: String(localized: "Abrir")) {
+                NotchSegmented(options: [(String(localized: "Ao passar o mouse"), true), (String(localized: "Ao clicar"), false)], selection: $opensOnHover)
             }
             if opensOnHover {
-                SettingRow(title: "Atraso") {
-                    NotchSegmented(options: [("Nenhum", 0.0), ("Curto", 0.12), ("Médio", 0.3), ("Longo", 0.6)], selection: $hoverDelay)
+                SettingRow(title: String(localized: "Atraso")) {
+                    NotchSegmented(options: [(String(localized: "Nenhum"), 0.0), (String(localized: "Curto"), 0.12), (String(localized: "Médio"), 0.3), (String(localized: "Longo"), 0.6)], selection: $hoverDelay)
                 }
             }
-            SettingRow(title: "Largura", note: "Mais largo cabe mais widgets no Início.") {
+            SettingRow(title: String(localized: "Largura"), note: String(localized: "Mais largo cabe mais widgets no Início.")) {
                 NotchSegmented(options: NotchSettings.widths, selection: $panelWidth)
             }
-            SettingRow(title: "Altura", note: "Mais alto mostra mais itens nas listas.") {
+            SettingRow(title: String(localized: "Altura"), note: String(localized: "Mais alto mostra mais itens nas listas.")) {
                 NotchSegmented(options: NotchSettings.heights, selection: $panelHeight)
             }
-            SettingRow(title: "Monitores externos", note: "Desenha um notch no topo de cada tela.") {
-                NotchSwitch(label: "Monitores externos", isOn: $allScreens)
+            SettingRow(title: String(localized: "Monitores externos"), note: String(localized: "Desenha um notch no topo de cada tela.")) {
+                NotchSwitch(label: String(localized: "Monitores externos"), isOn: $allScreens)
             }
         }
     }

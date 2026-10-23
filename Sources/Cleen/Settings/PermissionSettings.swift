@@ -8,13 +8,13 @@ struct PermissionSettings: View {
 
     var body: some View {
         NotchGroup {
-            permission("Acesso Total ao Disco", note: "Para ver Lixeira, Mail, Safari e containers de outros apps.", granted: fullDisk) {
+            permission(String(localized: "Acesso Total ao Disco"), note: String(localized: "Para ver Lixeira, Mail, Safari e containers de outros apps."), granted: fullDisk) {
                 openURL(FullDiskAccess.settingsURL)
             }
-            permission("Calendário", note: "Para os eventos no Início e no Calendário.", granted: EKEventStore.authorizationStatus(for: .event) == .fullAccess) {
+            permission(String(localized: "Calendário"), note: String(localized: "Para os eventos no Início e no Calendário."), granted: EKEventStore.authorizationStatus(for: .event) == .fullAccess) {
                 AgendaModel.openPrivacySettings()
             }
-            permission("Lembretes", note: "Para os lembretes no Início.", granted: EKEventStore.authorizationStatus(for: .reminder) == .fullAccess) {
+            permission(String(localized: "Lembretes"), note: String(localized: "Para os lembretes no Início."), granted: EKEventStore.authorizationStatus(for: .reminder) == .fullAccess) {
                 AgendaModel.openPrivacySettings()
             }
         }

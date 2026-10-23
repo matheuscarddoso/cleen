@@ -18,7 +18,7 @@ struct LaunchItemSwitch: View {
             .toggleStyle(.switch)
             .controlSize(.mini)
             .labelsHidden()
-            .help(item.scope.needsAdministrator ? "Pede a senha de administrador" : "Ligar ou desligar")
+            .help(item.scope.needsAdministrator ? String(localized: "Pede a senha de administrador") : String(localized: "Ligar ou desligar"))
             .onChange(of: isOn) { _, enabled in
                 Task { await model.setEnabled(enabled, for: item) }
             }

@@ -19,9 +19,9 @@ struct NotchGreeting: View {
 
     private var greeting: String {
         switch Calendar.current.component(.hour, from: .now) {
-        case 5..<12: "Bom dia"
-        case 12..<18: "Boa tarde"
-        default: "Boa noite"
+        case 5..<12: String(localized: "Bom dia")
+        case 12..<18: String(localized: "Boa tarde")
+        default: String(localized: "Boa noite")
         }
     }
 

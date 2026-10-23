@@ -20,10 +20,10 @@ struct CleanupReport: Equatable {
 
     var headline: String {
         switch (freed > 0, trashed > 0) {
-        case (true, true): "\(freed.bytes) liberados · \(trashed.bytes) no Lixo"
-        case (true, false): "\(freed.bytes) liberados"
-        case (false, true): "\(trashed.bytes) movidos para o Lixo"
-        case (false, false): failures.isEmpty ? "Nada para remover" : "Nada foi removido"
+        case (true, true): String(localized: "\(freed.bytes) liberados · \(trashed.bytes) no Lixo")
+        case (true, false): String(localized: "\(freed.bytes) liberados")
+        case (false, true): String(localized: "\(trashed.bytes) movidos para o Lixo")
+        case (false, false): failures.isEmpty ? String(localized: "Nada para remover") : String(localized: "Nada foi removido")
         }
     }
 

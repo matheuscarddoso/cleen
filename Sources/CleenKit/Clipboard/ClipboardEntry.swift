@@ -67,13 +67,13 @@ public struct ClipboardEntry: Codable, Sendable, Identifiable, Hashable {
         switch kind {
         case .text, .link:
             let line = (text ?? "").split(whereSeparator: \.isNewline).first.map(String.init) ?? ""
-            return line.trimmingCharacters(in: .whitespaces).isEmpty ? "Texto vazio" : line.trimmingCharacters(in: .whitespaces)
+            return line.trimmingCharacters(in: .whitespaces).isEmpty ? String(localized: "Texto vazio") : line.trimmingCharacters(in: .whitespaces)
         case .image:
-            if let imageWidth, let imageHeight { return "Imagem (\(imageWidth)×\(imageHeight))" }
-            return "Imagem"
+            if let imageWidth, let imageHeight { return String(localized: "Imagem (\(String(imageWidth))×\(String(imageHeight)))", comment: "Pixel size, without digit grouping") }
+            return String(localized: "Imagem")
         case .files:
             let names = (files ?? []).map { URL(filePath: $0).lastPathComponent }
-            return names.count > 1 ? "\(names[0]) e mais \(names.count - 1)" : (names.first ?? "Arquivo")
+            return names.count > 1 ? String(localized: "\(names[0]) e mais \(names.count - 1)") : (names.first ?? String(localized: "Arquivo"))
         }
     }
 

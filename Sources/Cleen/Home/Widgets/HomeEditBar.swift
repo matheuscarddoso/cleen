@@ -8,7 +8,7 @@ struct HomeEditBar: View {
     var body: some View {
         @Bindable var layout = layout
         HStack(spacing: 6) {
-            chip(layout.showsGreeting ? "checkmark" : "plus", "Saudação", isOn: layout.showsGreeting) {
+            chip(layout.showsGreeting ? "checkmark" : "plus", String(localized: "Saudação"), isOn: layout.showsGreeting) {
                 withAnimation(.smooth(duration: 0.3)) { layout.showsGreeting.toggle() }
             }
             Rectangle()
@@ -51,6 +51,6 @@ struct HomeEditBar: View {
                 .contentShape(.capsule)
         }
         .buttonStyle(.plain)
-        .help(isOn ? "Esconder \(title.lowercased())" : "Adicionar \(title.lowercased())")
+        .help(isOn ? String(localized: "Esconder \(title.lowercased())") : String(localized: "Adicionar \(title.lowercased())"))
     }
 }

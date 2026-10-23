@@ -16,16 +16,16 @@ enum HomeWidgetKind: String, Codable, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .nowPlaying: "Tocando agora"
-        case .agenda: "Agenda"
-        case .mirror: "Espelho"
-        case .disk: "Disco"
-        case .aiUsage: "Uso de IA"
-        case .system: "Sistema"
-        case .timer: "Timer"
-        case .note: "Nota"
-        case .reminders: "Lembretes"
-        case .weather: "Tempo"
+        case .nowPlaying: String(localized: "Tocando agora")
+        case .agenda: String(localized: "Agenda")
+        case .mirror: String(localized: "Espelho")
+        case .disk: String(localized: "Disco")
+        case .aiUsage: String(localized: "Uso de IA")
+        case .system: String(localized: "Sistema")
+        case .timer: String(localized: "Timer")
+        case .note: String(localized: "Nota")
+        case .reminders: String(localized: "Lembretes")
+        case .weather: String(localized: "Tempo")
         }
     }
 

@@ -7,7 +7,7 @@ struct NotchAppsTab: View {
 
     var body: some View {
         if model.phase != .ready {
-            NotchScanning(title: "Medindo os apps", detail: "Cada app em /Applications, com caches e dados")
+            NotchScanning(title: String(localized: "Medindo os apps"), detail: String(localized: "Cada app em /Applications, com caches e dados"))
                 .task { if model.phase == .idle { await model.load() } }
         } else {
             HStack(alignment: .top, spacing: 14) {

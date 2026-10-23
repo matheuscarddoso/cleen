@@ -6,11 +6,11 @@ struct AlertSettings: View {
 
     var body: some View {
         NotchGroup {
-            SettingRow(title: "Avisar quando o disco estiver quase cheio", note: "No máximo duas vezes por dia.") {
-                NotchSwitch(label: "Avisar", isOn: $enabled)
+            SettingRow(title: String(localized: "Avisar quando o disco estiver quase cheio"), note: String(localized: "No máximo duas vezes por dia.")) {
+                NotchSwitch(label: String(localized: "Avisar"), isOn: $enabled)
             }
-            SettingRow(title: "Avisar abaixo de") {
-                NotchStepper(value: $threshold, range: 2...100) { "\($0) GB" }
+            SettingRow(title: String(localized: "Avisar abaixo de")) {
+                NotchStepper(value: $threshold, range: 2...100) { String(localized: "\($0) GB") }
                     .disabled(!enabled)
                     .opacity(enabled ? 1 : 0.4)
             }

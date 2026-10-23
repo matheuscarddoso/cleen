@@ -16,8 +16,8 @@ struct TitleControls: View {
                     .contentTransition(.symbolEffect(.replace))
                     .frame(width: 34, height: Self.height)
             }
-            .help(model.isMuted ? "Ligar o som" : "Tirar o som")
-            .accessibilityLabel(model.isMuted ? "Ligar o som" : "Tirar o som")
+            .help(model.isMuted ? String(localized: "Ligar o som") : String(localized: "Tirar o som"))
+            .accessibilityLabel(model.isMuted ? String(localized: "Ligar o som") : String(localized: "Tirar o som"))
             Button("Pular", action: model.skipTitles)
                 .font(.system(size: 12, weight: .medium))
                 .padding(.leading, 4)
