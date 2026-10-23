@@ -43,6 +43,7 @@ struct NotchSearchView: View {
             results
         }
         .onAppear { focused = true }
+        .onChange(of: state.searchFocusRequest) { focused = true }
     }
 
     @ViewBuilder

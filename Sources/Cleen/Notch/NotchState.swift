@@ -28,6 +28,9 @@ final class NotchState {
     var showsSearch = false
     /// Opened from the keyboard: it appears and goes without animation, like a launcher.
     var opensInstantly = false
+    /// Bumped once the panel holds the keyboard, so the search field takes the cursor
+    /// right then (asking before the window is key does nothing).
+    var searchFocusRequest = 0
     var settingsSection = SettingsSection.general
     var geometry: NotchGeometry?
     /// While true the panel stays open even if the pointer leaves (a confirmation is

@@ -137,6 +137,13 @@ final class NotchController {
         // A non-activating panel can take the keyboard without the app in front changing,
         // so window commands and pastes still go to the app you were in.
         panel?.makeKey()
+        // The field asks for the cursor only once the window really is key: on the next
+        // turn of the run loop, after AppKit has finished making it so.
+        DispatchQueue.main.async { [weak self] in
+            guard let self, self.state.showsSearch else { return }
+            if self.panel?.isKeyWindow == false { self.panel?.makeKey() }
+            self.state.searchFocusRequest += 1
+        }
     }
 
     func toggleSearch() {
