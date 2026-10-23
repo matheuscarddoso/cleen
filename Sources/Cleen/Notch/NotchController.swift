@@ -11,6 +11,8 @@ final class NotchController {
     private var monitors: [Any] = []
     private var pendingOpen: Task<Void, Never>?
     private var pendingClose: Task<Void, Never>?
+    /// While set, a panel opened by Cleen itself doesn't close on the next mouse move.
+    private var presentedUntil: Date?
     /// The drag pasteboard's change count when the mouse went down, to tell a file drag
     /// (it changes) from dragging a window or selecting text across the menu bar.
     private var dragChangeCount = NSPasteboard(name: .drag).changeCount
@@ -79,6 +81,21 @@ final class NotchController {
         state.isPinned.toggle()
     }
 
+    func present(tab: NotchTab) {
+        presentedUntil = .now.addingTimeInterval(8)
+        open(tab: tab)
+        Task { [weak self] in
+            try? await Task.sleep(for: .seconds(8.2))
+            guard let self, let until = self.presentedUntil, until <= .now else { return }
+            self.presentedUntil = nil
+            if !self.state.isPinned, !self.state.holdsOpen, !self.pointerIsInside { self.close() }
+        }
+    }
+
+    private var pointerIsInside: Bool {
+        state.geometry?.hotZone(isOpen: true, showsWings: NotchSettings.showsWings).contains(NSEvent.mouseLocation) ?? false
+    }
+
     /// Opens the panel on Ajustes.
     func openSettings(_ section: SettingsSection? = nil) {
         if let section { state.settingsSection = section }
@@ -123,6 +140,10 @@ final class NotchController {
             if inside {
                 pendingClose?.cancel()
                 pendingClose = nil
+                // Once the person comes to it, it behaves like any other open panel.
+                presentedUntil = nil
+            } else if let until = presentedUntil, until > .now {
+                return
             } else if event.type == .leftMouseDown, !state.isPinned {
                 // A click elsewhere is a clear "done".
                 close()

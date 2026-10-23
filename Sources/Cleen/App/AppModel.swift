@@ -28,6 +28,7 @@ final class AppModel {
     let tabs = TabPreferences()
     let mirror = MirrorModel()
     let clipboard = ClipboardModel()
+    let screenshots = ScreenshotModel()
     @ObservationIgnored private(set) lazy var notch = NotchCoordinator(app: self)
 
     private init() {
@@ -47,6 +48,9 @@ final class AppModel {
         // After the app finishes launching, so screens and the menu bar are in place.
         Task { [weak self] in self?.installNotch() }
         clipboard.start()
+        clipboard.onScreenshot = { [screenshots] png in screenshots.addClipboardCapture(png) }
+        screenshots.onNewScreenshot = { [weak self] _ in self?.notch.present(tab: .screenshots) }
+        screenshots.start()
         // The closed notch shows what's playing, so listen from the start.
         Task { [nowPlaying] in await nowPlaying.watch() }
     }
@@ -74,7 +78,7 @@ final class AppModel {
         case .space: spaceLens.scan(.home)
         case .leftovers: orphans.startScan()
         case .apps: Task { await apps.load() }
-        case .calendar, .shelf, .clipboard, .ai, .system, .startup, .maintenance: break
+        case .calendar, .shelf, .clipboard, .screenshots, .ai, .system, .startup, .maintenance: break
         }
     }
 

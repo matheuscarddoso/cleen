@@ -18,6 +18,8 @@ final class ClipboardModel {
     var kind: ClipboardEntry.Kind?
     var selectedID: UUID?
 
+    /// Receives the PNG of a screenshot taken straight to the clipboard (⌃⌘⇧3/4).
+    @ObservationIgnored var onScreenshot: (Data) -> Void = { _ in }
     @ObservationIgnored private var lastChangeCount = NSPasteboard.general.changeCount
     @ObservationIgnored private var watcher: Task<Void, Never>?
     @ObservationIgnored private let folder = URL.applicationSupportDirectory.appending(path: "app.cleen.Cleen/Clipboard", directoryHint: .isDirectory)
@@ -101,6 +103,10 @@ final class ClipboardModel {
             let file = "\(hash.prefix(24)).png"
             try? png.write(to: folder.appending(path: file), options: .atomic)
             let pixels = image.representations.first.map { ($0.pixelsWide, $0.pixelsHigh) } ?? (Int(image.size.width), Int(image.size.height))
+            // The capture service is alive while a ⌃ screenshot lands on the clipboard.
+            if !NSRunningApplication.runningApplications(withBundleIdentifier: "com.apple.screencaptureui").isEmpty {
+                onScreenshot(png)
+            }
             return ClipboardEntry(kind: .image, imageFile: file, imageWidth: pixels.0, imageHeight: pixels.1, byteCount: png.count, contentHash: hash, sourceBundleID: bundleID, sourceName: name)
         }
         if let string = pasteboard.string(forType: .string), !string.isEmpty {

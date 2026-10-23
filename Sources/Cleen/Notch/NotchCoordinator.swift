@@ -37,6 +37,12 @@ final class NotchCoordinator {
         (controllerUnderPointer ?? primary)?.open(tab: tab)
     }
 
+    /// Opens on its own (a new screenshot): where the pointer is, and it stays up for a
+    /// few seconds even if the pointer is elsewhere.
+    func present(tab: NotchTab) {
+        (controllerUnderPointer ?? primary)?.present(tab: tab)
+    }
+
     func openSettings() {
         (controllerUnderPointer ?? primary)?.openSettings()
     }

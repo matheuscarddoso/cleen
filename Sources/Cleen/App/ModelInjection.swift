@@ -22,5 +22,6 @@ extension View {
             .environment(app.tabs)
             .environment(app.mirror)
             .environment(app.clipboard)
+            .environment(app.screenshots)
     }
 }
