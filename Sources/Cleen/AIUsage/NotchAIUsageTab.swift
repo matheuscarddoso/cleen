@@ -29,7 +29,7 @@ struct NotchAIUsageTab: View {
                             LimitBlock(symbol: row.symbol, label: row.label, value: row.window.used.percent, fraction: row.window.used, pace: row.window.elapsed(), color: row.color, detail: row.detail)
                         }
                         if model.claude == nil {
-                            LimitBlock(symbol: "asterisk", label: String(localized: "Sessão (5h)"), value: summary.blockCost.dollars, fraction: 0, detail: model.claudeProblem.map(Self.problemText))
+                            LimitBlock(symbol: ClaudeLogo.symbolName, label: String(localized: "Sessão (5h)"), value: summary.blockCost.dollars, fraction: 0, detail: model.claudeProblem.map(Self.problemText))
                         }
                         // Fill up to three blocks with where the month's spend went.
                         ForEach(summary.models.prefix(max(0, 3 - min(limitRows.count, 3) - (model.claude == nil ? 1 : 0)))) { share in
@@ -57,7 +57,7 @@ struct NotchAIUsageTab: View {
     }
 
     private var limitRows: [LimitRowData] {
-        let claude = (model.claude?.windows ?? []).prefix(3).map { ("asterisk", $0) }
+        let claude = (model.claude?.windows ?? []).prefix(3).map { (ClaudeLogo.symbolName, $0) }
         let codex = (model.codex ?? []).prefix(2).map { ("terminal", UsageWindow(name: "Codex · \($0.name)", used: $0.used, resetsAt: $0.resetsAt, length: $0.length)) }
         return (claude + codex).map { symbol, window in
             LimitRowData(symbol: symbol, label: window.name, window: window, detail: Self.detail(for: window), color: Self.color(for: window))

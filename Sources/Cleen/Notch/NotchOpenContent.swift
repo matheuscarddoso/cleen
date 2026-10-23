@@ -12,7 +12,12 @@ struct NotchOpenContent: View {
             NotchHeader(controller: controller)
                 .frame(height: notchHeight)
                 .padding(.horizontal, NotchOpenContent.inset - 2)
-            if state.showsSettings {
+            if state.showsSearch {
+                NotchSearchView(controller: controller)
+                    .padding(.horizontal, NotchOpenContent.inset)
+                    .padding(.top, 4)
+                    .padding(.bottom, 12)
+            } else if state.showsSettings {
                 NotchSettingsView()
                     .padding(.horizontal, NotchOpenContent.inset)
                     .padding(.top, 4)

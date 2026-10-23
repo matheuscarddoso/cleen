@@ -13,9 +13,7 @@ struct AgentsWidget: View {
             switch size {
             case .small:
                 VStack(spacing: 4) {
-                    Image(systemName: "asterisk")
-                        .font(.system(size: 20, weight: .medium))
-                        .foregroundStyle(ToolPalette.orange)
+                    ClaudeLogo(size: 22)
                     Text(agents.working.count.formatted())
                         .font(.system(size: 22, weight: .light).monospacedDigit())
                         .contentTransition(.numericText())
@@ -26,7 +24,12 @@ struct AgentsWidget: View {
                 .frame(width: 88, height: 88)
             case .medium, .large:
                 VStack(alignment: .leading, spacing: 6) {
-                    HomeWidgetLabel(title: String(localized: "Claude Code"), symbol: "asterisk")
+                    HStack(spacing: 5) {
+                        ClaudeLogo(size: 11)
+                        Text("Claude Code")
+                            .font(.system(size: 11, weight: .medium))
+                            .foregroundStyle(NotchStyle.secondary)
+                    }
                     if agents.sessions.isEmpty {
                         Text("Nenhuma sessão agora")
                             .font(.system(size: 11))

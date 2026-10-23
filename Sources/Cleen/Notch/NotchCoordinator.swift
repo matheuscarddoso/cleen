@@ -6,6 +6,9 @@ final class NotchCoordinator {
     private unowned let app: AppModel
     private(set) var controllers: [NotchController] = []
     private var hotKey: GlobalHotKey?
+    private var searchHotKey: GlobalHotKey?
+    /// False when another app (a launcher) already owns ⌥Space.
+    private(set) var searchShortcutAvailable = true
     private var observers: [NSObjectProtocol] = []
     private var showsOnAllScreens = NotchSettings.showsOnAllScreens
     private var panelSize = NotchSettings.panelSize
@@ -29,6 +32,11 @@ final class NotchCoordinator {
             guard let self else { return }
             if self.isSuspended { self.onSuspendedHotKey?() } else { self.toggleUnderPointer() }
         }
+        searchHotKey = GlobalHotKey.search { [weak self] in
+            guard let self, !self.isSuspended else { return }
+            (self.controllerUnderPointer ?? self.primary)?.toggleSearch()
+        }
+        searchShortcutAvailable = searchHotKey?.isRegistered ?? false
         observers.append(NotificationCenter.default.addObserver(
             forName: NSApplication.didChangeScreenParametersNotification, object: nil, queue: .main
         ) { [weak self] _ in

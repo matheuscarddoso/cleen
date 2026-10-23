@@ -18,7 +18,7 @@ struct NotchTabBar: View {
     private var buttons: some View {
         HStack(spacing: 2) {
             ForEach(tabs.visible) { tab in
-                NotchTabButton(symbol: tab.symbol, title: tab.title, isSelected: state.tab == tab) {
+                NotchTabButton(symbol: tab.symbol, showsClaudeLogo: tab == .agents, title: tab.title, isSelected: state.tab == tab) {
                     state.tab = tab
                 }
             }

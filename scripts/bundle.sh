@@ -26,6 +26,8 @@ cp "$ROOT/Support/NowPlaying/now-playing.pl" "$APP/Contents/Resources/now-playin
 # Translations: the Portuguese text is the key, en.lproj maps it to English
 # (see scripts/strings.sh).
 cp -R "$ROOT/Support/Localization/"*.lproj "$APP/Contents/Resources/"
+# Brand marks drawn as they are (the Claude logo where the app shows Claude).
+cp "$ROOT/Support/Brand/"*.svg "$APP/Contents/Resources/"
 
 # Icon: regenerate only when the script changed.
 ICONSET="$ROOT/build/AppIcon.iconset"

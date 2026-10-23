@@ -17,10 +17,16 @@ struct LimitBlock: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 5) {
             HStack(spacing: 7) {
-                Image(systemName: symbol)
-                    .font(.system(size: 10.5, weight: .medium))
-                    .foregroundStyle(NotchStyle.secondary)
-                    .frame(width: 14)
+                Group {
+                    if symbol == ClaudeLogo.symbolName {
+                        ClaudeLogo(size: 12)
+                    } else {
+                        Image(systemName: symbol)
+                            .font(.system(size: 10.5, weight: .medium))
+                            .foregroundStyle(NotchStyle.secondary)
+                    }
+                }
+                .frame(width: 14)
                 Text(label)
                     .font(.system(size: 12, weight: .medium))
                     .foregroundStyle(NotchStyle.primary.opacity(0.85))

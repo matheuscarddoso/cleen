@@ -32,6 +32,7 @@ final class AppModel {
     let live = LiveActivityCenter()
     let agents = AgentsModel()
     let displays = DisplaysModel()
+    @ObservationIgnored private(set) lazy var search = SearchModel(app: self)
     let fullscreen = FullscreenWatcher()
     let timer = TimerModel()
     let notes = NotesModel()
@@ -75,7 +76,6 @@ final class AppModel {
             }
         }
         fullscreen.start()
-        agents.onFinished = { [live] session in live.agentFinished(session.title) }
         agents.start()
         displays.restoreDimming()
         Thumbnails.shared.scale = NSScreen.screens.map(\.backingScaleFactor).max() ?? 2
@@ -92,9 +92,14 @@ final class AppModel {
         // until the tour is over.
         screenshots.start()
         warmCharts(after: .seconds(4))
+        if let text = LaunchArguments.search {
+            notch.primary?.openSearch()
+            search.query = text
+        }
         if let kind = LaunchArguments.liveActivity {
-            Task { [live] in
+            Task { [live, agents] in
                 try? await Task.sleep(for: .seconds(1.5))
+                if kind == "agent" { agents.previewFinished() }
                 live.preview(kind)
             }
         }

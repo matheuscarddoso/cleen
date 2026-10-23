@@ -32,12 +32,12 @@ struct NotchRootView: View {
                     NotchOpenContent(controller: controller, notchHeight: geometry.notchSize.height)
                         .padding(.horizontal, NotchStyle.openTopRadius)
                         .frame(width: geometry.openSize.width, height: geometry.openSize.height, alignment: .top)
-                        .transition(.notchPanel)
+                        .transition(state.opensInstantly ? .identity : .notchPanel)
                 } else if wingWidth > 0 {
                     NotchWings(notchWidth: geometry.notchSize.width, notchHeight: geometry.notchSize.height)
                         .padding(.horizontal, NotchStyle.closedTopRadius)
                         .frame(width: closed.width, height: closed.height)
-                        .transition(.notchWings)
+                        .transition(state.opensInstantly ? .identity : .notchWings)
                 }
             }
             .frame(width: size.width, height: size.height, alignment: .top)
@@ -63,8 +63,10 @@ struct NotchRootView: View {
         if hidesInFullscreen, fullscreen.isFullscreen(controller.screen) { return 0 }
         let busy = junk.phase == .scanning || junk.isCleaning || app.isSmartScanning || app.isSmartCleaning
         if live.banner != nil, !busy { return LiveActivity.bannerWingWidth }
-        let hasContent = busy || timer.isActive || live.meeting != nil || (LiveActivitySettings.agents && !agents.working.isEmpty) || nowPlaying.track?.isPlaying == true
+        let claude = LiveActivitySettings.agents && (!agents.working.isEmpty || agents.justFinished)
+        let hasContent = busy || timer.isActive || live.meeting != nil || claude || nowPlaying.track?.isPlaying == true
             || LiveActivitySettings.Idle(rawValue: idle) != LiveActivitySettings.Idle.none
-        return hasContent ? NotchGeometry.wingWidth : 0
+        // Claude's glyph sits before whatever else is on the left wing.
+        return hasContent ? NotchGeometry.wingWidth + (claude ? 20 : 0) : 0
     }
 }

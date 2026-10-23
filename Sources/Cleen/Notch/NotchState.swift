@@ -22,6 +22,10 @@ final class NotchState {
     }
     /// The panel shows Ajustes instead of a tool.
     var showsSettings = false
+    /// The panel shows the launcher (⌥Space) instead of a tool.
+    var showsSearch = false
+    /// Opened from the keyboard: it appears and goes without animation, like a launcher.
+    var opensInstantly = false
     var settingsSection = SettingsSection.general
     var geometry: NotchGeometry?
     /// While true the panel stays open even if the pointer leaves (a confirmation is

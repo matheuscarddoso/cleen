@@ -81,10 +81,9 @@ final class LiveActivityCenter {
         show(.timerEnded(phase: phase))
     }
 
-    /// Called when a Claude Code session finishes a turn.
-    func agentFinished(_ title: String) {
-        guard LiveActivitySettings.agents else { return }
-        show(.agentFinished(title: title))
+    /// Confirms a copy the person can't see happen (the notch is closed by then).
+    func copied(_ text: String, color: NSColor? = nil) {
+        show(.copied(text: text, color: color))
     }
 
     /// Called by the player when what's playing changes.
@@ -120,7 +119,6 @@ final class LiveActivityCenter {
         case "low": show(.power(.low, level: 0.1))
         case "headphones": show(.headphones(name: "AirPods Pro de Matheus", connected: true))
         case "track": show(.track(title: "Clair de Lune", artist: "Claude Debussy"))
-        case "agent": show(.agentFinished(title: "Refatorar o checkout"))
         case "meeting": meeting = .meeting(title: "Daily", start: .now.addingTimeInterval(5 * 60), color: .systemPurple)
         default: break
         }

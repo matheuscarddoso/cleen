@@ -52,11 +52,18 @@ struct LiveActivityBanner: View {
                 .font(.system(size: 12, weight: .medium))
                 .foregroundStyle(NotchStyle.warning)
             label(phase)
-        case .agentFinished(let title):
-            Image(systemName: "asterisk")
-                .font(.system(size: 12, weight: .medium))
-                .foregroundStyle(ToolPalette.orange)
-            label(title)
+        case .copied(let text, let color):
+            if let color {
+                Circle()
+                    .fill(Color(nsColor: color))
+                    .frame(width: 12, height: 12)
+                    .overlay { Circle().strokeBorder(Color.white.opacity(0.3)) }
+            } else {
+                Image(systemName: "doc.on.clipboard")
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundStyle(NotchStyle.secondary)
+            }
+            label(text)
         }
     }
 
@@ -78,8 +85,8 @@ struct LiveActivityBanner: View {
         case .timerEnded:
             Text("Concluído")
                 .foregroundStyle(NotchStyle.warning)
-        case .agentFinished:
-            Text("Terminou")
+        case .copied:
+            Text("Copiado")
                 .foregroundStyle(NotchStyle.good)
         }
     }

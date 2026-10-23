@@ -77,8 +77,65 @@ final class NotchController {
         state.holdsOpen = false
         state.mirrorExpanded = false
         state.isEditingHome = false
-        withAnimation(Self.closeAnimation) { state.isOpen = false }
+        if state.opensInstantly {
+            withTransaction(Self.instant) { state.isOpen = false }
+        } else {
+            withAnimation(Self.closeAnimation) { state.isOpen = false }
+        }
+        state.showsSearch = false
+        state.opensInstantly = false
         panel?.ignoresMouseEvents = true
+        giveBackKeyboard()
+    }
+
+    // MARK: Search
+
+    private static var instant: Transaction {
+        var transaction = Transaction(animation: nil)
+        transaction.disablesAnimations = true
+        return transaction
+    }
+
+    /// ⌥Space: the launcher, there at once and with the keyboard in its field. Opened
+    /// on the panel already showing, it just switches to the search.
+    func openSearch() {
+        pendingClose?.cancel()
+        app.search.prepare()
+        state.showsSettings = false
+        state.mirrorExpanded = false
+        let wasOpen = state.isOpen
+        if !wasOpen { state.opensInstantly = true }
+        state.showsSearch = true
+        // Moving the pointer away doesn't close a launcher; Esc or a click elsewhere does.
+        state.holdsOpen = true
+        panel?.ignoresMouseEvents = false
+        if !wasOpen { withTransaction(Self.instant) { state.isOpen = true } }
+        // A non-activating panel can take the keyboard without the app in front changing,
+        // so window commands and pastes still go to the app you were in.
+        panel?.makeKey()
+    }
+
+    func toggleSearch() {
+        state.isOpen && state.showsSearch ? close() : openSearch()
+    }
+
+    /// Closes the launcher; with `paste`, sends ⌘V to the app you were in once it has
+    /// the keyboard back.
+    func closeSearch(paste: Bool) {
+        close()
+        guard paste else { return }
+        Task {
+            try? await Task.sleep(for: .milliseconds(120))
+            PasteKeystroke.send()
+        }
+    }
+
+    /// The panel had the keyboard (search, a text field): hand it back to the app in
+    /// front, which never stopped being active.
+    private func giveBackKeyboard() {
+        guard let panel, panel.isKeyWindow else { return }
+        panel.resignKey()
+        NSWorkspace.shared.frontmostApplication?.activate()
     }
 
     func togglePin() {

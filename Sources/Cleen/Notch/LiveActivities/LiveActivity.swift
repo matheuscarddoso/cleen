@@ -9,8 +9,8 @@ enum LiveActivity: Equatable {
     case meeting(title: String, start: Date, color: NSColor)
     /// A timer or Pomodoro phase that just ran out ("Foco", "Pausa", "Timer").
     case timerEnded(phase: String)
-    /// A Claude Code session finished its turn and is waiting.
-    case agentFinished(title: String)
+    /// Something went to the clipboard from the search (a picked color, a result).
+    case copied(text: String, color: NSColor?)
 
     enum Power: Equatable {
         case charging

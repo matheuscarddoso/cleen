@@ -8,6 +8,9 @@ import Observation
 @Observable
 final class AgentsModel {
     private(set) var sessions: [ClaudeSession] = []
+    /// A session just finished: the closed notch shows a check for a moment.
+    private(set) var justFinished = false
+    @ObservationIgnored private var finishedTask: Task<Void, Never>?
     /// Told when a session finishes a turn and starts waiting for the person.
     @ObservationIgnored var onFinished: (ClaudeSession) -> Void = { _ in }
     @ObservationIgnored private var loop: Task<Void, Never>?
@@ -19,6 +22,9 @@ final class AgentsModel {
     static var isClaudeCodeInstalled: Bool {
         FileManager.default.fileExists(atPath: Paths.home.appending(path: ".claude/projects").path(percentEncoded: false))
     }
+
+    /// A finished session's check, for checking the UI (`--live agent`).
+    func previewFinished() { showFinished() }
 
     func start() {
         guard loop == nil, Self.isClaudeCodeInstalled else { return }
@@ -37,8 +43,19 @@ final class AgentsModel {
         let found = await offMain { scanner.scan() }
         let before = Dictionary(uniqueKeysWithValues: sessions.map { ($0.id, $0.state) })
         if found != sessions { sessions = found }
-        for session in found where session.state == .waiting && before[session.id]?.isBusy == true {
-            onFinished(session)
+        let finished = found.filter { $0.state == .waiting && before[$0.id]?.isBusy == true }
+        for session in finished { onFinished(session) }
+        if !finished.isEmpty, working.isEmpty { showFinished() }
+    }
+
+    /// The check stays long enough to be seen, then goes.
+    private func showFinished() {
+        finishedTask?.cancel()
+        justFinished = true
+        finishedTask = Task { [weak self] in
+            try? await Task.sleep(for: .seconds(2.6))
+            guard !Task.isCancelled else { return }
+            self?.justFinished = false
         }
     }
 }

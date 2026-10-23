@@ -19,9 +19,8 @@ struct NotchAgentsTab: View {
                 ) { Task { await agents.refresh() } }
             } else if agents.sessions.isEmpty {
                 VStack(spacing: 6) {
-                    Image(systemName: "asterisk")
-                        .font(.system(size: 16))
-                        .foregroundStyle(NotchStyle.tertiary)
+                    ClaudeLogo(size: 18)
+                        .opacity(0.5)
                     Text("Nenhuma sessão na última meia hora")
                         .font(.system(size: 11.5, weight: .medium))
                         .foregroundStyle(NotchStyle.secondary)
@@ -47,9 +46,7 @@ private struct AgentRow: View {
 
     var body: some View {
         HStack(spacing: 10) {
-            Image(systemName: "asterisk")
-                .font(.system(size: 12, weight: .medium))
-                .foregroundStyle(ToolPalette.orange)
+            ClaudeLogo(size: 15)
                 .frame(width: 16)
             VStack(alignment: .leading, spacing: 1) {
                 Text(session.title)

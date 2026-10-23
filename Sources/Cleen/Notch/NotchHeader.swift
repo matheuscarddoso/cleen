@@ -11,7 +11,12 @@ struct NotchHeader: View {
                 .font(NotchStyle.title)
                 .contentTransition(.opacity)
             Spacer()
-            if state.tab == .home, !state.showsSettings, !state.mirrorExpanded {
+            if !state.showsSearch {
+                NotchIconButton(symbol: "magnifyingglass", help: String(localized: "Buscar (⌥ Espaço)")) {
+                    controller.openSearch()
+                }
+            }
+            if state.tab == .home, !state.showsSettings, !state.showsSearch, !state.mirrorExpanded {
                 NotchIconButton(symbol: state.isEditingHome ? "checkmark" : "square.grid.2x2", help: state.isEditingHome ? String(localized: "Concluir") : String(localized: "Editar o Início"), isActive: state.isEditingHome) {
                     withAnimation(.smooth(duration: 0.3)) { state.isEditingHome.toggle() }
                 }
@@ -20,12 +25,16 @@ struct NotchHeader: View {
                 controller.togglePin()
             }
             NotchIconButton(symbol: state.showsSettings ? "xmark" : "gearshape", help: state.showsSettings ? String(localized: "Fechar ajustes") : String(localized: "Ajustes"), isActive: state.showsSettings) {
-                withAnimation(.smooth(duration: 0.25)) { state.showsSettings.toggle() }
+                withAnimation(.smooth(duration: 0.25)) {
+                    state.showsSearch = false
+                    state.showsSettings.toggle()
+                }
             }
         }
     }
 
     private var headerTitle: String {
+        if state.showsSearch { return String(localized: "Buscar") }
         if state.showsSettings { return String(localized: "Ajustes") }
         if state.tab == .home, state.mirrorExpanded { return String(localized: "Espelho") }
         if state.tab == .home, state.isEditingHome { return String(localized: "Editar o Início") }

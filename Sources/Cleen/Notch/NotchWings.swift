@@ -29,7 +29,14 @@ struct NotchWings: View {
 
     private var wings: some View {
         HStack(spacing: 0) {
-            leading
+            HStack(spacing: 6) {
+                // Claude first, even beside what's playing: it's what you're waiting on.
+                if showsClaude {
+                    ClaudeWingIndicator(isWorking: !agents.working.isEmpty, justFinished: agents.justFinished)
+                        .transition(.scale(scale: 0.5).combined(with: .opacity))
+                }
+                leading
+            }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.leading, inset)
             Spacer(minLength: notchWidth)
@@ -41,6 +48,7 @@ struct NotchWings: View {
         .animation(.smooth(duration: 0.3), value: isPlaying)
         .animation(.smooth(duration: 0.3), value: live.meeting)
         .animation(.smooth(duration: 0.3), value: timer.isActive)
+        .animation(.spring(response: 0.42, dampingFraction: 0.8), value: showsClaude)
         .accessibilityElement(children: .combine)
         .accessibilityLabel("Cleen")
     }
@@ -56,6 +64,11 @@ struct NotchWings: View {
 
     private var isBusy: Bool {
         junk.phase == .scanning || junk.isCleaning || app.isSmartScanning || app.isSmartCleaning
+    }
+
+    /// A session working, or one that just finished (its check is still up).
+    private var showsClaude: Bool {
+        showsAgents && (!agents.working.isEmpty || agents.justFinished)
     }
 
     private var idleIndicator: LiveActivitySettings.Idle {
@@ -81,12 +94,6 @@ struct NotchWings: View {
         } else if isPlaying {
             WingArtwork(image: nowPlaying.artwork, size: artworkSize, cornerRadius: max(3, NotchStyle.closedBottomRadius - inset))
                 .transition(.scale(0.6).combined(with: .opacity))
-        } else if showsAgents, !agents.working.isEmpty {
-            Image(systemName: "asterisk")
-                .font(.system(size: 12, weight: .medium))
-                .foregroundStyle(ToolPalette.orange)
-                .symbolEffect(.pulse, options: .repeating)
-                .transition(.opacity)
         } else {
             switch idleIndicator {
             case .disk: WingRing(fraction: monitor.disk?.usedFraction ?? 0).transition(.opacity)
@@ -119,8 +126,6 @@ struct NotchWings: View {
         } else if isPlaying {
             SoundBars(isPlaying: isPlaying)
                 .transition(.opacity)
-        } else if showsAgents, !agents.working.isEmpty {
-            wingText(agents.working.count.formatted(), color: ToolPalette.orange)
         } else {
             switch idleIndicator {
             case .disk:

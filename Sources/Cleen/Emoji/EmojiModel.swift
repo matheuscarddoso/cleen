@@ -46,6 +46,18 @@ final class EmojiModel {
         await loadTask?.value
     }
 
+    /// The best matches over every emoji, for the notch search.
+    func matches(_ query: String, limit: Int) -> [EmojiItem] {
+        guard !query.trimmingCharacters(in: .whitespaces).isEmpty else { return [] }
+        return Array(EmojiSearch.search(query, in: all).prefix(limit))
+    }
+
+    /// Remembers an emoji used from somewhere else (the search), as a pick here would.
+    func noteUsed(_ item: EmojiItem) {
+        recentEmoji = EmojiRecents.record(item.emoji, in: recentEmoji)
+        UserDefaults.standard.set(recentEmoji, forKey: Self.recentsKey)
+    }
+
     // MARK: Using one
 
     /// Copies the emoji and pastes it into the app in front. Returns whether it pasted
