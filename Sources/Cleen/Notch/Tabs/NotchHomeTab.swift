@@ -13,11 +13,11 @@ struct NotchHomeTab: View {
                     .frame(width: 270)
                 Rectangle()
                     .fill(NotchStyle.track)
-                    .frame(width: 1, height: 96)
+                    .frame(width: 1, height: 88)
                 NotchCalendar()
                 Rectangle()
                     .fill(NotchStyle.track)
-                    .frame(width: 1, height: 96)
+                    .frame(width: 1, height: 88)
                 MirrorButton()
             }
             .padding(.top, 4)

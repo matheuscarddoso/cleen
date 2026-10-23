@@ -9,7 +9,7 @@ struct NowPlayingCard: View {
     var body: some View {
         HStack(alignment: .center, spacing: 14) {
             NowPlayingArtwork(image: model.artwork, appURL: model.appURL)
-                .frame(width: 96, height: 96)
+                .frame(width: 88, height: 88)
             VStack(alignment: .leading, spacing: 2) {
                 Text(model.track?.title ?? "Nada tocando")
                     .font(.system(size: 15, weight: .semibold))
@@ -21,7 +21,7 @@ struct NowPlayingCard: View {
                     .font(.system(size: 14, weight: .medium))
                     .foregroundStyle(NotchStyle.primary.opacity(0.45))
                 NowPlayingControls(isPlaying: model.track?.isPlaying ?? false, isEnabled: model.track != nil)
-                    .padding(.top, 6)
+                    .padding(.top, 2)
                     .padding(.leading, -6)
             }
             .lineLimit(1)

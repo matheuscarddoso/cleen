@@ -34,6 +34,6 @@ struct CalendarDayAgenda: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             }
         }
-        .frame(height: 70)
+        .frame(height: 54)
     }
 }

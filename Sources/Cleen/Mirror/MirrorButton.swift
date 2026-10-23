@@ -25,7 +25,7 @@ struct MirrorButton: View {
                     .foregroundStyle(NotchStyle.primary.opacity(0.55))
                 }
             }
-            .frame(width: 96, height: 96)
+            .frame(width: 88, height: 88)
             .contentShape(.circle)
         }
         .buttonStyle(.plain)

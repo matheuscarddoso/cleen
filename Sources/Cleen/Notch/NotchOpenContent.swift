@@ -21,7 +21,9 @@ struct NotchOpenContent: View {
             } else {
                 tool
                     .padding(.horizontal, NotchOpenContent.inset)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                    // minHeight 0: a tall tool clips instead of pushing the tab bar down, so the
+                    // bar sits at the same height on every tab.
+                    .frame(maxWidth: .infinity, minHeight: 0, maxHeight: .infinity, alignment: .top)
                     .clipped()
                     .padding(.top, 6)
                 NotchTabBar()
