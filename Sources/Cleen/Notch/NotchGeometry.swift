@@ -32,7 +32,11 @@ struct NotchGeometry: Equatable {
     }
 
     func closedSize(showsWings: Bool) -> CGSize {
-        CGSize(width: notchSize.width + (showsWings ? Self.wingWidth * 2 : 0), height: notchSize.height)
+        closedSize(wingWidth: showsWings ? Self.wingWidth : 0)
+    }
+
+    func closedSize(wingWidth: Double) -> CGSize {
+        CGSize(width: notchSize.width + wingWidth * 2, height: notchSize.height)
     }
 
     var openSize: CGSize {

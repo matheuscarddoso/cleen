@@ -29,6 +29,8 @@ final class AppModel {
     let shelf = ShelfModel()
     let tabs = TabPreferences()
     let homeLayout = HomeLayout()
+    let live = LiveActivityCenter()
+    let fullscreen = FullscreenWatcher()
     let timer = TimerModel()
     let notes = NotesModel()
     let weather = WeatherModel()
@@ -60,6 +62,10 @@ final class AppModel {
         screenshots.onNewScreenshot = { [weak self] _ in self?.notch.present(tab: .screenshots) }
         // The closed notch shows what's playing, so listen from the start.
         Task { [nowPlaying] in await nowPlaying.watch() }
+        LiveActivitySettings.register()
+        nowPlaying.onTrackChange = { [live] track in live.trackChanged(track) }
+        live.start(agenda: agenda)
+        fullscreen.start()
         Thumbnails.shared.scale = NSScreen.screens.map(\.backingScaleFactor).max() ?? 2
     }
 
@@ -74,9 +80,15 @@ final class AppModel {
         // until the tour is over.
         screenshots.start()
         warmCharts(after: .seconds(4))
+        if let kind = LaunchArguments.liveActivity {
+            Task { [live] in
+                try? await Task.sleep(for: .seconds(1.5))
+                live.preview(kind)
+            }
+        }
         if LaunchArguments.settings {
             notch.primary?.state.isPinned = true
-            notch.primary?.openSettings()
+            notch.primary?.openSettings(LaunchArguments.settingsSection)
         } else if let tab = LaunchArguments.notchTab {
             notch.primary?.state.isPinned = true
             notch.primary?.open(tab: tab)

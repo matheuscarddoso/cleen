@@ -5,7 +5,11 @@ import Observation
 /// the system's Now Playing through `NowPlayingBridge`.
 @Observable
 final class NowPlayingModel {
-    private(set) var track: NowPlayingTrack?
+    private(set) var track: NowPlayingTrack? {
+        didSet { if track?.identity != oldValue?.identity || track?.isPlaying != oldValue?.isPlaying { onTrackChange(track) } }
+    }
+    /// Told when the item or its playing state changes (the notch's song banner).
+    @ObservationIgnored var onTrackChange: (NowPlayingTrack?) -> Void = { _ in }
     private(set) var artwork: NSImage?
     /// The app playing it, for its name and icon.
     private(set) var appName: String?

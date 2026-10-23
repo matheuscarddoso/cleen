@@ -3,7 +3,6 @@ import SwiftUI
 struct NotchAppearanceSettings: View {
     @AppStorage(NotchSettings.openOnHoverKey) private var opensOnHover = true
     @AppStorage(NotchSettings.hoverDelayKey) private var hoverDelay = 0.12
-    @AppStorage(NotchSettings.showsWingsKey) private var showsWings = true
     @AppStorage(NotchSettings.allScreensKey) private var allScreens = false
     @AppStorage(NotchSettings.panelWidthKey) private var panelWidth = 680.0
     @AppStorage(NotchSettings.panelHeightKey) private var panelHeight = 234.0
@@ -23,9 +22,6 @@ struct NotchAppearanceSettings: View {
             }
             SettingRow(title: "Altura", note: "Mais alto mostra mais itens nas listas.") {
                 NotchSegmented(options: NotchSettings.heights, selection: $panelHeight)
-            }
-            SettingRow(title: "Indicadores com o notch fechado", note: "Disco e espaço livre; o que está tocando, quando houver.") {
-                NotchSwitch(label: "Indicadores", isOn: $showsWings)
             }
             SettingRow(title: "Monitores externos", note: "Desenha um notch no topo de cada tela.") {
                 NotchSwitch(label: "Monitores externos", isOn: $allScreens)

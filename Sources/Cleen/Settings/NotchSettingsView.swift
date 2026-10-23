@@ -39,7 +39,9 @@ struct NotchSettingsView: View {
             GeneralSettings()
             ClipboardSettings()
             AlertSettings()
-        case .notch: NotchAppearanceSettings()
+        case .notch:
+            NotchAppearanceSettings()
+            ClosedNotchSettings()
         case .tabs: TabSettings()
         case .cleaning: CleaningSettings()
         case .about:
