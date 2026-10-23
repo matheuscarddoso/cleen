@@ -16,6 +16,9 @@ final class NotchController {
     /// The drag pasteboard's change count when the mouse went down, to tell a file drag
     /// (it changes) from dragging a window or selecting text across the menu bar.
     private var dragChangeCount = NSPasteboard(name: .drag).changeCount
+    /// The trackpad swipe in progress over the notch, summed until it's decisive.
+    private var swipe = CGVector.zero
+    private var swipeHandled = false
 
     /// Springy like the system's own island: quick to arrive, settles without wobble.
     static let openAnimation = Animation.spring(response: 0.42, dampingFraction: 0.8)
@@ -119,6 +122,15 @@ final class NotchController {
         }) {
             monitors.append(global)
         }
+        // Two-finger swipes reach Cleen over other apps too, without any permission.
+        for install in [NSEvent.addGlobalMonitorForEvents(matching: .scrollWheel, handler: { [weak self] event in
+            self?.handleSwipe(event)
+        }) as Any?, NSEvent.addLocalMonitorForEvents(matching: .scrollWheel, handler: { [weak self] event in
+            self?.handleSwipe(event)
+            return event
+        }) as Any?] {
+            if let install { monitors.append(install) }
+        }
         if let local = NSEvent.addLocalMonitorForEvents(matching: mask.union(.keyDown), handler: { [weak self] event in
             if event.type == .keyDown, event.keyCode == 53, self?.state.isOpen == true {
                 self?.close()
@@ -182,6 +194,58 @@ final class NotchController {
                 self?.pendingOpen = nil
                 self?.open()
             }
+        }
+    }
+
+    // MARK: Gestures
+
+    /// Points of travel that make a swipe count.
+    private static let swipeThreshold = 28.0
+
+    /// Over the closed notch: two fingers down open it, sideways skip the track that's
+    /// playing. Over the open panel, two fingers up close it (only when the scroll isn't
+    /// a list's: a swipe that starts inside scrollable content just scrolls).
+    private func handleSwipe(_ event: NSEvent) {
+        guard NotchSettings.allowsGestures, let geometry = state.geometry, !app.notch.isSuspended,
+              event.hasPreciseScrollingDeltas
+        else { return }
+        if event.phase == .began {
+            swipe = .zero
+            swipeHandled = false
+        }
+        defer {
+            if event.phase == .ended || event.phase == .cancelled {
+                swipe = .zero
+                swipeHandled = false
+            }
+        }
+        guard event.momentumPhase.isEmpty, !swipeHandled else { return }
+        let location = NSEvent.mouseLocation
+        let wings = NotchSettings.showsWings
+        // Content moves with the fingers under natural scrolling; undo that so "down"
+        // always means the fingers moved down.
+        let flip = event.isDirectionInvertedFromDevice ? 1.0 : -1.0
+        swipe.dx += event.scrollingDeltaX * flip
+        swipe.dy += event.scrollingDeltaY * flip
+
+        if !state.isOpen {
+            guard geometry.hotZone(isOpen: false, showsWings: wings).insetBy(dx: -10, dy: -6).contains(location) else { return }
+            if swipe.dy < -Self.swipeThreshold, abs(swipe.dy) > abs(swipe.dx) {
+                swipeHandled = true
+                open()
+            } else if abs(swipe.dx) > Self.swipeThreshold * 1.4, abs(swipe.dx) > abs(swipe.dy) * 1.5, app.nowPlaying.track != nil {
+                swipeHandled = true
+                let command: NowPlayingCommand = swipe.dx > 0 ? .next : .previous
+                Task { await app.nowPlaying.send(command) }
+            }
+        } else if swipe.dy > Self.swipeThreshold * 1.6, abs(swipe.dy) > abs(swipe.dx) * 1.5 {
+            // Only from the strip by the camera, where nothing scrolls.
+            let strip = CGRect(x: geometry.screenFrame.midX - geometry.openSize.width / 2, y: geometry.screenFrame.maxY - geometry.notchSize.height - 8,
+                               width: geometry.openSize.width, height: geometry.notchSize.height + 8)
+            guard strip.contains(location), !state.holdsOpen else { return }
+            swipeHandled = true
+            state.isPinned = false
+            close()
         }
     }
 }

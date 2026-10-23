@@ -8,6 +8,7 @@ enum NotchSettings {
     static let hoverDelayKey = "notchHoverDelay"
     static let showsWingsKey = "notchShowsWings"
     static let allScreensKey = "notchOnAllScreens"
+    static let gesturesKey = "notchAllowsGestures"
     static let panelWidthKey = "notchPanelWidth"
     static let panelHeightKey = "notchPanelHeight"
 
@@ -20,6 +21,7 @@ enum NotchSettings {
             hoverDelayKey: 0.12,
             showsWingsKey: true,
             allScreensKey: false,
+            gesturesKey: true,
             panelWidthKey: 680.0,
             panelHeightKey: 234.0,
         ])
@@ -29,6 +31,7 @@ enum NotchSettings {
     static var hoverDelay: Double { UserDefaults.standard.double(forKey: hoverDelayKey) }
     static var showsWings: Bool { UserDefaults.standard.bool(forKey: showsWingsKey) }
     static var showsOnAllScreens: Bool { UserDefaults.standard.bool(forKey: allScreensKey) }
+    static var allowsGestures: Bool { UserDefaults.standard.bool(forKey: gesturesKey) }
     /// The open panel, as chosen in Aparência; never smaller than the original.
     static var panelSize: CGSize {
         CGSize(
