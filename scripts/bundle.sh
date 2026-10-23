@@ -57,6 +57,7 @@ cat > "$APP/Contents/Info.plist" <<PLIST
   <key>NSCameraReactionEffectGesturesEnabledDefault</key><false/>
   <key>NSCameraUsageDescription</key><string>O Espelho do Cleen mostra a câmera frontal para você se ver antes de uma chamada. Nada é gravado.</string>
   <key>NSCalendarsFullAccessUsageDescription</key><string>O Cleen mostra os eventos de hoje no notch.</string>
+  <key>NSLocationUsageDescription</key><string>O Cleen usa sua localização só para mostrar o tempo onde você está, e só quando você pede.</string>
   <key>NSRemindersFullAccessUsageDescription</key><string>O Cleen mostra seus lembretes no notch e deixa você marcá-los como feitos.</string>
 </dict>
 </plist>
