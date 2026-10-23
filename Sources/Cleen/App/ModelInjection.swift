@@ -32,5 +32,6 @@ extension View {
             .environment(app.mirror)
             .environment(app.clipboard)
             .environment(app.screenshots)
+            .environment(app.icons)
     }
 }

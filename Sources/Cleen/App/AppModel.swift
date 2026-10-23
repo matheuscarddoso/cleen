@@ -40,6 +40,7 @@ final class AppModel {
     let mirror = MirrorModel()
     let clipboard = ClipboardModel()
     let screenshots = ScreenshotModel()
+    let icons = LucideModel()
     @ObservationIgnored private(set) lazy var notch = NotchCoordinator(app: self)
     @ObservationIgnored private var onboarding: OnboardingController?
 
