@@ -2,7 +2,11 @@ import AVFoundation
 
 /// The tour's few sounds, synthesised on the spot (bell-like partials through a hall
 /// reverb) so Cleen ships no audio files. Quiet by design, and one tap mutes them.
-final class OnboardingSound {
+///
+/// Everything audio runs on its own queue: rendering the chords is millions of samples
+/// and starting the engine can take a while, and on the main thread either one froze
+/// the titles right as the wordmark came in. `isMuted` belongs to the main thread.
+nonisolated final class OnboardingSound: @unchecked Sendable {
     enum Cue {
         /// The wordmark arriving: a slow, rising chord.
         case shimmer
@@ -20,12 +24,13 @@ final class OnboardingSound {
     private let player = AVAudioPlayerNode()
     private let reverb = AVAudioUnitReverb()
     private let format = AVAudioFormat(standardFormatWithSampleRate: 44_100, channels: 2)!
+    private let queue = DispatchQueue(label: "app.cleen.onboarding.sound", qos: .userInitiated)
     private var buffers: [Cue: AVAudioPCMBuffer] = [:]
 
     var isMuted = UserDefaults.standard.bool(forKey: OnboardingSound.mutedKey) {
         didSet {
             UserDefaults.standard.set(isMuted, forKey: Self.mutedKey)
-            if isMuted { player.stop() }
+            if isMuted { queue.async { self.player.stop() } }
         }
     }
 
@@ -39,20 +44,35 @@ final class OnboardingSound {
         engine.mainMixerNode.outputVolume = 0.9
     }
 
+    /// Renders every cue and starts the engine ahead of time, so the first sound plays
+    /// on cue.
+    func prepare() {
+        queue.async {
+            for cue in [Cue.shimmer, .tick, .success, .fanfare] where self.buffers[cue] == nil {
+                self.buffers[cue] = self.render(cue)
+            }
+            if !self.engine.isRunning { try? self.engine.start() }
+        }
+    }
+
     func play(_ cue: Cue) {
         guard !isMuted else { return }
-        if !engine.isRunning {
-            do { try engine.start() } catch { return }
+        queue.async {
+            if !self.engine.isRunning {
+                do { try self.engine.start() } catch { return }
+            }
+            let buffer = self.buffers[cue] ?? self.render(cue)
+            self.buffers[cue] = buffer
+            self.player.scheduleBuffer(buffer, at: nil, options: [])
+            if !self.player.isPlaying { self.player.play() }
         }
-        let buffer = buffers[cue] ?? render(cue)
-        buffers[cue] = buffer
-        player.scheduleBuffer(buffer, at: nil, options: [])
-        if !player.isPlaying { player.play() }
     }
 
     func stop() {
-        player.stop()
-        engine.stop()
+        queue.async {
+            self.player.stop()
+            self.engine.stop()
+        }
     }
 
     // MARK: Synthesis

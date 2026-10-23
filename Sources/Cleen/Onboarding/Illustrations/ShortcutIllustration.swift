@@ -1,34 +1,33 @@
 import SwiftUI
 
-/// ⌃ ⌥ C as real keys that sink under the person's fingers, and a little notch that
-/// opens when the shortcut lands.
+/// A Mac's screen with the notch closed, ⌃ ⌥ C as real keys below it that sink under
+/// the person's fingers, and the notch opening when the shortcut lands.
 struct ShortcutIllustration: View {
     @Environment(OnboardingModel.self) private var model
     @State private var cPressed = false
 
     var body: some View {
-        VStack(spacing: 48) {
-            NotchShape(topRadius: model.triedShortcut ? 9 : 5, bottomRadius: model.triedShortcut ? 22 : 10)
-                .fill(.black)
-                .frame(width: model.triedShortcut ? 240 : 130, height: model.triedShortcut ? 92 : 26)
-                .overlay {
+        VStack(spacing: 0) {
+            MacScreen {
+                ZStack(alignment: .top) {
                     if model.triedShortcut {
-                        Image(systemName: "checkmark")
-                            .font(.system(size: 22, weight: .medium))
-                            .foregroundStyle(NotchStyle.good)
-                            .padding(.top, 8)
-                            .transition(.scale(scale: 0.4).combined(with: .opacity))
+                        NotchPanelMock()
+                            .shadow(color: .black.opacity(0.4), radius: 30, y: 16)
+                            .transition(.scale(scale: 0.3, anchor: .top).combined(with: .opacity))
+                    } else {
+                        ClosedNotchMock()
+                            .transition(.opacity)
                     }
                 }
-                .shadow(color: .black.opacity(0.4), radius: 20, y: 12)
-                .frame(height: 92, alignment: .top)
-            HStack(spacing: 14) {
-                KeyCap(glyph: "⌃", caption: "control", isPressed: model.heldModifiers.contains(.control))
-                KeyCap(glyph: "⌥", caption: "option", isPressed: model.heldModifiers.contains(.option))
-                KeyCap(glyph: "C", isPressed: cPressed)
             }
+            HStack(spacing: 10) {
+                KeyCap(glyph: "⌃", caption: "control", width: 66, isPressed: model.heldModifiers.contains(.control))
+                KeyCap(glyph: "⌥", caption: "option", width: 66, isPressed: model.heldModifiers.contains(.option))
+                KeyCap(glyph: "C", width: 66, isPressed: cPressed)
+            }
+            .padding(.top, -40)
         }
-        .animation(.spring(response: 0.5, dampingFraction: 0.78), value: model.triedShortcut)
+        .animation(.spring(response: 0.5, dampingFraction: 0.82), value: model.triedShortcut)
         .onChange(of: model.shortcutPresses) {
             cPressed = true
             Task {

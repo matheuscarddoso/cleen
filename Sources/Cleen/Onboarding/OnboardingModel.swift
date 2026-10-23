@@ -79,6 +79,7 @@ final class OnboardingModel {
 
     /// Opens the shape and plays the titles, unless the person is coming back mid-tour.
     func begin() {
+        sound.prepare()
         startPolling()
         let resuming = step != .welcome
         titles = Task { [weak self] in

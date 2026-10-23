@@ -44,13 +44,13 @@ nonisolated enum GrainTexture {
         let centerX = Double(w) * 1.12
         let centerY = Double(h) * 0.52
         let radiusX = Double(w) * 0.58
-        let radiusY = Double(h) * 0.78
+        let radiusY = Double(h) * 1.2
         for y in 0..<h {
             let dy = (Double(y) - centerY) / radiusY
             for x in 0..<w {
                 let dx = (Double(x) - centerX) / radiusX
                 let distance = (dx * dx + dy * dy).squareRoot()
-                let fade = smoothstep(0.84, 1.06, distance)
+                let fade = smoothstep(0.93, 1.06, distance)
                 let alpha: Double
                 if fade <= 0.001 {
                     alpha = 0

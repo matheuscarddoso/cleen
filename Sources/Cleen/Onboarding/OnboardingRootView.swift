@@ -30,8 +30,10 @@ struct OnboardingRootView: View {
         ZStack(alignment: .topLeading) {
             Color.black
             painting
-            veil
             illustration
+            // Over the illustration: a Mac screen wider than its side dissolves into the
+            // black in grains instead of running under the page.
+            veil
             OnboardingTitles()
                 .opacity(model.phase == .titles ? 1 : 0)
             page
