@@ -50,6 +50,11 @@ struct SearchRow: View {
             RoundedRectangle(cornerRadius: 6, style: .continuous)
                 .fill(Color(nsColor: color))
                 .overlay { RoundedRectangle(cornerRadius: 6, style: .continuous).strokeBorder(Color.white.opacity(0.2)) }
+        case .lucide(let icon):
+            LucideGlyph(icon: icon, size: 15)
+                .foregroundStyle(NotchStyle.primary)
+                .frame(width: 22, height: 22)
+                .background(NotchStyle.control, in: .rect(cornerRadius: 6, style: .continuous))
         case .text(let text):
             Text(text)
                 .font(.system(size: 11, weight: .semibold))

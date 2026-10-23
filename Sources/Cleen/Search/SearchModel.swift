@@ -61,6 +61,11 @@ final class SearchModel {
             recompute()
         }
         Task {
+            let wasLoaded = app.icons.isLoaded
+            await app.icons.load()
+            if !wasLoaded { recompute() }
+        }
+        Task {
             let wasLoaded = EmojiModel.shared.isLoaded
             await EmojiModel.shared.load()
             if !wasLoaded { recompute() }
@@ -105,6 +110,8 @@ final class SearchModel {
             if !clips.isEmpty { sections.append(SearchSection(title: String(localized: "Área de transferência"), items: clips)) }
             let emoji = emojiMatches(text)
             if !emoji.isEmpty { sections.append(SearchSection(title: String(localized: "Emoji"), items: emoji)) }
+            let icons = iconMatches(text)
+            if !icons.isEmpty { sections.append(SearchSection(title: String(localized: "Ícones Lucide"), items: icons)) }
         }
         self.sections = sections
     }
@@ -165,6 +172,17 @@ final class SearchModel {
                     return .closeAndPaste
                 }
             }
+    }
+
+    private func iconMatches(_ text: String) -> [SearchItem] {
+        app.icons.search(text, limit: 4).map { icon in
+            SearchItem(id: "lucide.\(icon.name)", title: icon.name, icon: .lucide(icon), kind: String(localized: "Copiar SVG")) { [icons = app.icons, live = app.live] in
+                Task {
+                    if await icons.copySVG(icon) { live.copied("\(icon.name).svg") }
+                }
+                return .close
+            }
+        }
     }
 
     private func emojiMatches(_ text: String) -> [SearchItem] {

@@ -1,4 +1,5 @@
 import AppKit
+import CleenKit
 import SwiftUI
 
 /// One row of the search: what it's called, how it looks, and what Return does.
@@ -9,6 +10,7 @@ struct SearchItem: Identifiable {
         case emoji(String)
         case color(NSColor)
         case text(String)
+        case lucide(LucideIcon)
     }
 
     /// What happens to the notch after the action runs.
