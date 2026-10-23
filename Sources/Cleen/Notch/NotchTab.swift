@@ -16,6 +16,9 @@ enum NotchTab: String, CaseIterable, Identifiable, Codable {
     case shortcuts
     case agents
     case icons
+    case stocks
+    case teleprompter
+    case assistant
     case overview
     case clean
     case projects
@@ -47,6 +50,9 @@ enum NotchTab: String, CaseIterable, Identifiable, Codable {
         case .shortcuts: String(localized: "Atalhos")
         case .agents: String(localized: "Agentes")
         case .icons: String(localized: "Ícones")
+        case .stocks: String(localized: "Ações")
+        case .teleprompter: String(localized: "Teleprompter")
+        case .assistant: String(localized: "Perguntar")
         case .overview: String(localized: "Visão geral")
         case .clean: String(localized: "Limpeza")
         case .projects: String(localized: "Projetos")
@@ -81,6 +87,9 @@ enum NotchTab: String, CaseIterable, Identifiable, Codable {
         case .shortcuts: "square.2.layers.3d"
         case .agents: "asterisk"
         case .icons: "square.grid.3x3.square"
+        case .stocks: "chart.line.uptrend.xyaxis"
+        case .teleprompter: "text.aligncenter"
+        case .assistant: "bubble.left.and.text.bubble.right"
         case .overview: "internaldrive.fill"
         case .clean: "trash"
         case .projects: "chevron.left.forwardslash.chevron.right"
@@ -99,7 +108,7 @@ enum NotchTab: String, CaseIterable, Identifiable, Codable {
     /// crowds it; they're one switch away in Ajustes › Abas.
     var isHiddenByDefault: Bool {
         switch self {
-        case .timer, .notes, .reminders, .converter, .emoji, .weather, .shortcuts, .icons: true
+        case .timer, .notes, .reminders, .converter, .emoji, .weather, .shortcuts, .icons, .stocks, .teleprompter, .assistant: true
         // Shown right away to people who use Claude Code: that's who it's for.
         case .agents: !AgentsModel.isClaudeCodeInstalled
         default: false

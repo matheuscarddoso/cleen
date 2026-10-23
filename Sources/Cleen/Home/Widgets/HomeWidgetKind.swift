@@ -12,6 +12,7 @@ enum HomeWidgetKind: String, Codable, CaseIterable, Identifiable {
     case reminders
     case weather
     case agents
+    case stocks
 
     var id: String { rawValue }
 
@@ -28,6 +29,7 @@ enum HomeWidgetKind: String, Codable, CaseIterable, Identifiable {
         case .reminders: String(localized: "Lembretes")
         case .weather: String(localized: "Tempo")
         case .agents: String(localized: "Claude Code")
+        case .stocks: String(localized: "Ações")
         }
     }
 
@@ -44,6 +46,7 @@ enum HomeWidgetKind: String, Codable, CaseIterable, Identifiable {
         case .reminders: "checklist"
         case .weather: "cloud.sun"
         case .agents: "asterisk"
+        case .stocks: "chart.line.uptrend.xyaxis"
         }
     }
 
@@ -61,13 +64,14 @@ enum HomeWidgetKind: String, Codable, CaseIterable, Identifiable {
         case .reminders: [.medium, .large]
         case .weather: [.small, .medium, .large]
         case .agents: [.small, .medium, .large]
+        case .stocks: [.medium, .large]
         }
     }
 
     var defaultSize: HomeWidgetSize {
         switch self {
         case .nowPlaying: .large
-        case .agenda, .disk, .aiUsage, .system, .note, .reminders, .weather, .agents: .medium
+        case .agenda, .disk, .aiUsage, .system, .note, .reminders, .weather, .agents, .stocks: .medium
         case .mirror, .timer: .small
         }
     }
@@ -76,7 +80,7 @@ enum HomeWidgetKind: String, Codable, CaseIterable, Identifiable {
     /// their shape.
     func isFlexible(at size: HomeWidgetSize) -> Bool {
         switch self {
-        case .agenda, .aiUsage, .system, .note, .reminders, .weather, .agents: size != .small
+        case .agenda, .aiUsage, .system, .note, .reminders, .weather, .agents, .stocks: size != .small
         case .nowPlaying, .mirror, .disk, .timer: false
         }
     }
