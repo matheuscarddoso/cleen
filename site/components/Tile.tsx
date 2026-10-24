@@ -36,9 +36,7 @@ export function Tile({
           {more && <MoreLink href={more}>Saiba mais</MoreLink>}
         </div>
       </div>
-      <div className="mt-10 flex flex-1 items-end px-6 sm:px-10">
-        <div className="w-full">{visual}</div>
-      </div>
+      <div className="mt-auto w-full px-5 pb-5 pt-10 sm:px-10 sm:pb-10">{visual}</div>
     </article>
   );
 }

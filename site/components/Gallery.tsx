@@ -39,8 +39,15 @@ export function Gallery({ children, label }: { children: ReactNode; label: strin
   };
 
   return (
-    <div>
-      <div ref={track} role="region" aria-label={label} className="no-scrollbar flex snap-x snap-mandatory gap-5 overflow-x-auto overscroll-x-contain pb-1">
+    // Full bleed like Apple's galleries: the track spans the window and its padding lines the
+    // first card up with the page's content column.
+    <div className="relative left-1/2 w-screen -translate-x-1/2">
+      <div
+        ref={track}
+        role="region"
+        aria-label={label}
+        className="no-scrollbar flex snap-x snap-mandatory gap-5 overflow-x-auto overscroll-x-contain px-[max(24px,calc((100vw-1332px)/2))] pb-1 [scroll-padding-inline:max(24px,calc((100vw-1332px)/2))]"
+      >
         {children}
       </div>
       <div className="mt-4 flex justify-center gap-1.5">

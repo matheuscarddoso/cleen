@@ -6,19 +6,20 @@ import { ClaudeLive } from "@/components/ClaudeLive";
 import { Everyday } from "@/components/Everyday";
 import { LiveActivities } from "@/components/LiveActivities";
 import { Keycaps } from "@/components/Pieces";
-import { Shot } from "@/components/Shot";
+import { Replica } from "@/components/replica/Replica";
+import type { TabId } from "@/components/replica/tabs";
 import { Tile } from "@/components/Tile";
 import { site } from "@/lib/site";
 
-const tools = [
-  { title: "Tempo", text: "Agora e os próximos sete dias, onde você está.", shot: "/shots/weather.png", alt: "Aba Tempo com São Paulo e a previsão da semana", tone: "blue" },
-  { title: "Ações", text: "Cotações com o gráfico do dia, B3 e Nasdaq.", shot: "/shots/stocks.png", alt: "Aba Ações com Ibovespa, Apple, NVIDIA e Petrobras", tone: "teal" },
-  { title: "Timer e Pomodoro", text: "A contagem fica ao lado da câmera.", shot: "/shots/timer.png", alt: "Aba Timer com um timer de 10 minutos", tone: "dusk" },
-  { title: "Conversor", text: "Unidades e moedas. Return cola o resultado.", shot: "/shots/converter.png", alt: "Aba Conversor de quilômetros para milhas", tone: "blue" },
-  { title: "Emoji", text: "Busca em português e cola no app em que você está.", shot: "/shots/emoji.png", alt: "Aba Emoji com a grade de carinhas", tone: "teal" },
-  { title: "Ícones Lucide", text: "Mais de 1.900 ícones. Cole o SVG ou o JSX.", shot: "/shots/icons.png", alt: "Aba Ícones com ícones do Lucide", tone: "dusk" },
-  { title: "Sistema", text: "CPU, memória, rede e processos.", shot: "/shots/system.png", alt: "Aba Sistema com CPU, memória e processos", tone: "blue" },
-] as const;
+const tools: { tab: TabId; title: [string, string]; tone: "blue" | "dusk" | "teal" }[] = [
+  { tab: "weather", title: ["O tempo de agora", "e da semana inteira."], tone: "blue" },
+  { tab: "stocks", title: ["B3 e Nasdaq,", "com o gráfico do dia."], tone: "teal" },
+  { tab: "timer", title: ["Pomodoro ou timer,", "ao lado da câmera."], tone: "dusk" },
+  { tab: "converter", title: ["Unidades e moedas.", "Return cola o resultado."], tone: "blue" },
+  { tab: "emoji", title: ["Emoji em português,", "colados onde você está."], tone: "teal" },
+  { tab: "icons", title: ["Ícones do Lucide,", "em SVG ou JSX."], tone: "dusk" },
+  { tab: "system", title: ["CPU, memória e rede,", "sempre à vista."], tone: "blue" },
+];
 
 const included = [
   ["Grátis", "Sem assinatura e sem conta."],
@@ -88,9 +89,9 @@ export default function Home() {
               <sup>1</sup>
             </p>
           </div>
-          <div className="mx-auto mt-12 max-w-[1000px] px-4 sm:px-8">
-            <div>
-              <Shot src="/shots/home.png" alt="O Cleen aberto no notch: tempo em São Paulo, um timer e o uso de CPU e memória, com a barra de ferramentas embaixo" priority scale={0.86} rounded="rounded-t-[26px]" />
+          <div className="px-5 pb-5 pt-8 sm:px-[8.33%] sm:pb-[5%] sm:pt-12">
+            <div className="mx-auto max-w-[940px]">
+              <Replica label="O Cleen aberto no notch, no Início" tab="home" control="lg" />
             </div>
           </div>
         </section>
@@ -98,11 +99,11 @@ export default function Home() {
         {/* Feature tiles */}
         <div id="recursos" className="mt-3 grid scroll-mt-16 gap-3 lg:grid-cols-2 sm:mt-6 sm:gap-6">
           <Tile id="busca" dark eyebrow="Busca" title={<>Um launcher inteiro.<br />No notch.</>} more="#todo-motivo"
-              visual={<Shot src="/shots/search.png" alt="Busca do Cleen com comandos de janela" tone="teal" scale={1} />}>
+              visual={<Replica label="A busca do Cleen" mode="search" tone="teal" />}>
               ⌥ Espaço abre na hora. Mova janelas, abra apps, faça contas e cole emoji, ícones e cores.
           </Tile>
           <Tile id="limpeza" eyebrow="Limpeza" title={<>Seu Mac mais leve.<br />Num clique.</>} more="#perguntas"
-              visual={<Shot src="/shots/overview.png" alt="Visão geral do disco com o que dá para limpar" scale={1} />}>
+              visual={<Replica label="A visão geral do disco" tab="overview" />}>
               Caches, restos de apps, node_modules parados e duplicados. O que é seu vai para o Lixo.
           </Tile>
           <Tile id="claude" eyebrow="Claude Code" title={<>Seus agentes.<br />À vista.</>} more="#ferramentas" visual={<ClaudeLive />}>
@@ -125,8 +126,10 @@ export default function Home() {
               Monte o Início com os widgets que importam, escolha as abas da barra e o tamanho do painel.
             </p>
           </div>
-          <div className="mt-12 overflow-hidden rounded-[18px] bg-tile px-4 pt-10 sm:px-16 sm:pt-16">
-            <Shot src="/shots/appearance.png" alt="Ajustes de aparência do notch" tone="dusk" scale={0.9} rounded="rounded-t-[26px]" />
+          <div className="mt-12 rounded-[18px] bg-tile px-5 py-5 sm:px-[8.33%] sm:py-[5%]">
+            <div className="mx-auto max-w-[940px]">
+              <Replica label="Ajustes de aparência do notch" mode="settings" settings="appearance" tone="dusk" control="lg" />
+            </div>
           </div>
         </section>
 
@@ -167,16 +170,16 @@ export default function Home() {
               <div className="px-8 pt-10 text-center">
                 <h3 className="text-[24px] font-semibold leading-tight tracking-[-0.015em]">Escolha as ferramentas.<br />Na ordem que quiser.</h3>
               </div>
-              <div className="mt-10 flex flex-1 items-end px-6">
-                <Shot src="/shots/home.png" alt="O Início do Cleen com widgets de tempo, timer e sistema" scale={1} />
+              <div className="mt-auto px-5 pb-6 pt-10">
+                <Replica label="O Início do Cleen" tab="home" tone="dusk" />
               </div>
             </div>
             <div className="flex flex-col overflow-hidden rounded-[18px] bg-tile">
               <div className="px-8 pt-10 text-center">
                 <h3 className="text-[24px] font-semibold leading-tight tracking-[-0.015em]">Brilho do monitor externo.<br />Pelo próprio cabo.</h3>
               </div>
-              <div className="mt-10 flex flex-1 items-end px-6">
-                <Shot src="/shots/displays.png" alt="Ajustes de brilho da tela do Mac e do monitor externo" tone="teal" scale={1} />
+              <div className="mt-auto px-5 pb-6 pt-10">
+                <Replica label="Brilho da tela do Mac e do monitor externo" mode="settings" settings="displays" tone="teal" />
               </div>
             </div>
           </div>
@@ -187,7 +190,7 @@ export default function Home() {
           <div className="text-center">
             <h2 className="text-[clamp(36px,5vw,64px)] font-semibold leading-none tracking-[-0.009em]">
               Ferramentas. Em volta do notch
-              <br />e ao longo do seu dia.
+              <br className="max-[734px]:hidden" /> e ao longo do seu dia.
             </h2>
             <div className="mt-4">
               <MoreLink href="#instalar">Baixe e experimente</MoreLink>
@@ -196,12 +199,15 @@ export default function Home() {
           <div className="mt-12">
             <Gallery label="Ferramentas do Cleen">
               {tools.map((tool) => (
-                <article key={tool.title} className="flex w-[min(680px,86vw)] shrink-0 snap-start flex-col overflow-hidden rounded-[18px] bg-tile">
-                  <div className="px-[7.3%] pb-8 pt-8 text-center">
-                    <h3 className="text-[24px] font-semibold leading-[1.17] tracking-[0.009em]">{tool.title}</h3>
-                    <p className="mt-1 text-[17px] leading-[1.47] text-mute">{tool.text}</p>
+                <article key={tool.tab} className="flex h-[410px] w-[300px] shrink-0 snap-start flex-col overflow-hidden rounded-[18px] bg-tile sm:h-[480px] sm:w-[480px]">
+                  <h3 className="px-[7.3%] pt-[30px] text-center text-[19px] font-semibold leading-[1.21] tracking-[0.012em] sm:pt-[34px] sm:text-[24px] sm:leading-[1.17] sm:tracking-[0.009em]">
+                    {tool.title[0]}
+                    <br />
+                    {tool.title[1]}
+                  </h3>
+                  <div className="mt-auto w-full px-5 pb-6">
+                    <Replica label={`${tool.title[0]} ${tool.title[1]}`} tab={tool.tab} tone={tool.tone} />
                   </div>
-                  <Shot src={tool.shot} alt={tool.alt} tone={tool.tone} scale={0.94} rounded="" className="mt-auto pb-6" />
                 </article>
               ))}
             </Gallery>
@@ -255,26 +261,25 @@ export default function Home() {
           </ol>
         </section>
 
-        {/* FAQ */}
-        <section id="perguntas" className="mx-auto mt-24 max-w-[980px] scroll-mt-16 sm:mt-32">
-          <div className="text-center">
-            <h2 className="text-[clamp(36px,5vw,64px)] font-semibold leading-none tracking-[-0.009em]">Perguntas? Respostas.</h2>
-          </div>
-          <div className="mt-10 rounded-[18px] bg-tile px-6 sm:px-10">
-            {faq.map(([question, answer], index) => (
-              <details key={question} className={`group py-5 ${index > 0 ? "border-t border-line/70" : ""}`}>
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-6 text-[17px] font-semibold">
-                  {question}
-                  <svg viewBox="0 0 16 16" aria-hidden className="h-4 w-4 shrink-0 text-mute transition-transform duration-300 group-open:rotate-45" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
-                    <path d="M8 2v12M2 8h12" />
-                  </svg>
-                </summary>
-                <p className="mt-3 max-w-[720px] text-[17px] leading-[1.47] text-mute">{answer}</p>
-              </details>
-            ))}
-          </div>
-        </section>
       </main>
+
+      {/* FAQ */}
+      <section id="perguntas" className="scroll-mt-16 bg-tile px-6 py-[60px] sm:py-[100px]">
+        <h2 className="text-center text-[clamp(32px,5vw,64px)] font-semibold leading-none tracking-[-0.009em]">Perguntas? Respostas.</h2>
+        <div className="mx-auto mt-10 max-w-[820px] border-t border-line sm:mt-12">
+          {faq.map(([question, answer]) => (
+            <details key={question} className="group border-b border-line [&_summary::-webkit-details-marker]:hidden">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-6 py-5 text-[17px] font-semibold leading-[1.24] sm:py-6 sm:text-[21px] sm:leading-[1.19]">
+                {question}
+                <svg viewBox="0 0 24 24" aria-hidden className="h-6 w-6 shrink-0 transition-transform duration-300 ease-(--ease-apple) group-open:rotate-45" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+                  <path d="M12 5v14M5 12h14" />
+                </svg>
+              </summary>
+              <p className="pb-7 text-[17px] leading-[1.47] text-ink sm:pr-12">{answer}</p>
+            </details>
+          ))}
+        </div>
+      </section>
 
       <footer className="bg-page text-[12px] text-mute">
         <div className="mx-auto max-w-[980px] border-t border-line px-5 py-6 leading-relaxed">

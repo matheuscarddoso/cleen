@@ -57,7 +57,7 @@ export function LiveActivities() {
 
   return (
     <div ref={ref}>
-      <Screen tone="teal" className="h-[280px] rounded-t-[18px] sm:h-[300px]">
+      <Screen tone="teal" className="aspect-[1280/666] min-h-[250px] rounded-[10px]">
         <ClosedNotch width={active.width}>
           {activities.map((activity, position) => (
             <Swap key={activity.key} shown={position === index} className="flex items-center justify-between px-4 text-[14px] font-medium text-white">
