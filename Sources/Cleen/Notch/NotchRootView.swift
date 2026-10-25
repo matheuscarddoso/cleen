@@ -22,13 +22,13 @@ struct NotchRootView: View {
         if let geometry = state.geometry {
             let closed = geometry.closedSize(wingWidth: wingWidth)
             let welcomes = state.isOpen && state.showsWelcome
-            // The teleprompter reading folds the panel into an island under the camera.
+            // The teleprompter reading: the panel is all script, with its glow behind.
             let prompting = state.isOpen && state.isPrompting && state.tab == .teleprompter && !welcomes && !state.showsSearch && !state.showsSettings
-            let open = prompting ? geometry.prompterSize : geometry.openSize(showsSearch: state.isTall)
+            let open = geometry.openSize(showsSearch: state.isTall)
             let size = state.isOpen ? (welcomes ? geometry.welcomeSize : open) : closed
             let shape = NotchShape(
-                topRadius: state.isOpen ? (prompting ? 10 : NotchStyle.openTopRadius) : NotchStyle.closedTopRadius,
-                bottomRadius: state.isOpen ? (welcomes || prompting ? 26 : NotchStyle.openBottomRadius) : NotchStyle.closedBottomRadius
+                topRadius: state.isOpen ? NotchStyle.openTopRadius : NotchStyle.closedTopRadius,
+                bottomRadius: state.isOpen ? (welcomes ? 26 : NotchStyle.openBottomRadius) : NotchStyle.closedBottomRadius
             )
 
             ZStack(alignment: .top) {
@@ -41,7 +41,7 @@ struct NotchRootView: View {
                         .transition(.notchPanel)
                 } else if state.isOpen {
                     NotchOpenContent(controller: controller, notchHeight: geometry.notchSize.height)
-                        .padding(.horizontal, prompting ? 10 : NotchStyle.openTopRadius)
+                        .padding(.horizontal, NotchStyle.openTopRadius)
                         .frame(width: open.width, height: open.height, alignment: .top)
                         .transition(state.opensInstantly ? .identity : .notchPanel)
                 } else if let reading = mediaKeys.reading(on: controller.screen) {
@@ -66,7 +66,7 @@ struct NotchRootView: View {
             }
             .background {
                 if prompting {
-                    PrompterGlow(shape: shape, levels: voice.levels, isListening: voice.isListening)
+                    PrompterGlow(levels: voice.levels, isListening: voice.isListening)
                         .transition(.opacity.animation(.smooth(duration: 0.5)))
                 }
             }
@@ -81,6 +81,9 @@ struct NotchRootView: View {
             .animation(.spring(response: 0.42, dampingFraction: 0.82), value: wingWidth)
             .onChange(of: state.isTall) { _, tall in
                 controller.fitWindow(showsSearch: tall)
+            }
+            .onChange(of: prompting) {
+                controller.fitWindow(showsSearch: state.isTall)
             }
             .environment(\.colorScheme, .dark)
             .preferredColorScheme(.dark)

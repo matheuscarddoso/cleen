@@ -265,10 +265,9 @@ private struct TeleprompterStepper: View {
 
 // MARK: - Player
 
-/// The island under the camera: the script in a monospaced face, a few lines at a time,
-/// gliding up so the line you're on sits right under the lens. Pace on the camera's
-/// left, transport on its right, in the strip beside it; the ring around the island
-/// (PrompterGlow) follows your voice.
+/// The panel given over to the script: a monospaced face, gliding up so the line you're
+/// on sits right under the lens. Pace on the camera's left, transport on its right, in
+/// the strip beside it; the light behind the panel (PrompterGlow) follows your voice.
 private struct TeleprompterPlayer: View {
     @Environment(TeleprompterModel.self) private var model
     @Environment(NotchState.self) private var notch
@@ -278,9 +277,9 @@ private struct TeleprompterPlayer: View {
         let camera = notch.geometry?.notchSize ?? CGSize(width: 180, height: 32)
         ZStack(alignment: .top) {
             TeleprompterScroller()
-                .padding(.horizontal, 16)
-                .padding(.top, camera.height - 8)
-                .padding(.bottom, 8)
+                .padding(.horizontal, 24)
+                .padding(.top, camera.height - 4)
+                .padding(.bottom, 12)
             HStack(spacing: 0) {
                 paceControls
                 Spacer(minLength: camera.width + 12)
@@ -366,11 +365,12 @@ private struct TeleprompterScroller: View {
 
     /// Where the line being read sits: just below the top fade, as close to the
     /// camera as the text can get while staying crisp.
-    private static let readingLine = 12.0
-    private static let topFade = 14.0
-    private static let bottomFade = 30.0
-    /// The island is a few lines tall: the chosen size, scaled to fit it (24 pt → 15).
-    static let scale = 0.62
+    private static let readingLine = 16.0
+    private static let topFade = 18.0
+    private static let bottomFade = 44.0
+    /// A monospaced face runs wider than the sans: a touch smaller keeps the same words
+    /// on a line (24 pt → 20).
+    static let scale = 0.84
 
     var body: some View {
         let fontSize = model.fontSize * Self.scale
@@ -410,7 +410,7 @@ private struct TeleprompterScroller: View {
         switch model.phase {
         case .countdown(let value):
             Text(value, format: .number.locale(.cleen))
-                .font(.system(size: 34, weight: .semibold, design: .monospaced))
+                .font(.system(size: 44, weight: .semibold, design: .monospaced))
                 .monospacedDigit()
                 .contentTransition(.numericText(countsDown: true))
                 .animation(.smooth(duration: 0.3), value: value)

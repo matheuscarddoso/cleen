@@ -30,6 +30,30 @@ const included = [
   ["Português e inglês", "Segue o idioma do seu Mac."],
 ] as const;
 
+/** First install, in the order things show up on screen. */
+const install = [
+  {
+    title: "Baixe o Cleen",
+    text: "Clique em Baixar. O arquivo Cleen.dmg vai para a pasta Downloads.",
+  },
+  {
+    title: "Arraste para Aplicativos",
+    text: "Dê dois cliques no Cleen.dmg. Na janela que abre, arraste o ícone do Cleen para a pasta Aplicativos, logo ao lado.",
+  },
+  {
+    title: "Tente abrir uma vez",
+    text: "Abra a pasta Aplicativos e dê dois cliques no Cleen. O macOS avisa que não conseguiu verificar o app: feche esse aviso. É normal, o Cleen ainda não passou pela verificação paga da Apple.",
+  },
+  {
+    title: "Libere em Privacidade e Segurança",
+    text: "Abra Ajustes do Sistema › Privacidade e Segurança e role até o fim. Ao lado do aviso sobre o Cleen, clique em Abrir Mesmo Assim e confirme com a sua senha ou o Touch ID. Só nesta primeira vez.",
+  },
+  {
+    title: "Passe o mouse no notch",
+    text: "O Cleen mora em volta da câmera. Um tour rápido mostra o resto, e daqui em diante ele se atualiza sozinho.",
+  },
+];
+
 const faq = [
   ["O que é o Cleen?", "Um app para Mac que mora no notch. Ele limpa o disco, move janelas, busca apps, cola emoji e ícones, mostra o Claude Code trabalhando e traz mais de vinte ferramentas a um gesto."],
   ["Abre ao passar o mouse ou ao clicar?", "Você escolhe em Ajustes › Aparência. Também abre com ⌃⌥C, com dois dedos para baixo no trackpad, e a busca abre com ⌥ Espaço."],
@@ -245,17 +269,18 @@ export default function Home() {
           </div>
           <div className="mt-20 text-center">
             <h3 className="text-[28px] font-semibold tracking-[-0.02em]">Pronto em um minuto.</h3>
+            <p className="mx-auto mt-2 max-w-[520px] text-balance text-[17px] leading-[1.47] text-mute">
+              Primeira vez instalando um app fora da App Store? É só seguir na ordem.
+            </p>
           </div>
-          <ol className="mx-auto mt-10 grid max-w-[900px] gap-8 sm:grid-cols-3">
-            {[
-              ["Baixe", "O instalador vem direto dos releases do GitHub."],
-              ["Arraste", "Leve o Cleen para Aplicativos e abra por lá."],
-              ["Libere uma vez", "Em Ajustes do Sistema › Privacidade e Segurança, clique em Abrir Mesmo Assim."],
-            ].map(([title, text], index) => (
-              <li key={title} className="text-center">
-                <span className="mx-auto flex h-11 w-11 items-center justify-center rounded-full border border-line text-[17px] font-semibold">{index + 1}</span>
-                <h4 className="mt-4 text-[19px] font-semibold">{title}</h4>
-                <p className="mx-auto mt-1 max-w-[240px] text-[15px] leading-[1.45] text-mute">{text}</p>
+          <ol className="mx-auto mt-10 max-w-[640px] divide-y divide-line border-y border-line text-left">
+            {install.map(({ title, text }, index) => (
+              <li key={title} className="flex gap-5 py-6">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-line text-[15px] font-semibold tabular-nums">{index + 1}</span>
+                <div className="pt-1">
+                  <h4 className="text-[19px] font-semibold leading-[1.21]">{title}</h4>
+                  <p className="mt-1.5 text-[16px] leading-[1.5] text-mute">{text}</p>
+                </div>
               </li>
             ))}
           </ol>

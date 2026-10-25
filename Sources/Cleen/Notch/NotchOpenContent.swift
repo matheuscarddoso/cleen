@@ -9,7 +9,7 @@ struct NotchOpenContent: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Reading, the teleprompter has the whole island, the camera's strip included.
+            // Reading, the teleprompter has the whole panel, the camera's strip included.
             if !isPrompting {
                 NotchHeader(controller: controller)
                     .frame(height: notchHeight)

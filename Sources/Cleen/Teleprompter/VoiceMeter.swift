@@ -3,7 +3,7 @@ import AVFoundation
 import os
 
 /// The microphone while the teleprompter reads, boiled down to how loud the voice is and
-/// where its energy sits (low, low-mid, high-mid, high), for the ring around the island.
+/// where its energy sits (low, low-mid, high-mid, high), for the glow behind the panel.
 /// Nothing is recorded or kept: each buffer becomes those five numbers and is dropped.
 ///
 /// The analysis runs on the audio thread; the ring reads the latest numbers on every

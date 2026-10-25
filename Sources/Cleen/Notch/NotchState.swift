@@ -41,7 +41,7 @@ final class NotchState {
     /// While true the panel stays open even if the pointer leaves (a confirmation is
     /// waiting, a sheet or open panel is up).
     var holdsOpen = false
-    /// The teleprompter is reading: the panel folds into the island under the camera.
+    /// The teleprompter is reading: the panel is all script, with its glow behind.
     var isPrompting = false
     /// Files from another app are being dragged over the open panel: the shelf swaps
     /// its tray for drop zones.
