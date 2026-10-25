@@ -15,6 +15,8 @@ enum LaunchArguments {
     static let welcome = ProcessInfo.processInfo.arguments.contains("--welcome")
     /// `--search <text>` opens the launcher with that typed.
     static let search = value(after: "--search")
+    /// `--prompt <text>`: the teleprompter reading that text (only into an empty script).
+    static let prompt = value(after: "--prompt")
     /// `--live power|headphones|track|meeting` plays that live activity on the closed notch.
     static let liveActivity = value(after: "--live")
     static let onboarding = ProcessInfo.processInfo.arguments.contains("--onboarding")

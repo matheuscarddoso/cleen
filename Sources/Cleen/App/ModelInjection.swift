@@ -37,6 +37,7 @@ extension View {
             .environment(app.screenshots)
             .environment(app.icons)
             .environment(app.teleprompter)
+            .environment(app.voice)
             .environment(app.assistant)
             .environment(app.stocks)
     }

@@ -55,6 +55,12 @@ struct NotchGeometry: Equatable {
         )
     }
 
+    /// The teleprompter reading: an island under the camera, a few lines tall, with room
+    /// beside the camera for its controls.
+    var prompterSize: CGSize {
+        CGSize(width: max(notchSize.width + 250, 420), height: notchSize.height + 112)
+    }
+
     /// The greeting after the tour: a small island under the camera, NotchNook's "hello".
     var welcomeSize: CGSize {
         CGSize(width: max(notchSize.width + 150, 330), height: notchSize.height + 141)

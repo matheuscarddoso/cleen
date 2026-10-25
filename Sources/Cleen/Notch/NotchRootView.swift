@@ -16,16 +16,19 @@ struct NotchRootView: View {
     @Environment(TimerModel.self) private var timer
     @Environment(AgentsModel.self) private var agents
     @Environment(MediaKeyHUD.self) private var mediaKeys
+    @Environment(VoiceMeter.self) private var voice
 
     var body: some View {
         if let geometry = state.geometry {
             let closed = geometry.closedSize(wingWidth: wingWidth)
             let welcomes = state.isOpen && state.showsWelcome
-            let open = geometry.openSize(showsSearch: state.isTall)
+            // The teleprompter reading folds the panel into an island under the camera.
+            let prompting = state.isOpen && state.isPrompting && state.tab == .teleprompter && !welcomes && !state.showsSearch && !state.showsSettings
+            let open = prompting ? geometry.prompterSize : geometry.openSize(showsSearch: state.isTall)
             let size = state.isOpen ? (welcomes ? geometry.welcomeSize : open) : closed
             let shape = NotchShape(
-                topRadius: state.isOpen ? NotchStyle.openTopRadius : NotchStyle.closedTopRadius,
-                bottomRadius: state.isOpen ? (welcomes ? 26 : NotchStyle.openBottomRadius) : NotchStyle.closedBottomRadius
+                topRadius: state.isOpen ? (prompting ? 10 : NotchStyle.openTopRadius) : NotchStyle.closedTopRadius,
+                bottomRadius: state.isOpen ? (welcomes || prompting ? 26 : NotchStyle.openBottomRadius) : NotchStyle.closedBottomRadius
             )
 
             ZStack(alignment: .top) {
@@ -38,7 +41,7 @@ struct NotchRootView: View {
                         .transition(.notchPanel)
                 } else if state.isOpen {
                     NotchOpenContent(controller: controller, notchHeight: geometry.notchSize.height)
-                        .padding(.horizontal, NotchStyle.openTopRadius)
+                        .padding(.horizontal, prompting ? 10 : NotchStyle.openTopRadius)
                         .frame(width: open.width, height: open.height, alignment: .top)
                         .transition(state.opensInstantly ? .identity : .notchPanel)
                 } else if let reading = mediaKeys.reading(on: controller.screen) {
@@ -59,7 +62,13 @@ struct NotchRootView: View {
             .background {
                 shape
                     .fill(NotchStyle.background)
-                    .shadow(color: .black.opacity(state.isOpen ? 0.55 : 0), radius: 22, y: 10)
+                    .shadow(color: .black.opacity(state.isOpen ? (prompting ? 0.2 : 0.55) : 0), radius: 22, y: 10)
+            }
+            .background {
+                if prompting {
+                    PrompterGlow(shape: shape, levels: voice.levels, isListening: voice.isListening)
+                        .transition(.opacity.animation(.smooth(duration: 0.5)))
+                }
             }
             .overlay(alignment: .top) {
                 if state.isOpen, !welcomes, let reading = mediaKeys.reading(on: controller.screen) {

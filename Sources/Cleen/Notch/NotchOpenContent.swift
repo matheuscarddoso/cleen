@@ -9,9 +9,13 @@ struct NotchOpenContent: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            NotchHeader(controller: controller)
-                .frame(height: notchHeight)
-                .padding(.horizontal, NotchOpenContent.inset - 2)
+            // Reading, the teleprompter has the whole island, the camera's strip included.
+            if !isPrompting {
+                NotchHeader(controller: controller)
+                    .frame(height: notchHeight)
+                    .padding(.horizontal, NotchOpenContent.inset - 2)
+                    .transition(.opacity)
+            }
             if state.showsSearch {
                 NotchSearchView(controller: controller)
                     .padding(.top, 2)
@@ -24,12 +28,12 @@ struct NotchOpenContent: View {
                     .transition(.opacity)
             } else {
                 tool
-                    .padding(.horizontal, NotchOpenContent.inset)
+                    .padding(.horizontal, isPrompting ? 0 : NotchOpenContent.inset)
                     // minHeight 0: a tall tool clips instead of pushing the tab bar down, so the
                     // bar sits at the same height on every tab.
                     .frame(maxWidth: .infinity, minHeight: 0, maxHeight: .infinity, alignment: .top)
                     .clipped()
-                    .padding(.top, 6)
+                    .padding(.top, isPrompting ? 0 : 6)
                 // The expanded mirror and Início's edit mode take the tab bar's room too.
                 if !hidesTabBar {
                     NotchTabBar()
@@ -52,7 +56,9 @@ struct NotchOpenContent: View {
         .animation(.spring(response: 0.36, dampingFraction: 0.86), value: state.pasteNeedsPermission)
     }
 
-    private var hidesTabBar: Bool { state.tab == .home && (state.mirrorExpanded || state.isEditingHome) }
+    private var hidesTabBar: Bool { state.tab == .home && (state.mirrorExpanded || state.isEditingHome) || isPrompting }
+
+    private var isPrompting: Bool { state.isPrompting && state.tab == .teleprompter }
 
     /// Room between the panel's rounded edge and its content.
     static let inset = 20.0

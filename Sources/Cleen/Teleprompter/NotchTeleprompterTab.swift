@@ -6,6 +6,7 @@ import SwiftUI
 struct NotchTeleprompterTab: View {
     @Environment(TeleprompterModel.self) private var model
     @Environment(NotchState.self) private var notch
+    @Environment(VoiceMeter.self) private var voice
     /// The person is typing the script.
     @State private var isTyping = false
     /// This tab is the one keeping the panel open.
@@ -21,7 +22,8 @@ struct NotchTeleprompterTab: View {
                     .transition(.opacity)
             }
         }
-        .animation(.smooth(duration: 0.25), value: model.isPresenting)
+        // The panel folding into the island (and back) is the transition here.
+        .animation(.spring(response: 0.5, dampingFraction: 0.86), value: model.isPresenting)
         .onAppear {
             // Esc stops the reading first; the next one closes the notch.
             notch.escapeHandler = { [model] in
@@ -40,6 +42,8 @@ struct NotchTeleprompterTab: View {
                 isHolding = false
                 notch.holdsOpen = false
             }
+            notch.isPrompting = false
+            voice.stop()
         }
         .onChange(of: model.isPresenting) { syncHold() }
         .onChange(of: isTyping) { syncHold() }
@@ -48,6 +52,12 @@ struct NotchTeleprompterTab: View {
     /// Reading keeps the panel open even with the pointer elsewhere (it's on the camera,
     /// not the notch), and so does typing the script.
     private func syncHold() {
+        withAnimation(.spring(response: 0.5, dampingFraction: 0.86)) { notch.isPrompting = model.isPresenting }
+        if model.isPresenting {
+            Task { await voice.start() }
+        } else {
+            voice.stop()
+        }
         let wants = model.isPresenting || isTyping
         guard wants != isHolding else { return }
         isHolding = wants
@@ -62,6 +72,7 @@ private struct TeleprompterEditor: View {
     @Environment(TeleprompterModel.self) private var model
     @Binding var isTyping: Bool
     @FocusState private var editorFocused: Bool
+    @AppStorage(VoiceMeter.enabledKey) private var voiceRing = true
 
     var body: some View {
         HStack(spacing: 12) {
@@ -159,6 +170,17 @@ private struct TeleprompterEditor: View {
                 )
                 .help("Tamanho do texto")
             }
+            HStack(spacing: 6) {
+                Image(systemName: "waveform")
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundStyle(NotchStyle.secondary)
+                Text("Anel segue a voz")
+                    .font(NotchStyle.captionMedium)
+                    .foregroundStyle(NotchStyle.primary.opacity(0.85))
+                Spacer(minLength: 4)
+                NotchSwitch(label: String(localized: "Anel segue a voz"), isOn: $voiceRing)
+            }
+            .help("Com o microfone, o anel em volta do texto reage à sua voz. Nada é gravado.")
             Spacer(minLength: 0)
             summary
                 .font(NotchStyle.caption)
@@ -243,20 +265,31 @@ private struct TeleprompterStepper: View {
 
 // MARK: - Player
 
-/// The script large and centered, gliding up so the line you're on sits just under the
-/// camera. Pace on the left, transport on the right, both out of the text's way.
+/// The island under the camera: the script in a monospaced face, a few lines at a time,
+/// gliding up so the line you're on sits right under the lens. Pace on the camera's
+/// left, transport on its right, in the strip beside it; the ring around the island
+/// (PrompterGlow) follows your voice.
 private struct TeleprompterPlayer: View {
     @Environment(TeleprompterModel.self) private var model
+    @Environment(NotchState.self) private var notch
     @FocusState private var isFocused: Bool
 
     var body: some View {
-        HStack(spacing: 10) {
-            paceColumn
+        let camera = notch.geometry?.notchSize ?? CGSize(width: 180, height: 32)
+        ZStack(alignment: .top) {
             TeleprompterScroller()
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-            transportColumn
+                .padding(.horizontal, 16)
+                .padding(.top, camera.height - 8)
+                .padding(.bottom, 8)
+            HStack(spacing: 0) {
+                paceControls
+                Spacer(minLength: camera.width + 12)
+                transportControls
+            }
+            .frame(height: camera.height)
+            .padding(.horizontal, 6)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .focusable()
         .focused($isFocused)
         .focusEffectDisabled()
@@ -281,38 +314,31 @@ private struct TeleprompterPlayer: View {
         .task { isFocused = true }
     }
 
-    private var paceColumn: some View {
-        VStack(spacing: 2) {
-            NotchIconButton(symbol: "chevron.up", help: String(localized: "Mais rápido (↑)")) { model.nudgePace(by: 1) }
-                .disabled(model.wordsPerMinute >= TeleprompterPace.range.upperBound)
-            VStack(spacing: 0) {
-                Text(model.wordsPerMinute, format: .number.locale(.cleen))
-                    .font(.system(size: 13, weight: .semibold))
-                    .monospacedDigit()
-                    .contentTransition(.numericText())
-                    .animation(.smooth(duration: 0.18), value: model.wordsPerMinute)
-                Text("ppm")
-                    .font(NotchStyle.caption)
-                    .foregroundStyle(NotchStyle.tertiary)
-            }
-            .accessibilityElement(children: .combine)
-            .accessibilityLabel("\(model.wordsPerMinute) palavras por minuto")
+    private var paceControls: some View {
+        HStack(spacing: 0) {
             NotchIconButton(symbol: "chevron.down", help: String(localized: "Mais devagar (↓)")) { model.nudgePace(by: -1) }
                 .disabled(model.wordsPerMinute <= TeleprompterPace.range.lowerBound)
+            Text(model.wordsPerMinute, format: .number.locale(.cleen))
+                .font(.system(size: 11, weight: .semibold).monospacedDigit())
+                .foregroundStyle(NotchStyle.secondary)
+                .contentTransition(.numericText())
+                .animation(.smooth(duration: 0.18), value: model.wordsPerMinute)
+                .frame(minWidth: 26)
+                .accessibilityLabel("\(model.wordsPerMinute) palavras por minuto")
+            NotchIconButton(symbol: "chevron.up", help: String(localized: "Mais rápido (↑)")) { model.nudgePace(by: 1) }
+                .disabled(model.wordsPerMinute >= TeleprompterPace.range.upperBound)
         }
-        .frame(width: 34)
     }
 
-    private var transportColumn: some View {
-        VStack(spacing: 4) {
-            NotchIconButton(symbol: playSymbol, help: playHelp, isActive: true, action: model.togglePause)
+    private var transportControls: some View {
+        HStack(spacing: 0) {
+            NotchIconButton(symbol: playSymbol, help: playHelp, action: model.togglePause)
                 .contentTransition(.symbolEffect(.replace))
                 .disabled(isCountingDown)
                 .opacity(isCountingDown ? 0.4 : 1)
             NotchIconButton(symbol: "arrow.counterclockwise", help: String(localized: "Recomeçar (R)"), action: model.restart)
             NotchIconButton(symbol: "xmark", help: String(localized: "Parar (Esc)"), action: model.stop)
         }
-        .frame(width: 34)
     }
 
     private var isCountingDown: Bool {
@@ -340,12 +366,14 @@ private struct TeleprompterScroller: View {
 
     /// Where the line being read sits: just below the top fade, as close to the
     /// camera as the text can get while staying crisp.
-    private static let readingLine = 16.0
-    private static let topFade = 18.0
-    private static let bottomFade = 44.0
+    private static let readingLine = 12.0
+    private static let topFade = 14.0
+    private static let bottomFade = 30.0
+    /// The island is a few lines tall: the chosen size, scaled to fit it (24 pt → 15).
+    static let scale = 0.62
 
     var body: some View {
-        let fontSize = model.fontSize
+        let fontSize = model.fontSize * Self.scale
         // Up to where the last line reaches the reading line, then it rests there.
         let travel = max(0, textHeight - fontSize * 1.3)
         GeometryReader { proxy in
@@ -382,7 +410,7 @@ private struct TeleprompterScroller: View {
         switch model.phase {
         case .countdown(let value):
             Text(value, format: .number.locale(.cleen))
-                .font(.system(size: 48, weight: .semibold))
+                .font(.system(size: 34, weight: .semibold, design: .monospaced))
                 .monospacedDigit()
                 .contentTransition(.numericText(countsDown: true))
                 .animation(.smooth(duration: 0.3), value: value)
@@ -410,8 +438,8 @@ private struct ScriptText: View, Equatable {
         VStack(spacing: fontSize * 0.7) {
             ForEach(paragraphs.indices, id: \.self) { index in
                 Text(verbatim: paragraphs[index])
-                    .font(.system(size: fontSize, weight: .medium))
-                    .lineSpacing(fontSize * 0.22)
+                    .font(.system(size: fontSize, weight: .medium, design: .monospaced))
+                    .lineSpacing(fontSize * 0.3)
                     .multilineTextAlignment(.center)
                     .foregroundStyle(NotchStyle.primary)
                     .frame(maxWidth: .infinity)
@@ -459,7 +487,7 @@ private struct StatusPill: View {
             .background(.black.opacity(0.85), in: .capsule)
             .overlay { Capsule().strokeBorder(NotchStyle.cardStroke) }
             .frame(maxHeight: .infinity, alignment: .bottom)
-            .padding(.bottom, 4)
+            .padding(.bottom, 2)
             .transition(.opacity)
     }
 }

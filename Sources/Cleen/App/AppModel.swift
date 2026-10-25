@@ -45,6 +45,7 @@ final class AppModel {
     let screenshots = ScreenshotModel()
     let icons = LucideModel()
     let teleprompter = TeleprompterModel()
+    let voice = VoiceMeter()
     let assistant = AssistantModel()
     let stocks = StocksModel()
     @ObservationIgnored private(set) lazy var notch = NotchCoordinator(app: self)
@@ -121,6 +122,14 @@ final class AppModel {
                 try? await Task.sleep(for: .seconds(2))
                 pasteboard.clearContents()
                 if let previous { pasteboard.setString(previous, forType: .string) }
+            }
+        }
+        if let text = LaunchArguments.prompt, let notch = notch.primary {
+            if teleprompter.script.isEmpty { teleprompter.script = text }
+            notch.openHeld(tab: .teleprompter)
+            Task {
+                try? await Task.sleep(for: .milliseconds(600))
+                teleprompter.start()
             }
         }
         if let text = LaunchArguments.search {

@@ -984,7 +984,6 @@
 "Normal" = "Normal";
 "Rápido" = "Fast";
 "%lld ppm" = "%lld wpm";
-"ppm" = "wpm";
 "Mais devagar" = "Slower";
 "Mais rápido" = "Faster";
 "Mais devagar (↓)" = "Slower (↓)";
@@ -1122,3 +1121,5 @@
 "Procura a cada seis horas e instala quando o Mac fica parado por alguns minutos." = "Checks every six hours and installs once the Mac sits idle for a few minutes.";
 "Procurar atualizações" = "Check for updates";
 "Sobre o Cleen" = "About Cleen";
+"Anel segue a voz" = "Ring follows your voice";
+"Com o microfone, o anel em volta do texto reage à sua voz. Nada é gravado." = "With the microphone, the ring around the text reacts to your voice. Nothing is recorded.";

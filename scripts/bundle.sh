@@ -63,6 +63,7 @@ cat > "$APP/Contents/Info.plist" <<PLIST
        macOS load its gesture models every time the camera started. -->
   <key>NSCameraReactionEffectGesturesEnabledDefault</key><false/>
   <key>NSCameraUsageDescription</key><string>O Espelho do Cleen mostra a câmera frontal para você se ver antes de uma chamada. Nada é gravado.</string>
+  <key>NSMicrophoneUsageDescription</key><string>O teleprompter do Cleen faz o anel em volta do texto seguir a sua voz. Nada é gravado nem sai do Mac.</string>
   <key>NSCalendarsFullAccessUsageDescription</key><string>O Cleen mostra os eventos de hoje no notch.</string>
   <key>NSLocationUsageDescription</key><string>O Cleen usa sua localização só para mostrar o tempo onde você está, e só quando você pede.</string>
   <key>NSLocationWhenInUseUsageDescription</key><string>O Cleen usa sua localização só para mostrar o tempo onde você está, e só quando você pede.</string>

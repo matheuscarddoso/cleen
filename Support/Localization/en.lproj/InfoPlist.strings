@@ -5,3 +5,4 @@
 "NSRemindersFullAccessUsageDescription" = "Cleen shows your reminders in the notch and lets you check them off.";
 "NSLocationUsageDescription" = "Cleen uses your location only to show the weather where you are, and only when you ask.";
 "NSLocationWhenInUseUsageDescription" = "Cleen uses your location only to show the weather where you are, and only when you ask.";
+"NSMicrophoneUsageDescription" = "Cleen's teleprompter makes the ring around the text follow your voice. Nothing is recorded or leaves the Mac.";
