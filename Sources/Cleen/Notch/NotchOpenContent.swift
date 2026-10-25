@@ -41,6 +41,15 @@ struct NotchOpenContent: View {
         }
         .foregroundStyle(NotchStyle.primary)
         .animation(.spring(response: 0.45, dampingFraction: 0.86), value: hidesTabBar)
+        .overlay(alignment: .bottom) {
+            if state.pasteNeedsPermission {
+                PastePermissionBanner()
+                    .padding(.horizontal, NotchOpenContent.inset)
+                    .padding(.bottom, 10)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
+        }
+        .animation(.spring(response: 0.36, dampingFraction: 0.86), value: state.pasteNeedsPermission)
     }
 
     private var hidesTabBar: Bool { state.tab == .home && (state.mirrorExpanded || state.isEditingHome) }

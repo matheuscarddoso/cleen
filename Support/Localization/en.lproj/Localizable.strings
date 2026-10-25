@@ -351,7 +351,6 @@
 "Esconder %@" = "Hide %@";
 "Esconder em tela cheia" = "Hide in full screen";
 "Esconder itens" = "Hide items";
-"Escreva algo…" = "Write something…";
 "Espaço livre" = "Free space";
 "Espelho" = "Mirror";
 "Esperando o macOS…" = "Waiting for macOS…";
@@ -782,7 +781,6 @@
 "Toneladas" = "Tonnes";
 "Toque algo em qualquer app" = "Play something in any app";
 "Toque num widget acima para adicionar" = "Tap a widget above to add it";
-"Toque para escrever" = "Tap to write";
 "Transferência" = "Clipboard";
 "Trocar de cidade" = "Change City";
 "Trovoada" = "Thunderstorm";
@@ -1113,3 +1111,7 @@
 /* Notes placeholder with Markdown hints */
 "Escreva algo… - lista, [] tarefa, # título" = "Write something… - list, [] to-do, # heading";
 "Escreva aqui" = "Write here";
+
+/* Paste permission banner */
+"Copiado. Para colar sozinho, o Cleen precisa de Acessibilidade." = "Copied. To paste by itself, Cleen needs Accessibility.";
+"Ative o Cleen em Ajustes do Sistema › Privacidade e Segurança › Acessibilidade." = "Turn on Cleen in System Settings › Privacy & Security › Accessibility.";

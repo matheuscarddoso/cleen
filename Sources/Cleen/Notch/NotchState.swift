@@ -31,6 +31,8 @@ final class NotchState {
     /// Bumped once the panel holds the keyboard, so the search field takes the cursor
     /// right then (asking before the window is key does nothing).
     var searchFocusRequest = 0
+    /// A paste was asked for without Accessibility: the panel shows how to allow it.
+    var pasteNeedsPermission = false
     var settingsSection = SettingsSection.general
     var geometry: NotchGeometry?
     /// While true the panel stays open even if the pointer leaves (a confirmation is

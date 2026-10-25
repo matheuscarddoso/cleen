@@ -70,9 +70,8 @@ nonisolated final class MarkdownLayoutManager: NSLayoutManager, NSLayoutManagerD
     }
 
     /// The checkbox's square, in text-container coordinates.
-    func checkboxRect(level: Int, line: NSRect, baseline: CGFloat) -> NSRect {
+    func checkboxRect(x: CGFloat, line: NSRect, baseline: CGFloat) -> NSRect {
         let side = styler.baseSize * 1.05
-        let x = CGFloat(level) * styler.levelWidth
         let center = line.minY + baseline - styler.baseFont.xHeight / 2
         return NSRect(x: x, y: center - side / 2, width: side, height: side)
     }
@@ -82,13 +81,14 @@ nonisolated final class MarkdownLayoutManager: NSLayoutManager, NSLayoutManagerD
         let line = frame.line.offsetBy(dx: origin.x, dy: origin.y)
         let xHeightCenter = line.minY + frame.baseline - styler.baseFont.xHeight / 2
         switch decoration {
-        case .bullet(let level):
-            let radius = styler.baseSize * 0.17
-            let x = origin.x + CGFloat(level) * styler.levelWidth + styler.markerWidth * 0.35
+        case .bullet(let x, let width):
+            // The dot sits where the hyphen was.
+            let radius = styler.baseSize * 0.16
+            let center = origin.x + x + width / 2
             NSColor.white.withAlphaComponent(0.7).setFill()
-            NSBezierPath(ovalIn: NSRect(x: x - radius, y: xHeightCenter - radius, width: radius * 2, height: radius * 2)).fill()
-        case .checkbox(let level, let checked):
-            let box = checkboxRect(level: level, line: frame.line, baseline: frame.baseline).offsetBy(dx: origin.x, dy: origin.y)
+            NSBezierPath(ovalIn: NSRect(x: center - radius, y: xHeightCenter - radius, width: radius * 2, height: radius * 2)).fill()
+        case .checkbox(let x, let checked):
+            let box = checkboxRect(x: x, line: frame.line, baseline: frame.baseline).offsetBy(dx: origin.x, dy: origin.y)
             let path = NSBezierPath(roundedRect: box.insetBy(dx: 0.6, dy: 0.6), xRadius: box.width * 0.3, yRadius: box.width * 0.3)
             if checked {
                 NSColor.white.withAlphaComponent(0.9).setFill()
@@ -107,17 +107,19 @@ nonisolated final class MarkdownLayoutManager: NSLayoutManager, NSLayoutManagerD
                 NSColor.white.withAlphaComponent(0.5).setStroke()
                 path.stroke()
             }
-        case .quote:
+        case .quote(let x):
             NSColor.white.withAlphaComponent(0.25).setFill()
-            NSBezierPath(roundedRect: NSRect(x: origin.x + 1, y: line.minY + 1, width: 2.5, height: line.height - 2), xRadius: 1.25, yRadius: 1.25).fill()
+            NSBezierPath(roundedRect: NSRect(x: origin.x + x + 1, y: line.minY + 1, width: 2.5, height: line.height - 2), xRadius: 1.25, yRadius: 1.25).fill()
         }
     }
 }
 
-/// The note's editor: Markdown styled as you type, with the shortcuts of Apple Notes
-/// (⇧⌘L checklist, ⇧⌘7 bullets, ⇧⌘9 numbers, ⇧⌘U tick) and of Markdown editors (⌘B,
-/// ⌘I, ⇧⌘X, ⌘E for code). Return continues a list and leaves it from an empty item,
-/// Tab nests an item, a click on a checkbox ticks it.
+/// The note's editor, like Obsidian's Live Preview: the line with the cursor shows its
+/// Markdown, the rest is rendered, and the cursor moves through plain text, never
+/// around hidden characters. Shortcuts of Apple Notes (⇧⌘L checklist, ⇧⌘7 bullets,
+/// ⇧⌘9 numbers, ⇧⌘U tick) and of Markdown editors (⌘B, ⌘I, ⇧⌘X, ⌘E for code). Return
+/// continues a list and leaves it from an empty item, Tab nests an item, a click on a
+/// checkbox ticks it.
 final class MarkdownTextView: NSTextView {
     let styler: MarkdownStyler
     var onFocusChange: ((Bool) -> Void)?
@@ -152,28 +154,70 @@ final class MarkdownTextView: NSTextView {
 
     private var markdownLayout: MarkdownLayoutManager? { layoutManager as? MarkdownLayoutManager }
 
+    /// The lines showing their Markdown: the ones the selection touches.
+    private var activeLines = NSRange(location: 0, length: 0)
+
+    /// Restyles everything (a note loaded or switched).
     func restyle() {
         guard let storage = textStorage else { return }
-        styler.style(storage)
-        layoutManager?.invalidateGlyphs(forCharacterRange: NSRange(location: 0, length: storage.length), changeInLength: 0, actualCharacterRange: nil)
+        activeLines = currentLines()
+        styler.style(storage, lines: NSRange(location: 0, length: storage.length), active: isEditing ? activeLines : NSRange(location: NSNotFound, length: 0))
         typingAttributes = styler.baseAttributes
-        needsDisplay = true
+    }
+
+    /// Only the lines that can have changed: the edited one, the one just left, the one
+    /// now under the cursor.
+    private func restyle(around range: NSRange) {
+        guard let storage = textStorage else { return }
+        let previous = activeLines
+        activeLines = currentLines()
+        let length = storage.length
+        func clamp(_ range: NSRange) -> NSRange {
+            let location = min(range.location, length)
+            return NSRange(location: location, length: min(range.length, length - location))
+        }
+        let touched = NSUnionRange(NSUnionRange(clamp(previous), clamp(activeLines)), clamp(range))
+        styler.style(storage, lines: touched, active: isEditing ? activeLines : NSRange(location: NSNotFound, length: 0))
+        typingAttributes = styler.baseAttributes
+    }
+
+    private var isEditing: Bool { window?.firstResponder === self }
+
+    private func currentLines() -> NSRange {
+        let selection = selectedRange()
+        guard selection.location <= nsString.length else { return NSRange(location: 0, length: 0) }
+        return nsString.lineRange(for: selection)
     }
 
     override func didChangeText() {
-        restyle()
+        // The edit and the line before it: Return leaves a line that now renders.
+        let caret = selectedRange().location
+        restyle(around: NSRange(location: max(0, caret - 1), length: 1))
         super.didChangeText()
+    }
+
+    override func setSelectedRanges(_ ranges: [NSValue], affinity: NSSelectionAffinity, stillSelecting: Bool) {
+        super.setSelectedRanges(ranges, affinity: affinity, stillSelecting: stillSelecting)
+        guard textStorage != nil, currentLines() != activeLines else { return }
+        restyle(around: currentLines())
     }
 
     override func becomeFirstResponder() -> Bool {
         let became = super.becomeFirstResponder()
-        if became { onFocusChange?(true) }
+        if became {
+            onFocusChange?(true)
+            restyle(around: currentLines())
+        }
         return became
     }
 
+    /// Leaving the note renders every line, the one that had the cursor too.
     override func resignFirstResponder() -> Bool {
         let resigned = super.resignFirstResponder()
-        if resigned { onFocusChange?(false) }
+        if resigned {
+            onFocusChange?(false)
+            DispatchQueue.main.async { [weak self] in self?.restyle() }
+        }
         return resigned
     }
 
@@ -265,28 +309,6 @@ final class MarkdownTextView: NSTextView {
         replace(NSRange(location: range.location, length: remove), with: "", caret: max(range.location, caret.location - remove))
     }
 
-    /// Keeps the caret off the hidden marker: it lands where the words start, and ←
-    /// from there goes on to the end of the line above.
-    override func setSelectedRanges(_ ranges: [NSValue], affinity: NSSelectionAffinity, stillSelecting: Bool) {
-        guard !stillSelecting, ranges.count == 1, let only = ranges.first?.rangeValue, only.length == 0, only.location <= nsString.length else {
-            return super.setSelectedRanges(ranges, affinity: affinity, stillSelecting: stillSelecting)
-        }
-        let range = lineRange(at: only.location)
-        let line = MarkdownLine(nsString.substring(with: range))
-        let hidden = switch line.kind {
-        case .bullet, .checklist, .quote: line.prefixLength
-        default: 0
-        }
-        let wordsStart = range.location + hidden
-        var location = only.location
-        if hidden > 0, location < wordsStart {
-            let previous = selectedRange().location
-            let goingBack = previous == wordsStart && only.location < previous
-            location = goingBack && range.location > 0 ? range.location - 1 : wordsStart
-        }
-        super.setSelectedRanges([NSValue(range: NSRange(location: location, length: 0))], affinity: affinity, stillSelecting: stillSelecting)
-    }
-
     // MARK: Shortcuts
 
     override func performKeyEquivalent(with event: NSEvent) -> Bool {
@@ -330,19 +352,29 @@ final class MarkdownTextView: NSTextView {
         super.mouseDown(with: event)
     }
 
-    /// A click on a checkbox ticks it without moving the caret.
+    /// A click on a checkbox ticks it without moving the caret: the drawn box on a
+    /// rendered line, or the "[ ]" itself on the line being edited.
     private func toggleCheckbox(at point: NSPoint) -> Bool {
         guard let layout = markdownLayout, let container = textContainer, let storage = textStorage, storage.length > 0 else { return false }
         let inContainer = NSPoint(x: point.x - textContainerOrigin.x, y: point.y - textContainerOrigin.y)
         let glyph = layout.glyphIndex(for: inContainer, in: container)
         let character = min(layout.characterIndexForGlyph(at: glyph), storage.length - 1)
         let range = lineRange(at: character)
-        let line = MarkdownLine(nsString.substring(with: range))
-        guard case .checklist = line.kind,
-              let frame = layout.markerFrame(for: NSRange(location: range.location, length: line.prefixLength))
-        else { return false }
-        let box = layout.checkboxRect(level: line.level, line: frame.line, baseline: frame.baseline).insetBy(dx: -5, dy: -4)
-        guard box.contains(inContainer), let toggled = MarkdownLine.togglingCheckbox(nsString.substring(with: range)) else { return false }
+        let source = nsString.substring(with: range)
+        let line = MarkdownLine(source)
+        guard case .checklist = line.kind else { return false }
+        let hit: Bool
+        if let encoded = storage.attribute(.markdownDecoration, at: range.location, effectiveRange: nil) as? String,
+           case .checkbox(let x, _) = MarkdownDecoration(encoded: encoded),
+           let frame = layout.markerFrame(for: NSRange(location: range.location, length: line.prefixLength)) {
+            hit = layout.checkboxRect(x: x, line: frame.line, baseline: frame.baseline).insetBy(dx: -5, dy: -4).contains(inContainer)
+        } else {
+            // Shown as text: "- [ ]" from the hyphen to the bracket.
+            var fraction: CGFloat = 0
+            let index = layout.characterIndex(for: inContainer, in: container, fractionOfDistanceBetweenInsertionPoints: &fraction)
+            hit = index >= range.location + line.indent && index < range.location + line.indent + 5
+        }
+        guard hit, let toggled = MarkdownLine.togglingCheckbox(source) else { return false }
         let caret = selectedRange()
         replace(range, with: toggled)
         setSelectedRange(caret)

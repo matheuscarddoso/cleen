@@ -8,25 +8,29 @@ nonisolated extension NSAttributedString.Key {
     static let markdownDecoration = NSAttributedString.Key("app.cleen.markdownDecoration")
 }
 
-/// What the layout manager draws in a list item's hanging indent.
+/// What the layout manager draws where a rendered line's marker is hidden: `x` is where
+/// the marker starts (after its indent), `width` how wide it is.
 nonisolated enum MarkdownDecoration: Equatable {
-    case bullet(level: Int)
-    case checkbox(level: Int, checked: Bool)
-    case quote
+    case bullet(x: CGFloat, width: CGFloat)
+    case checkbox(x: CGFloat, checked: Bool)
+    case quote(x: CGFloat)
 }
 
-/// Styles a note's Markdown in place, the way Bear and Apple Notes show it: headings
-/// larger, **bold**, *italic*, `code` and ~~struck~~ text formatted with their markers
-/// dimmed, list markers swapped for a dot or a checkbox, ticked items struck and greyed.
-/// The text itself never changes: what's saved is plain Markdown.
+/// Styles a note's Markdown in place, the way Obsidian's Live Preview shows it. The line
+/// with the cursor shows its Markdown, markers dimmed, so it edits like plain text; every
+/// other line is rendered: list markers become a dot or a checkbox, **bold**, *italic*,
+/// `code` and ~~struck~~ lose their markers, headings their hashes, ticked items are
+/// struck and greyed. The text itself never changes: what's saved is plain Markdown.
+///
+/// A rendered list item is indented by exactly its marker's width, so the words sit in
+/// the same place whether the line shows its marker or its dot.
 nonisolated struct MarkdownStyler {
     let baseSize: CGFloat
 
-    /// Width of one nesting level, and of the room a dot or checkbox takes.
-    var levelWidth: CGFloat { baseSize * 1.25 }
-    var markerWidth: CGFloat { baseSize * 1.45 }
-
     var baseFont: NSFont { .systemFont(ofSize: baseSize) }
+    private var markerFont: NSFont { .systemFont(ofSize: baseSize) }
+
+    private var dim: NSColor { NSColor.white.withAlphaComponent(0.32) }
 
     var baseAttributes: [NSAttributedString.Key: Any] {
         [.font: baseFont, .foregroundColor: NSColor.white, .paragraphStyle: paragraph(indent: 0)]
@@ -41,70 +45,100 @@ nonisolated struct MarkdownStyler {
         return style
     }
 
-    func style(_ storage: NSTextStorage) {
+    /// How wide a marker is when shown: where the words start on a rendered line.
+    func width(of marker: String) -> CGFloat {
+        ceil((marker as NSString).size(withAttributes: [.font: markerFont]).width)
+    }
+
+    /// Restyles the lines `range` touches; the lines `active` touches show their Markdown.
+    func style(_ storage: NSTextStorage, lines range: NSRange, active: NSRange) {
         let text = storage.string as NSString
-        let whole = NSRange(location: 0, length: text.length)
+        let lines = text.paragraphRange(for: NSRange(location: min(range.location, text.length), length: min(range.length, text.length - min(range.location, text.length))))
         storage.beginEditing()
-        storage.setAttributes(baseAttributes, range: whole)
-        text.enumerateSubstrings(in: whole, options: [.byParagraphs, .substringNotRequired]) { _, range, _, _ in
-            styleLine(storage, text: text, range: range)
+        storage.setAttributes(baseAttributes, range: lines)
+        text.enumerateSubstrings(in: lines, options: [.byParagraphs, .substringNotRequired]) { _, line, _, _ in
+            let isActive = NSIntersectionRange(line, active).length > 0 || NSLocationInRange(active.location, NSRange(location: line.location, length: line.length + 1))
+            styleLine(storage, text: text, range: line, active: isActive)
         }
         storage.endEditing()
     }
 
-    private func styleLine(_ storage: NSTextStorage, text: NSString, range: NSRange) {
-        let line = MarkdownLine(text.substring(with: range))
+    private func styleLine(_ storage: NSTextStorage, text: NSString, range: NSRange, active: Bool) {
+        let source = text.substring(with: range)
+        let line = MarkdownLine(source)
         let prefix = NSRange(location: range.location, length: min(line.prefixLength, range.length))
-        let dim = NSColor.white.withAlphaComponent(0.32)
+        let marker = (source as NSString).substring(with: NSRange(location: 0, length: prefix.length))
         switch line.kind {
         case .plain:
             break
         case .heading(let level):
             let size = baseSize * [1.45, 1.25, 1.1][max(0, min(level - 1, 2))]
             storage.addAttribute(.font, value: NSFont.systemFont(ofSize: size, weight: .semibold), range: range)
-            storage.addAttribute(.foregroundColor, value: dim, range: prefix)
-        case .bullet, .checklist:
-            let indent = CGFloat(line.level) * levelWidth + markerWidth
-            storage.addAttribute(.paragraphStyle, value: paragraph(indent: indent), range: range)
-            storage.addAttribute(.markdownHidden, value: true, range: prefix)
-            let decoration: MarkdownDecoration
-            if case .checklist(let checked) = line.kind {
-                decoration = .checkbox(level: line.level, checked: checked)
-                if checked {
-                    let words = NSRange(location: prefix.upperBound, length: range.upperBound - prefix.upperBound)
-                    storage.addAttributes([.foregroundColor: NSColor.white.withAlphaComponent(0.42), .strikethroughStyle: NSUnderlineStyle.single.rawValue], range: words)
-                }
+            if active {
+                storage.addAttribute(.foregroundColor, value: dim, range: prefix)
             } else {
-                decoration = .bullet(level: line.level)
+                storage.addAttribute(.markdownHidden, value: true, range: prefix)
             }
-            storage.addAttribute(.markdownDecoration, value: decoration.encoded, range: prefix)
+        case .bullet, .checklist, .quote:
+            // The marker keeps its own width either way: shown dimmed while editing,
+            // hidden behind a dot, checkbox or bar otherwise.
+            let indent = width(of: marker)
+            if active {
+                storage.addAttribute(.foregroundColor, value: dim, range: prefix)
+                storage.addAttribute(.paragraphStyle, value: paragraph(indent: 0, hanging: indent), range: range)
+            } else {
+                storage.addAttribute(.paragraphStyle, value: paragraph(indent: indent), range: range)
+                storage.addAttribute(.markdownHidden, value: true, range: prefix)
+                let x = width(of: String(marker.prefix(line.indent)))
+                let decoration: MarkdownDecoration = switch line.kind {
+                case .checklist(let checked): .checkbox(x: x, checked: checked)
+                case .quote: .quote(x: x)
+                default: .bullet(x: x, width: width(of: "-"))
+                }
+                storage.addAttribute(.markdownDecoration, value: decoration.encoded, range: prefix)
+            }
+            if case .checklist(true) = line.kind {
+                let words = NSRange(location: prefix.upperBound, length: range.upperBound - prefix.upperBound)
+                storage.addAttributes([.foregroundColor: NSColor.white.withAlphaComponent(0.42), .strikethroughStyle: NSUnderlineStyle.single.rawValue], range: words)
+            }
+            if line.kind == .quote {
+                storage.addAttribute(.foregroundColor, value: NSColor.white.withAlphaComponent(0.6), range: NSRange(location: prefix.upperBound, length: range.upperBound - prefix.upperBound))
+            }
         case .numbered:
-            let indent = CGFloat(line.level) * levelWidth
-            storage.addAttribute(.paragraphStyle, value: paragraph(indent: indent), range: range)
-            storage.addAttribute(.markdownHidden, value: true, range: NSRange(location: range.location, length: min(line.indent, range.length)))
-            let marker = NSRange(location: range.location + line.indent, length: min(line.markerLength, range.length - line.indent))
-            storage.addAttributes([.foregroundColor: NSColor.white.withAlphaComponent(0.55), .font: NSFont.monospacedDigitSystemFont(ofSize: baseSize, weight: .medium)], range: marker)
-        case .quote:
-            storage.addAttribute(.paragraphStyle, value: paragraph(indent: markerWidth * 0.8), range: range)
-            storage.addAttribute(.markdownHidden, value: true, range: prefix)
-            storage.addAttribute(.markdownDecoration, value: MarkdownDecoration.quote.encoded, range: prefix)
-            storage.addAttribute(.foregroundColor, value: NSColor.white.withAlphaComponent(0.6), range: range)
+            storage.addAttribute(.paragraphStyle, value: paragraph(indent: 0, hanging: width(of: marker)), range: range)
+            storage.addAttributes([.foregroundColor: NSColor.white.withAlphaComponent(0.55), .font: NSFont.monospacedDigitSystemFont(ofSize: baseSize, weight: .medium)], range: prefix)
         }
-        styleInline(storage, text: text, range: NSRange(location: prefix.upperBound, length: range.upperBound - prefix.upperBound))
+        styleInline(storage, text: text, range: NSRange(location: prefix.upperBound, length: range.upperBound - prefix.upperBound), active: active)
     }
 
-    /// **bold**, *italic* / _italic_, `code`, ~~struck~~, each with its markers dimmed.
-    private func styleInline(_ storage: NSTextStorage, text: NSString, range: NSRange) {
+    /// A list item's wrapped lines line up under its words, not under its marker.
+    private func paragraph(indent: CGFloat, hanging: CGFloat) -> NSParagraphStyle {
+        let style = paragraph(indent: indent).mutableCopy() as! NSMutableParagraphStyle
+        style.headIndent = indent + hanging
+        return style
+    }
+
+    /// **bold**, *italic* / _italic_, `code`, ~~struck~~: markers dimmed on the line being
+    /// edited, hidden everywhere else.
+    private func styleInline(_ storage: NSTextStorage, text: NSString, range: NSRange, active: Bool) {
         guard range.length > 1 else { return }
-        let dim = NSColor.white.withAlphaComponent(0.3)
         for (pattern, apply) in inlineRules {
             pattern.enumerateMatches(in: text as String, range: range) { match, _, _ in
                 guard let match, match.numberOfRanges == 3 else { return }
                 let whole = match.range
                 let inner = match.range(at: 2)
                 apply(storage, inner)
-                storage.addAttribute(.foregroundColor, value: dim, range: NSRange(location: whole.location, length: inner.location - whole.location))
-                storage.addAttribute(.foregroundColor, value: dim, range: NSRange(location: inner.upperBound, length: whole.upperBound - inner.upperBound))
+                let markers = [
+                    NSRange(location: whole.location, length: inner.location - whole.location),
+                    NSRange(location: inner.upperBound, length: whole.upperBound - inner.upperBound),
+                ]
+                for marker in markers {
+                    if active {
+                        storage.addAttribute(.foregroundColor, value: dim, range: marker)
+                    } else {
+                        storage.addAttribute(.markdownHidden, value: true, range: marker)
+                    }
+                }
             }
         }
     }
@@ -142,18 +176,19 @@ nonisolated extension MarkdownDecoration {
     /// Stored in the text as a string, so attributes compare cheaply.
     var encoded: String {
         switch self {
-        case .bullet(let level): "bullet:\(level)"
-        case .checkbox(let level, let checked): "check:\(level):\(checked ? 1 : 0)"
-        case .quote: "quote"
+        case .bullet(let x, let width): "bullet:\(x):\(width)"
+        case .checkbox(let x, let checked): "check:\(x):\(checked ? 1 : 0)"
+        case .quote(let x): "quote:\(x)"
         }
     }
 
     init?(encoded: String) {
-        let parts = encoded.split(separator: ":")
-        switch parts.first {
-        case "bullet": self = .bullet(level: parts.count > 1 ? Int(parts[1]) ?? 0 : 0)
-        case "check": self = .checkbox(level: parts.count > 1 ? Int(parts[1]) ?? 0 : 0, checked: parts.count > 2 && parts[2] == "1")
-        case "quote": self = .quote
+        let parts = encoded.split(separator: ":").map(String.init)
+        guard parts.count >= 2, let x = Double(parts[1]) else { return nil }
+        switch parts[0] {
+        case "bullet": self = .bullet(x: x, width: parts.count > 2 ? Double(parts[2]) ?? 6 : 6)
+        case "check": self = .checkbox(x: x, checked: parts.count > 2 && parts[2] == "1")
+        case "quote": self = .quote(x: x)
         default: return nil
         }
     }

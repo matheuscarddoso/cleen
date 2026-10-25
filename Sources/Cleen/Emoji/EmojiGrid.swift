@@ -33,12 +33,22 @@ enum EmojiJumpTarget: Hashable {
 }
 
 /// The emoji: recents, then every category in Apple's order; while searching, the
-/// matches alone, best first.
+/// matches alone, best first. `selection` is a position in `EmojiGrid.order(of:)`, the
+/// cell the arrow keys move and Return pastes.
 struct EmojiGrid: View {
     let model: EmojiModel
+    let selection: Int
+    @Binding var columns: Int
+    let select: (Int) -> Void
     let use: (EmojiItem) -> Void
 
-    private let columns = [GridItem(.adaptive(minimum: 36, maximum: 44), spacing: 2)]
+    static let cellWidth = 36.0
+    static let spacing = 2.0
+
+    /// Every cell in reading order, the way the grid lays them out.
+    static func order(of model: EmojiModel) -> [EmojiItem] {
+        model.isSearching ? model.results : model.recents + model.sections.flatMap(\.items)
+    }
 
     var body: some View {
         if !model.isLoaded {
@@ -57,29 +67,44 @@ struct EmojiGrid: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
             NotchScroll {
-                LazyVGrid(columns: columns, alignment: .leading, spacing: 2) {
+                // A fixed column count (from the width), so ↑ and ↓ land on the cell
+                // straight above and below.
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: Self.spacing), count: max(columns, 1)), alignment: .leading, spacing: Self.spacing) {
                     if model.isSearching {
-                        cells(model.results)
+                        cells(model.results, from: 0)
                     } else {
                         if !model.recents.isEmpty {
-                            section(.recents, items: model.recents)
+                            section(.recents, items: model.recents, from: 0)
                         }
-                        ForEach(model.sections) { section in
-                            self.section(.category(section.category), items: section.items)
+                        let offsets = sectionOffsets
+                        ForEach(Array(model.sections.enumerated()), id: \.element.id) { index, section in
+                            self.section(.category(section.category), items: section.items, from: offsets[index])
                         }
                     }
                 }
                 .padding(.bottom, 4)
             }
+            .onGeometryChange(for: Int.self) { proxy in
+                max(1, Int((proxy.size.width + Self.spacing) / (Self.cellWidth + Self.spacing)))
+            } action: { columns = $0 }
             // Searching jumps back to the top instead of keeping a scroll position from
             // the full grid.
             .id(model.isSearching)
         }
     }
 
-    private func section(_ target: EmojiJumpTarget, items: [EmojiItem]) -> some View {
+    /// Where each category's cells start in the reading order.
+    private var sectionOffsets: [Int] {
+        var start = model.recents.count
+        return model.sections.map { section in
+            defer { start += section.items.count }
+            return start
+        }
+    }
+
+    private func section(_ target: EmojiJumpTarget, items: [EmojiItem], from start: Int) -> some View {
         Section {
-            cells(items)
+            cells(items, from: start)
         } header: {
             Text(target.title)
                 .font(NotchStyle.captionMedium)
@@ -91,18 +116,27 @@ struct EmojiGrid: View {
         }
     }
 
-    private func cells(_ items: [EmojiItem]) -> some View {
-        ForEach(items) { item in
-            EmojiCell(item: item) { use(item) }
+    private func cells(_ items: [EmojiItem], from start: Int) -> some View {
+        ForEach(Array(items.enumerated()), id: \.offset) { offset, item in
+            let position = start + offset
+            EmojiCell(item: item, isSelected: position == selection, hover: { select(position) }) { use(item) }
+                .id(EmojiCellID(position: position))
         }
     }
 }
 
-/// One emoji: large, lifts a grey square on hover, its name as the tooltip.
+/// A cell's scroll anchor: its place in the reading order.
+struct EmojiCellID: Hashable {
+    let position: Int
+}
+
+/// One emoji: large, on a grey square when selected (by the arrows or the pointer), its
+/// name as the tooltip.
 struct EmojiCell: View {
     let item: EmojiItem
+    let isSelected: Bool
+    let hover: () -> Void
     let action: () -> Void
-    @State private var isHovered = false
 
     var body: some View {
         Button(action: action) {
@@ -110,13 +144,15 @@ struct EmojiCell: View {
                 .font(.system(size: 26))
                 .frame(maxWidth: .infinity)
                 .frame(height: 36)
-                .background(isHovered ? NotchStyle.control : .clear, in: .rect(cornerRadius: 8, style: .continuous))
+                .background(isSelected ? NotchStyle.selection : .clear, in: .rect(cornerRadius: 8, style: .continuous))
                 .contentShape(.rect(cornerRadius: 8))
         }
         .buttonStyle(EmojiPressStyle())
-        .onHover { isHovered = $0 }
+        // The pointer and the arrows share one selection, like the launcher.
+        .onHover { if $0 { hover() } }
         .help(item.name)
         .accessibilityLabel(item.name)
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 }
 

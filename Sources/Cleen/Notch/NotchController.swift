@@ -74,6 +74,7 @@ final class NotchController {
     func close() {
         pendingOpen?.cancel()
         guard state.isOpen else { return }
+        state.pasteNeedsPermission = false
         state.holdsOpen = false
         state.mirrorExpanded = false
         state.isEditingHome = false
@@ -181,6 +182,13 @@ final class NotchController {
     /// Closes the launcher; with `paste`, sends ⌘V to the app you were in once it has
     /// the keyboard back.
     func closeSearch(paste: Bool) {
+        // Without Accessibility the paste can't happen: stay open and say how to allow it,
+        // instead of closing on something that silently didn't paste.
+        if paste, !PasteKeystroke.isAllowed {
+            PasteKeystroke.log.error("paste blocked: asking for Accessibility")
+            state.pasteNeedsPermission = true
+            return
+        }
         close()
         guard paste else { return }
         // With one of Cleen's own windows in front (Ajustes, the tour), step back so the
