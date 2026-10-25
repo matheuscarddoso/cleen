@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type ComponentType, type ReactNode, type SVGProps } from "react";
-import { Camera, Inbox, Pin, ScrollText, Search, Send, Settings, Timer } from "./Icons";
+import { Camera, Inbox, NotebookPen, Pin, ScrollText, Search, Send, Settings, Timer } from "./Icons";
 import { Shoulders, Swap } from "./Notch";
 import { Wallpaper } from "./Wallpaper";
 import { useSeconds } from "./useLoop";
@@ -21,6 +21,7 @@ const features: Feature[] = [
   { key: "teleprompter", title: "Teleprompter", text: "O roteiro rola logo abaixo da câmera, com o olhar na lente.", icon: ScrollText, gradient: "linear-gradient(180deg,#ffb340,#ff7a00)" },
   { key: "timer", title: "Timers", text: "Pomodoro ou timer simples, contando no notch fechado.", icon: Timer, gradient: "linear-gradient(180deg,#ff6961,#d70015)" },
   { key: "shelf", title: "Shelf", text: "Solte arquivos no notch e mande por AirDrop num gesto.", icon: Inbox, gradient: "linear-gradient(180deg,#5ac8fa,#0a7aff)" },
+  { key: "notes", title: "Notas", text: "Listas, tarefas e títulos em Markdown, ao vivo como no Obsidian.", icon: NotebookPen, gradient: "linear-gradient(180deg,#ffd60a,#ff9f0a)" },
   { key: "mirror", title: "Espelho", text: "Uma olhada na câmera antes da chamada, sem abrir app.", icon: Camera, gradient: "linear-gradient(180deg,#8e8e93,#48484a)" },
 ];
 
@@ -66,10 +67,11 @@ export function Everyday() {
         <Swap shown={index === 0}><Teleprompter playing={running && index === 0} /></Swap>
         <Swap shown={index === 1}><TimerScene counting={running && index === 1} /></Swap>
         <Swap shown={index === 2}><Shelf key={index === 2 ? "on" : "off"} /></Swap>
-        <Swap shown={index === 3}><Mirror /></Swap>
+        <Swap shown={index === 3}><Notes key={index === 3 ? "on" : "off"} playing={running && index === 3} /></Swap>
+        <Swap shown={index === 4}><Mirror /></Swap>
       </Stage>
 
-      <div className="mx-auto mt-10 grid max-w-[1040px] grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-4">
+      <div className="mx-auto mt-10 grid max-w-[1180px] grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-3 lg:grid-cols-5">
         {features.map((feature, position) => {
           const Icon = feature.icon;
           const active = position === index;
@@ -257,6 +259,65 @@ function Shelf() {
         </div>
       </div>
     </Panel>
+  );
+}
+
+/** The new item typed in, letter by letter, then the pending one ticked. */
+const NOTE_TYPED = "café em grão";
+
+/**
+ * Notas as Obsidian's Live Preview shows it: the line being typed shows its Markdown,
+ * dimmed; once the cursor leaves it, it renders as a checkbox.
+ */
+function Notes({ playing }: { playing: boolean }) {
+  const [typed, setTyped] = useState(0);
+  const [ticked, setTicked] = useState(false);
+  const done = typed >= NOTE_TYPED.length;
+  useEffect(() => {
+    if (!playing) return;
+    const timer = window.setTimeout(
+      () => (done ? setTicked(true) : setTyped((count) => count + 1)),
+      done ? 1100 : typed === 0 ? 900 : 90 + (typed % 3) * 25,
+    );
+    return () => window.clearTimeout(timer);
+  }, [done, playing, typed]);
+  const editing = !ticked;
+  return (
+    <Panel title="Notas" height={244}>
+      <div className="mt-3 flex items-center gap-1">
+        <span className="rounded-full bg-white/[0.14] px-3 py-1 text-[13px] font-medium">Mercado</span>
+        <span className="px-2 text-[16px] text-white/55">+</span>
+      </div>
+      <div className="mt-2.5 h-[140px] rounded-[12px] bg-white/[0.045] px-4 py-3 text-[15px] leading-[1.5] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.07)]">
+        <p className="text-[21px] font-semibold leading-[1.3]">Mercado</p>
+        <NoteCheck checked text="leite" />
+        <NoteCheck checked={ticked} text="pão integral" />
+        {editing ? (
+          <p className="flex items-center">
+            <span className="text-white/30">- [ ]&nbsp;</span>
+            {NOTE_TYPED.slice(0, typed)}
+            <span className="ml-px inline-block h-[17px] w-[2px] animate-pulse rounded-full bg-white motion-reduce:animate-none" />
+          </p>
+        ) : (
+          <NoteCheck checked={false} text={NOTE_TYPED} />
+        )}
+      </div>
+    </Panel>
+  );
+}
+
+function NoteCheck({ checked, text }: { checked: boolean; text: string }) {
+  return (
+    <p className="flex items-center gap-2">
+      <span className={`flex h-[15px] w-[15px] shrink-0 items-center justify-center rounded-[4.5px] transition-colors duration-200 ${checked ? "bg-white/90" : "shadow-[inset_0_0_0_1.2px_rgba(255,255,255,0.5)]"}`}>
+        {checked && (
+          <svg viewBox="0 0 12 12" className="h-2.5 w-2.5" fill="none" stroke="#000" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+            <path d="M2.6 6.2 5 8.4l4.4-5" />
+          </svg>
+        )}
+      </span>
+      <span className={`transition-colors duration-200 ${checked ? "text-white/40 line-through" : ""}`}>{text}</span>
+    </p>
   );
 }
 
