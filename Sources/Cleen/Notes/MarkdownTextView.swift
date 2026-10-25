@@ -1,0 +1,351 @@
+import AppKit
+import CleenKit
+
+/// Lays a list item's hidden marker out as nothing and draws, in its place, a dot, a
+/// checkbox or a quote bar.
+nonisolated final class MarkdownLayoutManager: NSLayoutManager, NSLayoutManagerDelegate {
+    var styler: MarkdownStyler
+
+    init(styler: MarkdownStyler) {
+        self.styler = styler
+        super.init()
+        delegate = self
+    }
+
+    required init?(coder: NSCoder) { nil }
+
+    func layoutManager(
+        _ layoutManager: NSLayoutManager,
+        shouldGenerateGlyphs glyphs: UnsafePointer<CGGlyph>,
+        properties: UnsafePointer<NSLayoutManager.GlyphProperty>,
+        characterIndexes: UnsafePointer<Int>,
+        font: NSFont,
+        forGlyphRange glyphRange: NSRange
+    ) -> Int {
+        guard let storage = textStorage else { return 0 }
+        var changed = false
+        var adjusted = [NSLayoutManager.GlyphProperty](unsafeUninitializedCapacity: glyphRange.length) { buffer, count in
+            for index in 0..<glyphRange.length {
+                let character = characterIndexes[index]
+                if character < storage.length, storage.attribute(.markdownHidden, at: character, effectiveRange: nil) != nil {
+                    buffer[index] = .null
+                    changed = true
+                } else {
+                    buffer[index] = properties[index]
+                }
+            }
+            count = glyphRange.length
+        }
+        guard changed else { return 0 }
+        return adjusted.withUnsafeMutableBufferPointer { buffer in
+            setGlyphs(glyphs, properties: buffer.baseAddress!, characterIndexes: characterIndexes, font: font, forGlyphRange: glyphRange)
+            return glyphRange.length
+        }
+    }
+
+    override func drawGlyphs(forGlyphRange glyphsToShow: NSRange, at origin: NSPoint) {
+        super.drawGlyphs(forGlyphRange: glyphsToShow, at: origin)
+        guard let storage = textStorage else { return }
+        let characters = characterRange(forGlyphRange: glyphsToShow, actualGlyphRange: nil)
+        storage.enumerateAttribute(.markdownDecoration, in: characters) { value, range, _ in
+            guard let encoded = value as? String, let decoration = MarkdownDecoration(encoded: encoded) else { return }
+            draw(decoration, markerRange: range, origin: origin)
+        }
+    }
+
+    /// The box the marker's line sits in, and where its text's baseline is. Measured on
+    /// the first character after the marker: hidden glyphs can be laid out at the end
+    /// of the line above. An empty item at the very end sits in the extra line fragment.
+    func markerFrame(for markerRange: NSRange) -> (line: NSRect, baseline: CGFloat)? {
+        guard let storage = textStorage else { return nil }
+        let character = markerRange.upperBound
+        if character < storage.length {
+            let glyph = glyphIndexForCharacter(at: character)
+            guard glyph < numberOfGlyphs else { return nil }
+            return (lineFragmentRect(forGlyphAt: glyph, effectiveRange: nil), location(forGlyphAt: glyph).y)
+        }
+        let extra = extraLineFragmentRect
+        guard !extra.isEmpty else { return nil }
+        return (extra, styler.baseFont.ascender)
+    }
+
+    /// The checkbox's square, in text-container coordinates.
+    func checkboxRect(level: Int, line: NSRect, baseline: CGFloat) -> NSRect {
+        let side = styler.baseSize * 1.05
+        let x = CGFloat(level) * styler.levelWidth
+        let center = line.minY + baseline - styler.baseFont.xHeight / 2
+        return NSRect(x: x, y: center - side / 2, width: side, height: side)
+    }
+
+    private func draw(_ decoration: MarkdownDecoration, markerRange: NSRange, origin: NSPoint) {
+        guard let frame = markerFrame(for: markerRange) else { return }
+        let line = frame.line.offsetBy(dx: origin.x, dy: origin.y)
+        let xHeightCenter = line.minY + frame.baseline - styler.baseFont.xHeight / 2
+        switch decoration {
+        case .bullet(let level):
+            let radius = styler.baseSize * 0.17
+            let x = origin.x + CGFloat(level) * styler.levelWidth + styler.markerWidth * 0.35
+            NSColor.white.withAlphaComponent(0.7).setFill()
+            NSBezierPath(ovalIn: NSRect(x: x - radius, y: xHeightCenter - radius, width: radius * 2, height: radius * 2)).fill()
+        case .checkbox(let level, let checked):
+            let box = checkboxRect(level: level, line: frame.line, baseline: frame.baseline).offsetBy(dx: origin.x, dy: origin.y)
+            let path = NSBezierPath(roundedRect: box.insetBy(dx: 0.6, dy: 0.6), xRadius: box.width * 0.3, yRadius: box.width * 0.3)
+            if checked {
+                NSColor.white.withAlphaComponent(0.9).setFill()
+                path.fill()
+                let check = NSBezierPath()
+                check.move(to: NSPoint(x: box.minX + box.width * 0.26, y: box.midY))
+                check.line(to: NSPoint(x: box.minX + box.width * 0.43, y: box.minY + box.height * 0.7))
+                check.line(to: NSPoint(x: box.minX + box.width * 0.76, y: box.minY + box.height * 0.3))
+                check.lineWidth = box.width * 0.13
+                check.lineCapStyle = .round
+                check.lineJoinStyle = .round
+                NSColor.black.setStroke()
+                check.stroke()
+            } else {
+                path.lineWidth = 1.2
+                NSColor.white.withAlphaComponent(0.5).setStroke()
+                path.stroke()
+            }
+        case .quote:
+            NSColor.white.withAlphaComponent(0.25).setFill()
+            NSBezierPath(roundedRect: NSRect(x: origin.x + 1, y: line.minY + 1, width: 2.5, height: line.height - 2), xRadius: 1.25, yRadius: 1.25).fill()
+        }
+    }
+}
+
+/// The note's editor: Markdown styled as you type, with the shortcuts of Apple Notes
+/// (⇧⌘L checklist, ⇧⌘7 bullets, ⇧⌘9 numbers, ⇧⌘U tick) and of Markdown editors (⌘B,
+/// ⌘I, ⇧⌘X, ⌘E for code). Return continues a list and leaves it from an empty item,
+/// Tab nests an item, a click on a checkbox ticks it.
+final class MarkdownTextView: NSTextView {
+    let styler: MarkdownStyler
+    var onFocusChange: ((Bool) -> Void)?
+
+    init(baseSize: CGFloat) {
+        styler = MarkdownStyler(baseSize: baseSize)
+        let storage = NSTextStorage()
+        let layout = MarkdownLayoutManager(styler: styler)
+        storage.addLayoutManager(layout)
+        let container = NSTextContainer(size: NSSize(width: 0, height: CGFloat.greatestFiniteMagnitude))
+        container.widthTracksTextView = true
+        container.lineFragmentPadding = 0
+        layout.addTextContainer(container)
+        super.init(frame: .zero, textContainer: container)
+        isRichText = false
+        importsGraphics = false
+        allowsUndo = true
+        drawsBackground = false
+        isAutomaticQuoteSubstitutionEnabled = false
+        isAutomaticDashSubstitutionEnabled = false
+        isAutomaticTextReplacementEnabled = false
+        isVerticallyResizable = true
+        isHorizontallyResizable = false
+        autoresizingMask = [.width]
+        insertionPointColor = .white
+        typingAttributes = styler.baseAttributes
+        selectedTextAttributes = [.backgroundColor: NSColor.white.withAlphaComponent(0.22)]
+        setAccessibilityLabel(String(localized: "Nota"))
+    }
+
+    required init?(coder: NSCoder) { nil }
+
+    private var markdownLayout: MarkdownLayoutManager? { layoutManager as? MarkdownLayoutManager }
+
+    func restyle() {
+        guard let storage = textStorage else { return }
+        styler.style(storage)
+        layoutManager?.invalidateGlyphs(forCharacterRange: NSRange(location: 0, length: storage.length), changeInLength: 0, actualCharacterRange: nil)
+        typingAttributes = styler.baseAttributes
+        needsDisplay = true
+    }
+
+    override func didChangeText() {
+        restyle()
+        super.didChangeText()
+    }
+
+    override func becomeFirstResponder() -> Bool {
+        let became = super.becomeFirstResponder()
+        if became { onFocusChange?(true) }
+        return became
+    }
+
+    override func resignFirstResponder() -> Bool {
+        let resigned = super.resignFirstResponder()
+        if resigned { onFocusChange?(false) }
+        return resigned
+    }
+
+    // MARK: Lines
+
+    private var nsString: NSString { string as NSString }
+
+    private func lineRange(at location: Int) -> NSRange {
+        let range = nsString.lineRange(for: NSRange(location: location, length: 0))
+        // Without its line break.
+        var length = range.length
+        while length > 0, let scalar = UnicodeScalar(nsString.character(at: range.location + length - 1)), CharacterSet.newlines.contains(scalar) { length -= 1 }
+        return NSRange(location: range.location, length: length)
+    }
+
+    /// Replaces text as typing would, so it can be undone and the delegate hears of it.
+    private func replace(_ range: NSRange, with text: String, caret: Int? = nil) {
+        guard shouldChangeText(in: range, replacementString: text) else { return }
+        textStorage?.replaceCharacters(in: range, with: text)
+        didChangeText()
+        if let caret { setSelectedRange(NSRange(location: caret, length: 0)) }
+    }
+
+    /// Rewrites every line the selection touches, numbering them from 1.
+    private func transformLines(_ transform: (String, Int) -> String) {
+        let lines = nsString.lineRange(for: selectedRange())
+        let original = nsString.substring(with: lines)
+        let trailingBreak = original.hasSuffix("\n")
+        let body = trailingBreak ? String(original.dropLast()) : original
+        let text = body.components(separatedBy: "\n").enumerated()
+            .map { transform($0.element, $0.offset + 1) }
+            .joined(separator: "\n")
+        replace(lines, with: text + (trailingBreak ? "\n" : ""))
+        setSelectedRange(NSRange(location: lines.location + (text as NSString).length, length: 0))
+    }
+
+    // MARK: Typing
+
+    override func insertNewline(_ sender: Any?) {
+        let caret = selectedRange()
+        let range = lineRange(at: caret.location)
+        guard caret.length == 0, caret.location == range.upperBound else { return super.insertNewline(sender) }
+        switch MarkdownLine(nsString.substring(with: range)).continuation {
+        case .none:
+            super.insertNewline(sender)
+        case .insert(let prefix):
+            replace(caret, with: "\n" + prefix, caret: caret.location + 1 + (prefix as NSString).length)
+        case .end:
+            replace(range, with: "", caret: range.location)
+        }
+    }
+
+    override func insertText(_ string: Any, replacementRange: NSRange) {
+        super.insertText(string, replacementRange: replacementRange)
+        guard (string as? String) == " " else { return }
+        let caret = selectedRange().location
+        let range = lineRange(at: caret)
+        let typed = nsString.substring(with: NSRange(location: range.location, length: caret - range.location))
+        if let expanded = MarkdownLine.expandingShortcut(typed) {
+            replace(NSRange(location: range.location, length: caret - range.location), with: expanded, caret: range.location + (expanded as NSString).length)
+        }
+    }
+
+    /// Backspace at the start of an item's words drops its marker, like Notes.
+    override func deleteBackward(_ sender: Any?) {
+        let caret = selectedRange()
+        let range = lineRange(at: caret.location)
+        let line = MarkdownLine(nsString.substring(with: range))
+        if caret.length == 0, line.markerLength > 0, caret.location == range.location + line.prefixLength, line.isListItem || line.kind == .quote {
+            replace(NSRange(location: range.location, length: line.prefixLength), with: "", caret: range.location)
+            return
+        }
+        super.deleteBackward(sender)
+    }
+
+    override func insertTab(_ sender: Any?) {
+        guard MarkdownLine(nsString.substring(with: lineRange(at: selectedRange().location))).isListItem else { return super.insertTab(sender) }
+        let caret = selectedRange()
+        let range = lineRange(at: caret.location)
+        replace(NSRange(location: range.location, length: 0), with: "  ", caret: caret.location + 2)
+    }
+
+    override func insertBacktab(_ sender: Any?) {
+        let caret = selectedRange()
+        let range = lineRange(at: caret.location)
+        let line = MarkdownLine(nsString.substring(with: range))
+        guard line.isListItem, line.indent > 0 else { return }
+        let remove = min(2, line.indent)
+        replace(NSRange(location: range.location, length: remove), with: "", caret: max(range.location, caret.location - remove))
+    }
+
+    /// Keeps the caret off the hidden marker: it lands where the words start, and ←
+    /// from there goes on to the end of the line above.
+    override func setSelectedRanges(_ ranges: [NSValue], affinity: NSSelectionAffinity, stillSelecting: Bool) {
+        guard !stillSelecting, ranges.count == 1, let only = ranges.first?.rangeValue, only.length == 0, only.location <= nsString.length else {
+            return super.setSelectedRanges(ranges, affinity: affinity, stillSelecting: stillSelecting)
+        }
+        let range = lineRange(at: only.location)
+        let line = MarkdownLine(nsString.substring(with: range))
+        let hidden = switch line.kind {
+        case .bullet, .checklist, .quote: line.prefixLength
+        default: 0
+        }
+        let wordsStart = range.location + hidden
+        var location = only.location
+        if hidden > 0, location < wordsStart {
+            let previous = selectedRange().location
+            let goingBack = previous == wordsStart && only.location < previous
+            location = goingBack && range.location > 0 ? range.location - 1 : wordsStart
+        }
+        super.setSelectedRanges([NSValue(range: NSRange(location: location, length: 0))], affinity: affinity, stillSelecting: stillSelecting)
+    }
+
+    // MARK: Shortcuts
+
+    override func performKeyEquivalent(with event: NSEvent) -> Bool {
+        guard window?.firstResponder === self else { return super.performKeyEquivalent(with: event) }
+        let flags = event.modifierFlags.intersection([.command, .shift, .option, .control])
+        let key = event.charactersIgnoringModifiers?.lowercased() ?? ""
+        switch (flags, key) {
+        case ([.command], "b"): wrap("**")
+        case ([.command], "i"): wrap("*")
+        case ([.command], "e"): wrap("`")
+        case ([.command, .shift], "x"): wrap("~~")
+        case ([.command, .shift], "l"): transformLines { line, _ in MarkdownLine.applying(.checklist, to: line) }
+        case ([.command, .shift], "7"), ([.command, .shift], "&"): transformLines { line, _ in MarkdownLine.applying(.bullet, to: line) }
+        case ([.command, .shift], "9"), ([.command, .shift], "("): transformLines { line, number in MarkdownLine.applying(.numbered, to: line, number: number) }
+        case ([.command, .shift], "u"): transformLines { line, _ in MarkdownLine.togglingCheckbox(line) ?? line }
+        default: return super.performKeyEquivalent(with: event)
+        }
+        return true
+    }
+
+    /// Wraps the selection in a marker, or unwraps it; with nothing selected, leaves the
+    /// caret between a pair to type into.
+    private func wrap(_ marker: String) {
+        let selection = selectedRange()
+        let length = (marker as NSString).length
+        let selected = nsString.substring(with: selection)
+        if selected.hasPrefix(marker), selected.hasSuffix(marker), (selected as NSString).length >= length * 2 {
+            let inner = String(selected.dropFirst(marker.count).dropLast(marker.count))
+            replace(selection, with: inner)
+            setSelectedRange(NSRange(location: selection.location, length: (inner as NSString).length))
+            return
+        }
+        replace(selection, with: marker + selected + marker)
+        setSelectedRange(NSRange(location: selection.location + length, length: selection.length))
+    }
+
+    // MARK: Checkboxes
+
+    override func mouseDown(with event: NSEvent) {
+        if toggleCheckbox(at: convert(event.locationInWindow, from: nil)) { return }
+        super.mouseDown(with: event)
+    }
+
+    /// A click on a checkbox ticks it without moving the caret.
+    private func toggleCheckbox(at point: NSPoint) -> Bool {
+        guard let layout = markdownLayout, let container = textContainer, let storage = textStorage, storage.length > 0 else { return false }
+        let inContainer = NSPoint(x: point.x - textContainerOrigin.x, y: point.y - textContainerOrigin.y)
+        let glyph = layout.glyphIndex(for: inContainer, in: container)
+        let character = min(layout.characterIndexForGlyph(at: glyph), storage.length - 1)
+        let range = lineRange(at: character)
+        let line = MarkdownLine(nsString.substring(with: range))
+        guard case .checklist = line.kind,
+              let frame = layout.markerFrame(for: NSRange(location: range.location, length: line.prefixLength))
+        else { return false }
+        let box = layout.checkboxRect(level: line.level, line: frame.line, baseline: frame.baseline).insetBy(dx: -5, dy: -4)
+        guard box.contains(inContainer), let toggled = MarkdownLine.togglingCheckbox(nsString.substring(with: range)) else { return false }
+        let caret = selectedRange()
+        replace(range, with: toggled)
+        setSelectedRange(caret)
+        return true
+    }
+}

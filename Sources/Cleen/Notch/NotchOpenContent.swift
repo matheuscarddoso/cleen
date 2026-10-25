@@ -14,9 +14,8 @@ struct NotchOpenContent: View {
                 .padding(.horizontal, NotchOpenContent.inset - 2)
             if state.showsSearch {
                 NotchSearchView(controller: controller)
-                    .padding(.horizontal, NotchOpenContent.inset)
-                    .padding(.top, 4)
-                    .padding(.bottom, 12)
+                    .padding(.top, 2)
+                    .transition(.opacity)
             } else if state.showsSettings {
                 NotchSettingsView()
                     .padding(.horizontal, NotchOpenContent.inset)

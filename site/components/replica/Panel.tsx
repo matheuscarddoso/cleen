@@ -82,7 +82,11 @@ export function Panel({
         </div>
         <div
           className="relative min-h-0 flex-1 overflow-hidden"
-          style={{ paddingInline: panel.inset, paddingTop: mode === "tool" ? 6 : 4, paddingBottom: mode === "tool" ? 0 : mode === "search" ? 12 : 10 }}
+          style={
+            mode === "search"
+              ? { paddingTop: 2 }
+              : { paddingInline: panel.inset, paddingTop: mode === "tool" ? 6 : 4, paddingBottom: mode === "tool" ? 0 : 10 }
+          }
         >
           {children}
         </div>

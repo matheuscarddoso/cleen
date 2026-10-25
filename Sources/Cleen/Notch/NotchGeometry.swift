@@ -15,6 +15,9 @@ struct NotchGeometry: Equatable {
     static var openPanelSize: CGSize { NotchSettings.panelSize }
     /// Room around the open panel for its shadow; the window is this much larger.
     static let shadowPadding = 36.0
+    /// The launcher grows the panel this tall, so a page of results fits (Raycast's
+    /// window shows about eight rows; this shows about as many).
+    static let searchHeight = 404.0
 
     init(screen: NSScreen) {
         screenFrame = screen.frame
@@ -39,10 +42,14 @@ struct NotchGeometry: Equatable {
         CGSize(width: notchSize.width + wingWidth * 2, height: notchSize.height)
     }
 
-    var openSize: CGSize {
+    var openSize: CGSize { openSize(showsSearch: false) }
+
+    /// The open panel; taller while it shows the launcher, never shorter than the
+    /// size chosen in Aparência.
+    func openSize(showsSearch: Bool) -> CGSize {
         CGSize(
             width: min(Self.openPanelSize.width, screenFrame.width - 40),
-            height: Self.openPanelSize.height
+            height: showsSearch ? max(Self.openPanelSize.height, min(Self.searchHeight, screenFrame.height * 0.6)) : Self.openPanelSize.height
         )
     }
 
@@ -52,15 +59,18 @@ struct NotchGeometry: Equatable {
     }
 
     /// The panel window: as big as the open notch plus shadow, hanging from the top.
-    var windowFrame: CGRect {
-        let width = openSize.width + Self.shadowPadding * 2
-        let height = openSize.height + Self.shadowPadding
+    /// It grows for the launcher and shrinks back after, so the clear area under a
+    /// normal panel never sits over the app below.
+    func windowFrame(showsSearch: Bool) -> CGRect {
+        let size = openSize(showsSearch: showsSearch)
+        let width = size.width + Self.shadowPadding * 2
+        let height = size.height + Self.shadowPadding
         return CGRect(x: screenFrame.midX - width / 2, y: screenFrame.maxY - height, width: width, height: height)
     }
 
     /// The area that reacts to the pointer, in global coordinates.
-    func hotZone(isOpen: Bool, showsWings: Bool) -> CGRect {
-        let size = isOpen ? openSize : closedSize(showsWings: showsWings)
+    func hotZone(isOpen: Bool, showsWings: Bool, showsSearch: Bool = false) -> CGRect {
+        let size = isOpen ? openSize(showsSearch: showsSearch) : closedSize(showsWings: showsWings)
         let rect = CGRect(x: screenFrame.midX - size.width / 2, y: screenFrame.maxY - size.height, width: size.width, height: size.height)
         // A little forgiveness: the closed notch is small, the open edge shouldn't be a cliff.
         return isOpen ? rect.insetBy(dx: -14, dy: -14) : rect.insetBy(dx: -6, dy: -3)

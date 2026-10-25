@@ -9,7 +9,7 @@ struct SearchRow: View {
     var body: some View {
         HStack(spacing: 10) {
             icon
-                .frame(width: 22, height: 22)
+                .frame(width: 20, height: 20)
             Text(item.title)
                 .font(.system(size: 13, weight: .medium))
                 .foregroundStyle(NotchStyle.primary)
@@ -23,13 +23,13 @@ struct SearchRow: View {
             Spacer(minLength: 8)
             if let kind = item.kind {
                 Text(kind)
-                    .font(.system(size: 11, weight: .medium))
+                    .font(.system(size: 12))
                     .foregroundStyle(isSelected ? NotchStyle.secondary : NotchStyle.tertiary)
             }
         }
         .padding(.horizontal, 10)
-        .frame(height: 34)
-        .background(isSelected ? NotchStyle.selection : .clear, in: .rect(cornerRadius: 9, style: .continuous))
+        .frame(height: 32)
+        .background(isSelected ? NotchStyle.selection : .clear, in: .rect(cornerRadius: 8, style: .continuous))
         .contentShape(.rect)
     }
 
@@ -38,22 +38,22 @@ struct SearchRow: View {
         switch item.icon {
         case .symbol(let name, let color):
             Image(systemName: name)
-                .font(.system(size: 11.5, weight: .medium))
+                .font(.system(size: 10.5, weight: .medium))
                 .foregroundStyle(.white)
-                .frame(width: 22, height: 22)
-                .background(color.gradient, in: .rect(cornerRadius: 6, style: .continuous))
+                .frame(width: 20, height: 20)
+                .background(color.gradient, in: .rect(cornerRadius: 5.5, style: .continuous))
         case .app(let url):
-            FileIcon(url: url, size: 22)
+            FileIcon(url: url, size: 20)
         case .emoji(let emoji):
-            Text(emoji).font(.system(size: 17))
+            Text(emoji).font(.system(size: 16))
         case .color(let color):
             RoundedRectangle(cornerRadius: 6, style: .continuous)
                 .fill(Color(nsColor: color))
                 .overlay { RoundedRectangle(cornerRadius: 6, style: .continuous).strokeBorder(Color.white.opacity(0.2)) }
         case .lucide(let icon):
-            LucideGlyph(icon: icon, size: 15)
+            LucideGlyph(icon: icon, size: 14)
                 .foregroundStyle(NotchStyle.primary)
-                .frame(width: 22, height: 22)
+                .frame(width: 20, height: 20)
                 .background(NotchStyle.control, in: .rect(cornerRadius: 6, style: .continuous))
         case .text(let text):
             Text(text)

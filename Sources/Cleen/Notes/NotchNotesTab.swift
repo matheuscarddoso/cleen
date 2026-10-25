@@ -6,7 +6,8 @@ import SwiftUI
 struct NotchNotesTab: View {
     @Environment(NotesModel.self) private var notes
     @Environment(NotchState.self) private var notch
-    @FocusState private var editorFocused: Bool
+    @State private var editorFocused = false
+    @State private var focusRequest = 0
     /// The panel is kept open because the person is writing.
     @State private var holdsForTyping = false
 
@@ -20,10 +21,7 @@ struct NotchNotesTab: View {
         // text system and input method, which stalled the switch when done on its frame.
         .task {
             try? await Task.sleep(for: .milliseconds(350))
-            editorFocused = true
-        }
-        .onChange(of: editorFocused) { _, focused in
-            if !focused { releaseHold() }
+            focusEditor()
         }
         .onDisappear(perform: releaseHold)
     }
@@ -34,28 +32,20 @@ struct NotchNotesTab: View {
             holdWhileTyping()
         })
         return ZStack(alignment: .topLeading) {
-            TextEditor(text: text)
-                .textEditorStyle(.plain)
-                .scrollContentBackground(.hidden)
-                .scrollIndicators(.hidden)
-                .font(.system(size: 13))
-                .lineSpacing(2)
-                .foregroundStyle(NotchStyle.primary)
-                .tint(NotchStyle.primary)
-                .focused($editorFocused)
-                .accessibilityLabel("Nota")
+            NoteEditor(text: text, focusRequest: focusRequest) { focused in
+                editorFocused = focused
+                if !focused { releaseHold() }
+            }
             if notes.selected.text.isEmpty {
-                // TextEditor lays its text out 5 pt in (the text container's padding).
-                Text("Escreva algo…")
+                Text("Escreva algo… - lista, [] tarefa, # título")
                     .font(.system(size: 13))
                     .foregroundStyle(NotchStyle.tertiary)
-                    .padding(.leading, 5)
                     .allowsHitTesting(false)
                     .transition(.opacity)
             }
         }
-        .padding(.horizontal, 9)
-        .padding(.vertical, 8)
+        .padding(.horizontal, 14)
+        .padding(.vertical, 9)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .background {
             // A click on the card's margin still lands in the note.
@@ -73,7 +63,7 @@ struct NotchNotesTab: View {
     }
 
     private func focusEditor() {
-        editorFocused = true
+        focusRequest += 1
     }
 
     /// Writing keeps the panel open even if the pointer drifts off it, so the notch never

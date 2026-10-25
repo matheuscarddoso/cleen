@@ -362,7 +362,6 @@
 "Esvaziar a Shelf" = "Empty the Shelf";
 "Eventos de hoje e do mês" = "Today's and this month's events";
 "Excluir" = "Delete";
-"Executar" = "Run";
 "Experimente agora: ⌃ Control, ⌥ Option e C." = "Try it now: ⌃ Control, ⌥ Option, and C.";
 "Extra" = "Extra";
 "Fahrenheit" = "Fahrenheit";
@@ -1104,3 +1103,13 @@
 
 /* Tab titles from the scaffolding on main */
 "Return cola o resultado" = "Return pastes the result";
+
+/* Launcher key bar */
+"Ajustar janela" = "Arrange Window";
+"Executar" = "Run";
+"Mover" = "Move";
+"Fechar" = "Close";
+
+/* Notes placeholder with Markdown hints */
+"Escreva algo… - lista, [] tarefa, # título" = "Write something… - list, [] to-do, # heading";
+"Escreva aqui" = "Write here";

@@ -10,14 +10,16 @@ struct NotchSearchView: View {
 
     var body: some View {
         @Bindable var search = search
-        VStack(spacing: 8) {
+        VStack(spacing: 0) {
+            // Raycast's layout: the field bare on top, a hairline, the list, and a bar of
+            // keys at the bottom. Nothing boxed, so the rows get the room.
             HStack(spacing: 10) {
                 Image(systemName: "magnifyingglass")
-                    .font(.system(size: 14, weight: .medium))
+                    .font(.system(size: 15, weight: .medium))
                     .foregroundStyle(NotchStyle.secondary)
                 TextField("Buscar apps, janelas, emoji, cálculos…", text: $search.query)
                     .textFieldStyle(.plain)
-                    .font(.system(size: 16, weight: .medium))
+                    .font(.system(size: 17))
                     .focused($focused)
                     .onSubmit(runSelected)
                     .onKeyPress(.downArrow) { search.move(1); return .handled }
@@ -35,12 +37,17 @@ struct NotchSearchView: View {
                     .help("Limpar a busca")
                 }
             }
-            .padding(.horizontal, 12)
+            .padding(.horizontal, NotchOpenContent.inset)
             .frame(height: 40)
-            .background(NotchStyle.card, in: .rect(cornerRadius: 12, style: .continuous))
-            .overlay { RoundedRectangle(cornerRadius: 12, style: .continuous).strokeBorder(NotchStyle.cardStroke) }
+
+            Rectangle()
+                .fill(NotchStyle.separator)
+                .frame(height: 1)
 
             results
+                .frame(maxHeight: .infinity)
+
+            footer
         }
         .onAppear { focused = true }
         .onChange(of: state.searchFocusRequest) { focused = true }
@@ -56,15 +63,15 @@ struct NotchSearchView: View {
         } else {
             ScrollViewReader { proxy in
                 ScrollView {
-                    LazyVStack(alignment: .leading, spacing: 1) {
+                    LazyVStack(alignment: .leading, spacing: 0) {
                         let selectedID = search.selectedItem?.id
                         ForEach(search.sections) { section in
                             Text(section.title)
-                                .font(.system(size: 10.5, weight: .medium))
+                                .font(.system(size: 11, weight: .medium))
                                 .foregroundStyle(NotchStyle.tertiary)
                                 .padding(.horizontal, 10)
-                                .padding(.top, 6)
-                                .padding(.bottom, 2)
+                                .padding(.top, 8)
+                                .padding(.bottom, 3)
                             ForEach(section.items) { item in
                                 SearchRow(item: item, isSelected: item.id == selectedID)
                                     .id(item.id)
@@ -73,7 +80,8 @@ struct NotchSearchView: View {
                             }
                         }
                     }
-                    .padding(.bottom, 4)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 2)
                 }
                 .scrollIndicators(.hidden)
                 .scrollEdgeFade()
@@ -81,6 +89,35 @@ struct NotchSearchView: View {
                     if let id = search.selectedItem?.id { proxy.scrollTo(id) }
                 }
             }
+        }
+    }
+
+    /// The keys, as Raycast shows them: what Return does to the selected row, and Esc.
+    private var footer: some View {
+        HStack(spacing: 14) {
+            Spacer()
+            if let item = search.selectedItem {
+                FooterKey(label: actionLabel(for: item), keys: ["⏎"], emphasized: true)
+            }
+            FooterKey(label: String(localized: "Mover"), keys: ["↑", "↓"])
+            FooterKey(label: String(localized: "Fechar"), keys: ["esc"])
+        }
+        .padding(.horizontal, NotchOpenContent.inset + 6)
+        .frame(height: 32)
+        .overlay(alignment: .top) {
+            Rectangle().fill(NotchStyle.separator).frame(height: 1)
+        }
+        .padding(.bottom, 6)
+    }
+
+    /// Return's verb for a row: the kinds that already read as one stay as they are.
+    private func actionLabel(for item: SearchItem) -> String {
+        switch item.kind {
+        case String(localized: "App"), String(localized: "Cleen"): String(localized: "Abrir")
+        case String(localized: "Janela"): String(localized: "Ajustar janela")
+        case String(localized: "Comando"): String(localized: "Executar")
+        case let kind?: kind
+        case nil: String(localized: "Abrir")
         }
     }
 
@@ -93,8 +130,10 @@ struct NotchSearchView: View {
         case .close: controller.closeSearch(paste: false)
         case .closeAndPaste: controller.closeSearch(paste: true)
         case .openTab(let tab):
-            state.showsSearch = false
-            state.tab = tab
+            withAnimation(NotchController.searchResize) {
+                state.showsSearch = false
+                state.tab = tab
+            }
         case .stay: break
         }
     }

@@ -15,9 +15,12 @@ public struct QuickNote: Codable, Sendable, Identifiable, Equatable {
     /// Nothing but spaces and line breaks.
     public var isBlank: Bool { text.allSatisfy(\.isWhitespace) }
 
-    /// The first line that has words in it, trimmed: "Lista do mercado".
+    /// The first line that has words in it, trimmed and without its Markdown marker:
+    /// "# Lista do mercado" and "- [ ] Lista do mercado" both read "Lista do mercado".
     public var title: String? {
-        lines.first
+        lines.lazy
+            .map { MarkdownLine($0).content.trimmingCharacters(in: .whitespaces) }
+            .first { !$0.isEmpty }
     }
 
     /// The note without its blank lines, so a glance of a few lines shows words.

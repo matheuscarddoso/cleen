@@ -21,7 +21,8 @@ struct NotchRootView: View {
         if let geometry = state.geometry {
             let closed = geometry.closedSize(wingWidth: wingWidth)
             let welcomes = state.isOpen && state.showsWelcome
-            let size = state.isOpen ? (welcomes ? geometry.welcomeSize : geometry.openSize) : closed
+            let open = geometry.openSize(showsSearch: state.showsSearch)
+            let size = state.isOpen ? (welcomes ? geometry.welcomeSize : open) : closed
             let shape = NotchShape(
                 topRadius: state.isOpen ? NotchStyle.openTopRadius : NotchStyle.closedTopRadius,
                 bottomRadius: state.isOpen ? (welcomes ? 26 : NotchStyle.openBottomRadius) : NotchStyle.closedBottomRadius
@@ -38,7 +39,7 @@ struct NotchRootView: View {
                 } else if state.isOpen {
                     NotchOpenContent(controller: controller, notchHeight: geometry.notchSize.height)
                         .padding(.horizontal, NotchStyle.openTopRadius)
-                        .frame(width: geometry.openSize.width, height: geometry.openSize.height, alignment: .top)
+                        .frame(width: open.width, height: open.height, alignment: .top)
                         .transition(state.opensInstantly ? .identity : .notchPanel)
                 } else if let reading = mediaKeys.reading(on: controller.screen) {
                     MediaKeyHUDWings(reading: reading, notchWidth: geometry.notchSize.width, notchHeight: geometry.notchSize.height)
@@ -69,6 +70,9 @@ struct NotchRootView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             .animation(.spring(response: 0.42, dampingFraction: 0.82), value: wingWidth)
+            .onChange(of: state.showsSearch) { _, shows in
+                if !shows { controller.fitWindow(showsSearch: false) }
+            }
             .environment(\.colorScheme, .dark)
             .preferredColorScheme(.dark)
         }

@@ -35,6 +35,9 @@ export function Replica({
   const [mode, setMode] = useState<Mode>(initialMode);
   const [size, setSize] = useState<{ width: number; height: number }>({ width: panel.width, height: panel.height });
   const Tool = tools[tab];
+  // The launcher grows the panel so a page of results fits, like the app (404 pt there;
+  // as tall as the stage allows here).
+  const height = mode === "search" ? Math.max(size.height, 356) : size.height;
   const title = mode === "search" ? "Buscar" : mode === "settings" ? "Ajustes" : tabTitle(tab);
 
   return (
@@ -45,7 +48,7 @@ export function Replica({
           mode={mode}
           tab={tab}
           width={size.width}
-          height={size.height}
+          height={height}
           onTab={(next) => setTab(next)}
           onSearch={() => setMode("search")}
           onSettings={() => setMode(mode === "settings" ? "tool" : "settings")}

@@ -24,27 +24,27 @@ function WindowGlyph({ region: [x, y, width, height] }: { region: Region }) {
   );
 }
 
-/** A result's 22 pt icon (SearchRow.icon). Apps are drawn, never their real artwork. */
+/** A result's 20 pt icon (SearchRow.icon). Apps are drawn, never their real artwork. */
 export function ItemGlyph({ icon }: { icon: ItemIcon }) {
   switch (icon.kind) {
     case "symbol": {
       const Glyph = icon.glyph;
       return (
-        <span className="flex size-[22px] items-center justify-center rounded-[6px] text-white" style={{ background: gradient(icon.color) }}>
+        <span className="flex size-5 items-center justify-center rounded-[5.5px] text-white" style={{ background: gradient(icon.color) }}>
           <Glyph size={12} strokeWidth={2.3} aria-hidden />
         </span>
       );
     }
     case "window":
       return (
-        <span className="flex size-[22px] items-center justify-center rounded-[6px]" style={{ background: gradient("rgb(10,133,255)") }}>
+        <span className="flex size-5 items-center justify-center rounded-[5.5px]" style={{ background: gradient("rgb(10,133,255)") }}>
           <WindowGlyph region={icon.region} />
         </span>
       );
     case "app": {
       const Glyph = icon.look.glyph;
       return (
-        <span className="flex size-[22px] items-center justify-center">
+        <span className="flex size-5 items-center justify-center">
           <span
             className="flex size-[19px] items-center justify-center rounded-[4.6px] shadow-[0_0.5px_1px_rgba(0,0,0,0.5),inset_0_0_0_0.5px_rgba(255,255,255,0.18)]"
             style={{ background: `linear-gradient(180deg, ${icon.look.from}, ${icon.look.to})`, color: icon.look.ink ?? "#fff" }}
@@ -55,13 +55,13 @@ export function ItemGlyph({ icon }: { icon: ItemIcon }) {
       );
     }
     case "emoji":
-      return <span className="flex size-[22px] items-center justify-center text-[17px] leading-none" aria-hidden>{icon.emoji}</span>;
+      return <span className="flex size-5 items-center justify-center text-[16px] leading-none" aria-hidden>{icon.emoji}</span>;
     case "color":
-      return <span className="block size-[22px] rounded-[6px] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.2)]" style={{ background: icon.hex }} />;
+      return <span className="block size-5 rounded-[5.5px] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.2)]" style={{ background: icon.hex }} />;
     case "lucide": {
       const Glyph = icon.glyph;
       return (
-        <span className="flex size-[22px] items-center justify-center rounded-[6px]" style={{ background: notch.control, color: notch.primary }}>
+        <span className="flex size-5 items-center justify-center rounded-[5.5px]" style={{ background: notch.control, color: notch.primary }}>
           <Glyph size={15} strokeWidth={2} aria-hidden />
         </span>
       );

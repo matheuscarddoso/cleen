@@ -34,7 +34,7 @@ final class NotchController {
         let geometry = NotchGeometry(screen: screen)
         state.geometry = geometry
 
-        let panel = NotchPanel(frame: geometry.windowFrame)
+        let panel = NotchPanel(frame: geometry.windowFrame(showsSearch: false))
         let root = NotchRootView(controller: self)
             .injecting(app)
             .environment(state)
@@ -128,8 +128,14 @@ final class NotchController {
         state.showsSettings = false
         state.mirrorExpanded = false
         let wasOpen = state.isOpen
-        if !wasOpen { state.opensInstantly = true }
-        state.showsSearch = true
+        fitWindow(showsSearch: true)
+        if wasOpen {
+            // From an open panel the launcher grows out of it.
+            withAnimation(Self.searchResize) { state.showsSearch = true }
+        } else {
+            state.opensInstantly = true
+            withTransaction(Self.instant) { state.showsSearch = true }
+        }
         // Moving the pointer away doesn't close a launcher; Esc or a click elsewhere does.
         state.holdsOpen = true
         panel?.ignoresMouseEvents = false
@@ -146,6 +152,28 @@ final class NotchController {
         }
     }
 
+    /// How the panel grows into the launcher and back.
+    static let searchResize = Animation.spring(response: 0.4, dampingFraction: 0.86)
+
+    private var pendingShrink: Task<Void, Never>?
+
+    /// Sizes the window for the launcher at once when it opens; when it goes, waits for
+    /// the panel to finish shrinking before taking the room back.
+    func fitWindow(showsSearch: Bool) {
+        pendingShrink?.cancel()
+        guard let geometry = state.geometry, let panel else { return }
+        let frame = geometry.windowFrame(showsSearch: showsSearch)
+        if showsSearch {
+            if panel.frame != frame { panel.setFrame(frame, display: true) }
+            return
+        }
+        pendingShrink = Task { [weak self] in
+            try? await Task.sleep(for: .milliseconds(600))
+            guard !Task.isCancelled, let self, !self.state.showsSearch, let panel = self.panel else { return }
+            if panel.frame != frame { panel.setFrame(frame, display: true) }
+        }
+    }
+
     func toggleSearch() {
         state.isOpen && state.showsSearch ? close() : openSearch()
     }
@@ -155,6 +183,9 @@ final class NotchController {
     func closeSearch(paste: Bool) {
         close()
         guard paste else { return }
+        // With one of Cleen's own windows in front (Ajustes, the tour), step back so the
+        // app underneath is the one that gets the paste.
+        if NSApp.isActive { NSApp.deactivate() }
         Task {
             try? await Task.sleep(for: .milliseconds(120))
             PasteKeystroke.send()
@@ -163,10 +194,17 @@ final class NotchController {
 
     /// The panel had the keyboard (search, a text field): hand it back to the app in
     /// front, which never stopped being active.
+    /// Hands the keyboard back to the app you were in, so a paste lands there.
+    /// `resignKey()` only reports a change, it doesn't make one: the panel stayed key and
+    /// a ⌘V sent after closing went to Cleen. Ordering the panel out is what really gives
+    /// up key status; ordering it straight back in (never key) keeps the closed notch on
+    /// screen, in the same frame, so nothing flickers.
     private func giveBackKeyboard() {
-        guard let panel, panel.isKeyWindow else { return }
-        panel.resignKey()
-        NSWorkspace.shared.frontmostApplication?.activate()
+        guard let panel else { return }
+        if panel.isKeyWindow {
+            panel.orderOut(nil)
+            panel.orderFrontRegardless()
+        }
     }
 
     func togglePin() {
@@ -204,7 +242,7 @@ final class NotchController {
     }
 
     private var pointerIsInside: Bool {
-        state.geometry?.hotZone(isOpen: true, showsWings: NotchSettings.showsWings).contains(NSEvent.mouseLocation) ?? false
+        state.geometry?.hotZone(isOpen: true, showsWings: NotchSettings.showsWings, showsSearch: state.showsSearch).contains(NSEvent.mouseLocation) ?? false
     }
 
     /// Opens the panel on Ajustes.
@@ -261,7 +299,7 @@ final class NotchController {
         }
 
         if state.isOpen {
-            let inside = geometry.hotZone(isOpen: true, showsWings: wings).contains(location)
+            let inside = geometry.hotZone(isOpen: true, showsWings: wings, showsSearch: state.showsSearch).contains(location)
             // Only the shelf takes files, so only it pays for reading the drag pasteboard.
             let draggingFiles = inside && event.type == .leftMouseDragged && state.tab == .shelf && !state.showsSettings && isDraggingFiles
             if state.isDraggingFiles != draggingFiles { state.isDraggingFiles = draggingFiles }

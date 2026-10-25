@@ -29,10 +29,10 @@ cp -R "$ROOT/Support/Localization/"*.lproj "$APP/Contents/Resources/"
 # Brand marks drawn as they are (the Claude logo where the app shows Claude).
 cp "$ROOT/Support/Brand/"*.svg "$APP/Contents/Resources/"
 
-# Icon: regenerate only when the script changed.
+# Icon: regenerate only when the script or the artwork changed.
 ICONSET="$ROOT/build/AppIcon.iconset"
 ICNS="$ROOT/build/AppIcon.icns"
-if [[ ! -f "$ICNS" || "$ROOT/scripts/make-icon.swift" -nt "$ICNS" ]]; then
+if [[ ! -f "$ICNS" || "$ROOT/scripts/make-icon.swift" -nt "$ICNS" || "$ROOT/Support/Icon/artwork.png" -nt "$ICNS" ]]; then
   swift "$ROOT/scripts/make-icon.swift" "$ICONSET" >/dev/null
   iconutil -c icns "$ICONSET" -o "$ICNS"
 fi

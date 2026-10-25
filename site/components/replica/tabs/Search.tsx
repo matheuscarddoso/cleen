@@ -107,11 +107,10 @@ export function SearchView() {
   const showsCaret = manual === null && !focused && !reduced && (caret || !typed.finished);
 
   return (
-    <div className="flex h-full flex-col gap-2">
-      <label
-        className="relative flex h-10 shrink-0 items-center gap-2.5 rounded-[12px] px-3"
-        style={{ background: notch.card, boxShadow: `inset 0 0 0 1px ${notch.cardStroke}` }}
-      >
+    // Raycast's layout, as the app has it: the field bare on top, a hairline, the list,
+    // and a bar of keys at the bottom.
+    <div className="flex h-full flex-col">
+      <label className="relative flex h-10 shrink-0 items-center gap-2.5 px-5">
         <Search size={15} strokeWidth={2.4} className="shrink-0" style={{ color: notch.secondary }} aria-hidden />
         <span className="relative flex min-w-0 flex-1 items-center">
           <input
@@ -136,11 +135,11 @@ export function SearchView() {
             aria-autocomplete="list"
             autoComplete="off"
             spellCheck={false}
-            className="w-full bg-transparent text-[16px] font-medium text-white caret-white outline-none placeholder:text-white/30"
+            className="w-full bg-transparent text-[17px] text-white caret-white outline-none placeholder:text-white/30"
             style={{ outline: "none" }}
           />
           {showsCaret && (
-            <span aria-hidden className="pointer-events-none absolute left-0 top-1/2 flex -translate-y-1/2 whitespace-pre text-[16px] font-medium text-transparent">
+            <span aria-hidden className="pointer-events-none absolute left-0 top-1/2 flex -translate-y-1/2 whitespace-pre text-[17px] text-transparent">
               {query}
               <span className="ml-px h-[19px] w-[2px] rounded-full bg-white" />
             </span>
@@ -162,6 +161,7 @@ export function SearchView() {
           </button>
         )}
       </label>
+      <span aria-hidden className="h-px shrink-0" style={{ background: notch.separator }} />
 
       {done ? (
         <p role="status" className="flex flex-1 animate-[numeric_300ms_ease-out] items-center justify-center gap-1.5 text-[12px] font-medium">
@@ -178,14 +178,14 @@ export function SearchView() {
           id={`${id}-results`}
           role="listbox"
           aria-label="Resultados"
-          className="relative min-h-0 flex-1 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="relative min-h-0 flex-1 overflow-y-auto px-2.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           onScroll={(event) => setScrolled(event.currentTarget.scrollTop > 0)}
           style={{ maskImage: `linear-gradient(to bottom, ${scrolled ? "transparent, #000 14px" : "#000"}, #000 calc(100% - 14px), transparent)` }}
         >
-          <div className="flex flex-col gap-px pb-1">
+          <div className="flex flex-col py-0.5">
             {sections.map((section) => (
-              <div key={section.title} role="group" aria-label={section.title} className="flex flex-col gap-px">
-                <span aria-hidden className="px-2.5 pb-0.5 pt-1.5 text-[10.5px] font-medium leading-[13px]" style={{ color: notch.tertiary }}>
+              <div key={section.title} role="group" aria-label={section.title} className="flex flex-col">
+                <span aria-hidden className="px-2.5 pb-[3px] pt-2 text-[11px] font-medium leading-[13px]" style={{ color: notch.tertiary }}>
                   {section.title}
                 </span>
                 {section.items.map((item) => {
@@ -210,6 +210,40 @@ export function SearchView() {
           </div>
         </div>
       )}
+      <KeyBar action={selected ? actionLabel(selected.kind) : null} />
+    </div>
+  );
+}
+
+/** Return's verb for a row, as the app's key bar words it. */
+function actionLabel(kind: string | undefined): string {
+  if (kind === "App" || kind === "Cleen" || kind === undefined) return "Abrir";
+  if (kind === "Janela") return "Ajustar janela";
+  if (kind === "Comando") return "Executar";
+  return kind;
+}
+
+/** The bottom bar (FooterKey): what Return does to the selected row, ↑↓ and Esc. */
+function KeyBar({ action }: { action: string | null }) {
+  const keys: { label: string; keys: string[]; emphasized?: boolean }[] = [
+    ...(action ? [{ label: action, keys: ["⏎"], emphasized: true }] : []),
+    { label: "Mover", keys: ["↑", "↓"] },
+    { label: "Fechar", keys: ["esc"] },
+  ];
+  return (
+    <div aria-hidden className="flex h-8 shrink-0 items-center justify-end gap-3.5 border-t px-[26px] mb-1.5" style={{ borderColor: notch.separator }}>
+      {keys.map((key) => (
+        <span key={key.label} className="flex items-center gap-1.5 text-[12px] font-medium" style={{ color: key.emphasized ? notch.primary : notch.secondary }}>
+          {key.label}
+          <span className="flex gap-[3px]">
+            {key.keys.map((glyph) => (
+              <span key={glyph} className="flex h-5 min-w-5 items-center justify-center rounded-[5px] px-1 text-[11px]" style={{ background: notch.control, color: notch.secondary }}>
+                {glyph}
+              </span>
+            ))}
+          </span>
+        </span>
+      ))}
     </div>
   );
 }
@@ -224,7 +258,7 @@ function Row({ id, index, item, selected, onHover, onRun }: { id: string; index:
       aria-selected={selected}
       onPointerMove={onHover}
       onClick={onRun}
-      className="flex h-[34px] shrink-0 cursor-default items-center gap-2.5 rounded-[9px] px-2.5"
+      className="flex h-8 shrink-0 cursor-default items-center gap-2.5 rounded-[8px] px-2.5"
       style={{ background: selected ? notch.selection : undefined }}
     >
       <ItemGlyph icon={item.icon} />
@@ -236,7 +270,7 @@ function Row({ id, index, item, selected, onHover, onRun }: { id: string; index:
       )}
       <span className="min-w-2 flex-1" />
       {item.kind && (
-        <span className="shrink-0 text-[11px] font-medium" style={{ color: selected ? notch.secondary : notch.tertiary }}>
+        <span className="shrink-0 text-[12px]" style={{ color: selected ? notch.secondary : notch.tertiary }}>
           {item.kind}
         </span>
       )}
