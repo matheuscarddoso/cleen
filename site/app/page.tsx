@@ -61,7 +61,7 @@ export default function Home() {
       <Navigation />
       <div className="ribbon">
         <p className="ribbon-text mx-auto max-w-[1000px] px-5 py-4 text-center text-[14px] leading-[1.43]">
-          Cleen {site.version}: notas em Markdown e colagem direto no app em que você estava.{" "}
+          Cleen {site.version}: atualiza sozinho e mostra só as IAs que você usa.{" "}
           <a href={site.download} className="ribbon-link whitespace-nowrap hover:underline">
             Baixe grátis ›
           </a>

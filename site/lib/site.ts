@@ -2,7 +2,7 @@
 export const site = {
   name: "Cleen",
   url: "https://cleen.ocardoso.com",
-  version: "1.2.0",
+  version: "1.2.1",
   /** A stable asset name on every release, so this link never goes stale. */
   download: "https://github.com/matheuscarddoso/cleen/releases/latest/download/Cleen.dmg",
   releases: "https://github.com/matheuscarddoso/cleen/releases",
