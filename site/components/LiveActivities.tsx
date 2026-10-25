@@ -42,7 +42,7 @@ export function LiveActivities() {
       key: "music",
       label: "Música",
       width: "300px",
-      left: <span className="h-[18px] w-[18px] rounded-[5px] bg-[linear-gradient(160deg,#ff4fa3,#a23cf0_52%,#2a1a6e)]" />,
+      left: <span className="h-[18px] w-[18px] rounded-[5px] bg-black bg-[url(/covers/iceman.jpg)] bg-cover bg-center" />,
       right: <Equalizer playing={running && index === 3} />,
     },
     {

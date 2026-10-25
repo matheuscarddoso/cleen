@@ -23,7 +23,7 @@ export function Navigation() {
       <div className="bg-page/90 backdrop-blur-xl">
         <nav aria-label="Global" className="mx-auto flex h-11 max-w-[1000px] items-center justify-center gap-8 px-5 text-[12px] text-ink/80 md:gap-11">
           <a href="#topo" aria-label="Cleen">
-            <Image src="/cleen-icon.png" alt="" width={18} height={18} />
+            <Image src="/cleen-icon.png" alt="" width={18} height={18} unoptimized />
           </a>
           {global.map((link) => (
             <a key={link.label} href={link.href} className="hidden transition-colors hover:text-ink sm:inline">

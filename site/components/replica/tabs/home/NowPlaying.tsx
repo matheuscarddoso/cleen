@@ -29,6 +29,8 @@ export function NowPlaying({
       <div className="relative size-[88px] shrink-0">
         <div className="absolute inset-0 overflow-hidden rounded-[22px]" style={{ background: "rgb(41,41,41)" }}>
           <div key={track.title} className="absolute inset-0 motion-safe:animate-[numeric_400ms_ease-out]" style={{ background: track.artwork }} />
+          {/* A hairline so a dark cover still has an edge on the black panel. */}
+          <div aria-hidden className="absolute inset-0 rounded-[22px] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)]" />
         </div>
         <AppBadge />
       </div>

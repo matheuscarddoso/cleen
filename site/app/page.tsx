@@ -72,7 +72,7 @@ export default function Home() {
         {/* Hero */}
         <section className="overflow-hidden rounded-[18px] bg-tile">
           <div className="px-6 pt-14 text-center sm:pt-16">
-            <Image src="/cleen-icon.png" alt="Ícone do Cleen" width={96} height={96} priority className="mx-auto" />
+            <Image src="/cleen-icon.png" alt="Ícone do Cleen" width={96} height={96} priority className="mx-auto" unoptimized />
             <p className="mt-3 text-[17px] font-semibold text-new">Novo</p>
             <h1 className="mt-1 text-[clamp(40px,5vw,56px)] font-semibold leading-[1.07] tracking-[-0.005em]">Cleen</h1>
             <p className="mt-1 text-[clamp(22px,2.4vw,28px)] font-normal leading-[1.14] tracking-[0.007em]">Tudo no notch.</p>
@@ -221,7 +221,7 @@ export default function Home() {
             <p className="mt-3 text-[19px] text-mute">Grátis. Para sempre.</p>
           </div>
           <div className="mx-auto mt-10 max-w-[680px] rounded-[18px] bg-tile px-8 py-12 text-center">
-            <Image src="/cleen-icon.png" alt="" width={84} height={84} className="mx-auto" />
+            <Image src="/cleen-icon.png" alt="" width={84} height={84} className="mx-auto" unoptimized />
             <h3 className="mt-3 text-[28px] font-semibold tracking-[-0.02em]">Cleen</h3>
             <p className="mt-1 text-[48px] font-semibold tracking-[-0.03em]">Grátis</p>
             <p className="text-[15px] text-mute">Sem conta, sem assinatura, sem anúncio.</p>

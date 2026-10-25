@@ -1,30 +1,15 @@
-/** Content for Início: three Drake songs, and a made-up week of events and a few reminders. */
+/** Content for Início: Drake's newest songs, and a made-up week of events and a few reminders. */
 
 export type Track = { title: string; album: string; artist: string; artwork: string };
 
-/** Artwork as layered gradients in each album's mood, so every cover reads as one at 88 pt. */
+/** The album covers, as a CSS background. */
+const cover = (file: string) => `#000 url(/covers/${file}) center / cover no-repeat`;
+
 export const tracks: Track[] = [
-  {
-    title: "Hotline Bling",
-    album: "Views",
-    artist: "Drake",
-    artwork:
-      "radial-gradient(circle at 30% 28%, rgba(255,214,240,0.85) 0 9%, rgba(255,120,200,0.25) 10%, transparent 32%), linear-gradient(160deg, #ff4fa3 0%, #a23cf0 52%, #2a1a6e 100%)",
-  },
-  {
-    title: "Passionfruit",
-    album: "More Life",
-    artist: "Drake",
-    artwork:
-      "radial-gradient(circle at 50% 58%, #ffe08a 0 17%, rgba(255,200,110,0.35) 18%, transparent 36%), linear-gradient(180deg, #ffab45 0%, #e8573a 58%, #7a2335 100%)",
-  },
-  {
-    title: "God's Plan",
-    album: "Scorpion",
-    artist: "Drake",
-    artwork:
-      "radial-gradient(ellipse 120% 38% at 50% 100%, #141414 0 60%, transparent 61%), linear-gradient(180deg, #f1f1f1 0%, #a9a9a9 55%, #3a3a3a 100%)",
-  },
+  { title: "Janice STFU", album: "ICEMAN", artist: "Drake", artwork: cover("iceman.jpg") },
+  { title: "Hoe Phase", album: "MAID OF HONOUR", artist: "Drake", artwork: cover("maid-of-honour.jpg") },
+  { title: "Burning Bridges", album: "ICEMAN", artist: "Drake", artwork: cover("iceman.jpg") },
+  { title: "Dust", album: "ICEMAN", artist: "Drake", artwork: cover("iceman.jpg") },
 ];
 
 /** Today in the replica: quinta-feira, 22 de outubro (the menu bar's "qui"). */
