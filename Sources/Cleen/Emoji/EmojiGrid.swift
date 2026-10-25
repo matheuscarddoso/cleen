@@ -50,6 +50,22 @@ struct EmojiGrid: View {
         model.isSearching ? model.results : model.recents + model.sections.flatMap(\.items)
     }
 
+    /// The grid as it's drawn: rows of positions in the reading order. Each section starts
+    /// a row of its own, so moving up or down keeps the column across sections.
+    static func rows(of model: EmojiModel, columns: Int) -> [[Int]] {
+        let width = max(columns, 1)
+        let groups = model.isSearching ? [model.results.count] : [model.recents.count] + model.sections.map(\.items.count)
+        var rows: [[Int]] = []
+        var start = 0
+        for count in groups where count > 0 {
+            for rowStart in stride(from: 0, to: count, by: width) {
+                rows.append(Array((start + rowStart)..<(start + min(rowStart + width, count))))
+            }
+            start += count
+        }
+        return rows
+    }
+
     var body: some View {
         if !model.isLoaded {
             ProgressView()

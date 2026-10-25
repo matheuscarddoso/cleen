@@ -103,11 +103,20 @@ final class AppModel {
         screenshots.start()
         warmCharts(after: .seconds(4))
         if LaunchArguments.welcome { notch.primary?.presentWelcome() }
-        if LaunchArguments.focusCheck, let notch = notch.primary {
+        if LaunchArguments.focusCheck || LaunchArguments.pasteCheck != nil, let notch = notch.primary {
             notch.openSearch()
             Task {
                 try? await Task.sleep(for: .seconds(2))
-                notch.closeSearch(paste: false)
+                // Only ever pastes into a bare test tool, never into a real app.
+                guard let text = LaunchArguments.pasteCheck, PasteKeystroke.target?.bundleIdentifier == nil else { return notch.closeSearch(paste: false) }
+                let pasteboard = NSPasteboard.general
+                let previous = pasteboard.string(forType: .string)
+                pasteboard.clearContents()
+                pasteboard.setString(text, forType: .string)
+                notch.closeSearch(paste: true)
+                try? await Task.sleep(for: .seconds(2))
+                pasteboard.clearContents()
+                if let previous { pasteboard.setString(previous, forType: .string) }
             }
         }
         if let text = LaunchArguments.search {

@@ -264,7 +264,7 @@ final class NotchController {
     }
 
     private var pointerIsInside: Bool {
-        state.geometry?.hotZone(isOpen: true, showsWings: NotchSettings.showsWings, showsSearch: state.showsSearch).contains(NSEvent.mouseLocation) ?? false
+        state.geometry?.hotZone(isOpen: true, showsWings: NotchSettings.showsWings, showsSearch: state.isTall).contains(NSEvent.mouseLocation) ?? false
     }
 
     /// Opens the panel on Ajustes.
@@ -321,7 +321,7 @@ final class NotchController {
         }
 
         if state.isOpen {
-            let inside = geometry.hotZone(isOpen: true, showsWings: wings, showsSearch: state.showsSearch).contains(location)
+            let inside = geometry.hotZone(isOpen: true, showsWings: wings, showsSearch: state.isTall).contains(location)
             // Only the shelf takes files, so only it pays for reading the drag pasteboard.
             let draggingFiles = inside && event.type == .leftMouseDragged && state.tab == .shelf && !state.showsSettings && isDraggingFiles
             if state.isDraggingFiles != draggingFiles { state.isDraggingFiles = draggingFiles }

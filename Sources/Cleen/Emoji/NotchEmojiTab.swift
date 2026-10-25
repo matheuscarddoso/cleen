@@ -11,6 +11,8 @@ struct NotchEmojiTab: View {
     @State private var confirmation: Confirmation?
     @State private var selection = 0
     @State private var columns = 16
+    /// The column ↑ and ↓ aim for, kept across shorter rows like a text cursor's.
+    @State private var goalColumn = 0
 
     struct Confirmation: Equatable {
         let emoji: String
@@ -29,14 +31,17 @@ struct NotchEmojiTab: View {
                         jump: { target in jump(to: target, proxy: proxy) }
                     )
                 }
-                EmojiGrid(model: model, selection: selection, columns: $columns, select: { selection = $0 }, use: use)
+                EmojiGrid(model: model, selection: selection, columns: $columns, select: point, use: use)
             }
             .onChange(of: selection) { _, position in
                 proxy.scrollTo(EmojiCellID(position: position))
             }
         }
         // A new search starts on its best match.
-        .onChange(of: model.query) { selection = 0 }
+        .onChange(of: model.query) {
+            selection = 0
+            goalColumn = 0
+        }
         .overlay(alignment: .bottom) {
             if let confirmation {
                 EmojiConfirmation(emoji: confirmation.emoji, pasted: confirmation.pasted)
@@ -70,8 +75,8 @@ struct NotchEmojiTab: View {
                 .onSubmit(useSelected)
                 .onKeyPress(.leftArrow) { move(-1) }
                 .onKeyPress(.rightArrow) { move(1) }
-                .onKeyPress(.upArrow) { move(-columns) }
-                .onKeyPress(.downArrow) { move(columns) }
+                .onKeyPress(.upArrow) { moveRow(-1) }
+                .onKeyPress(.downArrow) { moveRow(1) }
                 .onKeyPress(.tab) { move(1) }
                 .onKeyPress(.escape) {
                     guard !model.query.isEmpty else { return .ignored }
@@ -109,6 +114,27 @@ struct NotchEmojiTab: View {
         let count = EmojiGrid.order(of: model).count
         guard count > 0 else { return .ignored }
         selection = min(max(selection + step, 0), count - 1)
+        let rows = EmojiGrid.rows(of: model, columns: columns)
+        if let row = rows.first(where: { $0.contains(selection) }), let column = row.firstIndex(of: selection) { goalColumn = column }
+        return .handled
+    }
+
+    /// The pointer picks a cell: it becomes the selection, and its column the goal.
+    private func point(at position: Int) {
+        selection = position
+        let rows = EmojiGrid.rows(of: model, columns: columns)
+        if let row = rows.first(where: { $0.contains(position) }), let column = row.firstIndex(of: position) { goalColumn = column }
+    }
+
+    /// ↑ and ↓: the row above or below, in the goal column (or the row's last cell when
+    /// it's shorter), across section boundaries.
+    private func moveRow(_ step: Int) -> KeyPress.Result {
+        let rows = EmojiGrid.rows(of: model, columns: columns)
+        guard let current = rows.firstIndex(where: { $0.contains(selection) }) else { return .ignored }
+        let target = current + step
+        guard rows.indices.contains(target) else { return .handled }
+        let row = rows[target]
+        selection = row[min(goalColumn, row.count - 1)]
         return .handled
     }
 

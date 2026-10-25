@@ -21,7 +21,7 @@ struct NotchRootView: View {
         if let geometry = state.geometry {
             let closed = geometry.closedSize(wingWidth: wingWidth)
             let welcomes = state.isOpen && state.showsWelcome
-            let open = geometry.openSize(showsSearch: state.showsSearch)
+            let open = geometry.openSize(showsSearch: state.isTall)
             let size = state.isOpen ? (welcomes ? geometry.welcomeSize : open) : closed
             let shape = NotchShape(
                 topRadius: state.isOpen ? NotchStyle.openTopRadius : NotchStyle.closedTopRadius,
@@ -70,8 +70,8 @@ struct NotchRootView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             .animation(.spring(response: 0.42, dampingFraction: 0.82), value: wingWidth)
-            .onChange(of: state.showsSearch) { _, shows in
-                if !shows { controller.fitWindow(showsSearch: false) }
+            .onChange(of: state.isTall) { _, tall in
+                controller.fitWindow(showsSearch: tall)
             }
             .environment(\.colorScheme, .dark)
             .preferredColorScheme(.dark)

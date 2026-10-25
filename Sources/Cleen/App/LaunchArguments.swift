@@ -21,6 +21,9 @@ enum LaunchArguments {
     /// `--focus-check` opens the launcher and closes it two seconds later, for checking
     /// that the keyboard goes back to the app in front.
     static let focusCheck = ProcessInfo.processInfo.arguments.contains("--focus-check")
+    /// `--paste-check <text>` does the same, pasting `text` on the way out (the clipboard
+    /// is put back after), for checking the paste and where the keyboard ends up.
+    static let pasteCheck = value(after: "--paste-check")
 
     private static func value(after flag: String) -> String? {
         let arguments = ProcessInfo.processInfo.arguments

@@ -31,6 +31,9 @@ final class NotchState {
     /// Bumped once the panel holds the keyboard, so the search field takes the cursor
     /// right then (asking before the window is key does nothing).
     var searchFocusRequest = 0
+    /// The panel grows tall, like a launcher: the search, and Emoji's grid.
+    var isTall: Bool { isOpen && !showsWelcome && (showsSearch || (tab == .emoji && !showsSettings)) }
+
     /// A paste was asked for without Accessibility: the panel shows how to allow it.
     var pasteNeedsPermission = false
     var settingsSection = SettingsSection.general

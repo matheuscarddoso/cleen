@@ -19,7 +19,8 @@ struct NotchTabBar: View {
         HStack(spacing: 2) {
             ForEach(tabs.visible) { tab in
                 NotchTabButton(symbol: tab.symbol, showsClaudeLogo: tab == .agents, title: tab.title, isSelected: state.tab == tab) {
-                    state.tab = tab
+                    // Emoji grows the panel like the launcher; switching to or from it animates.
+                    withAnimation(NotchController.searchResize) { state.tab = tab }
                 }
             }
         }
