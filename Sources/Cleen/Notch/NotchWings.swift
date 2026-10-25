@@ -21,7 +21,8 @@ struct NotchWings: View {
     var body: some View {
         if let banner = live.banner, !isBusy {
             LiveActivityBanner(activity: banner, notchWidth: notchWidth, inset: inset, artworkSize: artworkSize)
-                .transition(.opacity)
+                .id(banner)
+                .transition(.trackSwap)
         } else {
             wings.transition(.opacity)
         }
@@ -45,7 +46,8 @@ struct NotchWings: View {
                 .padding(.trailing, inset)
         }
         .frame(maxHeight: .infinity)
-        .animation(.smooth(duration: 0.3), value: isPlaying)
+        .animation(NotchStyle.liveSpring, value: isPlaying)
+        .animation(NotchStyle.liveSpring, value: nowPlaying.artwork.map(ObjectIdentifier.init))
         .animation(.smooth(duration: 0.3), value: live.meeting)
         .animation(.smooth(duration: 0.3), value: timer.isActive)
         .animation(.spring(response: 0.42, dampingFraction: 0.8), value: showsClaude)
@@ -94,7 +96,7 @@ struct NotchWings: View {
                 .transition(.opacity)
         } else if isPlaying {
             WingArtwork(image: nowPlaying.artwork, size: artworkSize, cornerRadius: max(3, NotchStyle.closedBottomRadius - inset))
-                .transition(.scale(0.6).combined(with: .opacity))
+                .transition(.scale(0.7).combined(with: .opacity))
         }
         // Idle, the left wing stays empty: the reading and its bar are on the right.
     }

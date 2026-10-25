@@ -14,6 +14,17 @@ struct NotchContentEffect: ViewModifier {
     }
 }
 
+struct TrackSwapEffect: ViewModifier {
+    let visibility: Double
+
+    func body(content: Content) -> some View {
+        content
+            .opacity(visibility)
+            .blur(radius: (1 - visibility) * 5)
+            .scaleEffect(0.92 + 0.08 * visibility)
+    }
+}
+
 extension AnyTransition {
     /// Arrives a beat after the shape starts growing; leaves quickly, before the shape
     /// has shrunk past it, so nothing is ever seen hanging outside the tray.
@@ -29,6 +40,15 @@ extension AnyTransition {
     }
 
     /// The live-activity wings come back once the panel has closed.
+    /// A new track's artwork, title or banner: in from a slight blur and scale, out by
+    /// fading, so one song hands over to the next instead of cutting.
+    static var trackSwap: AnyTransition {
+        .asymmetric(
+            insertion: .modifier(active: TrackSwapEffect(visibility: 0), identity: TrackSwapEffect(visibility: 1)),
+            removal: .opacity.animation(NotchStyle.liveExit)
+        )
+    }
+
     static var notchWings: AnyTransition {
         .asymmetric(
             insertion: .opacity.animation(.smooth(duration: 0.25).delay(0.18)),

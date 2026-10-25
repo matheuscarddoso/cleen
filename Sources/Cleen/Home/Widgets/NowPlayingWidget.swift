@@ -29,7 +29,8 @@ struct NowPlayingWidget: View {
                 NowPlayingControls(isPlaying: model.track?.isPlaying ?? false, isEnabled: model.track != nil)
                     .frame(maxWidth: .infinity)
             }
-            .animation(.smooth(duration: 0.3), value: model.track?.identity)
+            .animation(NotchStyle.liveSpring, value: model.track?.identity)
+            .animation(NotchStyle.liveSpring, value: model.artwork.map(ObjectIdentifier.init))
         case .small:
             NowPlayingArtwork(image: model.artwork, appURL: nil, isIcon: model.artworkIsIcon)
                 .frame(width: 88, height: 88)

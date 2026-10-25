@@ -22,12 +22,15 @@ struct NowPlayingArtwork: View {
                         .scaledToFit()
                         .clipShape(.rect(cornerRadius: 12 * scale, style: .continuous))
                         .padding(18 * scale)
-                        .transition(.opacity)
+                        .id(ObjectIdentifier(image))
+                        .transition(.trackSwap)
                 } else if let image {
                     Image(nsImage: image)
                         .resizable()
                         .scaledToFill()
-                        .transition(.opacity)
+                        // A new image is a new view, so the swap animates.
+                        .id(ObjectIdentifier(image))
+                        .transition(.trackSwap)
                 } else {
                     Image(systemName: "music.note")
                         .font(.system(size: 28 * scale, weight: .medium))

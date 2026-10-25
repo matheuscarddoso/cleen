@@ -23,6 +23,12 @@ enum NotchStyle {
     static let warning = Color(red: 1.0, green: 0.62, blue: 0.24)
     static let critical = Color(red: 1.0, green: 0.33, blue: 0.33)
 
+    /// What's playing and the live activities beside the camera: fluid, with the
+    /// faintest settle at the end.
+    static let liveSpring = Animation.spring(duration: 0.5, bounce: 0.12)
+    /// Their way out: quicker and without the settle.
+    static let liveExit = Animation.smooth(duration: 0.32)
+
     static let cardRadius = 14.0
     static let openTopRadius = 14.0
     static let openBottomRadius = 30.0

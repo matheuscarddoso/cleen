@@ -2,7 +2,7 @@ import AppKit
 
 /// Something worth a glance on the closed notch. Banners widen the wings for a few
 /// seconds and go; a meeting about to start stays, compact, until it begins.
-enum LiveActivity: Equatable {
+enum LiveActivity: Hashable {
     case power(Power, level: Double)
     case headphones(name: String, connected: Bool)
     case track(title: String, artist: String)
@@ -12,7 +12,7 @@ enum LiveActivity: Equatable {
     /// Something went to the clipboard from the search (a picked color, a result).
     case copied(text: String, color: NSColor?)
 
-    enum Power: Equatable {
+    enum Power: Hashable {
         case charging
         case unplugged
         case full

@@ -1,5 +1,6 @@
 import AppKit
 import CleenKit
+import SwiftUI
 import CoreAudio
 import EventKit
 import Observation
@@ -128,11 +129,11 @@ final class LiveActivityCenter {
 
     private func show(_ activity: LiveActivity) {
         bannerTask?.cancel()
-        banner = activity
+        withAnimation(NotchStyle.liveSpring) { banner = activity }
         bannerTask = Task { [weak self] in
             try? await Task.sleep(for: Self.bannerDuration)
             guard !Task.isCancelled else { return }
-            self?.banner = nil
+            withAnimation(NotchStyle.liveExit) { self?.banner = nil }
         }
     }
 

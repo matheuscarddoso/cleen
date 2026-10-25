@@ -28,7 +28,8 @@ struct NowPlayingCard: View {
             .truncationMode(.tail)
             .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .animation(.smooth(duration: 0.3), value: model.track?.identity)
+        .animation(NotchStyle.liveSpring, value: model.track?.identity)
+            .animation(NotchStyle.liveSpring, value: model.artwork.map(ObjectIdentifier.init))
     }
 
     /// Album, or the app when there is none (a video in a browser).

@@ -14,6 +14,8 @@ struct WingArtwork: View {
                     Image(nsImage: image)
                         .resizable()
                         .scaledToFill()
+                        .id(ObjectIdentifier(image))
+                        .transition(.trackSwap)
                 } else {
                     Image(systemName: "music.note")
                         .font(.system(size: 10, weight: .semibold))
