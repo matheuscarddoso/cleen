@@ -7,6 +7,15 @@ struct NotchMaintenanceTab: View {
 
     var body: some View {
         let tasks = MaintenanceTask.allCases
+        // Scrolls when the panel is shorter than the list (a smaller size in Aparência).
+        NotchScroll {
+            columns(tasks)
+                .padding(.top, 4)
+        }
+        .task { await model.refresh() }
+    }
+
+    private func columns(_ tasks: [MaintenanceTask]) -> some View {
         HStack(alignment: .top, spacing: 10) {
             NotchGroup {
                 ForEach(tasks.prefix(4)) { task in
@@ -19,7 +28,5 @@ struct NotchMaintenanceTab: View {
                 }
             }
         }
-        .padding(.top, 4)
-        .task { await model.refresh() }
     }
 }

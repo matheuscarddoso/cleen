@@ -131,6 +131,8 @@ struct NotchAIUsageTab: View {
     static func problemText(_ failure: ClaudeLimits.Failure) -> String {
         switch failure {
         case .noCredential: String(localized: "entre no Claude Code")
+        // The ↻ beside today's spend asks again, and the Keychain prompt comes back.
+        case .keychainDenied: String(localized: "clique em ↻ e permita")
         case .expired: String(localized: "abra o Claude Code")
         case .unavailable: String(localized: "limites indisponíveis")
         }

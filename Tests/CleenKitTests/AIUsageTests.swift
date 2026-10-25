@@ -112,6 +112,16 @@ struct AIUsageTests {
         #expect(ClaudeLimits.services(inDump: dump) == ["Claude Code-credentials", "Claude Code-credentials-ab782afa", "Claude Safe Storage"])
     }
 
+    /// Without the Keychain, Claude Code keeps its sign-in in a file: that one is read too.
+    @Test func credentialsFileIsRead() async throws {
+        let sandbox = try Sandbox()
+        let json = #"{"claudeAiOauth":{"accessToken":"tok","expiresAt":4102444800000,"subscriptionType":"pro"}}"#
+        try Data(json.utf8).write(to: sandbox.file(".claude/.credentials.json"))
+        let credential = try #require(await ClaudeLimits.readCredentialsFile(home: sandbox.root))
+        #expect(credential.accessToken == "tok")
+        #expect(credential.plan == "Pro")
+    }
+
     @Test func paceProjection() {
         let window = UsageWindow(name: "Sessão", used: 0.5, resetsAt: .now.addingTimeInterval(2.5 * 3600), length: 5 * 3600)
         #expect(abs((window.elapsed() ?? 0) - 0.5) < 0.01)

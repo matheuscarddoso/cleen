@@ -87,7 +87,7 @@ final class AIUsageModel {
         // The limits endpoint is a network call; every few minutes is plenty.
         // Without a sign-in to read (or with the Keychain prompt turned down) it waits for
         // the refresh button or half an hour, so a "Deny" isn't asked again every few minutes.
-        let interval: TimeInterval = claudeProblem == .noCredential ? 1800 : 180
+        let interval: TimeInterval = claudeProblem == .noCredential || claudeProblem == .keychainDenied ? 1800 : 180
         guard hasClaudeCode, shows(.claude), force || Date.now.timeIntervalSince(lastLimitsCheck) > interval else { return }
         lastLimitsCheck = .now
         switch await ClaudeLimits.fetch() {
