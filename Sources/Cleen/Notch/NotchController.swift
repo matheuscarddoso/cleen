@@ -252,6 +252,13 @@ final class NotchController {
         if !state.isPinned, !state.holdsOpen, !pointerIsInside { close() }
     }
 
+    /// A text field or the note has the cursor: the panel stays while the pointer is
+    /// moved out of the way to type, until Esc or a click elsewhere.
+    private var isTyping: Bool {
+        guard let panel, panel.isKeyWindow else { return false }
+        return panel.firstResponder is NSText
+    }
+
     private var pointerIsInside: Bool {
         state.geometry?.hotZone(isOpen: true, showsWings: NotchSettings.showsWings, showsSearch: state.showsSearch).contains(NSEvent.mouseLocation) ?? false
     }
@@ -327,12 +334,12 @@ final class NotchController {
                 // A click elsewhere is a clear "done", except in the Cleen window that's
                 // holding the panel open (the file picker, Quick Look).
                 close()
-            } else if pendingClose == nil, !state.isPinned, !state.holdsOpen {
+            } else if pendingClose == nil, !state.isPinned, !state.holdsOpen, !isTyping {
                 pendingClose = Task { [weak self] in
                     try? await Task.sleep(for: .milliseconds(380))
-                    guard !Task.isCancelled else { return }
-                    self?.pendingClose = nil
-                    self?.close()
+                    guard !Task.isCancelled, let self else { return }
+                    self.pendingClose = nil
+                    if !self.isTyping { self.close() }
                 }
             }
             return
