@@ -350,7 +350,13 @@ final class MarkdownTextView: NSTextView {
 
     // MARK: Checkboxes
 
+    /// The notch panel is never the active window, so every click would be a "first
+    /// click" that only brings the window forward; the note takes it as a real one.
+    override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
+
     override func mouseDown(with event: NSEvent) {
+        // Typing goes to the panel only once it holds the keyboard.
+        if window?.isKeyWindow == false { window?.makeKey() }
         if toggleCheckbox(at: convert(event.locationInWindow, from: nil)) { return }
         super.mouseDown(with: event)
     }
