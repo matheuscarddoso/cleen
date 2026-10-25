@@ -164,24 +164,20 @@ final class NotchController {
 
     /// Sizes the window for the launcher at once when it opens; when it goes, waits for
     /// the panel to finish shrinking before taking the room back.
-    /// The teleprompter's glow needs room around the panel too.
     func fitWindow(showsSearch: Bool) {
         pendingShrink?.cancel()
         guard let geometry = state.geometry, let panel else { return }
-        let frame = geometry.windowFrame(showsSearch: showsSearch, glows: isGlowing)
-        if frame.width >= panel.frame.width, frame.height >= panel.frame.height {
+        let frame = geometry.windowFrame(showsSearch: showsSearch)
+        if showsSearch {
             if panel.frame != frame { panel.setFrame(frame, display: true) }
             return
         }
         pendingShrink = Task { [weak self] in
             try? await Task.sleep(for: .milliseconds(600))
-            guard !Task.isCancelled, let self, let panel = self.panel else { return }
-            let frame = geometry.windowFrame(showsSearch: self.state.showsSearch, glows: self.isGlowing)
+            guard !Task.isCancelled, let self, !self.state.showsSearch, let panel = self.panel else { return }
             if panel.frame != frame { panel.setFrame(frame, display: true) }
         }
     }
-
-    private var isGlowing: Bool { state.isOpen && state.isPrompting && state.tab == .teleprompter }
 
     func toggleSearch() {
         state.isOpen && state.showsSearch ? close() : openSearch()

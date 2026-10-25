@@ -16,13 +16,12 @@ struct NotchRootView: View {
     @Environment(TimerModel.self) private var timer
     @Environment(AgentsModel.self) private var agents
     @Environment(MediaKeyHUD.self) private var mediaKeys
-    @Environment(VoiceMeter.self) private var voice
 
     var body: some View {
         if let geometry = state.geometry {
             let closed = geometry.closedSize(wingWidth: wingWidth)
             let welcomes = state.isOpen && state.showsWelcome
-            // The teleprompter reading: the panel is all script, with its glow behind.
+            // The teleprompter reading: the panel is all script, an arc of light behind it.
             let prompting = state.isOpen && state.isPrompting && state.tab == .teleprompter && !welcomes && !state.showsSearch && !state.showsSettings
             let open = geometry.openSize(showsSearch: state.isTall)
             let size = state.isOpen ? (welcomes ? geometry.welcomeSize : open) : closed
@@ -62,14 +61,9 @@ struct NotchRootView: View {
             .background {
                 shape
                     .fill(NotchStyle.background)
-                    .shadow(color: .black.opacity(state.isOpen ? (prompting ? 0.2 : 0.55) : 0), radius: 22, y: 10)
+                    .shadow(color: .black.opacity(state.isOpen ? 0.55 : 0), radius: 22, y: 10)
             }
-            .background {
-                if prompting {
-                    PrompterGlow(levels: voice.levels, isListening: voice.isListening)
-                        .transition(.opacity.animation(.smooth(duration: 0.5)))
-                }
-            }
+
             .overlay(alignment: .top) {
                 if state.isOpen, !welcomes, let reading = mediaKeys.reading(on: controller.screen) {
                     MediaKeyHUDPill(reading: reading)
@@ -82,9 +76,7 @@ struct NotchRootView: View {
             .onChange(of: state.isTall) { _, tall in
                 controller.fitWindow(showsSearch: tall)
             }
-            .onChange(of: prompting) {
-                controller.fitWindow(showsSearch: state.isTall)
-            }
+
             .environment(\.colorScheme, .dark)
             .preferredColorScheme(.dark)
         }

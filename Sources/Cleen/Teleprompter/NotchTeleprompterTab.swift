@@ -267,15 +267,18 @@ private struct TeleprompterStepper: View {
 
 /// The panel given over to the script: a monospaced face, gliding up so the line you're
 /// on sits right under the lens. Pace on the camera's left, transport on its right, in
-/// the strip beside it; the light behind the panel (PrompterGlow) follows your voice.
+/// the strip beside it; the arc of light behind the text (PrompterArc) follows your voice.
 private struct TeleprompterPlayer: View {
     @Environment(TeleprompterModel.self) private var model
     @Environment(NotchState.self) private var notch
+    @Environment(VoiceMeter.self) private var voice
     @FocusState private var isFocused: Bool
 
     var body: some View {
         let camera = notch.geometry?.notchSize ?? CGSize(width: 180, height: 32)
         ZStack(alignment: .top) {
+            // Behind the letters, rising from the bottom edge.
+            PrompterArc(levels: voice.levels, isListening: voice.isListening)
             TeleprompterScroller()
                 .padding(.horizontal, 24)
                 .padding(.top, camera.height - 4)

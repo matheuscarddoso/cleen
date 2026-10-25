@@ -55,9 +55,6 @@ struct NotchGeometry: Equatable {
         )
     }
 
-    /// Room around the panel for the teleprompter's glow, which spills out below it and
-    /// beside it.
-    static let glowRoom = CGSize(width: 190, height: 240)
 
     /// The greeting after the tour: a small island under the camera, NotchNook's "hello".
     var welcomeSize: CGSize {
@@ -67,11 +64,10 @@ struct NotchGeometry: Equatable {
     /// The panel window: as big as the open notch plus shadow, hanging from the top.
     /// It grows for the launcher and shrinks back after, so the clear area under a
     /// normal panel never sits over the app below.
-    func windowFrame(showsSearch: Bool, glows: Bool = false) -> CGRect {
+    func windowFrame(showsSearch: Bool) -> CGRect {
         let size = openSize(showsSearch: showsSearch)
-        let room = glows ? Self.glowRoom : CGSize(width: Self.shadowPadding, height: Self.shadowPadding)
-        let width = size.width + room.width * 2
-        let height = size.height + room.height
+        let width = size.width + Self.shadowPadding * 2
+        let height = size.height + Self.shadowPadding
         return CGRect(x: screenFrame.midX - width / 2, y: screenFrame.maxY - height, width: width, height: height)
     }
 
