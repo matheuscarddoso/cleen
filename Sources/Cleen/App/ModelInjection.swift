@@ -30,6 +30,7 @@ extension View {
             .environment(app.fullscreen)
             .environment(app.timer)
             .environment(app.notes)
+            .environment(app.notesSync)
             .environment(app.weather)
             .environment(app.shortcuts)
             .environment(app.mirror)

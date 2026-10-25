@@ -75,6 +75,19 @@ public struct QuickNotebook: Codable, Sendable, Equatable {
         }
     }
 
+    /// A note that arrived from outside (a file in the synced vault). Past the limit too:
+    /// text already written is never dropped.
+    public mutating func insert(_ note: QuickNote) {
+        guard !notes.contains(where: { $0.id == note.id }) else { return }
+        // A blank note waiting to be written in makes room instead of staying behind.
+        if notes.count == 1, notes[0].isBlank {
+            notes = [note]
+            selectedID = note.id
+        } else {
+            notes.append(note)
+        }
+    }
+
     /// Folds in notes written while this notebook was still loading from disk: they're
     /// kept and the one being written stays open.
     public mutating func absorb(_ written: QuickNotebook) {

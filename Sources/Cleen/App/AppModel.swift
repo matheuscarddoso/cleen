@@ -38,6 +38,7 @@ final class AppModel {
     let fullscreen = FullscreenWatcher()
     let timer = TimerModel()
     let notes = NotesModel()
+    let notesSync = NotesSync()
     let weather = WeatherModel()
     let shortcuts = ShortcutsModel()
     let mirror = MirrorModel()
@@ -91,6 +92,7 @@ final class AppModel {
         updates.isInUse = { [unowned self] in
             notch.controllers.contains { $0.state.isOpen } || !agents.approvals.isEmpty || timer.isActive || teleprompter.isRunning
         }
+        notesSync.start(notes: notes)
         updates.start()
         mediaKeys.start()
         Thumbnails.shared.scale = NSScreen.screens.map(\.backingScaleFactor).max() ?? 2

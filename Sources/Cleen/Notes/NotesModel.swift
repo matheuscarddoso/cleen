@@ -13,6 +13,8 @@ final class NotesModel {
     @ObservationIgnored private var isLoaded = false
     @ObservationIgnored private var editedBeforeLoad = false
     @ObservationIgnored private var terminationObserver: NSObjectProtocol?
+    /// Told after each save, with what was saved: the sync follows from there.
+    @ObservationIgnored var onSaved: (QuickNotebook) -> Void = { _ in }
 
     private nonisolated static let folder = URL.applicationSupportDirectory.appending(path: "Cleen", directoryHint: .isDirectory)
     private nonisolated static let file = folder.appending(path: "notes.json")
@@ -60,6 +62,18 @@ final class NotesModel {
         changed()
     }
 
+    /// What the synced vault changed: notes edited there, new ones, deleted ones.
+    func apply(updates: [UUID: String], imports: [UUID: String], deletes: [UUID]) {
+        guard !updates.isEmpty || !imports.isEmpty || !deletes.isEmpty else { return }
+        for (id, text) in updates { notebook.update(id, text: text) }
+        for (id, text) in imports.sorted(by: { $0.value < $1.value }) { notebook.insert(QuickNote(id: id, text: text)) }
+        for id in deletes { notebook.remove(id) }
+        changed()
+    }
+
+    /// The notes as they are now, for a sync that didn't start from a save.
+    var current: QuickNotebook { notebook }
+
     func copy(_ note: QuickNote) {
         let pasteboard = NSPasteboard.general
         pasteboard.clearContents()
@@ -106,6 +120,7 @@ final class NotesModel {
                 }
             }
             if !Task.isCancelled { self.saveTask = nil }
+            self.onSaved(notebook)
         }
     }
 
