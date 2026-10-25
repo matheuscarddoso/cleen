@@ -80,6 +80,15 @@ final class NotchCoordinator {
         (controllerUnderPointer ?? primary)?.openSettings()
     }
 
+    /// The menu bar item's entries: on the screen with the pointer, staying open.
+    func openHeld(tab: NotchTab? = nil, settings section: SettingsSection? = nil) {
+        (controllerUnderPointer ?? primary)?.openHeld(tab: tab, settings: section)
+    }
+
+    func openSearch() {
+        (controllerUnderPointer ?? primary)?.openSearch()
+    }
+
     func toggleUnderPointer() {
         (controllerUnderPointer ?? primary)?.toggle()
     }

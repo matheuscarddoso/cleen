@@ -59,6 +59,7 @@ export function DemoFrame({
   const focus = width !== null && width < 480 ? 700 : canvas.width;
   const scale = width === null ? 1 : width / focus;
   const offset = width === null ? 0 : (width - canvas.width * scale) / 2;
+  const radius = width === null ? 8 : width * 0.01875;
   const button = control === "lg" ? { box: 36, icon: 16, inset: 16 } : { box: 28, icon: 13, inset: 8 };
 
   return (
@@ -68,7 +69,9 @@ export function DemoFrame({
       aria-roledescription="demonstração interativa"
       aria-label={label}
       className="relative w-full overflow-hidden"
-      style={{ aspectRatio: "1280 / 666", borderRadius: width === null ? 8 : width * 0.01875 }}
+      // The rounding clips by clip-path as well: a border radius with overflow hidden
+      // doesn't clip the blurred menu bar (a backdrop filter), so its corners stayed square.
+      style={{ aspectRatio: "1280 / 666", borderRadius: radius, clipPath: `inset(0 round ${radius}px)` }}
     >
       <Wallpaper tone={tone} />
       <div
@@ -100,7 +103,7 @@ export function DemoFrame({
 /** The menu bar behind the panel; at this crop only the clock shows past its shoulders. */
 function MenuBar() {
   return (
-    <div aria-hidden className="absolute inset-x-0 top-0 flex h-8 items-center justify-between bg-black/20 px-3.5 text-[13px] font-medium text-white/90 backdrop-blur-md">
+    <div aria-hidden className="absolute inset-x-0 top-0 flex h-8 items-center justify-between bg-black/20 px-3.5 text-[13px] font-medium text-white/90">
       <span />
       <span className="tabular-nums">14:32</span>
     </div>

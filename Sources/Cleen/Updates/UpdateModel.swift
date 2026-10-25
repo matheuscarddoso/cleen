@@ -8,6 +8,10 @@ import Security
 /// there's a newer version downloads it, checks it's intact and signed by the same
 /// developer as the copy running, swaps the app in place and reopens it. The old
 /// copy goes to the Lixo, so a bad update is one drag away from undone.
+///
+/// With "Atualizar sozinho" on, all of that happens without a click: the new version is
+/// downloaded as soon as it's found, and swapped in once nobody is using Cleen (the
+/// notch closed, nothing waiting for an answer, the Mac idle for a few minutes).
 @Observable
 final class UpdateModel {
     enum Phase: Equatable {
@@ -28,6 +32,18 @@ final class UpdateModel {
     private static let interval: Duration = .seconds(6 * 3600)
 
     @ObservationIgnored private var loop: Task<Void, Never>?
+    @ObservationIgnored private var waitingToInstall: Task<Void, Never>?
+    /// A verified-later download of the available version, kept until it's installed.
+    @ObservationIgnored private var downloaded: (version: String, file: URL)?
+    /// Whether swapping the app now would interrupt anyone; set by AppModel, which knows
+    /// about the notch and the requests waiting in it.
+    @ObservationIgnored var isInUse: () -> Bool = { false }
+    /// How long the Mac has to sit untouched before an update installs on its own.
+    static let idleBeforeInstall: TimeInterval = 3 * 60
+
+    var isBusy: Bool { phase == .checking || phase == .downloading || phase == .installing }
+
+    static var isAutomatic: Bool { UserDefaults.standard.bool(forKey: automaticKey) }
 
     static var currentVersion: String {
         Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0"
@@ -45,7 +61,10 @@ final class UpdateModel {
         loop = Task { [weak self] in
             try? await Task.sleep(for: .seconds(60))
             while !Task.isCancelled {
-                if UserDefaults.standard.bool(forKey: Self.automaticKey) { await self?.check() }
+                if Self.isAutomatic {
+                    await self?.check()
+                    await self?.installWhenIdle()
+                }
                 try? await Task.sleep(for: Self.interval)
             }
         }
@@ -66,12 +85,51 @@ final class UpdateModel {
         }
     }
 
-    /// Downloads, verifies and installs the available version, then relaunches.
+    /// On its own: downloads the available version now, then waits for a moment when
+    /// nobody is using Cleen to install it.
+    private func installWhenIdle() async {
+        guard let feed = available, waitingToInstall == nil else { return }
+        guard (try? await download(feed)) != nil else { return }
+        waitingToInstall = Task { [weak self] in
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(30))
+                guard let self, Self.isAutomatic, self.available == feed else { break }
+                if !self.isInUse(), Self.idleTime >= Self.idleBeforeInstall {
+                    await self.install()
+                    break
+                }
+            }
+            self?.waitingToInstall = nil
+        }
+    }
+
+    /// Seconds since the last key press, click or pointer move anywhere.
+    static var idleTime: TimeInterval {
+        CGEventSource.secondsSinceLastEventType(.combinedSessionState, eventType: CGEventType(rawValue: ~0)!)
+    }
+
+    /// The DMG for `feed`, downloaded once and kept in Caches until it's installed.
+    private func download(_ feed: UpdateFeed) async throws -> URL {
+        if let downloaded, downloaded.version == feed.version, FileManager.default.fileExists(atPath: downloaded.file.path(percentEncoded: false)) {
+            return downloaded.file
+        }
+        let (temporary, _) = try await URLSession.shared.download(from: feed.url)
+        let folder = URL.cachesDirectory.appending(path: "app.cleen.Cleen/Updates")
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        let file = folder.appending(path: "Cleen-\(feed.version).dmg")
+        try? FileManager.default.removeItem(at: file)
+        try FileManager.default.moveItem(at: temporary, to: file)
+        downloaded = (feed.version, file)
+        return file
+    }
+
+    /// Downloads (unless that's done), verifies and installs the available version, then
+    /// relaunches.
     func install() async {
         guard let feed = available else { return }
         phase = .downloading
         do {
-            let (download, _) = try await URLSession.shared.download(from: feed.url)
+            let download = try await download(feed)
             phase = .installing
             let destination = Bundle.main.bundleURL
             let failure: (any Error)? = await offMain {
@@ -83,6 +141,7 @@ final class UpdateModel {
                 }
             }
             if let failure { throw failure }
+            try? FileManager.default.removeItem(at: download)
             Installer.relaunch(destination)
         } catch let error as UpdateError {
             phase = .failed(error.message)

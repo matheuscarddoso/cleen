@@ -12,7 +12,7 @@ export function Screen({ tone, children, className = "" }: { tone: "blue" | "dus
   return (
     <div className={`relative overflow-hidden ${className}`}>
       <Wallpaper tone={tone} />
-      <div aria-hidden className="absolute inset-x-0 top-0 flex h-[34px] items-center justify-between bg-black/15 px-4 text-[13px] font-medium text-white/85 backdrop-blur-md">
+      <div aria-hidden className="absolute inset-x-0 top-0 flex h-[34px] items-center justify-between bg-black/15 px-4 text-[13px] font-medium text-white/85">
         <span className="hidden gap-4 sm:flex">
           <span className="font-semibold">Finder</span>
           <span>Arquivo</span>

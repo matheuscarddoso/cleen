@@ -24,7 +24,7 @@ struct UpdateSettingsRows: View {
                 }
             }
         }
-        SettingRow(title: String(localized: "Atualizar sozinho"), note: String(localized: "Procura uma versão nova a cada seis horas.")) {
+        SettingRow(title: String(localized: "Atualizar sozinho"), note: String(localized: "Procura a cada seis horas e instala quando o Mac fica parado por alguns minutos.")) {
             NotchSwitch(label: String(localized: "Atualizar sozinho"), isOn: $automatic)
         }
     }

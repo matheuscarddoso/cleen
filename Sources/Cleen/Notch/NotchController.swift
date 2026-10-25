@@ -271,6 +271,19 @@ final class NotchController {
         open()
     }
 
+    /// From the menu bar item: the pointer is up in the menu, not at the notch, so the
+    /// panel stays (like the launcher) until Esc or a click elsewhere instead of closing
+    /// the moment the pointer moves.
+    func openHeld(tab: NotchTab? = nil, settings section: SettingsSection? = nil) {
+        if let section {
+            openSettings(section)
+        } else {
+            state.showsSettings = false
+            open(tab: tab)
+        }
+        state.holdsOpen = true
+    }
+
     // MARK: Pointer
 
     private var isDraggingFiles: Bool {

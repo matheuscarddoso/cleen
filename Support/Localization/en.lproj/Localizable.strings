@@ -351,7 +351,6 @@
 "Esconder %@" = "Hide %@";
 "Esconder em tela cheia" = "Hide in full screen";
 "Esconder itens" = "Hide items";
-"Espaço livre" = "Free space";
 "Espelho" = "Mirror";
 "Esperando o macOS…" = "Waiting for macOS…";
 "Esperando você" = "Waiting for you";
@@ -520,7 +519,6 @@
 "Médio" = "Medium";
 "Mês anterior" = "Previous month";
 "Música nova" = "New song";
-"Na barra de menus" = "In the menu bar";
 "Na bateria" = "On battery";
 "Nada" = "Nothing";
 "Nada acima de %lld MB fora das pastas do sistema." = "Nothing over %lld MB outside system folders.";
@@ -747,7 +745,6 @@
 "Sábado" = "Saturday";
 "Símbolos" = "Symbols";
 "Só demora na primeira vez" = "Only slow the first time";
-"Só o ícone" = "Icon only";
 "Tamanho" = "Size";
 "Taxas de referência do Banco Central Europeu, via Frankfurter" = "European Central Bank reference rates, via Frankfurter";
 "Teleprompter" = "Teleprompter";
@@ -797,9 +794,7 @@
 "Usando uma ferramenta" = "Using a tool";
 "Usar minha localização" = "Use My Location";
 "Usar também a miniatura do macOS" = "Also use the macOS thumbnail";
-"Uso de CPU" = "CPU usage";
 "Uso de IA" = "AI Usage";
-"Uso de memória" = "Memory usage";
 "Uso dos últimos 14 dias" = "Usage over the last 14 days";
 "Vai direto para a área de transferência, pronto para colar." = "Goes straight to the clipboard, ready to paste.";
 "Valor em %@" = "Value in %@";
@@ -887,7 +882,6 @@
 "Área" = "Area";
 "Área de transferência" = "Clipboard";
 "Áudio" = "Audio";
-"Ícone" = "Icon";
 "↓" = "↓";
 "⌃ ⌥ C" = "⌃ ⌥ C";
 "Brilho" = "Brightness";
@@ -975,7 +969,6 @@
 "Atualizar para %@" = "Update to %@";
 "Procurar agora" = "Check Now";
 "Atualizar sozinho" = "Update automatically";
-"Procura uma versão nova a cada seis horas." = "Checks for a new version every six hours.";
 "Esta é a versão mais nova." = "This is the latest version.";
 "Uma versão nova está pronta." = "A new version is ready.";
 "Baixando…" = "Downloading…";
@@ -1122,3 +1115,10 @@
 "Escondido" = "Hidden";
 "Não encontrado neste Mac" = "Not found on this Mac";
 "esperando você" = "waiting for you";
+"Abrir na aba" = "Open in tab";
+"CPU: %@" = "CPU: %@";
+"Este Mac" = "This Mac";
+"Memória: %@ em uso" = "Memory: %@ in use";
+"Procura a cada seis horas e instala quando o Mac fica parado por alguns minutos." = "Checks every six hours and installs once the Mac sits idle for a few minutes.";
+"Procurar atualizações" = "Check for updates";
+"Sobre o Cleen" = "About Cleen";

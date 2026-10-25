@@ -1,19 +1,10 @@
 import SwiftUI
 
+/// The menu bar item: just Cleen's icon. What the Mac is up to is in its menu.
 struct MenuBarLabel: View {
-    @Environment(SystemMonitor.self) private var monitor
-    @AppStorage(MenuBarDisplay.storageKey) private var display = MenuBarDisplay.freeSpace
-
     var body: some View {
-        HStack(spacing: 4) {
-            Image(nsImage: Self.icon)
-            if let text {
-                Text(text)
-                    .monospacedDigit()
-            }
-        }
-        .accessibilityLabel("Cleen")
-        .accessibilityValue(text ?? "")
+        Image(nsImage: Self.icon)
+            .accessibilityLabel("Cleen")
     }
 
     /// The app icon at menu bar size, cropped to its body: the icon grid keeps it at 824 of
@@ -26,17 +17,4 @@ struct MenuBarLabel: View {
             return true
         }
     }()
-
-    private var text: String? {
-        switch display {
-        case .iconOnly:
-            nil
-        case .freeSpace:
-            monitor.disk.map { $0.available.bytes }
-        case .cpu:
-            monitor.cpu.map { $0.total.percent }
-        case .memory:
-            monitor.memory.map { $0.usedFraction.percent }
-        }
-    }
 }

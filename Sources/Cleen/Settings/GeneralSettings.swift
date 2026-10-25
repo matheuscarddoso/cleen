@@ -2,7 +2,6 @@ import ServiceManagement
 import SwiftUI
 
 struct GeneralSettings: View {
-    @AppStorage(MenuBarDisplay.storageKey) private var menuBarDisplay = MenuBarDisplay.freeSpace
     @Environment(AppModel.self) private var app
     @State private var launchesAtLogin = SMAppService.mainApp.status == .enabled
     @State private var loginError: String?
@@ -11,9 +10,6 @@ struct GeneralSettings: View {
         NotchGroup {
             SettingRow(title: String(localized: "Abrir ao iniciar a sessão"), note: loginError) {
                 NotchSwitch(label: String(localized: "Abrir ao iniciar a sessão"), isOn: $launchesAtLogin)
-            }
-            SettingRow(title: String(localized: "Na barra de menus")) {
-                NotchSegmented(options: MenuBarDisplay.allCases.map { ($0.shortTitle, $0) }, selection: $menuBarDisplay)
             }
             SettingRow(title: String(localized: "Abrir e fechar o notch"), note: String(localized: "Funciona em qualquer app.")) {
                 Text("⌃ ⌥ C")

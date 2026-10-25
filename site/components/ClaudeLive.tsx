@@ -22,7 +22,7 @@ export function ClaudeLive() {
 
   return (
     <div ref={ref}>
-      <Screen tone="dusk" className="aspect-[1280/666] min-h-[250px] rounded-[10px]">
+      <Screen tone="dusk" className="aspect-[1280/666] min-h-[250px] rounded-[10px] [clip-path:inset(0_round_10px)]">
         <ClosedNotch width={done ? "340px" : "330px"}>
           <Swap shown={!done} className="flex items-center justify-between px-4 text-[14px] font-medium text-white">
             <span className="flex items-center gap-2">

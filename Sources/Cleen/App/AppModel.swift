@@ -86,6 +86,10 @@ final class AppModel {
         agents.onApprovalsCleared = { [weak self] in self?.notch.endRequest() }
         agents.start()
         displays.restoreDimming()
+        // An update installs on its own only when swapping the app interrupts nothing.
+        updates.isInUse = { [unowned self] in
+            notch.controllers.contains { $0.state.isOpen } || !agents.approvals.isEmpty || timer.isActive || teleprompter.isRunning
+        }
         updates.start()
         mediaKeys.start()
         Thumbnails.shared.scale = NSScreen.screens.map(\.backingScaleFactor).max() ?? 2
