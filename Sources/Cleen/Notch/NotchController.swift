@@ -61,6 +61,8 @@ final class NotchController {
     }
 
     func open(tab: NotchTab? = nil) {
+        // Picks in Emoji, Clipboard and the others paste into the app in front now.
+        if !state.isOpen { PasteKeystroke.rememberTarget() }
         pendingClose?.cancel()
         if let tab {
             state.tab = tab
@@ -125,6 +127,7 @@ final class NotchController {
     /// on the panel already showing, it just switches to the search.
     func openSearch() {
         pendingClose?.cancel()
+        PasteKeystroke.rememberTarget()
         app.search.prepare()
         state.showsSettings = false
         state.mirrorExpanded = false

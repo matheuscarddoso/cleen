@@ -19,25 +19,47 @@ enum PasteKeystroke {
         }
     }
 
-    /// Sends ⌘V. Returns false, without sending, when Accessibility isn't granted; what
-    /// was copied stays on the clipboard for a manual ⌘V.
+    /// The app to paste into: the one in front when the notch took the keyboard. Kept
+    /// because, for a moment after the notch closes, macOS may still route keys to Cleen.
+    static var target: NSRunningApplication?
+
+    /// Remembers the app in front, unless it's Cleen itself.
+    static func rememberTarget() {
+        guard let front = NSWorkspace.shared.frontmostApplication, front.processIdentifier != ProcessInfo.processInfo.processIdentifier else { return }
+        target = front
+    }
+
+    /// Sends ⌘V straight to the target app's process, with ⌘ pressed and released around
+    /// the V like a real keyboard, so it lands there whoever has the keyboard right now.
+    /// Returns false, without sending, when Accessibility isn't granted; what was copied
+    /// stays on the clipboard for a manual ⌘V.
     @discardableResult
     static func send() -> Bool {
-        let front = NSWorkspace.shared.frontmostApplication?.bundleIdentifier ?? "?"
+        let app = target.flatMap { $0.isTerminated ? nil : $0 } ?? NSWorkspace.shared.frontmostApplication
+        let name = app?.bundleIdentifier ?? "?"
         guard isAllowed else {
-            log.error("paste skipped: no Accessibility permission (front: \(front, privacy: .public))")
+            log.error("paste skipped: no Accessibility permission (target: \(name, privacy: .public))")
             return false
         }
-        let source = CGEventSource(stateID: .combinedSessionState)
+        let source = CGEventSource(stateID: .hidSystemState)
+        // Command plus the left-⌘ device bit, as a physical key sets it: some apps
+        // (Chromium ones among them) look at the device bits.
+        let command = CGEventFlags(rawValue: CGEventFlags.maskCommand.rawValue | 0x8)
+        let keyCommand: CGKeyCode = 55
         let keyV: CGKeyCode = 9
-        let down = CGEvent(keyboardEventSource: source, virtualKey: keyV, keyDown: true)
-        let up = CGEvent(keyboardEventSource: source, virtualKey: keyV, keyDown: false)
-        down?.flags = .maskCommand
-        up?.flags = .maskCommand
-        down?.post(tap: .cghidEventTap)
-        up?.post(tap: .cghidEventTap)
-        let keyWindow = NSApp.keyWindow.map { String(describing: type(of: $0)) } ?? "none"
-        log.info("paste sent to \(front, privacy: .public); Cleen active: \(NSApp.isActive), Cleen key window: \(keyWindow, privacy: .public)")
+        let events: [(CGKeyCode, Bool, CGEventFlags)] = [
+            (keyCommand, true, command), (keyV, true, command), (keyV, false, command), (keyCommand, false, []),
+        ]
+        for (key, down, flags) in events {
+            guard let event = CGEvent(keyboardEventSource: source, virtualKey: key, keyDown: down) else { continue }
+            event.flags = flags
+            if let pid = app?.processIdentifier {
+                event.postToPid(pid)
+            } else {
+                event.post(tap: .cgAnnotatedSessionEventTap)
+            }
+        }
+        log.info("paste sent to \(name, privacy: .public) (pid \(app?.processIdentifier ?? 0)); Cleen active: \(NSApp.isActive)")
         return true
     }
 }

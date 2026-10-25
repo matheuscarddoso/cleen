@@ -71,7 +71,7 @@ nonisolated final class MarkdownLayoutManager: NSLayoutManager, NSLayoutManagerD
 
     /// The checkbox's square, in text-container coordinates.
     func checkboxRect(x: CGFloat, line: NSRect, baseline: CGFloat) -> NSRect {
-        let side = styler.baseSize * 1.05
+        let side = styler.checkboxSide
         let center = line.minY + baseline - styler.baseFont.xHeight / 2
         return NSRect(x: x, y: center - side / 2, width: side, height: side)
     }

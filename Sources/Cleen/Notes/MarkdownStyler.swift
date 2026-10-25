@@ -22,12 +22,14 @@ nonisolated enum MarkdownDecoration: Equatable {
 /// `code` and ~~struck~~ lose their markers, headings their hashes, ticked items are
 /// struck and greyed. The text itself never changes: what's saved is plain Markdown.
 ///
-/// A rendered list item is indented by exactly its marker's width, so the words sit in
-/// the same place whether the line shows its marker or its dot.
+/// A rendered bullet or quote is indented by exactly its marker's width, so the words
+/// sit in the same place whether the line shows its marker or its dot.
 nonisolated struct MarkdownStyler {
     let baseSize: CGFloat
 
     var baseFont: NSFont { .systemFont(ofSize: baseSize) }
+    /// The rendered checkbox's side.
+    var checkboxSide: CGFloat { baseSize * 1.05 }
     private var markerFont: NSFont { .systemFont(ofSize: baseSize) }
 
     private var dim: NSColor { NSColor.white.withAlphaComponent(0.32) }
@@ -82,14 +84,16 @@ nonisolated struct MarkdownStyler {
         case .bullet, .checklist, .quote:
             // The marker keeps its own width either way: shown dimmed while editing,
             // hidden behind a dot, checkbox or bar otherwise.
-            let indent = width(of: marker)
+            let x = width(of: String(marker.prefix(line.indent)))
+            // A rendered checkbox keeps the words half an em from its edge; the source
+            // "- [ ] " is wider, so that line shifts a little while it's being edited.
+            let indent = if case .checklist = line.kind, !active { x + checkboxSide + baseSize * 0.5 } else { width(of: marker) }
             if active {
                 storage.addAttribute(.foregroundColor, value: dim, range: prefix)
                 storage.addAttribute(.paragraphStyle, value: paragraph(indent: 0, hanging: indent), range: range)
             } else {
                 storage.addAttribute(.paragraphStyle, value: paragraph(indent: indent), range: range)
                 storage.addAttribute(.markdownHidden, value: true, range: prefix)
-                let x = width(of: String(marker.prefix(line.indent)))
                 let decoration: MarkdownDecoration = switch line.kind {
                 case .checklist(let checked): .checkbox(x: x, checked: checked)
                 case .quote: .quote(x: x)
