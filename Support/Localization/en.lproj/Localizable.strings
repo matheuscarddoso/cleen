@@ -249,7 +249,6 @@
 "Claude Code" = "Claude Code";
 "Claude Code não encontrado" = "Claude Code not found";
 "Cleen" = "Cleen";
-"Clique de novo para apagar" = "Click again to delete";
 "Clique em Abrir Ajustes" = "Click Open Settings";
 "Clique para voltar" = "Click to go back";
 "Colar" = "Paste";
@@ -276,7 +275,6 @@
 "Conectado" = "Connected";
 "Confere a estrutura do disco sem alterar nada. Pode levar alguns minutos." = "Checks the disk's structure without changing anything. It can take a few minutes.";
 "Confirmar" = "Confirm";
-"Confirmar: apagar nota" = "Confirm: delete note";
 "Container" = "Container";
 "Container compartilhado" = "Shared container";
 "Containers" = "Containers";
@@ -1124,3 +1122,19 @@
 "Anel segue a voz" = "Ring follows your voice";
 "Com o microfone, o anel em volta do texto reage à sua voz. Nada é gravado." = "With the microphone, the ring around the text reacts to your voice. Nothing is recorded.";
 "clique em ↻ e permita" = "click ↻ and allow";
+"Apagar %lld itens?" = "Delete %lld items?";
+"Apagar %lld snapshots locais?" = "Delete %lld local snapshots?";
+"Apagar 1 item?" = "Delete 1 item?";
+"Apagar 1 snapshot local?" = "Delete 1 local snapshot?";
+"Apagar do histórico?" = "Delete from history?";
+"Apagar esta nota?" = "Delete this note?";
+"Cancelar" = "Cancel";
+"Mover %lld itens para o Lixo?" = "Move %lld items to the Trash?";
+"Mover 1 item para o Lixo?" = "Move 1 item to the Trash?";
+"O app" = "The app";
+"Os backups no disco externo ficam" = "Backups on the external drive stay";
+"Parte vai para o Lixo e parte é apagada de vez." = "Some goes to the Trash, some is deleted for good.";
+"Snapshots locais do Time Machine" = "Time Machine local snapshots";
+"Vai para o Lixo: dá para recuperar de lá." = "Goes to the Trash: you can get it back from there.";
+"e mais %lld itens menores" = "and %lld smaller items";
+"É apagado de vez, sem passar pelo Lixo." = "Deleted for good, without going to the Trash.";

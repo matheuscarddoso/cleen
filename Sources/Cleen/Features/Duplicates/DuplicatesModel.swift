@@ -25,6 +25,11 @@ final class DuplicatesModel {
     var selectedSize: Int64 { allFiles.filter { selection.contains($0.url) }.reduce(0) { $0 + $1.size } }
     var selectedCount: Int { allFiles.count { selection.contains($0.url) } }
 
+    /// The copies about to go to the Lixo (the one kept in each group stays).
+    var reviewItems: [DeletionReview.Item] {
+        allFiles.filter { selection.contains($0.url) }.map { DeletionReview.Item(url: $0.url, size: $0.size) }
+    }
+
     func startScan() {
         task?.cancel()
         task = Task { await performScan() }

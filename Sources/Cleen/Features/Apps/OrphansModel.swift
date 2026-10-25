@@ -23,6 +23,11 @@ final class OrphansModel {
     var selectedSize: Int64 { allItems.filter { selection.contains($0.url) }.reduce(0) { $0 + $1.size } }
     var selectedCount: Int { allItems.count { selection.contains($0.url) } }
 
+    /// What's about to go to the Lixo, each with what it was.
+    var reviewItems: [DeletionReview.Item] {
+        allItems.filter { selection.contains($0.url) }.map { DeletionReview.Item(url: $0.url, size: $0.size, detail: $0.place.title) }
+    }
+
     func scan() async {
         task?.cancel()
         let task = Task { await performScan() }

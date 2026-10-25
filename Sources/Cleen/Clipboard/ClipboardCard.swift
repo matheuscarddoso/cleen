@@ -6,6 +6,7 @@ import SwiftUI
 /// appear on hover; a click pastes it.
 struct ClipboardCard: View {
     @Environment(ClipboardModel.self) private var model
+    @Environment(NotchState.self) private var notch
     let entry: ClipboardEntry
     let isSelected: Bool
     let paste: () -> Void
@@ -25,7 +26,7 @@ struct ClipboardCard: View {
                     CardButton(symbol: entry.pinned ? "pin.fill" : "pin", help: entry.pinned ? String(localized: "Desafixar") : String(localized: "Fixar")) { model.togglePin(entry) }
                 }
                 if isHovered {
-                    CardButton(symbol: "xmark", help: String(localized: "Apagar do histórico")) { model.delete(entry) }
+                    CardButton(symbol: "xmark", help: String(localized: "Apagar do histórico"), action: reviewDelete)
                 }
             }
             .frame(height: 16)
@@ -47,9 +48,18 @@ struct ClipboardCard: View {
             Button("Copiar") { model.copy(entry) }
             Button(entry.pinned ? String(localized: "Desafixar") : String(localized: "Fixar")) { model.togglePin(entry) }
             Divider()
-            Button("Apagar do histórico", role: .destructive) { model.delete(entry) }
+            Button("Apagar do histórico", role: .destructive, action: reviewDelete)
         }
         .help(entry.kind == .image ? entry.title : (entry.text ?? entry.title))
+    }
+
+    private func reviewDelete() {
+        notch.review(DeletionReview(
+            title: String(localized: "Apagar do histórico?"),
+            items: [DeletionReview.Item(id: entry.id.uuidString, name: entry.title, detail: String(localized: "Área de transferência"), symbol: entry.kind == .image ? "photo" : "doc.on.clipboard")],
+            outcome: .delete,
+            confirm: { model.delete(entry) }
+        ))
     }
 
     private var sourceApp: URL? {

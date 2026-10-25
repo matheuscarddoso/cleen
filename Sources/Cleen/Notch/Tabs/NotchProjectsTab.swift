@@ -24,7 +24,7 @@ struct NotchProjectsTab: View {
                 NotchSummaryBar(value: model.selectedSize.bytes, caption: String(localized: "selecionados · \(model.staleSize.bytes) em projetos parados há \(model.staleDays)+ dias")) {
                     Button("Marcar parados", action: model.selectStale)
                         .buttonStyle(.notchSecondary)
-                    ConfirmingButton(title: String(localized: "Apagar"), confirmTitle: String(localized: "Confirmar"), isWorking: model.isCleaning, action: clean)
+                    ConfirmingButton(title: String(localized: "Apagar"), isWorking: model.isCleaning, items: { model.reviewItems }, outcome: .delete, action: clean)
                         .disabled(model.selectedCount == 0)
                 }
                 if let report = model.report {

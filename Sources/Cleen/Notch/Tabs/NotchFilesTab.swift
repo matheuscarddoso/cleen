@@ -24,7 +24,7 @@ struct NotchFilesTab: View {
                 NotchSummaryBar(value: model.selectedSize.bytes, caption: String(localized: "selecionados de \(model.totalSize.bytes) em \(model.files.count) arquivos · vão para o Lixo")) {
                     Button("Analisar de novo", action: model.startScan)
                         .buttonStyle(.notchSecondary)
-                    ConfirmingButton(title: String(localized: "Mover para o Lixo"), confirmTitle: String(localized: "Confirmar"), isWorking: model.isCleaning, action: trash)
+                    ConfirmingButton(title: String(localized: "Mover para o Lixo"), isWorking: model.isCleaning, items: { model.reviewItems }, action: trash)
                         .disabled(model.selectedCount == 0)
                 }
                 if let report = model.report {

@@ -40,6 +40,15 @@ final class ProjectsModel {
     var selectedSize: Int64 { allArtifacts.filter { selection.contains($0.url) }.reduce(0) { $0 + $1.size } }
     var selectedCount: Int { allArtifacts.count { selection.contains($0.url) } }
 
+    /// The dependency folders Apagar is about to delete, each with its project.
+    var reviewItems: [DeletionReview.Item] {
+        projects.flatMap { project in
+            project.artifacts.filter { selection.contains($0.url) }.map {
+                DeletionReview.Item(id: $0.url.path(percentEncoded: false), name: "\(project.name) · \($0.url.lastPathComponent)", detail: $0.kind.title, size: $0.size, url: $0.url)
+            }
+        }
+    }
+
     // MARK: Roots
 
     func addRoot(_ url: URL) {

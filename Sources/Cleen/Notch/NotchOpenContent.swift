@@ -44,6 +44,18 @@ struct NotchOpenContent: View {
             }
         }
         .foregroundStyle(NotchStyle.primary)
+        // The review covers the tool (and Ajustes), which stay as they were underneath.
+        .overlay(alignment: .top) {
+            if let review = state.deletionReview {
+                DeletionReviewView(review: review)
+                    .padding(.horizontal, NotchOpenContent.inset)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                    .background(NotchStyle.background)
+                    .padding(.top, notchHeight)
+                    .transition(.opacity)
+                    .id(review.id)
+            }
+        }
         .animation(.spring(response: 0.45, dampingFraction: 0.86), value: hidesTabBar)
         .overlay(alignment: .bottom) {
             if state.pasteNeedsPermission {

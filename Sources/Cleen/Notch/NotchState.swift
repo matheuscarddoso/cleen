@@ -1,5 +1,6 @@
 import Foundation
 import Observation
+import SwiftUI
 
 /// What the notch is doing right now. Owned by `NotchController`, read by the views.
 @Observable
@@ -31,8 +32,37 @@ final class NotchState {
     /// Bumped once the panel holds the keyboard, so the search field takes the cursor
     /// right then (asking before the window is key does nothing).
     var searchFocusRequest = 0
-    /// The panel grows tall, like a launcher: the search, and Emoji's grid.
-    var isTall: Bool { isOpen && !showsWelcome && (showsSearch || (tab == .emoji && !showsSettings)) }
+    /// The panel grows tall, like a launcher: the search, Emoji's grid, and the review
+    /// of something about to be deleted.
+    var isTall: Bool { isOpen && !showsWelcome && (showsSearch || deletionReview != nil || (tab == .emoji && !showsSettings)) }
+
+    /// Something is about to be deleted: the panel lists it and waits for Confirmar.
+    private(set) var deletionReview: DeletionReview?
+    /// Whether the panel was held open before the review took over.
+    @ObservationIgnored private var heldBeforeReview = false
+
+    /// Grows the panel into the review; nothing is deleted until it's confirmed.
+    func review(_ review: DeletionReview) {
+        if deletionReview == nil { heldBeforeReview = holdsOpen }
+        holdsOpen = true
+        withAnimation(NotchController.searchResize) { deletionReview = review }
+    }
+
+    func confirmDeletion() {
+        guard let review = deletionReview else { return }
+        endReview()
+        review.confirm()
+    }
+
+    func cancelDeletion() {
+        guard deletionReview != nil else { return }
+        endReview()
+    }
+
+    private func endReview() {
+        holdsOpen = heldBeforeReview
+        withAnimation(NotchController.searchResize) { deletionReview = nil }
+    }
 
     /// A paste was asked for without Accessibility: the panel shows how to allow it.
     var pasteNeedsPermission = false

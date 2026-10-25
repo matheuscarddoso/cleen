@@ -1,52 +1,37 @@
 import SwiftUI
 
-/// Two taps instead of a dialog: the first arms it (it turns red and says what will
-/// happen), the second does it. Dialogs don't belong in a panel that hides when you
-/// look away. Disarms itself after a few seconds.
+/// The button on anything that deletes. It doesn't delete: it opens the review (the
+/// notch grows and lists what's about to go, with Cancelar and Confirmar), and only
+/// Confirmar there runs `action`.
 struct ConfirmingButton: View {
     let title: String
-    let confirmTitle: String
     var isWorking = false
+    /// What's about to go, read when the button is clicked (the selection then).
+    let items: () -> [DeletionReview.Item]
+    var outcome = DeletionReview.Outcome.trash
     let action: () -> Void
 
     @Environment(NotchState.self) private var notch
-    @State private var isArmed = false
-    @State private var disarm: Task<Void, Never>?
 
     var body: some View {
-        Button(action: tap) {
+        Button {
+            let items = items()
+            guard !items.isEmpty else { return }
+            notch.review(DeletionReview(
+                title: DeletionReview.title(count: items.count, outcome: outcome),
+                items: items,
+                outcome: outcome,
+                confirm: action
+            ))
+        } label: {
             HStack(spacing: 6) {
                 if isWorking {
-                    ProgressView().controlSize(.mini).tint(isArmed ? .white : .black)
+                    ProgressView().controlSize(.mini).tint(.black)
                 }
-                Text(isArmed ? confirmTitle : title)
-                    .contentTransition(.opacity)
+                Text(title)
             }
         }
-        .buttonStyle(isArmed ? .notchDestructive : .notchPrimary)
+        .buttonStyle(.notchPrimary)
         .disabled(isWorking)
-        .animation(.smooth(duration: 0.18), value: isArmed)
-        .onDisappear { reset() }
-    }
-
-    private func tap() {
-        if isArmed {
-            reset()
-            action()
-            return
-        }
-        isArmed = true
-        notch.holdsOpen = true
-        disarm = Task {
-            try? await Task.sleep(for: .seconds(4))
-            guard !Task.isCancelled else { return }
-            reset()
-        }
-    }
-
-    private func reset() {
-        disarm?.cancel()
-        isArmed = false
-        notch.holdsOpen = false
     }
 }

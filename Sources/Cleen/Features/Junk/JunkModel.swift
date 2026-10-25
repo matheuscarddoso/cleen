@@ -52,6 +52,25 @@ final class JunkModel {
         results.flatMap(\.items).count { selection.contains($0.url) } + selectedTools.count
     }
 
+    /// What Limpar is about to take, for the review before it does.
+    var reviewItems: [DeletionReview.Item] {
+        let files = results.flatMap { result in
+            result.items.filter { selection.contains($0.url) }.map { DeletionReview.Item(url: $0.url, size: $0.size, detail: result.category.title) }
+        }
+        let tools = tools.filter { selectedTools.contains($0.kind) }.map {
+            DeletionReview.Item(id: $0.kind.rawValue, name: $0.title, detail: $0.summary, size: $0.reclaimable, symbol: $0.symbol)
+        }
+        return files + tools
+    }
+
+    /// Trashed, deleted, or some of each, for the review.
+    var reviewOutcome: DeletionReview.Outcome {
+        let items = results.flatMap(\.items).filter { selection.contains($0.url) }
+        let deletes = items.contains { $0.removal == .delete } || !selectedTools.isEmpty
+        let trashes = items.contains { $0.removal != .delete }
+        return deletes ? (trashes ? .mixed : .delete) : .trash
+    }
+
     /// Whether anything selected is permanently deleted rather than trashed.
     var selectionDeletes: Bool {
         results.flatMap(\.items).contains { selection.contains($0.url) && $0.removal == .delete } || !selectedTools.isEmpty

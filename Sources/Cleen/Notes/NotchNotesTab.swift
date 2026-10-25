@@ -120,7 +120,7 @@ private struct NoteHeader: View {
             .contentTransition(.symbolEffect(.replace))
             .disabled(selected.isBlank)
             .opacity(selected.isBlank ? 0.4 : 1)
-            NoteDeleteButton(noteID: selected.id, isBlank: selected.isBlank, isOnlyNote: notes.notebook.notes.count == 1) {
+            NoteDeleteButton(noteID: selected.id, title: selected.title ?? selected.preview, isBlank: selected.isBlank, isOnlyNote: notes.notebook.notes.count == 1) {
                 withAnimation(.smooth(duration: 0.22)) { notes.delete(selected) }
                 focusEditor()
             }

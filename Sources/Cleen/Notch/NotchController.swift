@@ -77,6 +77,8 @@ final class NotchController {
     func close() {
         pendingOpen?.cancel()
         guard state.isOpen else { return }
+        // Closing is never a yes: a review left open is cancelled.
+        state.cancelDeletion()
         state.pasteNeedsPermission = false
         state.holdsOpen = false
         state.mirrorExpanded = false
@@ -311,7 +313,11 @@ final class NotchController {
         if let local = NSEvent.addLocalMonitorForEvents(matching: mask.union(.keyDown), handler: { [weak self] event in
             // Only Esc typed in the notch itself: Quick Look and the file picker close with theirs.
             if event.type == .keyDown, event.keyCode == 53, let self, self.state.isOpen, event.window === self.panel {
-                if self.state.escapeHandler?() != true { self.close() }
+                if self.state.deletionReview != nil {
+                    self.state.cancelDeletion()
+                } else if self.state.escapeHandler?() != true {
+                    self.close()
+                }
                 return nil
             }
             self?.handlePointer(event)

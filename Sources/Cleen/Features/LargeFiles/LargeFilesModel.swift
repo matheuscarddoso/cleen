@@ -44,6 +44,11 @@ final class LargeFilesModel {
     var selectedSize: Int64 { files.filter { selection.contains($0.url) }.reduce(0) { $0 + $1.size } }
     var selectedCount: Int { files.count { selection.contains($0.url) } }
 
+    /// The files about to go to the Lixo.
+    var reviewItems: [DeletionReview.Item] {
+        files.filter { selection.contains($0.url) }.map { DeletionReview.Item(url: $0.url, size: $0.size) }
+    }
+
     func startScan() {
         task?.cancel()
         task = Task { await performScan() }

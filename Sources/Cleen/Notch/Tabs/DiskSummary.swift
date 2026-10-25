@@ -27,7 +27,7 @@ struct DiskSummary: View {
                         .font(.system(size: 11))
                         .foregroundStyle(NotchStyle.secondary)
                 } else if app.hasSmartResults, app.smartCleanSize > 0 {
-                    ConfirmingButton(title: String(localized: "Limpar \(app.smartCleanSize.bytes)"), confirmTitle: String(localized: "Confirmar"), action: clean)
+                    ConfirmingButton(title: String(localized: "Limpar \(app.smartCleanSize.bytes)"), items: { app.junk.reviewItems + app.projects.reviewItems }, outcome: smartOutcome, action: clean)
                 } else {
                     Button(app.hasSmartResults ? String(localized: "Analisar de novo") : String(localized: "Analisar o Mac"), action: scan)
                         .buttonStyle(.notchPrimary)
@@ -51,5 +51,12 @@ struct DiskSummary: View {
 
     private func clean() {
         Task { await app.smartClean() }
+    }
+
+    /// Dependency folders are deleted outright, so with any of them it's at least mixed.
+    private var smartOutcome: DeletionReview.Outcome {
+        guard !app.projects.reviewItems.isEmpty else { return app.junk.reviewOutcome }
+        if app.junk.reviewItems.isEmpty { return .delete }
+        return app.junk.reviewOutcome == .delete ? .delete : .mixed
     }
 }

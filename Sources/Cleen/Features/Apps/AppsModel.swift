@@ -25,6 +25,13 @@ final class AppsModel {
 
     var selectedApp: InstalledApp? { apps.first { $0.id == selectedID } }
 
+    /// Desinstalar's list: the app, then the leftovers chosen with it.
+    var uninstallItems: [DeletionReview.Item] {
+        guard let app = selectedApp else { return [] }
+        let pieces = leftovers.filter { leftoverSelection.contains($0.url) }.map { DeletionReview.Item(url: $0.url, size: $0.size, detail: $0.place.title) }
+        return [DeletionReview.Item(url: app.url, size: app.size, detail: String(localized: "O app"))] + pieces
+    }
+
     var visibleApps: [InstalledApp] {
         let filtered = search.isEmpty ? apps : apps.filter { $0.name.localizedStandardContains(search) }
         return switch sort {

@@ -35,10 +35,17 @@ struct ClipboardSettings: View {
                 NotchSwitch(label: String(localized: "Miniatura do macOS"), isOn: $thumbnail)
             }
             SettingRow(title: String(localized: "Apagar histórico"), note: savedCount) {
-                ConfirmingButton(title: String(localized: "Apagar"), confirmTitle: String(localized: "Confirmar"), action: clipboard.clear)
+                ConfirmingButton(title: String(localized: "Apagar"), items: historyItems, outcome: .delete, action: clipboard.clear)
                     .disabled(clipboard.log.entries.isEmpty)
             }
         }
+    }
+
+    /// The history as one row: its entries aren't worth listing one by one.
+    private func historyItems() -> [DeletionReview.Item] {
+        let count = clipboard.log.entries.count
+        guard count > 0 else { return [] }
+        return [DeletionReview.Item(id: "clipboard", name: String(localized: "Histórico da área de transferência"), detail: savedCount, symbol: "doc.on.clipboard")]
     }
 
     private var savedCount: String {

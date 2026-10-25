@@ -20,7 +20,7 @@ struct AppUninstallPane: View {
                     }
                     Spacer(minLength: 6)
                     if !app.isSystem {
-                        ConfirmingButton(title: String(localized: "Desinstalar"), confirmTitle: String(localized: "Confirmar"), isWorking: model.isUninstalling, action: uninstall)
+                        ConfirmingButton(title: String(localized: "Desinstalar"), isWorking: model.isUninstalling, items: { model.uninstallItems }, action: uninstall)
                     }
                 }
                 if app.isSystem {

@@ -3,6 +3,7 @@ import SwiftUI
 /// What to do with the capture, as a compact grid that fits beside the preview.
 struct ScreenshotActions: View {
     @Environment(ScreenshotModel.self) private var model
+    @Environment(NotchState.self) private var notch
     let shot: Screenshot
     @State private var copied = false
 
@@ -33,7 +34,7 @@ struct ScreenshotActions: View {
                 .buttonStyle(.notchSecondary)
             }
             GridRow {
-                Button { model.delete(shot) } label: {
+                Button(action: reviewDelete) {
                     Label("Excluir", systemImage: "trash")
                         .frame(maxWidth: .infinity)
                         .foregroundStyle(NotchStyle.critical)
@@ -50,5 +51,15 @@ struct ScreenshotActions: View {
     private func copy() {
         model.copy(shot)
         copied = true
+    }
+
+    private func reviewDelete() {
+        let size = (try? shot.url.resourceValues(forKeys: [.fileSizeKey]).fileSize).map(Int64.init)
+        notch.review(DeletionReview(
+            title: DeletionReview.title(count: 1, outcome: .trash),
+            items: [DeletionReview.Item(url: shot.url, size: size)],
+            outcome: .trash,
+            confirm: { model.delete(shot) }
+        ))
     }
 }

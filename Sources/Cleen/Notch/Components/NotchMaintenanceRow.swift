@@ -4,6 +4,7 @@ import SwiftUI
 /// One chore: glyph, name, state, and a small run button.
 struct NotchMaintenanceRow: View {
     @Environment(MaintenanceModel.self) private var model
+    @Environment(NotchState.self) private var notch
     let task: MaintenanceTask
 
     var body: some View {
@@ -53,7 +54,19 @@ struct NotchMaintenanceRow: View {
         }
     }
 
+    /// Thinning snapshots deletes Time Machine's local copies: that goes through the
+    /// review first. The other chores only rebuild caches the system remakes.
     private func run() {
-        Task { await model.run(task) }
+        guard task == .thinSnapshots else {
+            Task { await model.run(task) }
+            return
+        }
+        let count = model.snapshotCount ?? 0
+        notch.review(DeletionReview(
+            title: count == 1 ? String(localized: "Apagar 1 snapshot local?") : String(localized: "Apagar \(count) snapshots locais?"),
+            items: [DeletionReview.Item(id: "snapshots", name: String(localized: "Snapshots locais do Time Machine"), detail: String(localized: "Os backups no disco externo ficam"), symbol: "clock.arrow.circlepath")],
+            outcome: .delete,
+            confirm: { Task { await model.run(task) } }
+        ))
     }
 }
