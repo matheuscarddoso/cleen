@@ -76,7 +76,11 @@ public enum ClaudeLimits {
         var denied = false
         for name in services {
             switch await readKeychain(service: name) {
-            case .found(let credential): found.append(credential)
+            case .found(let credential):
+                found.append(credential)
+                // A sign-in still valid is enough: every other item read could mean one
+                // more Keychain prompt.
+                if credential.expiresAt.map({ $0 > .now }) ?? true { return (found, denied) }
             case .denied: denied = true
             case .missing: break
             }

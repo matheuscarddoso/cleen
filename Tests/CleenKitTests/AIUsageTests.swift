@@ -131,6 +131,19 @@ struct AIUsageTests {
 
 @Suite(.enabled(if: ProcessInfo.processInfo.environment["CLEEN_PROBE"] != nil))
 struct AIUsageProbe {
+    /// The whole limits path on this Mac: sign-in, request, parse. Prints only the
+    /// outcome (never the token).
+    @Test func realLimits() async {
+        let (credentials, denied) = await ClaudeLimits.readCredentials(home: Paths.home)
+        print("PROBE credentials=\(credentials.count) denied=\(denied) expiries=\(credentials.map { $0.expiresAt.map { Int($0.timeIntervalSinceNow / 60) } ?? -1 }) min")
+        switch await ClaudeLimits.fetch() {
+        case .success(let report):
+            print("PROBE plan=\(report.plan ?? "-") windows=\(report.windows.map { "\($0.name) \(Int($0.used * 100))%" })")
+        case .failure(let failure):
+            print("PROBE failure=\(failure)")
+        }
+    }
+
     @Test func realLogs() {
         let clock = ContinuousClock()
         let start = clock.now
