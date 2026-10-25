@@ -36,8 +36,10 @@ func bounds() -> CGRect {
 
 /// The icon's silhouette as a grayscale mask the size of the artwork: flood-fills the
 /// near-white page in from the borders, then erodes and softens the edge.
-func silhouette(erode: Int = 3, soften: Double = 1.1) -> CGImage {
+func silhouette() -> CGImage {
     let width = bitmap.pixelsWide, height = bitmap.pixelsHigh
+    // Sized to the artwork: 3 px in and a 1.1 px blur at 1254 px wide.
+    let erode = max(3, Int((Double(width) / 418).rounded())), soften = Double(width) / 1140
     var page = [Bool](repeating: false, count: width * height)
     func paper(_ x: Int, _ y: Int) -> Bool {
         guard let color = bitmap.colorAt(x: x, y: y)?.usingColorSpace(.sRGB) else { return true }
