@@ -1,7 +1,8 @@
 "use client";
 
-import { Pause, Play, SkipBack, SkipForward, type LucideIcon } from "lucide-react";
+import { Pause, SkipBack, SkipForward, type LucideIcon } from "lucide-react";
 import type { Track } from "./data";
+import { OpticalPlay } from "../../OpticalPlay";
 
 /**
  * NowPlayingCard: the artwork with the playing app's icon on its corner, title, album
@@ -40,7 +41,7 @@ export function NowPlaying({
         <span className="truncate text-[14px] font-medium leading-[17px]" style={{ color: "rgba(255,255,255,0.45)" }}>{track.artist}</span>
         <div className="-ml-1.5 flex gap-1 pt-0.5">
           <PlayerButton icon={SkipBack} label="Anterior" lit={pressed === "previous"} onClick={onPrevious} />
-          <PlayerButton icon={playing ? Pause : Play} label={playing ? "Pausar" : "Tocar"} lit={pressed === "toggle"} onClick={onToggle} />
+          <PlayerButton icon={playing ? Pause : OpticalPlay} label={playing ? "Pausar" : "Tocar"} lit={pressed === "toggle"} onClick={onToggle} />
           <PlayerButton icon={SkipForward} label="Próxima" lit={pressed === "next"} onClick={onNext} />
         </div>
       </div>
@@ -49,7 +50,7 @@ export function NowPlaying({
 }
 
 /** PlayerButton: a 15 pt filled glyph with a round hover. */
-function PlayerButton({ icon: Icon, label, lit, onClick }: { icon: LucideIcon; label: string; lit: boolean; onClick: () => void }) {
+function PlayerButton({ icon: Icon, label, lit, onClick }: { icon: LucideIcon | typeof OpticalPlay; label: string; lit: boolean; onClick: () => void }) {
   return (
     <button
       type="button"

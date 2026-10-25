@@ -1,6 +1,7 @@
 "use client";
 
-import { Pause, Play } from "lucide-react";
+import { Pause } from "lucide-react";
+import { OpticalPlay } from "./OpticalPlay";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Wallpaper } from "../Wallpaper";
 import { DemoContext } from "./DemoContext";
@@ -93,7 +94,7 @@ export function DemoFrame({
           className="absolute z-10 flex items-center justify-center rounded-full bg-[rgba(210,210,215,0.64)] text-black/55 backdrop-blur-[20px] backdrop-saturate-[1.8] transition-[background-color,color,scale] duration-200 hover:bg-[rgba(223,223,227,0.7)] hover:text-black/65 active:scale-[0.96]"
           style={{ width: button.box, height: button.box, right: button.inset, bottom: button.inset }}
         >
-          {paused ? <Play size={button.icon} fill="currentColor" strokeWidth={0} className="translate-x-[1px]" /> : <Pause size={button.icon} fill="currentColor" strokeWidth={0} />}
+          {paused ? <OpticalPlay size={button.icon} fill="currentColor" strokeWidth={0} /> : <Pause size={button.icon} fill="currentColor" strokeWidth={0} />}
         </button>
       )}
     </div>

@@ -1,6 +1,7 @@
 "use client";
 
-import { Pause, Play } from "lucide-react";
+import { Pause } from "lucide-react";
+import { OpticalPlay } from "../OpticalPlay";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useDemo, useSteps } from "../DemoContext";
 import { notch } from "../style";
@@ -140,7 +141,7 @@ export function TimerTab() {
         <div className="flex items-center gap-1.5">
           <Pill kind="primary" pressed={pressed === "primary"} title={`${primaryTitle} (espaço)`} onClick={() => act(toggle)}>
             <span className="flex min-w-[72px] items-center justify-center gap-[7px]">
-              {running ? <Pause size={11} fill="currentColor" strokeWidth={0} aria-hidden /> : <Play size={11} fill="currentColor" strokeWidth={1} strokeLinejoin="round" aria-hidden />}
+              {running ? <Pause size={11} fill="currentColor" strokeWidth={0} aria-hidden /> : <OpticalPlay size={11} fill="currentColor" strokeWidth={1} strokeLinejoin="round" aria-hidden />}
               {primaryTitle}
             </span>
           </Pill>
@@ -182,7 +183,7 @@ function ClockFace({ session, still, onToggle }: { session: TimerSession; still:
             running ? (
               <Pause size={22} fill="#fff" strokeWidth={0} aria-hidden />
             ) : (
-              <Play size={21} fill="#fff" strokeWidth={0} className="translate-x-[1.5px]" aria-hidden />
+              <OpticalPlay size={21} fill="#fff" strokeWidth={0} aria-hidden />
             )
           ) : (
             <span className="transition-opacity duration-300" style={{ opacity: 0.8 }}>
