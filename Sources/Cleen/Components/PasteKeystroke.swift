@@ -23,6 +23,24 @@ enum PasteKeystroke {
     /// because, for a moment after the notch closes, macOS may still route keys to Cleen.
     static var target: NSRunningApplication?
 
+    /// Gives the keyboard back to the target app and its window. The panel had it, and
+    /// macOS doesn't hand it back to an app that was already in front when the panel
+    /// goes; Accessibility can: the app is made frontmost again and its focused window
+    /// main, which moves the keyboard there.
+    static func restoreFocus() {
+        guard isAllowed, let app = target, !app.isTerminated else { return }
+        let element = AXUIElementCreateApplication(app.processIdentifier)
+        AXUIElementSetAttributeValue(element, kAXFrontmostAttribute as CFString, kCFBooleanTrue)
+        var window: CFTypeRef?
+        if AXUIElementCopyAttributeValue(element, kAXFocusedWindowAttribute as CFString, &window) == .success, let window {
+            // A CFTypeRef from kAXFocusedWindowAttribute is always an AXUIElement.
+            let focused = window as! AXUIElement
+            AXUIElementSetAttributeValue(focused, kAXMainAttribute as CFString, kCFBooleanTrue)
+            AXUIElementPerformAction(focused, kAXRaiseAction as CFString)
+        }
+        log.info("focus restored to \(app.bundleIdentifier ?? "?", privacy: .public)")
+    }
+
     /// Remembers the app in front, unless it's Cleen itself.
     static func rememberTarget() {
         guard let front = NSWorkspace.shared.frontmostApplication, front.processIdentifier != ProcessInfo.processInfo.processIdentifier else { return }

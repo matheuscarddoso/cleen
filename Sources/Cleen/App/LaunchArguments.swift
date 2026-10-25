@@ -18,6 +18,9 @@ enum LaunchArguments {
     /// `--live power|headphones|track|meeting` plays that live activity on the closed notch.
     static let liveActivity = value(after: "--live")
     static let onboarding = ProcessInfo.processInfo.arguments.contains("--onboarding")
+    /// `--focus-check` opens the launcher and closes it two seconds later, for checking
+    /// that the keyboard goes back to the app in front.
+    static let focusCheck = ProcessInfo.processInfo.arguments.contains("--focus-check")
 
     private static func value(after flag: String) -> String? {
         let arguments = ProcessInfo.processInfo.arguments

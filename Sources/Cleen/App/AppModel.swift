@@ -103,6 +103,13 @@ final class AppModel {
         screenshots.start()
         warmCharts(after: .seconds(4))
         if LaunchArguments.welcome { notch.primary?.presentWelcome() }
+        if LaunchArguments.focusCheck, let notch = notch.primary {
+            notch.openSearch()
+            Task {
+                try? await Task.sleep(for: .seconds(2))
+                notch.closeSearch(paste: false)
+            }
+        }
         if let text = LaunchArguments.search {
             notch.primary?.openSearch()
             search.query = text

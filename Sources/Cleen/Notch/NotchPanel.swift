@@ -23,7 +23,12 @@ final class NotchPanel: NSPanel {
         ignoresMouseEvents = true
     }
 
+    /// True while a panel hands the keyboard back: ordering the key panel out makes
+    /// AppKit pick another of Cleen's windows (the notch on the other screen) as key,
+    /// which took the keyboard away from the app it was going back to.
+    static var isReleasingKeyboard = false
+
     // Lets text fields (search) take typing without activating the app.
-    override var canBecomeKey: Bool { true }
+    override var canBecomeKey: Bool { !Self.isReleasingKeyboard }
     override var canBecomeMain: Bool { false }
 }
