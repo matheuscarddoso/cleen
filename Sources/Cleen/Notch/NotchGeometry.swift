@@ -24,7 +24,9 @@ struct NotchGeometry: Equatable {
         if screen.safeAreaInsets.top > 0,
            let left = screen.auxiliaryTopLeftArea,
            let right = screen.auxiliaryTopRightArea {
-            notchSize = CGSize(width: screen.frame.width - left.width - right.width, height: screen.safeAreaInsets.top)
+            // A point wider and taller than the housing: drawn exactly to its edge, the
+            // antialiased rim fell short and the closed notch looked a pixel small.
+            notchSize = CGSize(width: screen.frame.width - left.width - right.width + 2, height: screen.safeAreaInsets.top + 1)
             hasPhysicalNotch = true
         } else {
             // No camera housing: draw a compact island the height of the menu bar.

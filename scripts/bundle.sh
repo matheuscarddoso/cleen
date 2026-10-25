@@ -27,7 +27,7 @@ cp "$ROOT/Support/NowPlaying/now-playing.pl" "$APP/Contents/Resources/now-playin
 # (see scripts/strings.sh).
 cp -R "$ROOT/Support/Localization/"*.lproj "$APP/Contents/Resources/"
 # Brand marks drawn as they are (the Claude logo where the app shows Claude).
-cp "$ROOT/Support/Brand/"*.svg "$APP/Contents/Resources/"
+cp "$ROOT/Support/Brand/"*.svg "$ROOT/Support/Brand/"*.png "$APP/Contents/Resources/"
 
 # Icon: regenerate only when the script or the artwork changed.
 ICONSET="$ROOT/build/AppIcon.iconset"

@@ -95,15 +95,8 @@ struct NotchWings: View {
         } else if isPlaying {
             WingArtwork(image: nowPlaying.artwork, size: artworkSize, cornerRadius: max(3, NotchStyle.closedBottomRadius - inset))
                 .transition(.scale(0.6).combined(with: .opacity))
-        } else {
-            switch idleIndicator {
-            case .disk: WingRing(fraction: monitor.disk?.usedFraction ?? 0).transition(.opacity)
-            case .battery:
-                WingRing(fraction: monitor.battery?.level ?? 0, color: batteryColor).transition(.opacity)
-            case .cpu: WingRing(fraction: monitor.cpu?.total ?? 0).transition(.opacity)
-            case .none: EmptyView()
-            }
         }
+        // Idle, the left wing stays empty: the reading and its bar are on the right.
     }
 
     private var batteryColor: Color {
@@ -130,11 +123,13 @@ struct NotchWings: View {
         } else {
             switch idleIndicator {
             case .disk:
-                wingText(monitor.disk.map { Self.compact($0.available) } ?? "", color: NotchStyle.level(monitor.disk?.usedFraction ?? 0))
+                let used = monitor.disk?.usedFraction ?? 0
+                wingMeter(monitor.disk.map { Self.compact($0.available) } ?? "", fraction: used, color: NotchStyle.level(used))
             case .battery:
-                wingText(monitor.battery?.level.percent ?? "", color: batteryColor)
+                wingMeter(monitor.battery?.level.percent ?? "", fraction: monitor.battery?.level ?? 0, color: batteryColor)
             case .cpu:
-                wingText(monitor.cpu?.total.percent ?? "", color: NotchStyle.level(monitor.cpu?.total ?? 0))
+                let load = monitor.cpu?.total ?? 0
+                wingMeter(monitor.cpu?.total.percent ?? "", fraction: load, color: NotchStyle.level(load))
             case .none: EmptyView()
             }
         }
@@ -148,6 +143,26 @@ struct NotchWings: View {
             .fixedSize()
             .contentTransition(.numericText())
             .transition(.opacity)
+    }
+
+    /// The idle reading with a hairline bar under it, as wide as the text: how full the
+    /// disk is (or the battery, the CPU) without a ring taking the other wing.
+    private func wingMeter(_ text: String, fraction: Double, color: Color) -> some View {
+        wingText(text, color: color)
+            .padding(.bottom, 4.5)
+            .overlay(alignment: .bottom) {
+                GeometryReader { proxy in
+                    ZStack(alignment: .leading) {
+                        Capsule().fill(NotchStyle.track)
+                        Capsule()
+                            .fill(color)
+                            .frame(width: max(2.5, proxy.size.width * min(1, max(0, fraction))))
+                    }
+                }
+                .frame(height: 2.5)
+                .animation(.smooth(duration: 0.4), value: fraction)
+            }
+            .accessibilityValue(fraction.percent)
     }
 
     /// `7,1G`, `13,6G`, `146G`: at most three digits, so it fits beside the camera
