@@ -55,7 +55,8 @@ enum PasteKeystroke {
             if let focusedApp, CFGetTypeID(focusedApp) == AXUIElementGetTypeID() { AXUIElementGetPid(focusedApp as! AXUIElement, &pid) }
             let role = focusedElement(of: pid).flatMap { string($0, kAXRoleAttribute) } ?? "none"
             let name = NSRunningApplication(processIdentifier: pid)?.bundleIdentifier ?? "none"
-            log.info("keyboard now with \(name, privacy: .public), element \(role, privacy: .public)")
+            let key = NSApp.keyWindow.map { "\(type(of: $0)) at \(Int($0.frame.minX)),\(Int($0.frame.minY))" } ?? "none"
+            log.info("keyboard now with \(name, privacy: .public), element \(role, privacy: .public); Cleen key window: \(key, privacy: .public)")
         }
     }
 

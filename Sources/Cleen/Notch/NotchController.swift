@@ -35,6 +35,7 @@ final class NotchController {
         state.geometry = geometry
 
         let panel = NotchPanel(frame: geometry.windowFrame(showsSearch: false))
+        panel.acceptsKeyboard = { [weak self] in self?.state.isOpen == true }
         let root = NotchRootView(controller: self)
             .injecting(app)
             .environment(state)
@@ -208,18 +209,14 @@ final class NotchController {
     /// Hands the keyboard back to the app you were in, so a paste lands there.
     /// `resignKey()` only reports a change, it doesn't make one: the panel stayed key and
     /// a ⌘V sent after closing went to Cleen. Ordering the panel out is what really gives
-    /// up key status (with no other Cleen window allowed to take it over); ordering it
-    /// straight back in keeps the closed notch on screen, so nothing flickers. Then the
-    /// app you were in gets the keyboard back.
+    /// up key status (no closed panel can take it over, see `NotchPanel.acceptsKeyboard`);
+    /// ordering it straight back in keeps the closed notch on screen, so nothing flickers.
+    /// Then the app you were in gets the keyboard back.
     private func giveBackKeyboard() {
-        guard let panel else { return }
-        if panel.isKeyWindow {
-            NotchPanel.isReleasingKeyboard = true
-            panel.orderOut(nil)
-            panel.orderFrontRegardless()
-            NotchPanel.isReleasingKeyboard = false
-            PasteKeystroke.restoreFocus()
-        }
+        guard let panel, panel.isKeyWindow else { return }
+        panel.orderOut(nil)
+        panel.orderFrontRegardless()
+        PasteKeystroke.restoreFocus()
     }
 
     func togglePin() {

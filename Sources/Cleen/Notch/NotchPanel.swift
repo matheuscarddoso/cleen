@@ -23,12 +23,13 @@ final class NotchPanel: NSPanel {
         ignoresMouseEvents = true
     }
 
-    /// True while a panel hands the keyboard back: ordering the key panel out makes
-    /// AppKit pick another of Cleen's windows (the notch on the other screen) as key,
-    /// which took the keyboard away from the app it was going back to.
-    static var isReleasingKeyboard = false
+    /// Whether the panel may take the keyboard (so search and notes take typing without
+    /// activating the app): only while it's open. A closed notch that could become key
+    /// gets picked by AppKit as the next key window when another panel gives the keyboard
+    /// up (the one on the other screen did, a moment after a paste), and then typing went
+    /// to Cleen instead of back to the app you were in.
+    var acceptsKeyboard: () -> Bool = { false }
 
-    // Lets text fields (search) take typing without activating the app.
-    override var canBecomeKey: Bool { !Self.isReleasingKeyboard }
+    override var canBecomeKey: Bool { acceptsKeyboard() }
     override var canBecomeMain: Bool { false }
 }
