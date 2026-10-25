@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   applicationName: site.name,
   authors: [{ name: site.author, url: site.authorUrl }],
   alternates: { canonical: "/" },
-  icons: { icon: "/favicon.png", apple: "/apple-touch-icon.png" },
+  icons: { icon: "/cleen-favicon.png", apple: "/cleen-apple-touch-icon.png" },
   openGraph: {
     type: "website",
     url: site.url,
@@ -25,9 +25,9 @@ export const metadata: Metadata = {
     title: "Cleen — Tudo no notch.",
     description,
     locale: "pt_BR",
-    images: [{ url: "/og.png", width: 1200, height: 630, alt: "O painel do Cleen aberto no notch de um Mac" }],
+    images: [{ url: "/cleen-og.png", width: 1200, height: 630, alt: "O painel do Cleen aberto no notch de um Mac" }],
   },
-  twitter: { card: "summary_large_image", title: "Cleen — Tudo no notch.", description, images: ["/og.png"] },
+  twitter: { card: "summary_large_image", title: "Cleen — Tudo no notch.", description, images: ["/cleen-og.png"] },
 };
 
 export const viewport: Viewport = { themeColor: "#f5f5f7", colorScheme: "light" };

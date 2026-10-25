@@ -1,29 +1,29 @@
-/** Made-up content for Início: three tracks, a week of events and a few reminders. */
+/** Content for Início: three Drake songs, and a made-up week of events and a few reminders. */
 
 export type Track = { title: string; album: string; artist: string; artwork: string };
 
-/** Artwork as layered gradients, so each cover reads as a real one at 88 pt. */
+/** Artwork as layered gradients in each album's mood, so every cover reads as one at 88 pt. */
 export const tracks: Track[] = [
   {
-    title: "Maré Alta",
-    album: "Litoral",
-    artist: "Banda Sal",
+    title: "Hotline Bling",
+    album: "Views",
+    artist: "Drake",
     artwork:
-      "radial-gradient(circle at 70% 30%, rgba(255,236,179,0.95) 0 12%, transparent 13%), linear-gradient(180deg, #ff8a5b 0%, #f2546b 46%, #3b2a6b 47%, #1d3b74 70%, #0f2547 100%)",
+      "radial-gradient(circle at 30% 28%, rgba(255,214,240,0.85) 0 9%, rgba(255,120,200,0.25) 10%, transparent 32%), linear-gradient(160deg, #ff4fa3 0%, #a23cf0 52%, #2a1a6e 100%)",
   },
   {
-    title: "Céu de Setembro",
-    album: "Horizonte",
-    artist: "Vento Norte",
+    title: "Passionfruit",
+    album: "More Life",
+    artist: "Drake",
     artwork:
-      "radial-gradient(circle at 72% 30%, rgba(248,255,174,0.9) 0 9%, rgba(248,255,174,0.25) 10%, transparent 34%), radial-gradient(ellipse 90% 45% at 20% 100%, #0b2f3a 0 60%, transparent 61%), radial-gradient(ellipse 80% 40% at 85% 105%, #134e5e 0 60%, transparent 61%), linear-gradient(180deg, #2b5876 0%, #4e9a9a 55%, #9fd8c8 100%)",
+      "radial-gradient(circle at 50% 58%, #ffe08a 0 17%, rgba(255,200,110,0.35) 18%, transparent 36%), linear-gradient(180deg, #ffab45 0%, #e8573a 58%, #7a2335 100%)",
   },
   {
-    title: "Luz da Tarde",
-    album: "Estações",
-    artist: "Coral Maresia",
+    title: "God's Plan",
+    album: "Scorpion",
+    artist: "Drake",
     artwork:
-      "radial-gradient(circle at 50% 120%, #ffd36e 0 30%, transparent 31%), linear-gradient(160deg, #2b1055 0%, #7597de 100%)",
+      "radial-gradient(ellipse 120% 38% at 50% 100%, #141414 0 60%, transparent 61%), linear-gradient(180deg, #f1f1f1 0%, #a9a9a9 55%, #3a3a3a 100%)",
   },
 ];
 
