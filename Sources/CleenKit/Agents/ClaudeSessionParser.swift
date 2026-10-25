@@ -34,9 +34,9 @@ public enum ClaudeSessionParser {
     }
 
     /// The state one conversation event leaves the session in; nil for bookkeeping lines
-    /// (titles, attachments, API logs) and for subagents' own events.
-    static func state(of object: [String: Any]) -> ClaudeSession.State? {
-        guard object["isSidechain"] as? Bool != true,
+    /// (titles, attachments, API logs) and, unless asked for, for subagents' own events.
+    static func state(of object: [String: Any], includingSidechains: Bool = false) -> ClaudeSession.State? {
+        guard includingSidechains || object["isSidechain"] as? Bool != true,
               let type = object["type"] as? String,
               let message = object["message"] as? [String: Any]
         else { return nil }

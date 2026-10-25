@@ -10,7 +10,7 @@ struct NotchTabBar: View {
         ViewThatFits(in: .horizontal) {
             buttons
             ScrollView(.horizontal) { buttons.padding(.horizontal, 8) }
-                .scrollIndicators(.hidden)
+                .scrollIndicators(.never)
                 .scrollEdgeFade(.horizontal, length: 18)
         }
     }

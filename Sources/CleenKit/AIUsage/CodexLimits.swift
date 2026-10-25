@@ -2,7 +2,17 @@ import Foundation
 
 /// Codex CLI writes its rate limits into every session log; the newest one is current.
 public enum CodexLimits {
-    public static func read(home: URL = Paths.home) -> [UsageWindow]? {
+    /// Only the windows still running: once a window has reset, what the last log says
+    /// about it is history (a week-old 84% isn't this week's), so it isn't shown at all.
+    public static func read(home: URL = Paths.home, now: Date = .now) -> [UsageWindow]? {
+        let windows = readLogged(home: home)?.filter { window in
+            guard let reset = window.resetsAt else { return false }
+            return reset > now
+        }
+        return windows?.isEmpty == false ? windows : nil
+    }
+
+    static func readLogged(home: URL) -> [UsageWindow]? {
         let sessions = home.appending(path: ".codex/sessions")
         guard let enumerator = FileManager.default.enumerator(at: sessions, includingPropertiesForKeys: [.contentModificationDateKey]) else { return nil }
         var newest: (URL, Date)?

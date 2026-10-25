@@ -223,7 +223,7 @@ private struct AssistantTranscript: View {
                 .padding(.vertical, 4)
                 .padding(.horizontal, 2)
             }
-            .scrollIndicators(.hidden)
+            .scrollIndicators(.never)
             .defaultScrollAnchor(.bottom)
             .defaultScrollAnchor(.bottom, for: .sizeChanges)
             .scrollEdgeFade()

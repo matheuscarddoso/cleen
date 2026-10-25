@@ -87,6 +87,31 @@ struct AIUsageTests {
         #expect(windows.map(\.used) == [0.78, 0.34])
     }
 
+    /// A log from before the windows reset says nothing about now: no Codex at all.
+    @Test func staleCodexLogShowsNothing() throws {
+        let sandbox = try Sandbox()
+        let json = #"{"payload":{"rate_limits":{"primary":{"used_percent":1.0,"window_minutes":300,"resets_in_seconds":3600},"secondary":{"used_percent":84.0,"window_minutes":10080,"resets_in_seconds":86400}}}}"#
+        let log = try sandbox.file(".codex/sessions/2026/10/rollout.jsonl")
+        try Data(json.utf8).write(to: log)
+        try FileManager.default.setAttributes([.modificationDate: Date.now.addingTimeInterval(-8 * 86_400)], ofItemAtPath: log.path(percentEncoded: false))
+        #expect(CodexLimits.read(home: sandbox.root) == nil)
+        // Logged an hour ago: the week is still running, the 5-hour window too.
+        try FileManager.default.setAttributes([.modificationDate: Date.now.addingTimeInterval(-1800)], ofItemAtPath: log.path(percentEncoded: false))
+        #expect(CodexLimits.read(home: sandbox.root)?.map(\.used) == [0.01, 0.84])
+    }
+
+    @Test func claudeCredentialItemsFromTheKeychainDump() {
+        let dump = """
+        keychain: "/Users/x/Library/Keychains/login.keychain-db"
+        class: "genp"
+            "svce"<blob>="Claude Code-credentials"
+            "svce"<blob>="Claude Code-credentials-ab782afa"
+            "svce"<blob>="Claude Safe Storage"
+            "svce"<blob>="Claude Code-credentials"
+        """
+        #expect(ClaudeLimits.services(inDump: dump) == ["Claude Code-credentials", "Claude Code-credentials-ab782afa", "Claude Safe Storage"])
+    }
+
     @Test func paceProjection() {
         let window = UsageWindow(name: "Sessão", used: 0.5, resetsAt: .now.addingTimeInterval(2.5 * 3600), length: 5 * 3600)
         #expect(abs((window.elapsed() ?? 0) - 0.5) < 0.01)

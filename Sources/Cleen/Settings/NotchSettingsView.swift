@@ -25,7 +25,7 @@ struct NotchSettingsView: View {
                 }
                 .padding(.bottom, 4)
             }
-            .scrollIndicators(.hidden)
+            .scrollIndicators(.never)
             .scrollEdgeFade()
             .scrollBounceBehavior(.basedOnSize)
             .id(state.settingsSection)
@@ -45,6 +45,7 @@ struct NotchSettingsView: View {
             ClosedNotchSettings()
         case .tabs: TabSettings()
         case .cleaning: CleaningSettings()
+        case .aiUsage: AIUsageSettings()
         case .agents: ClaudeCodeSettings()
         case .about:
             PermissionSettings()

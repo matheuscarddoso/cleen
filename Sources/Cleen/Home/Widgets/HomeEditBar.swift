@@ -30,7 +30,7 @@ struct HomeEditBar: View {
                     }
                 }
             }
-            .scrollIndicators(.hidden)
+            .scrollIndicators(.never)
             .scrollEdgeFade(.horizontal, length: 14)
             Button("Restaurar") {
                 withAnimation(.smooth(duration: 0.3)) { layout.reset() }

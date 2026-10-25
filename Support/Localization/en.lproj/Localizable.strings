@@ -1115,3 +1115,10 @@
 /* Paste permission banner */
 "Copiado. Para colar sozinho, o Cleen precisa de Acessibilidade." = "Copied. To paste by itself, Cleen needs Accessibility.";
 "Ative o Cleen em Ajustes do Sistema › Privacidade e Segurança › Acessibilidade." = "Turn on Cleen in System Settings › Privacy & Security › Accessibility.";
+"%lld agentes trabalhando" = "%lld agents working";
+"1 agente trabalhando" = "1 agent working";
+"As ferramentas de IA que aparecem no Uso de IA e no Início." = "The AI tools shown in AI Usage and on Home.";
+"Encontrado neste Mac" = "Found on this Mac";
+"Escondido" = "Hidden";
+"Não encontrado neste Mac" = "Not found on this Mac";
+"esperando você" = "waiting for you";

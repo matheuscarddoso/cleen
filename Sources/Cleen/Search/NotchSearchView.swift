@@ -83,7 +83,7 @@ struct NotchSearchView: View {
                     .padding(.horizontal, 10)
                     .padding(.vertical, 2)
                 }
-                .scrollIndicators(.hidden)
+                .scrollIndicators(.never)
                 .scrollEdgeFade()
                 .onChange(of: search.selection) {
                     if let id = search.selectedItem?.id { proxy.scrollTo(id) }

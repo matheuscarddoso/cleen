@@ -24,7 +24,7 @@ struct SpaceBreadcrumbs: View {
                     }
                 }
             }
-            .scrollIndicators(.hidden)
+            .scrollIndicators(.never)
             Spacer(minLength: 6)
             Text(crumbs.last?.size.bytes ?? "")
                 .font(.system(size: 12, weight: .semibold).monospacedDigit())

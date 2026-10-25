@@ -120,7 +120,7 @@ struct NotchShortcutsTab: View {
                 }
             }
         }
-        .scrollIndicators(.hidden)
+        .scrollIndicators(.never)
         .scrollBounceBehavior(.basedOnSize)
         .scrollEdgeFade(.horizontal, length: 18)
         .fixedSize(horizontal: false, vertical: true)

@@ -83,7 +83,7 @@ struct ShelfTray: View {
             }
             .animation(.smooth(duration: 0.25), value: shelf.items)
         }
-        .scrollIndicators(.hidden)
+        .scrollIndicators(.never)
         .scrollEdgeFade(.horizontal)
         .onGeometryChange(for: Double.self) { $0.size.width } action: { viewport = $0 }
     }

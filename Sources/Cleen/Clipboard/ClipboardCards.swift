@@ -28,7 +28,7 @@ struct ClipboardCards: View {
                         }
                     }
                 }
-                .scrollIndicators(.hidden)
+                .scrollIndicators(.never)
                 // Cards run to the panel's edges, not the content inset: the first card
                 // still starts aligned with the search field.
                 .contentMargins(.horizontal, NotchOpenContent.inset, for: .scrollContent)

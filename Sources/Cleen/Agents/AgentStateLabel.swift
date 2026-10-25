@@ -23,6 +23,7 @@ struct AgentStateLabel: View {
         let state: String = switch session.state {
         case .thinking: String(localized: "Pensando")
         case .running(let tool): tool.isEmpty ? String(localized: "Usando uma ferramenta") : String(localized: "Rodando \(tool)")
+        case .delegating(let agents): agents == 1 ? String(localized: "1 agente trabalhando") : String(localized: "\(agents) agentes trabalhando")
         case .waiting: String(localized: "Esperando você")
         }
         guard showsElapsed, session.state.isBusy else { return state }

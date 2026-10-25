@@ -14,10 +14,11 @@ struct AgentsWidget: View {
             case .small:
                 VStack(spacing: 4) {
                     ClaudeLogo(size: 22)
-                    Text(agents.working.count.formatted())
+                    // Working ones when any are, otherwise the open ones waiting for you.
+                    Text((agents.working.isEmpty ? agents.sessions.count : agents.working.count).formatted())
                         .font(.system(size: 22, weight: .light).monospacedDigit())
                         .contentTransition(.numericText())
-                    Text(agents.working.isEmpty ? String(localized: "sem sessões") : String(localized: "trabalhando"))
+                    Text(smallCaption)
                         .font(.system(size: 10, weight: .medium))
                         .foregroundStyle(NotchStyle.secondary)
                 }
@@ -51,5 +52,10 @@ struct AgentsWidget: View {
         }
         .buttonStyle(.plain)
         .help("Abrir Agentes")
+    }
+
+    private var smallCaption: String {
+        if !agents.working.isEmpty { return String(localized: "trabalhando") }
+        return agents.sessions.isEmpty ? String(localized: "sem sessões") : String(localized: "esperando você")
     }
 }

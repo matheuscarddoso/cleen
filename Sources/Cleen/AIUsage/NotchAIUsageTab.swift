@@ -53,7 +53,7 @@ struct NotchAIUsageTab: View {
     /// The session spent so far, standing in for Claude's limits until they load. Only
     /// with Claude Code on this Mac: a Codex-only setup has no Claude session to show.
     private var showsClaudeFallback: Bool {
-        model.hasClaudeCode && model.claude == nil
+        model.hasClaudeCode && model.shows(.claude) && model.claude == nil
     }
 
     private struct LimitRowData: Identifiable {

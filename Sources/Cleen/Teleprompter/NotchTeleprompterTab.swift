@@ -90,7 +90,7 @@ private struct TeleprompterEditor: View {
             TextEditor(text: text)
                 .textEditorStyle(.plain)
                 .scrollContentBackground(.hidden)
-                .scrollIndicators(.hidden)
+                .scrollIndicators(.never)
                 .font(.system(size: 13))
                 .lineSpacing(2)
                 .foregroundStyle(NotchStyle.primary)

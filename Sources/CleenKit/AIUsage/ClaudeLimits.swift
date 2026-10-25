@@ -20,8 +20,10 @@ public enum ClaudeLimits {
     }
 
     public static func fetch() async -> Result<Report, Failure> {
-        guard let credential = await readCredential() else { return .failure(.noCredential) }
-        if let expiry = credential.expiresAt, expiry < .now { return .failure(.expired) }
+        let credentials = await readCredentials()
+        guard !credentials.isEmpty else { return .failure(.noCredential) }
+        // The sign-in Claude Code renewed last; an expired one only if that's all there is.
+        guard let credential = credentials.first(where: { $0.expiresAt.map { $0 > .now } ?? true }) else { return .failure(.expired) }
 
         var request = URLRequest(url: URL(string: "https://api.anthropic.com/api/oauth/usage")!)
         request.setValue("Bearer \(credential.accessToken)", forHTTPHeaderField: "Authorization")
@@ -41,14 +43,47 @@ public enum ClaudeLimits {
         let plan: String?
     }
 
+    static let service = "Claude Code-credentials"
+
+    /// Claude Code's stored sign-ins, the latest expiry first. Besides the usual item, a
+    /// Claude Code run with its own config folder (`CLAUDE_CONFIG_DIR`) keeps one named
+    /// `Claude Code-credentials-<hash>`, and that may be the one in use.
+    static func readCredentials() async -> [Credential] {
+        var services = [service]
+        services += await keychainServices().filter { $0.hasPrefix(service + "-") }
+        var found: [Credential] = []
+        for name in services {
+            if let credential = await readCredential(service: name) { found.append(credential) }
+        }
+        return found.sorted { ($0.expiresAt ?? .distantFuture) > ($1.expiresAt ?? .distantFuture) }
+    }
+
     /// Asks the `security` tool (so the Keychain prompt's "Always Allow" survives Cleen
-    /// updates) for Claude Code's stored sign-in.
-    static func readCredential() async -> Credential? {
-        guard let result = try? await Shell.run("/usr/bin/security", ["find-generic-password", "-s", "Claude Code-credentials", "-w"]),
+    /// updates) for one stored sign-in.
+    static func readCredential(service: String) async -> Credential? {
+        guard let result = try? await Shell.run("/usr/bin/security", ["find-generic-password", "-s", service, "-w"]),
               result.succeeded,
               let data = result.stdout.trimmingCharacters(in: .whitespacesAndNewlines).data(using: .utf8)
         else { return nil }
         return parseCredential(data)
+    }
+
+    /// The names of the generic passwords in the login keychain: only the attributes,
+    /// which reading doesn't need permission for (no secret is read here).
+    static func keychainServices() async -> [String] {
+        guard let result = try? await Shell.run("/usr/bin/security", ["dump-keychain"], timeout: .seconds(10)), result.succeeded else { return [] }
+        return services(inDump: result.stdout)
+    }
+
+    /// `    "svce"<blob>="Claude Code-credentials-ab12"` → `Claude Code-credentials-ab12`.
+    static func services(inDump dump: String) -> [String] {
+        var names: [String] = []
+        for line in dump.split(whereSeparator: \.isNewline) {
+            guard let match = line.firstMatch(of: /"svce"<blob>="(.*)"/) else { continue }
+            let name = String(match.1)
+            if !names.contains(name) { names.append(name) }
+        }
+        return names
     }
 
     static func parseCredential(_ data: Data) -> Credential? {

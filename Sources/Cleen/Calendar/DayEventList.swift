@@ -25,7 +25,7 @@ struct DayEventList: View {
                         }
                     }
                 }
-                .scrollIndicators(.hidden)
+                .scrollIndicators(.never)
                 .scrollEdgeFade()
             }
         }

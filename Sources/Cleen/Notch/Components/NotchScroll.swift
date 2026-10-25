@@ -8,7 +8,7 @@ struct NotchScroll<Content: View>: View {
         ScrollView {
             content
         }
-        .scrollIndicators(.hidden)
+        .scrollIndicators(.never)
         .scrollBounceBehavior(.basedOnSize)
         .scrollEdgeFade()
         .frame(maxHeight: .infinity)

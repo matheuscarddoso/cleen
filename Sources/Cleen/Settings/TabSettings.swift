@@ -18,6 +18,7 @@ struct TabSettings: View {
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
             .scrollDisabled(true)
+            .scrollIndicators(.never)
             .frame(height: Double(tabs.order.count) * 32)
             .background(NotchStyle.card, in: .rect(cornerRadius: 12, style: .continuous))
             .overlay {

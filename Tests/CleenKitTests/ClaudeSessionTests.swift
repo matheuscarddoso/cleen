@@ -47,4 +47,25 @@ struct ClaudeSessionTests {
         let sessions = ClaudeSessionScanner(root: sandbox.url("projects"), window: 1800).scan()
         #expect(sessions.map(\.id) == ["aaaa"])
     }
+
+    /// The session's turn ended on "Waiting for 1 dynamic workflow", but its agent works on.
+    @Test func backgroundAgentsKeepASessionBusy() throws {
+        let sandbox = try Sandbox()
+        let main = try sandbox.file("projects/-loja/aaaa.jsonl")
+        try tail([prompt, done]).write(to: main)
+        // The main file is old, past the window: the agent's fresh writes keep it listed.
+        try FileManager.default.setAttributes([.modificationDate: Date.now.addingTimeInterval(-3600)], ofItemAtPath: main.path(percentEncoded: false))
+        let working = try sandbox.file("projects/-loja/aaaa/subagents/agent-1.jsonl")
+        try tail([sidechain]).write(to: working)
+        try Data(#"{"agentType":"general-purpose"}"#.utf8).write(to: sandbox.file("projects/-loja/aaaa/subagents/agent-1.meta.json"))
+        // One said it finished, one ended its turn without saying: neither counts.
+        try tail([sidechain]).write(to: sandbox.file("projects/-loja/aaaa/subagents/agent-2.jsonl"))
+        try Data(#"{"finished":true}"#.utf8).write(to: sandbox.file("projects/-loja/aaaa/subagents/agent-2.meta.json"))
+        let sidechainDone = done.replacing(#""isSidechain":false"#, with: #""isSidechain":true"#)
+        try tail([sidechain, sidechainDone]).write(to: sandbox.file("projects/-loja/aaaa/subagents/agent-3.jsonl"))
+
+        let sessions = ClaudeSessionScanner(root: sandbox.url("projects"), window: 1800).scan()
+        #expect(sessions.map(\.state) == [.delegating(agents: 1)])
+        #expect(sessions.first?.state.isBusy == true)
+    }
 }

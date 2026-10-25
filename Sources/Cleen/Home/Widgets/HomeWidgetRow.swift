@@ -38,9 +38,13 @@ struct HomeWidgetRow: View {
         }
 
         if Self.totalWidth(widths) > available + 0.5 {
-            ScrollView(.horizontal) { row }
-                .scrollIndicators(.hidden)
+            // A scroll view clips at its edges, and in edit mode the dashed frames and the
+            // remove buttons reach past the widgets: give them room inside, take it back outside.
+            let room = isEditing ? 14.0 : 0
+            ScrollView(.horizontal) { row.padding(room) }
+                .scrollIndicators(.never)
                 .scrollEdgeFade(.horizontal)
+                .padding(-room)
         } else {
             row.frame(maxWidth: .infinity, alignment: .leading)
         }

@@ -24,7 +24,7 @@ struct CalendarDayStrip: View {
             }
             .scrollTargetLayout()
         }
-        .scrollIndicators(.hidden)
+        .scrollIndicators(.never)
         .scrollPosition(id: $position, anchor: .center)
         .onAppear { position = selected }
         .mask {

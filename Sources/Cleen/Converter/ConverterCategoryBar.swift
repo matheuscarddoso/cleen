@@ -10,7 +10,7 @@ struct ConverterCategoryBar: View {
         ScrollView(.horizontal) {
             NotchSegmented(options: ConverterCategory.allCases.map { ($0.title, $0) }, selection: $selection)
         }
-        .scrollIndicators(.hidden)
+        .scrollIndicators(.never)
         .scrollBounceBehavior(.basedOnSize)
         .scrollEdgeFade(.horizontal, length: 28)
         .fixedSize(horizontal: false, vertical: true)

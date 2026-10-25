@@ -108,7 +108,7 @@ private struct NoteHeader: View {
                             .keyboardShortcut("n", modifiers: .command)
                     }
                 }
-                .scrollIndicators(.hidden)
+                .scrollIndicators(.never)
                 .scrollEdgeFade(.horizontal, length: 16)
                 .onChange(of: selected.id) { _, id in
                     withAnimation(.smooth(duration: 0.2)) { proxy.scrollTo(id) }

@@ -8,6 +8,9 @@ public struct ClaudeSession: Sendable, Equatable, Identifiable {
         case thinking
         /// A tool call is out and hasn't come back: running, or waiting for permission.
         case running(tool: String)
+        /// Background agents (subagents, a workflow) are still at work for it, even though
+        /// the session's own turn may have ended ("Waiting for 1 dynamic workflow").
+        case delegating(agents: Int)
         /// The turn ended: Claude is waiting for the next message.
         case waiting
 
@@ -25,6 +28,17 @@ public struct ClaudeSession: Sendable, Equatable, Identifiable {
     public let updatedAt: Date
     /// When the current state began (the last event's timestamp).
     public let since: Date
+
+    /// The same session with background agents at work: they outrank a turn that
+    /// ended or a call that's only waiting on them, not one the session itself is running.
+    public func delegating(_ agents: Int) -> ClaudeSession {
+        let state: State = switch self.state {
+        case .waiting, .delegating: .delegating(agents: agents)
+        case .running(let tool) where ["Agent", "Task", "Workflow"].contains(tool): .delegating(agents: agents)
+        default: self.state
+        }
+        return ClaudeSession(id: id, title: title, directory: directory, state: state, updatedAt: updatedAt, since: since)
+    }
 
     public var projectName: String? {
         directory.map { URL(filePath: $0).lastPathComponent }
