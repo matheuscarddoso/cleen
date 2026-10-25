@@ -6,7 +6,6 @@ struct NoteWidget: View {
     let size: HomeWidgetSize
     @Environment(NotesModel.self) private var notes
     @Environment(NotchState.self) private var state
-    @State private var focusRequest = 0
     /// The panel is kept open because the person is writing here.
     @State private var holdsForTyping = false
     @State private var isFocused = false
@@ -24,7 +23,7 @@ struct NoteWidget: View {
             .buttonStyle(.plain)
             .help("Abrir Notas")
             ZStack(alignment: .topLeading) {
-                NoteEditor(text: text, baseSize: 11.5, focusRequest: focusRequest) { focused in
+                NoteEditor(text: text, baseSize: 11.5) { focused in
                     isFocused = focused
                     if !focused { releaseHold() }
                 }
@@ -35,8 +34,7 @@ struct NoteWidget: View {
                         .allowsHitTesting(false)
                 }
             }
-            // A click anywhere in the widget's free space lands in the note.
-            .background { Color.clear.contentShape(.rect).onTapGesture { focusRequest += 1 } }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
         .frame(maxWidth: .infinity, alignment: .topLeading)
         .frame(height: 88, alignment: .topLeading)

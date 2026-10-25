@@ -194,6 +194,8 @@ final class MarkdownTextView: NSTextView {
         let caret = selectedRange().location
         restyle(around: NSRange(location: max(0, caret - 1), length: 1))
         super.didChangeText()
+        // Restyling can change line heights (a heading); keep the caret in sight.
+        scrollRangeToVisible(selectedRange())
     }
 
     override func setSelectedRanges(_ ranges: [NSValue], affinity: NSSelectionAffinity, stillSelecting: Bool) {
@@ -239,6 +241,7 @@ final class MarkdownTextView: NSTextView {
         textStorage?.replaceCharacters(in: range, with: text)
         didChangeText()
         if let caret { setSelectedRange(NSRange(location: caret, length: 0)) }
+        scrollRangeToVisible(selectedRange())
     }
 
     /// Rewrites every line the selection touches, numbering them from 1.

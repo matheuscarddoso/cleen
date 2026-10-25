@@ -18,10 +18,16 @@ struct NoteEditor: NSViewRepresentable {
         textView.string = text
         textView.restyle()
         textView.onFocusChange = onFocusChange
-        let scroll = NSScrollView()
+        let scroll = NoteScrollView()
         scroll.drawsBackground = false
         scroll.hasVerticalScroller = false
         scroll.hasHorizontalScroller = false
+        // The text view grows with its text inside the scroll view (without a max size it
+        // stopped at its first frame, so the lines being typed ran out of sight).
+        textView.minSize = NSSize(width: 0, height: 0)
+        textView.maxSize = NSSize(width: CGFloat.greatestFiniteMagnitude, height: CGFloat.greatestFiniteMagnitude)
+        textView.textContainer?.containerSize = NSSize(width: 0, height: CGFloat.greatestFiniteMagnitude)
+        textView.textContainer?.widthTracksTextView = true
         scroll.documentView = textView
         context.coordinator.focusRequest = focusRequest
         return scroll
@@ -55,6 +61,20 @@ struct NoteEditor: NSViewRepresentable {
         func textDidChange(_ notification: Notification) {
             guard let textView = notification.object as? NSTextView, text.wrappedValue != textView.string else { return }
             text.wrappedValue = textView.string
+        }
+    }
+}
+
+/// Keeps the text view at least as tall as what's visible, so a click anywhere in the
+/// note's area, even under the last line, lands in the text and puts the cursor there.
+final class NoteScrollView: NSScrollView {
+    override func tile() {
+        super.tile()
+        guard let textView = documentView as? NSTextView else { return }
+        let height = contentSize.height
+        if textView.minSize.height != height {
+            textView.minSize = NSSize(width: 0, height: height)
+            textView.sizeToFit()
         }
     }
 }
