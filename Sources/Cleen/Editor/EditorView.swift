@@ -47,6 +47,10 @@ struct EditorView: View {
 /// The title bar: the folder and the trash by the window buttons, the take's name in
 /// the middle, then shortcuts, undo, redo and Export.
 struct EditorTopBar: View {
+    /// Export (34 pt, 8 pt corners) sits this far from the top and the right, so the
+    /// window's 20.5 pt corner is concentric with it.
+    static let inset: CGFloat = 12.5
+    static let height: CGFloat = 34 + inset * 2
     @Environment(EditorModel.self) private var editor
     @State private var confirmsTrash = false
     @State private var showsShortcuts = false
@@ -96,8 +100,8 @@ struct EditorTopBar: View {
             .padding(.leading, 6)
         }
         .padding(.leading, 84)
-        .padding(.trailing, 14)
-        .frame(height: 52)
+        .padding(.trailing, Self.inset)
+        .frame(height: Self.height)
         .overlay(alignment: .bottom) { Rectangle().fill(EditorTheme.separator).frame(height: 1) }
     }
 
