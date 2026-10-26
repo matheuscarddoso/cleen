@@ -79,7 +79,7 @@ final class NotchController {
         }
         guard !state.isOpen else { return }
         // During a call, the notch opens on its controls (an explicit tab still wins).
-        state.showsCall = tab == nil && app.calls.call != nil
+        state.showsCall = tab == nil && (app.calls.call != nil || app.incomingCall.ringing != nil)
         panel?.ignoresMouseEvents = false
         withAnimation(Self.openAnimation) { state.isOpen = true }
     }

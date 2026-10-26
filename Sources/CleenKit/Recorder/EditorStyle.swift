@@ -4,7 +4,7 @@ import Foundation
 /// How a recording is dressed in the editor: what's behind it, how much room it gets,
 /// its corners and shadow, the canvas shape, the cursor, the camera bubble and the zoom.
 public struct EditorStyle: Codable, Sendable, Equatable {
-    public enum Background: Codable, Sendable, Equatable {
+    public enum Background: Codable, Sendable, Hashable {
         /// One of the editor's gradients, by index.
         case gradient(Int)
         /// A flat color, "#RRGGBB".

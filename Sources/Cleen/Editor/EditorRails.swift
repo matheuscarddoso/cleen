@@ -103,7 +103,7 @@ struct EditorTransport: View {
         @Bindable var editor = editor
         ZStack {
             HStack(spacing: 0) {
-                Button { editor.isCutting.toggle() } label: { Image(systemName: "scissors") }
+                Button { editor.isCuttingLocked.toggle() } label: { Image(systemName: "scissors") }
                     .buttonStyle(EditorIconButtonStyle(size: 36, isOn: editor.isCutting))
                     .help("Tesoura: clique num corte da linha do tempo para dividi-lo (C corta no ponto atual)")
                     .padding(.leading, 21)

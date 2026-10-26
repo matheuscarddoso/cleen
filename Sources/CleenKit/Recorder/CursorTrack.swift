@@ -30,12 +30,50 @@ public struct CursorTrack: Codable, Sendable, Equatable {
         }
     }
 
+    /// The pointer's shape: the arrow, the hand over a link, the text cursor…
+    public enum Shape: String, Codable, Sendable, CaseIterable {
+        case arrow, pointingHand, iBeam, openHand, closedHand, crosshair, resizeLeftRight, resizeUpDown, notAllowed
+    }
+
+    /// When the shape changed to what.
+    public struct ShapeChange: Codable, Sendable, Equatable {
+        public let t: Double
+        public let shape: Shape
+
+        public init(t: Double, shape: Shape) {
+            self.t = t
+            self.shape = shape
+        }
+    }
+
     public var samples: [Sample]
     public var clicks: [Click]
+    public var shapes: [ShapeChange]
 
-    public init(samples: [Sample] = [], clicks: [Click] = []) {
+    public init(samples: [Sample] = [], clicks: [Click] = [], shapes: [ShapeChange] = []) {
         self.samples = samples
         self.clicks = clicks
+        self.shapes = shapes
+    }
+
+    private enum CodingKeys: String, CodingKey { case samples, clicks, shapes }
+
+    /// Tracks recorded before shapes were kept open as all arrow.
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        samples = try c.decodeIfPresent([Sample].self, forKey: .samples) ?? []
+        clicks = try c.decodeIfPresent([Click].self, forKey: .clicks) ?? []
+        shapes = try c.decodeIfPresent([ShapeChange].self, forKey: .shapes) ?? []
+    }
+
+    /// The shape at `t`: the last change before it.
+    public func shape(at t: Double) -> Shape {
+        var low = 0, high = shapes.count
+        while low < high {
+            let mid = (low + high) / 2
+            if shapes[mid].t <= t { low = mid + 1 } else { high = mid }
+        }
+        return low > 0 ? shapes[low - 1].shape : .arrow
     }
 
     /// The raw position at `t`, between the two samples around it.

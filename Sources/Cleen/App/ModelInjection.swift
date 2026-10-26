@@ -44,5 +44,6 @@ extension View {
             .environment(app.recorder)
             .environment(app.messages)
             .environment(app.calls)
+            .environment(app.incomingCall)
     }
 }

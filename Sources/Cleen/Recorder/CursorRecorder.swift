@@ -13,6 +13,7 @@ final class CursorRecorder {
     private var currentArea = CGRect.zero
     private var lastAreaCheck = Date.distantPast
     private(set) var track = CursorTrack()
+    private var sampleCount = 0
 
     init(area: @escaping () -> CGRect) {
         self.area = area
@@ -53,6 +54,11 @@ final class CursorRecorder {
         }
         guard let point = normalized() else { return }
         track.samples.append(.init(t: now, x: point.x, y: point.y))
+        // The shape, ten times a second: enough to catch the hand over a link.
+        sampleCount += 1
+        if sampleCount % 6 == 1, let shape = CursorShapes.current(), shape != track.shapes.last?.shape {
+            track.shapes.append(.init(t: now, shape: shape))
+        }
     }
 
     private func click() {

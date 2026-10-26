@@ -6,6 +6,7 @@ import SwiftUI
 final class EditorWindowController: NSObject, NSWindowDelegate {
     let model: EditorModel
     private let window: NSWindow
+    private var keyMonitor: Any?
     var onClose: () -> Void = {}
 
     init?(folder: URL, app: AppModel) {
@@ -28,6 +29,23 @@ final class EditorWindowController: NSObject, NSWindowDelegate {
         window.contentView = NSHostingView(rootView: EditorView().environment(model).injecting(app))
         window.center()
         window.setFrameAutosaveName("CleenEditorWindow")
+        installKeys()
+    }
+
+    /// The editor's keys, Screen Studio's: they work wherever the focus is in the
+    /// window (a slider, a button), except while typing in a field.
+    private func installKeys() {
+        keyMonitor = NSEvent.addLocalMonitorForEvents(matching: [.keyDown, .flagsChanged]) { [weak self] event in
+            guard let self, event.window === self.window else { return event }
+            if event.type == .flagsChanged {
+                // Holding ⌥ takes the scissors out; letting go puts them away.
+                let held = event.modifierFlags.contains(.option)
+                if self.model.isCuttingHeld != held { self.model.isCuttingHeld = held }
+                return event
+            }
+            if self.window.firstResponder is NSText { return event }
+            return EditorKeys.handle(event, editor: self.model) ? nil : event
+        }
     }
 
     func show() {
@@ -35,7 +53,13 @@ final class EditorWindowController: NSObject, NSWindowDelegate {
         window.makeKeyAndOrderFront(nil)
     }
 
+    func windowDidResignKey(_ notification: Notification) {
+        model.isCuttingHeld = false
+    }
+
     func windowWillClose(_ notification: Notification) {
+        if let keyMonitor { NSEvent.removeMonitor(keyMonitor) }
+        keyMonitor = nil
         model.close()
         onClose()
     }

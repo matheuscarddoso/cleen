@@ -32,6 +32,7 @@ final class AppModel {
     let live = LiveActivityCenter()
     let messages = MessagesModel()
     let calls = CallMonitor()
+    let incomingCall = IncomingCallWatcher()
     let agents = AgentsModel()
     let displays = DisplaysModel()
     let updates = UpdateModel()
@@ -83,6 +84,7 @@ final class AppModel {
         messages.onIncoming = { [live] message in live.messageArrived(message) }
         messages.start()
         calls.start()
+        incomingCall.start()
         timer.onPhaseEnd = { [live] ended in
             switch ended {
             case .countdown: live.timerEnded(phase: String(localized: "Timer"))

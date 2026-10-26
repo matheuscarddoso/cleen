@@ -18,10 +18,11 @@ struct NotchRootView: View {
     @Environment(MediaKeyHUD.self) private var mediaKeys
     @Environment(RecorderModel.self) private var recorder
     @Environment(CallMonitor.self) private var calls
+    @Environment(IncomingCallWatcher.self) private var incoming
 
     var body: some View {
         if let geometry = state.geometry {
-            let island = !state.isOpen && live.banner?.isIsland == true && !recorder.isRecording
+            let island = !state.isOpen && (live.banner?.isIsland == true || incoming.ringing != nil) && !recorder.isRecording
             let closed = island
                 ? CGSize(width: geometry.notchSize.width + LiveActivity.islandWingWidth * 2, height: geometry.notchSize.height + LiveActivity.islandExtraHeight)
                 : geometry.closedSize(wingWidth: wingWidth)
@@ -105,7 +106,7 @@ struct NotchRootView: View {
         // A recording always shows, wings on or off: it's how you know it's running.
         if recorder.isRecording { return NotchGeometry.wingWidth }
         // A finished download is worth showing even with the wings off.
-        if live.banner?.isIsland == true { return LiveActivity.islandWingWidth }
+        if live.banner?.isIsland == true || incoming.ringing != nil { return LiveActivity.islandWingWidth }
         // A call too: the time and the voice, like the phone's island.
         if calls.call != nil { return NotchGeometry.wingWidth + 22 }
         guard showsWings else { return 0 }

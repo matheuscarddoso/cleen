@@ -7,7 +7,6 @@ import SwiftUI
 /// transport and the timeline along the bottom.
 struct EditorView: View {
     @Environment(EditorModel.self) private var editor
-    @FocusState private var isFocused: Bool
 
     var body: some View {
         VStack(spacing: 0) {
@@ -42,40 +41,6 @@ struct EditorView: View {
         .foregroundStyle(EditorTheme.primary)
         .environment(\.colorScheme, .dark)
         .ignoresSafeArea()
-        .onKeyPress(.space) {
-            editor.togglePlay()
-            return .handled
-        }
-        .onKeyPress(keys: [.delete, .deleteForward]) { _ in
-            guard editor.selection != nil else { return .ignored }
-            editor.removeSelection()
-            return .handled
-        }
-        .onKeyPress(.escape) {
-            if editor.isCutting {
-                editor.isCutting = false
-                return .handled
-            }
-            guard editor.selection != nil else { return .ignored }
-            editor.selection = nil
-            return .handled
-        }
-        .onKeyPress("c") {
-            editor.split(at: editor.currentTime)
-            return .handled
-        }
-        .onKeyPress(.leftArrow) {
-            editor.seek(to: editor.currentTime - 1.0 / Double(editor.project.export.framesPerSecond) * 6)
-            return .handled
-        }
-        .onKeyPress(.rightArrow) {
-            editor.seek(to: editor.currentTime + 1.0 / Double(editor.project.export.framesPerSecond) * 6)
-            return .handled
-        }
-        .focusable()
-        .focused($isFocused)
-        .focusEffectDisabled()
-        .onAppear { isFocused = true }
     }
 }
 
@@ -233,9 +198,12 @@ struct EditorExportPanel: View {
 /// The editor's keyboard shortcuts.
 struct EditorShortcuts: View {
     private let rows: [(String, LocalizedStringKey)] = [
-        ("Espaço", "Reproduzir ou pausar"),
-        ("C", "Cortar no ponto atual"),
-        ("← →", "Voltar ou avançar um pouco"),
+        ("Espaço / ↩", "Reproduzir ou pausar"),
+        ("⌥", "Segurar: tesoura"),
+        ("C / S", "Cortar no ponto atual"),
+        ("← →", "Um quadro (⇧: um segundo)"),
+        ("↑ ↓", "Início ou fim"),
+        ("+ −", "Aproximar a linha do tempo"),
         ("⌫", "Apagar o corte ou o zoom selecionado"),
         ("Esc", "Soltar a seleção ou guardar a tesoura"),
         ("⌘Z", "Desfazer"),

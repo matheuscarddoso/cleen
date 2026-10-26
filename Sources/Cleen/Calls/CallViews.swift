@@ -66,10 +66,13 @@ struct CallLevelBars: View {
 /// hanging up, in reach. Red is off.
 struct CallControls: View {
     @Environment(CallMonitor.self) private var calls
+    @Environment(IncomingCallWatcher.self) private var incoming
     @Environment(NotchState.self) private var notch
 
     var body: some View {
-        if let call = calls.call {
+        if let ringing = incoming.ringing {
+            RingingControls(ringing: ringing)
+        } else if let call = calls.call {
             VStack(spacing: 10) {
                 HStack(spacing: 6) {
                     Image(systemName: "phone.fill").foregroundStyle(CallWings.green)
@@ -137,7 +140,7 @@ struct CallControls: View {
     }
 }
 
-private struct CallButtonStyle: ButtonStyle {
+struct CallButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .scaleEffect(configuration.isPressed ? 0.92 : 1)
@@ -151,5 +154,114 @@ enum CallClock {
         let total = max(0, Int(seconds))
         let hours = total / 3600, minutes = (total % 3600) / 60, rest = total % 60
         return hours > 0 ? String(format: "%d:%02d:%02d", hours, minutes, rest) : String(format: "%d:%02d", minutes, rest)
+    }
+}
+
+/// A call ringing, on the closed notch: who's calling and where from, with the answer
+/// and decline colors on the right (hovering opens them as buttons).
+struct RingingIsland: View {
+    let ringing: IncomingCallWatcher.Ringing
+    let notchHeight: Double
+
+    var body: some View {
+        VStack(spacing: 0) {
+            Color.clear.frame(height: notchHeight)
+            HStack(spacing: 12) {
+                CallerAvatar(size: 36)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(ringing.caller)
+                        .font(.system(size: 13.5, weight: .semibold))
+                        .foregroundStyle(NotchStyle.primary)
+                        .lineLimit(1)
+                    Text(ringing.detail)
+                        .font(.system(size: 12))
+                        .foregroundStyle(NotchStyle.secondary)
+                        .lineLimit(1)
+                }
+                Spacer(minLength: 8)
+                HStack(spacing: 8) {
+                    CallRoundIcon(symbol: "phone.down.fill", color: Color(red: 0.95, green: 0.27, blue: 0.27), size: 32)
+                    CallRoundIcon(symbol: "phone.fill", color: CallWings.green, size: 32)
+                        .phaseAnimator([0, 1]) { icon, phase in
+                            icon.scaleEffect(phase == 1 ? 1.08 : 1)
+                        } animation: { _ in .easeInOut(duration: 0.6) }
+                }
+            }
+            .padding(.horizontal, 18)
+            .frame(maxHeight: .infinity)
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(Text("\(ringing.caller) ligando"))
+    }
+}
+
+/// The open notch while a call rings: who, and Decline and Answer.
+struct RingingControls: View {
+    let ringing: IncomingCallWatcher.Ringing
+    @Environment(IncomingCallWatcher.self) private var incoming
+
+    var body: some View {
+        HStack(spacing: 14) {
+            CallerAvatar(size: 46)
+            VStack(alignment: .leading, spacing: 3) {
+                Text(ringing.caller)
+                    .font(.system(size: 16, weight: .semibold))
+                    .lineLimit(1)
+                Text(ringing.detail)
+                    .font(.system(size: 12.5))
+                    .foregroundStyle(NotchStyle.secondary)
+                    .lineLimit(1)
+            }
+            Spacer(minLength: 10)
+            Button { incoming.decline() } label: {
+                CallRoundIcon(symbol: "phone.down.fill", color: Color(red: 0.95, green: 0.27, blue: 0.27), size: 54)
+            }
+            .buttonStyle(CallButtonStyle())
+            .help("Recusar")
+            Button { incoming.accept() } label: {
+                CallRoundIcon(symbol: "phone.fill", color: CallWings.green, size: 54)
+            }
+            .buttonStyle(CallButtonStyle())
+            .help("Atender")
+        }
+        .padding(.top, 8)
+    }
+}
+
+/// A grey person, as the system's call banner shows an unknown caller.
+struct CallerAvatar: View {
+    let size: Double
+
+    var body: some View {
+        ZStack {
+            Circle().fill(LinearGradient(colors: [Color(white: 0.6), Color(white: 0.42)], startPoint: .top, endPoint: .bottom))
+            Image(systemName: "person.fill")
+                .font(.system(size: size * 0.48))
+                .foregroundStyle(.white)
+                .offset(y: size * 0.04)
+        }
+        .frame(width: size, height: size)
+        .overlay(alignment: .bottomTrailing) {
+            Image(systemName: "iphone")
+                .font(.system(size: size * 0.24, weight: .semibold))
+                .foregroundStyle(.white)
+                .padding(2.5)
+                .background(Color.black, in: .rect(cornerRadius: 3))
+                .offset(x: 2, y: 2)
+        }
+    }
+}
+
+struct CallRoundIcon: View {
+    let symbol: String
+    let color: Color
+    let size: Double
+
+    var body: some View {
+        Image(systemName: symbol)
+            .font(.system(size: size * 0.38, weight: .semibold))
+            .foregroundStyle(.white)
+            .frame(width: size, height: size)
+            .background(color, in: .circle)
     }
 }

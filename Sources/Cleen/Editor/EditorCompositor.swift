@@ -33,8 +33,9 @@ nonisolated final class EditorCompositor: NSObject, AVVideoCompositing, @uncheck
     }()
     private let colorSpace = CGColorSpace(name: CGColorSpace.sRGB)!
 
+    // The decoder's own format: asking for BGRA cost a conversion of every source frame.
     let sourcePixelBufferAttributes: [String: any Sendable]? = [
-        kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA,
+        kCVPixelBufferPixelFormatTypeKey as String: [kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange, kCVPixelFormatType_420YpCbCr8BiPlanarFullRange, kCVPixelFormatType_32BGRA],
         kCVPixelBufferIOSurfacePropertiesKey as String: [String: any Sendable](),
     ]
 

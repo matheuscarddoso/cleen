@@ -2,6 +2,7 @@ import AppKit
 import CleenKit
 import CoreImage
 import CoreImage.CIFilterBuiltins
+import Metal
 import os
 
 /// Everything a frame needs besides the video itself, swapped whole whenever an edit
@@ -66,14 +67,21 @@ nonisolated enum EditorRenderer {
         // Side by side, the zoom stays inside the screen's panel; otherwise it moves the
         // whole frame, background and all, as Screen Studio does.
         let zoomsInPanel = !placement.cameraFloats
-        var stage = background(scene, bounds: bounds)
+        // The background and the screen's shadow don't move during the video: drawn once
+        // (blurs over the whole frame are the costly part) and reused every frame.
+        let screenRadius: CGFloat = if let screen = placement.screen { min(screen.width, screen.height) * CGFloat(style.roundness) } else { 0 }
+        let staticKey = StaticLayers.Key(canvas: canvas, background: style.background, blur: style.backgroundBlur, screen: placement.screen, radius: screenRadius, shadow: style.effectivePadding > 0 ? style.shadow : 0)
+        var stage = StaticLayers.shared.image(for: staticKey) {
+            var base = background(scene, bounds: bounds)
+            if let content = placement.screen, style.shadow > 0, style.effectivePadding > 0 {
+                base = shadow(flip(content, in: canvas), radius: screenRadius, strength: style.shadow, canvas: canvas).composited(over: base)
+            }
+            return base
+        }
 
         if let content = placement.screen {
             let contentCI = flip(content, in: canvas)
-            let radius = min(content.width, content.height) * style.roundness
-            if style.shadow > 0, style.effectivePadding > 0 {
-                stage = shadow(contentCI, radius: radius, strength: style.shadow, canvas: canvas).composited(over: stage)
-            }
+            let radius = screenRadius
             if let screen {
                 let panelZoom = zoomsInPanel ? ZoomState(scale: zoom.scale, center: ZoomPlanner.clamp(zoom.center, scale: zoom.scale)) : .none
                 stage = place(screen, crop: scene.crop, zoom: panelZoom, into: contentCI, radius: radius).composited(over: stage)
@@ -197,9 +205,11 @@ nonisolated enum EditorRenderer {
         case .square: roundedRect(rect, radius: min(rect.width, rect.height) * 0.04, color: .white)
         }
         let radius = style.shape == .circle ? rect.width / 2 : min(rect.width, rect.height) * 0.2
-        let shadow = roundedRect(rect, radius: radius, color: CIColor(red: 0, green: 0, blue: 0, alpha: 0.45))
-            .applyingGaussianBlur(sigma: rect.height * 0.06)
-            .transformed(by: CGAffineTransform(translationX: 0, y: -rect.height * 0.03))
+        let shadow = StaticLayers.shared.shadow(rect: rect, radius: radius) {
+            roundedRect(rect, radius: radius, color: CIColor(red: 0, green: 0, blue: 0, alpha: 0.45))
+                .applyingGaussianBlur(sigma: rect.height * 0.06)
+                .transformed(by: CGAffineTransform(translationX: 0, y: -rect.height * 0.03))
+        }
         return masked(fill(camera, into: rect), by: mask).composited(over: shadow)
     }
 
@@ -291,5 +301,61 @@ nonisolated final class SquircleMasks: @unchecked Sendable {
             cache[size] = mask
         }
         return mask
+    }
+}
+
+/// The frame's still parts (the background with its blur, the screen's shadow, the
+/// camera bubble's shadow), rendered to pixels once and reused: redrawing those blurs
+/// every frame is what made the preview stutter.
+nonisolated final class StaticLayers: @unchecked Sendable {
+    static let shared = StaticLayers()
+
+    struct Key: Hashable {
+        let canvas: CGSize
+        let background: EditorStyle.Background
+        let blur: Double
+        let screen: CGRect?
+        let radius: CGFloat
+        let shadow: Double
+    }
+
+    private struct ShadowKey: Hashable {
+        let rect: CGRect
+        let radius: CGFloat
+    }
+
+    private let lock = OSAllocatedUnfairLock<(base: [Key: CIImage], shadows: [ShadowKey: CIImage])>(initialState: ([:], [:]))
+    private let context: CIContext = {
+        if let device = MTLCreateSystemDefaultDevice() { return CIContext(mtlDevice: device, options: [.cacheIntermediates: false]) }
+        return CIContext()
+    }()
+
+    func image(for key: Key, make: () -> CIImage) -> CIImage {
+        if let cached = lock.withLock({ $0.base[key] }) { return cached }
+        let image = rasterize(make(), in: CGRect(origin: .zero, size: key.canvas))
+        lock.withLock { state in
+            // A handful is plenty: preview and export sizes, and the last few styles.
+            if state.base.count > 6 { state.base.removeAll() }
+            state.base[key] = image
+        }
+        return image
+    }
+
+    func shadow(rect: CGRect, radius: CGFloat, make: () -> CIImage) -> CIImage {
+        let key = ShadowKey(rect: rect, radius: radius)
+        if let cached = lock.withLock({ $0.shadows[key] }) { return cached }
+        let made = make()
+        let image = rasterize(made, in: made.extent.insetBy(dx: -1, dy: -1).integral)
+        lock.withLock { state in
+            if state.shadows.count > 12 { state.shadows.removeAll() }
+            state.shadows[key] = image
+        }
+        return image
+    }
+
+    private func rasterize(_ image: CIImage, in rect: CGRect) -> CIImage {
+        guard rect.width.isFinite, rect.height.isFinite, rect.width > 0, rect.height > 0,
+              let cgImage = context.createCGImage(image, from: rect) else { return image }
+        return CIImage(cgImage: cgImage).transformed(by: CGAffineTransform(translationX: rect.minX, y: rect.minY))
     }
 }

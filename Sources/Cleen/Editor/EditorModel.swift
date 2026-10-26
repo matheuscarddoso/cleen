@@ -41,8 +41,11 @@ final class EditorModel {
     private(set) var currentTime: Double = 0
     private(set) var isPlaying = false
     var selection: Selection?
-    /// The scissors are out: hovering the clips shows where a click would cut.
-    var isCutting = false
+    /// The scissors are out (the button): hovering the clips shows where a click would cut.
+    var isCuttingLocked = false
+    /// ⌥ is held: the scissors are out only while it is, as in Screen Studio.
+    var isCuttingHeld = false
+    var isCutting: Bool { isCuttingLocked || isCuttingHeld }
     /// The timeline's magnification: 1 fits the whole video.
     var timelineZoom = 1.0
     /// The inspector's page when nothing on the timeline is selected.
@@ -439,6 +442,12 @@ final class EditorModel {
         let clamped = max(0, min(duration, seconds))
         currentTime = clamped
         player.seek(to: CMTime(seconds: clamped, preferredTimescale: 600), toleranceBefore: .zero, toleranceAfter: .zero)
+    }
+
+    /// One frame back or forward (`frames` negative goes back).
+    func step(frames: Int) {
+        pause()
+        seek(to: currentTime + Double(frames) / Double(project.export.framesPerSecond))
     }
 
     /// The previous clip's start (or this one's, when past it).

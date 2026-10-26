@@ -1416,7 +1416,6 @@
 "Tela e câmera lado a lado" = "Screen and camera side by side";
 "Tesoura: clique num corte da linha do tempo para dividi-lo (C corta no ponto atual)" = "Scissors: click a clip on the timeline to split it (C splits at the playhead)";
 "Usar esta velocidade em todos os cortes" = "Apply speed to all slices";
-"Voltar ou avançar um pouco" = "Step back or forward";
 "10 segundos" = "10 seconds";
 "3 segundos" = "3 seconds";
 "5 segundos" = "5 seconds";
@@ -1484,3 +1483,10 @@
 "Mostrar" = "Show";
 "Ver as abas" = "Show the tabs";
 "iPhone" = "iPhone";
+"%@ ligando" = "%@ calling";
+"Atender" = "Answer";
+"Início ou fim" = "Start or end";
+"Ligação" = "Call";
+"Recusar" = "Decline";
+"Segurar: tesoura" = "Hold: scissors";
+"Um quadro (⇧: um segundo)" = "One frame (⇧: one second)";
