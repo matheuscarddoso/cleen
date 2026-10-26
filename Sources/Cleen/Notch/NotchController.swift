@@ -34,7 +34,7 @@ final class NotchController {
         let geometry = NotchGeometry(screen: screen)
         state.geometry = geometry
 
-        let panel = NotchPanel(frame: geometry.windowFrame(showsSearch: false))
+        let panel = NotchPanel(frame: geometry.windowFrame)
         panel.acceptsKeyboard = { [weak self] in self?.state.isOpen == true }
         let root = NotchRootView(controller: self)
             .injecting(app)
@@ -71,8 +71,6 @@ final class NotchController {
         }
         guard !state.isOpen else { return }
         panel?.ignoresMouseEvents = false
-        // The room first, with nothing animating yet; then the shape grows into it.
-        fitWindow(showsSearch: true)
         withAnimation(Self.openAnimation) { state.isOpen = true }
     }
 
@@ -94,7 +92,6 @@ final class NotchController {
         state.showsWelcome = false
         state.opensInstantly = false
         panel?.ignoresMouseEvents = true
-        fitWindow(showsSearch: false)
         giveBackKeyboard()
     }
 
@@ -108,7 +105,6 @@ final class NotchController {
         state.showsWelcome = true
         state.holdsOpen = true
         panel?.ignoresMouseEvents = false
-        fitWindow(showsSearch: true)
         withAnimation(Self.openAnimation) { state.isOpen = true }
     }
 
@@ -139,7 +135,6 @@ final class NotchController {
         state.showsSettings = false
         state.mirrorExpanded = false
         let wasOpen = state.isOpen
-        fitWindow(showsSearch: true)
         if wasOpen {
             // From an open panel the launcher grows out of it.
             withAnimation(Self.searchResize) { state.showsSearch = true }
@@ -165,29 +160,6 @@ final class NotchController {
 
     /// How the panel grows into the launcher and back.
     static let searchResize = Animation.spring(response: 0.4, dampingFraction: 0.86)
-
-    private var pendingShrink: Task<Void, Never>?
-
-    /// The window is the room the shape can grow into. While the panel is open it's
-    /// always the tallest the panel gets (Emoji, the launcher, a review), so switching to
-    /// a taller tab only grows the black shape: resizing the window in the middle of that
-    /// animation made the whole panel drop and then crawl back up. Once the panel has
-    /// closed and finished shrinking, the window goes back to the open panel's size.
-    func fitWindow(showsSearch: Bool) {
-        pendingShrink?.cancel()
-        guard let geometry = state.geometry, let panel else { return }
-        if showsSearch || state.isOpen {
-            let frame = geometry.windowFrame(showsSearch: true)
-            if panel.frame != frame { withTransaction(Self.instant) { panel.setFrame(frame, display: true) } }
-            return
-        }
-        let frame = geometry.windowFrame(showsSearch: false)
-        pendingShrink = Task { [weak self] in
-            try? await Task.sleep(for: .milliseconds(600))
-            guard !Task.isCancelled, let self, !self.state.isOpen, let panel = self.panel else { return }
-            if panel.frame != frame { panel.setFrame(frame, display: true) }
-        }
-    }
 
     func toggleSearch() {
         state.isOpen && state.showsSearch ? close() : openSearch()
@@ -344,6 +316,9 @@ final class NotchController {
 
         if state.isOpen {
             let inside = geometry.hotZone(isOpen: true, showsWings: wings, showsSearch: state.isTall).contains(location)
+            // The window is taller than a short panel; its clear part lets clicks through
+            // to the app below, as if the window ended where the panel does.
+            if let panel, panel.ignoresMouseEvents == inside { panel.ignoresMouseEvents = !inside }
             // Only the shelf takes files, so only it pays for reading the drag pasteboard.
             let draggingFiles = inside && event.type == .leftMouseDragged && state.tab == .shelf && !state.showsSettings && isDraggingFiles
             if state.isDraggingFiles != draggingFiles { state.isDraggingFiles = draggingFiles }

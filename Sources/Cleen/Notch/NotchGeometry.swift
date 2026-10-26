@@ -61,11 +61,13 @@ struct NotchGeometry: Equatable {
         CGSize(width: max(notchSize.width + 150, 330), height: notchSize.height + 141)
     }
 
-    /// The panel window: as big as the open notch plus shadow, hanging from the top.
-    /// It grows for the launcher and shrinks back after, so the clear area under a
-    /// normal panel never sits over the app below.
-    func windowFrame(showsSearch: Bool) -> CGRect {
-        let size = openSize(showsSearch: showsSearch)
+    /// The panel window: room for the tallest the panel gets (Emoji, the launcher, a
+    /// review) plus its shadow, hanging from the top. It never changes size while the
+    /// panel animates: resizing it mid-animation made the whole panel drop and crawl back
+    /// up. The clear part costs nothing: closed, the window lets every click through, and
+    /// open, a click there closes the panel like any click outside it.
+    var windowFrame: CGRect {
+        let size = openSize(showsSearch: true)
         let width = size.width + Self.shadowPadding * 2
         let height = size.height + Self.shadowPadding
         return CGRect(x: screenFrame.midX - width / 2, y: screenFrame.maxY - height, width: width, height: height)
