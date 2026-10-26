@@ -10,6 +10,7 @@ final class RecorderOverlays {
     private var covers: [OverlayWindow] = []
     private var countdown: OverlayWindow?
     private var camera: OverlayWindow?
+    private weak var cameraSession: AVCaptureSession?
 
     /// Window numbers of the covers, which must stay in the recording.
     var coverWindowNumbers: Set<Int> { Set(covers.map(\.windowNumber)) }
@@ -68,7 +69,10 @@ final class RecorderOverlays {
 
     /// The camera in a round window at the bottom right of `screen`, to check framing.
     func showCamera(session: AVCaptureSession, on screen: NSScreen) {
+        // Already up for this camera: left where the person dragged it.
+        if camera != nil, cameraSession === session { return }
         hideCamera()
+        cameraSession = session
         let side = 180.0
         let frame = CGRect(x: screen.visibleFrame.maxX - side - 24, y: screen.visibleFrame.minY + 24, width: side, height: side)
         let window = OverlayWindow(frame: frame, level: .floating, ignoresMouse: false, content: RecorderCameraPreview(session: session))
@@ -81,6 +85,7 @@ final class RecorderOverlays {
     func hideCamera() {
         camera?.orderOut(nil)
         camera = nil
+        cameraSession = nil
     }
 
     func hideAll() {

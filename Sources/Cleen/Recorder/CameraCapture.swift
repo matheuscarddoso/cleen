@@ -31,6 +31,10 @@ nonisolated final class CameraCapture: NSObject, AVCaptureFileOutputRecordingDel
         queue.async { self.session.startRunning() }
     }
 
+    func stopSession() {
+        queue.async { self.session.stopRunning() }
+    }
+
     func start(to url: URL) async throws {
         try await withCheckedThrowingContinuation { continuation in
             started = continuation

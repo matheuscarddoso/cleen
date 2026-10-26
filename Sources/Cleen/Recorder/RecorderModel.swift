@@ -34,10 +34,25 @@ final class RecorderModel {
 
     // MARK: Options (kept between launches)
 
-    var cameraID: String? { didSet { defaults.set(cameraID, forKey: Keys.camera) } }
-    var showsCameraPreview: Bool { didSet { defaults.set(showsCameraPreview, forKey: Keys.cameraPreview) } }
+    var cameraID: String? {
+        didSet {
+            defaults.set(cameraID, forKey: Keys.camera)
+            refreshCamera()
+        }
+    }
+    var showsCameraPreview: Bool {
+        didSet {
+            defaults.set(showsCameraPreview, forKey: Keys.cameraPreview)
+            refreshCamera()
+        }
+    }
     /// 720, 1080 or 2160 lines.
-    var cameraMaxHeight: Int { didSet { defaults.set(cameraMaxHeight, forKey: Keys.cameraHeight) } }
+    var cameraMaxHeight: Int {
+        didSet {
+            defaults.set(cameraMaxHeight, forKey: Keys.cameraHeight)
+            refreshCamera()
+        }
+    }
     var microphoneID: String? { didSet { defaults.set(microphoneID, forKey: Keys.microphone) } }
     var recordsSystemAudio: Bool { didSet { defaults.set(recordsSystemAudio, forKey: Keys.systemAudio) } }
     /// Seconds; 0 starts at once.
@@ -60,6 +75,13 @@ final class RecorderModel {
     @ObservationIgnored private var cursor: CursorRecorder?
     @ObservationIgnored private var take: (folder: URL, source: RecordingProject.Source, size: CGSize)?
     @ObservationIgnored private var countdownTask: Task<Void, Never>?
+    /// Gravar is on screen: the chosen camera shows its preview, as in Screen Studio.
+    @ObservationIgnored private var tabIsVisible = false
+    /// A take is starting or running: the camera stays on whatever else happens.
+    @ObservationIgnored private var holdsCamera = false
+    /// What the running camera session was set up with.
+    @ObservationIgnored private var cameraSetup: (id: String, height: Int)?
+    @ObservationIgnored private var previewHide: Task<Void, Never>?
     @ObservationIgnored private unowned let app: AppModel
     private static let log = Logger(subsystem: "app.cleen.Cleen", category: "recorder")
 
@@ -192,6 +214,8 @@ final class RecorderModel {
             state = .failed(String(localized: "Permita o microfone para o Cleen em Ajustes do Sistema › Privacidade e Segurança."))
             return
         }
+        holdsCamera = true
+        refreshCamera()
         app.notch.closeAll()
         let folder = RecordingProject.newFolder(in: Self.folder, prefix: String(localized: "Gravação"))
         do {
@@ -201,8 +225,7 @@ final class RecorderModel {
             try await begin(target, in: folder)
         } catch {
             if !(error is CancellationError) { Self.log.error("start failed: \(error.localizedDescription, privacy: .public)") }
-            try? await camera?.stop()
-            camera = nil
+            await releaseCamera()
             await tearDown()
             // Nothing worth keeping was written yet: the folder goes.
             try? FileManager.default.removeItem(at: folder)
@@ -214,13 +237,7 @@ final class RecorderModel {
     /// The camera warms up and the helpers go on screen before the countdown, so the
     /// first second of the take already has them.
     private func prepare(_ target: Target, in folder: URL) async throws {
-        if let cameraID, let device = CaptureDevices.device(cameraID) {
-            let camera = CameraCapture()
-            try camera.configure(device: device, maxHeight: cameraMaxHeight)
-            camera.startSession()
-            self.camera = camera
-            if showsCameraPreview { overlays.showCamera(session: camera.session, on: screen(of: target)) }
-        }
+        if cameraID != nil, camera == nil { throw CameraCapture.CameraError.unavailable }
         if hidesDesktopIcons { overlays.coverDesktopIcons() }
         if hidesDock { await DockHider.hide() }
         if highlightsArea, let rect = globalRect(of: target), !isWholeDisplay(target) { overlays.showHighlight(rect) }
@@ -295,7 +312,7 @@ final class RecorderModel {
         screen = nil
         device = nil
         let hadCamera = camera != nil
-        camera = nil
+        await releaseCamera()
         await tearDown()
         do {
             let project = try await makeProject(take: take, track: track, hasCamera: hadCamera)
@@ -319,10 +336,9 @@ final class RecorderModel {
         cursor = nil
         try? await screen?.stop()
         try? await device?.stop()
-        try? await camera?.stop()
         screen = nil
         device = nil
-        camera = nil
+        await releaseCamera()
         await tearDown()
         try? FileManager.default.removeItem(at: take.folder)
         self.take = nil
@@ -330,8 +346,97 @@ final class RecorderModel {
     }
 
 
+    // MARK: Camera
+
+    /// Gravar appeared: the camera's preview comes up (Screen Studio shows it as soon as
+    /// a camera is picked).
+    func tabAppeared() {
+        tabIsVisible = true
+        previewHide?.cancel()
+        refreshCamera()
+    }
+
+    /// Gravar went away: a moment later (it may just be switching), the camera goes off,
+    /// unless a take holds it.
+    func tabDisappeared() {
+        tabIsVisible = false
+        previewHide?.cancel()
+        previewHide = Task {
+            try? await Task.sleep(for: .seconds(1))
+            guard !Task.isCancelled else { return }
+            refreshCamera()
+        }
+    }
+
+    /// Runs the camera, and its preview, exactly while they're wanted: a camera is picked
+    /// and Gravar is on screen or a take is under way.
+    private func refreshCamera() {
+        guard let cameraID, tabIsVisible || holdsCamera else {
+            if !holdsCamera { dropCamera() }
+            return
+        }
+        switch AVCaptureDevice.authorizationStatus(for: .video) {
+        case .authorized:
+            break
+        case .notDetermined:
+            Task {
+                if await CaptureDevices.request(.video) { refreshCamera() }
+            }
+            return
+        default:
+            return
+        }
+        if cameraSetup?.id != cameraID || cameraSetup?.height != cameraMaxHeight {
+            // Never swapped in the middle of a take.
+            guard !isRecording else { return }
+            dropCamera()
+            guard let device = CaptureDevices.device(cameraID) else { return }
+            let camera = CameraCapture()
+            do {
+                try camera.configure(device: device, maxHeight: cameraMaxHeight)
+            } catch {
+                Self.log.error("camera setup failed: \(error.localizedDescription, privacy: .public)")
+                return
+            }
+            camera.startSession()
+            self.camera = camera
+            cameraSetup = (cameraID, cameraMaxHeight)
+        }
+        if showsCameraPreview, let camera {
+            overlays.showCamera(session: camera.session, on: pointerScreen)
+        } else {
+            overlays.hideCamera()
+        }
+    }
+
+    private func dropCamera() {
+        overlays.hideCamera()
+        camera?.stopSession()
+        camera = nil
+        cameraSetup = nil
+    }
+
+    /// After a take: the recording output is closed, the session goes, and the preview
+    /// comes back if Gravar is still open.
+    private func releaseCamera() async {
+        try? await camera?.stop()
+        camera = nil
+        cameraSetup = nil
+        holdsCamera = false
+        overlays.hideCamera()
+        refreshCamera()
+    }
+
+    /// The screen the pointer (and so the notch in use) is on.
+    private var pointerScreen: NSScreen {
+        let location = NSEvent.mouseLocation
+        return NSScreen.screens.first { $0.frame.contains(location) } ?? NSScreen.main ?? NSScreen.screens[0]
+    }
+
     private func tearDown() async {
-        overlays.hideAll()
+        overlays.hideHighlight()
+        overlays.uncoverDesktopIcons()
+        overlays.hideCountdown()
         if hidesDock { await DockHider.restore() }
         if showsSpeakerNotes, app.teleprompter.isRunning { app.teleprompter.stop() }
     }

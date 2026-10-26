@@ -32,7 +32,11 @@ struct NotchRecorderTab: View {
         .onChange(of: isJustTheBar, initial: true) { _, compact in
             withAnimation(NotchController.searchResize) { notch.isCompactTool = compact }
         }
-        .onDisappear { notch.isCompactTool = false }
+        .onAppear { recorder.tabAppeared() }
+        .onDisappear {
+            notch.isCompactTool = false
+            recorder.tabDisappeared()
+        }
     }
 
     private var isJustTheBar: Bool {
