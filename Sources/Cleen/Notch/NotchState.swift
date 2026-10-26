@@ -13,6 +13,8 @@ final class NotchState {
                 mirrorExpanded = false
                 isEditingHome = false
             }
+            // Picking a tool (from the grid, the dock, the search) leaves the grid.
+            showsAllTools = false
         }
     }
     /// The home tab's mirror grown to fill the panel.
@@ -23,6 +25,8 @@ final class NotchState {
     }
     /// The panel shows Ajustes instead of a tool.
     var showsSettings = false
+    /// The dock's grid: every tool, to pick one (Droppy's third button).
+    var showsAllTools = false
     /// The small "hello" island right after the first-run tour.
     var showsWelcome = false
     /// The panel shows the launcher (⌥Space) instead of a tool.
@@ -34,7 +38,7 @@ final class NotchState {
     var searchFocusRequest = 0
     /// The panel grows tall, like a launcher: the search, Emoji's grid, Ajustes, and the
     /// review of something about to be deleted.
-    var isTall: Bool { isOpen && !showsWelcome && (showsSearch || showsSettings || deletionReview != nil || tab == .emoji) }
+    var isTall: Bool { isOpen && !showsWelcome && (showsSearch || showsSettings || deletionReview != nil || showsAllTools || tab == .emoji) }
 
     /// The tabs' dock floats under the open panel, except where a tool takes the whole
     /// panel (the wide mirror, Início's edit mode, the teleprompter reading) and over the

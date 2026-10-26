@@ -76,7 +76,7 @@ enum NotchTab: String, CaseIterable, Identifiable, Codable {
 
     var symbol: String {
         switch self {
-        case .home: "square.grid.2x2.fill"
+        case .home: "house.fill"
         case .calendar: "calendar"
         case .shelf: "tray.and.arrow.down.fill"
         case .clipboard: "doc.on.clipboard"
@@ -107,6 +107,14 @@ enum NotchTab: String, CaseIterable, Identifiable, Codable {
         case .system: "chart.bar.fill"
         case .startup: "power"
         case .maintenance: "wrench.and.screwdriver.fill"
+        }
+    }
+
+    /// The Mac's upkeep, grouped under Limpeza in the tools grid.
+    var isCleaning: Bool {
+        switch self {
+        case .overview, .clean, .projects, .files, .duplicates, .space, .apps, .leftovers, .startup, .maintenance: true
+        default: false
         }
     }
 

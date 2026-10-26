@@ -93,6 +93,7 @@ final class NotchController {
         state.holdsOpen = false
         state.mirrorExpanded = false
         state.isEditingHome = false
+        state.showsAllTools = false
         if state.opensInstantly {
             withTransaction(Self.instant) { state.isOpen = false }
         } else {

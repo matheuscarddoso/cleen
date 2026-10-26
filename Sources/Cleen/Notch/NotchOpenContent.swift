@@ -20,6 +20,13 @@ struct NotchOpenContent: View {
                 NotchSearchView(controller: controller)
                     .padding(.top, 2)
                     .transition(.opacity)
+            } else if state.showsAllTools {
+                NotchAllTools()
+                    .padding(.horizontal, NotchOpenContent.inset)
+                    .padding(.top, 6)
+                    .padding(.bottom, 14)
+                    .frame(maxHeight: .infinity, alignment: .top)
+                    .transition(.toolSwap)
             } else if state.showsCall {
                 CallControls()
                     .padding(.horizontal, NotchOpenContent.inset)

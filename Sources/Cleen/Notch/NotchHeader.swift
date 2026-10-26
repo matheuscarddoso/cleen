@@ -16,7 +16,7 @@ struct NotchHeader: View {
                     controller.openSearch()
                 }
             }
-            if state.tab == .home, !state.showsSettings, !state.showsSearch, !state.mirrorExpanded {
+            if state.tab == .home, !state.showsSettings, !state.showsSearch, !state.mirrorExpanded, !state.showsAllTools {
                 NotchIconButton(symbol: state.isEditingHome ? "checkmark" : "square.grid.2x2", help: state.isEditingHome ? String(localized: "Concluir") : String(localized: "Editar o Início"), isActive: state.isEditingHome) {
                     withAnimation(.smooth(duration: 0.3)) { state.isEditingHome.toggle() }
                 }
@@ -36,6 +36,7 @@ struct NotchHeader: View {
     private var headerTitle: String {
         if state.showsSearch { return String(localized: "Buscar") }
         if state.showsSettings { return String(localized: "Ajustes") }
+        if state.showsAllTools { return String(localized: "Ferramentas") }
         if state.tab == .home, state.mirrorExpanded { return String(localized: "Espelho") }
         if state.tab == .home, state.isEditingHome { return String(localized: "Editar o Início") }
         return state.tab.title

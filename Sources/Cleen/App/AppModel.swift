@@ -191,6 +191,7 @@ final class AppModel {
             notch.primary?.state.isPinned = true
             notch.primary?.open(tab: tab)
             if tab == .home, LaunchArguments.editHome { notch.primary?.state.isEditingHome = true }
+            if LaunchArguments.allTools { notch.primary?.state.showsAllTools = true }
             if LaunchArguments.scan { startScan(for: tab) }
         } else if LaunchArguments.scan {
             // Closed notch, scan running: shows the wing's progress.
