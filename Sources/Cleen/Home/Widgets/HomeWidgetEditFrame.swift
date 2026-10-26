@@ -35,22 +35,6 @@ struct HomeWidgetEditFrame<Content: View>: View {
                     .strokeBorder(isTargeted ? NotchStyle.primary.opacity(0.6) : NotchStyle.primary.opacity(0.22), style: StrokeStyle(lineWidth: 1, dash: [4, 3]))
                     .padding(-6)
             }
-            .overlay(alignment: .topTrailing) {
-                Button {
-                    withAnimation(.smooth(duration: 0.3)) { layout.remove(item.kind) }
-                } label: {
-                    Image(systemName: "minus")
-                        .font(.system(size: 9, weight: .bold))
-                        .foregroundStyle(.black)
-                        .frame(width: 18, height: 18)
-                        .background(Color.white, in: .circle)
-                        .contentShape(.circle)
-                }
-                .buttonStyle(.plain)
-                .offset(x: 10, y: -10)
-                .help("Tirar do Início")
-                .accessibilityLabel("Tirar \(item.kind.title) do Início")
-            }
             .contentShape(.rect)
             .onDrag {
                 layout.dragging = item.kind
@@ -59,6 +43,28 @@ struct HomeWidgetEditFrame<Content: View>: View {
             .onDrop(of: [.text], delegate: HomeWidgetDropDelegate(target: item.kind, layout: layout, isTargeted: $isTargeted))
             .accessibilityElement(children: .contain)
             .accessibilityLabel(item.kind.title)
+            // Beside the drag, not inside it: a click on the button with the slightest
+            // movement used to start dragging the widget instead.
+            .overlay(alignment: .topTrailing) { removeButton.offset(x: 15, y: -15) }
+    }
+
+    private var removeButton: some View {
+        Button {
+            withAnimation(.smooth(duration: 0.3)) { layout.remove(item.kind) }
+        } label: {
+            Image(systemName: "minus")
+                .font(.system(size: 10, weight: .bold))
+                .foregroundStyle(.black)
+                .frame(width: 20, height: 20)
+                .background(Color.white, in: .circle)
+                .shadow(color: .black.opacity(0.4), radius: 3, y: 1)
+                // A wider target than the dot itself.
+                .frame(width: 32, height: 32)
+                .contentShape(.circle)
+        }
+        .buttonStyle(.plain)
+        .help("Tirar do Início")
+        .accessibilityLabel("Tirar \(item.kind.title) do Início")
     }
 
     private var sizePicker: some View {

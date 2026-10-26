@@ -63,6 +63,9 @@ struct NotchGeometry: Equatable {
         case mirror
         /// A tool that's one bar (Gravar): the camera strip, the bar and the tab bar.
         case compact
+        /// Início being edited: the dock steps aside, and the outlines, the size pickers
+        /// and the bar above need the room it had.
+        case editing
     }
 
     func openSize(_ height: PanelHeight) -> CGSize {
@@ -73,6 +76,8 @@ struct NotchGeometry: Equatable {
             return CGSize(width: width, height: standard - Self.dockSavings)
         case .tall:
             return CGSize(width: width, height: max(standard, min(Self.searchHeight, screenFrame.height * 0.6)))
+        case .editing:
+            return CGSize(width: width, height: standard - 6)
         case .compact:
             // The camera strip, 6 pt, the 64 pt bar and the bottom inset.
             return CGSize(width: width, height: min(standard, notchSize.height + 6 + 64 + 14))

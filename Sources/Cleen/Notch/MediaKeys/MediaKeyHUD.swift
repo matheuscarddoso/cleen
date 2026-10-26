@@ -1,4 +1,5 @@
 import AppKit
+import os
 import CleenKit
 import Observation
 
@@ -37,6 +38,7 @@ final class MediaKeyHUD {
     @ObservationIgnored private var screenObserver: NSObjectProtocol?
 
     static let enabledKey = "notchReplacesSystemHUD"
+    private static let log = Logger(subsystem: "app.cleen.Cleen", category: "media-keys")
     static let duration = Duration.seconds(1.5)
     /// Wide enough for the symbol on the left and a bar with its percentage on the right.
     static let wingWidth = 112.0
@@ -59,7 +61,10 @@ final class MediaKeyHUD {
             return
         }
         guard tap == nil else { return }
-        if AXIsProcessTrustedWithOptions(["AXTrustedCheckOptionPrompt": prompting] as CFDictionary), install() {
+        let trusted = AXIsProcessTrustedWithOptions(["AXTrustedCheckOptionPrompt": prompting] as CFDictionary)
+        let installed = trusted && install()
+        Self.log.notice("media keys: accessibility \(trusted ? "granted" : "missing", privacy: .public), tap \(installed ? "on" : "off", privacy: .public)")
+        if installed {
             isWaitingForAccess = false
             accessPoll?.cancel()
             accessPoll = nil
