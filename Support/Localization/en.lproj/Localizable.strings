@@ -1459,3 +1459,4 @@
 "%lld h %lld min" = "%lld h %lld min";
 "Download" = "Download";
 "O progresso e o tempo que falta enquanto baixa, e o arquivo quando termina." = "Progress and time left while it downloads, and the file when it finishes.";
+"Downloads" = "Downloads";
