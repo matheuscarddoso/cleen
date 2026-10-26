@@ -21,6 +21,10 @@ final class NotchPanel: NSPanel {
         collectionBehavior = [.canJoinAllSpaces, .stationary, .fullScreenAuxiliary, .ignoresCycle]
         hidesOnDeactivate = false
         ignoresMouseEvents = true
+        // Handing the keyboard back orders the panel out and straight back in; with the
+        // system's window fade that showed as the whole panel going translucent instead
+        // of the shape closing into the notch.
+        animationBehavior = .none
     }
 
     /// Whether the panel may take the keyboard (search, notes, a text field): only
