@@ -32,6 +32,8 @@ enum LaunchArguments {
     /// exports it right away (for checking the renderer end to end).
     static let editor = value(after: "--editor").map { URL(filePath: $0, directoryHint: .isDirectory) }
     static let exportNow = ProcessInfo.processInfo.arguments.contains("--export")
+    /// `--cut` opens the editor with the scissors out.
+    static let cut = ProcessInfo.processInfo.arguments.contains("--cut")
     /// `--pick display|window|area` puts the recorder's floating bar up in that mode.
     static let pick = value(after: "--pick")
 

@@ -160,6 +160,7 @@ final class AppModel {
         if let folder = LaunchArguments.editor {
             openEditor(folder)
             if LaunchArguments.exportNow { editors[folder]?.model.exportMovie() }
+            if LaunchArguments.cut { editors[folder]?.model.isCuttingLocked = true }
         }
         switch LaunchArguments.pick {
         case "display": recorder.select(.display)

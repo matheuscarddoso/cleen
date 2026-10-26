@@ -8,7 +8,10 @@ import SwiftUI
 /// Everything counts in the finished video's seconds.
 struct EditorTimeline: View {
     @Environment(EditorModel.self) private var editor
-    @State private var hoverX: CGFloat?
+    /// Where the pointer is over the timeline. Kept out of the view's own state so a move
+    /// only redraws the pins, not the tracks (redrawing them on every move made the
+    /// blocks shiver).
+    @State private var hover = TimelineHover()
     @State private var scroll = ScrollPosition(edge: .leading)
     @State private var scrollX: CGFloat = 0
 
@@ -26,26 +29,25 @@ struct EditorTimeline: View {
     var body: some View {
         GeometryReader { proxy in
             let scale = pointsPerSecond(width: proxy.size.width)
-            let content = editor.duration * scale + Self.margin * 2
+            // Whole points: a fraction wider than the view made it scroll by fractions.
+            let content = (editor.duration * scale + Self.margin * 2).rounded(.down)
             ScrollView(.horizontal) {
                 ZStack(alignment: .topLeading) {
                     Color.clear
                     ruler(scale: scale, width: content)
                     clips(scale: scale)
                     zooms(scale: scale, width: content)
-                    if let hoverX, !editor.isCutting { pin(at: hoverX, color: EditorTheme.hoverPin, height: proxy.size.height).allowsHitTesting(false) }
-                    if editor.isCutting, let hoverX { scissorPin(at: hoverX) }
-                    playhead(scale: scale, height: proxy.size.height)
+                    TimelinePointerLayer(hover: hover, scale: scale, height: proxy.size.height)
+                    TimelinePlayheadLayer(scale: scale, height: proxy.size.height, visible: proxy.size.width, scroll: $scroll, scrollX: scrollX)
                 }
                 .frame(width: max(content, proxy.size.width), height: proxy.size.height)
                 .coordinateSpace(.named("timeline"))
-                .onContinuousHover(coordinateSpace: .named("timeline")) { phase in
+                .onContinuousHover(coordinateSpace: .named("timeline")) { [hover] phase in
                     switch phase {
                     case .active(let point):
-                        let x = min(max(point.x, Self.margin), Self.margin + editor.duration * scale)
-                        hoverX = x
+                        hover.x = min(max(point.x, Self.margin), Self.margin + editor.duration * scale)
                     case .ended:
-                        hoverX = nil
+                        hover.x = nil
                     }
                 }
             }
@@ -53,9 +55,6 @@ struct EditorTimeline: View {
             .onScrollGeometryChange(for: CGFloat.self) { $0.contentOffset.x } action: { _, x in scrollX = x }
             .scrollIndicators(editor.timelineZoom > 1 ? .automatic : .never)
             .scrollDisabled(editor.timelineZoom <= 1)
-            .onChange(of: editor.currentTime) { _, time in
-                follow(time: time, scale: scale, visible: proxy.size.width)
-            }
         }
     }
 
@@ -66,16 +65,6 @@ struct EditorTimeline: View {
     private func x(_ t: Double, _ scale: CGFloat) -> CGFloat { Self.margin + CGFloat(t) * scale }
 
     private func t(_ x: CGFloat, _ scale: CGFloat) -> Double { max(0, min(editor.duration, Double((x - Self.margin) / max(0.0001, scale)))) }
-
-    /// While playing zoomed in, the view pages along with the playhead.
-    private func follow(time: Double, scale: CGFloat, visible: CGFloat) {
-        guard editor.isPlaying, editor.timelineZoom > 1 else { return }
-        let px = x(time, scale)
-        let left = scrollX
-        if px > left + visible - 60 || px < left {
-            withAnimation(.easeInOut(duration: 0.35)) { scroll.scrollTo(x: max(0, px - 80)) }
-        }
-    }
 
     // MARK: Ruler
 
@@ -159,18 +148,6 @@ struct EditorTimeline: View {
                 }
                 .help("Clique para adicionar um zoom")
                 .offset(y: Self.zoomY)
-            if let hoverX, !editor.isCutting, isOverEmptyZoomTrack(hoverX, scale: scale) {
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    .fill(EditorTheme.zoomTop.opacity(0.18))
-                    .overlay {
-                        Label("Zoom", systemImage: "plus")
-                            .font(.system(size: 13, weight: .medium))
-                            .foregroundStyle(EditorTheme.accentSoft.opacity(0.8))
-                    }
-                    .frame(width: 110, height: Self.zoomHeight)
-                    .offset(x: hoverX - 55, y: Self.zoomY)
-                    .allowsHitTesting(false)
-            }
             ForEach(editor.project.zoom) { segment in
                 let start = timeline.outputTime(at: segment.start)
                 let end = timeline.outputTime(at: segment.end)
@@ -180,57 +157,6 @@ struct EditorTimeline: View {
                 }
             }
         }
-    }
-
-    private func isOverEmptyZoomTrack(_ px: CGFloat, scale: CGFloat) -> Bool {
-        let time = t(px, scale)
-        let timeline = editor.timeline
-        return !editor.project.zoom.contains { segment in
-            time >= timeline.outputTime(at: segment.start) - 0.3 && time <= timeline.outputTime(at: segment.end) + 0.3
-        }
-    }
-
-    // MARK: Pins
-
-    /// Only the head takes the drag: the line lets clicks through to the blocks.
-    private func playhead(scale: CGFloat, height: CGFloat) -> some View {
-        pin(at: x(editor.currentTime, scale), color: EditorTheme.playhead, height: height, draggable: true) { location in
-            editor.seek(to: t(location, scale))
-        }
-    }
-
-    private func pin(at px: CGFloat, color: Color, height: CGFloat, draggable: Bool = false, drag: @escaping (CGFloat) -> Void = { _ in }) -> some View {
-        ZStack(alignment: .top) {
-            Rectangle().fill(color).frame(width: 1.5, height: height - Self.pinY).allowsHitTesting(false)
-            EditorPinShape()
-                .fill(color)
-                .frame(width: 14, height: 18)
-                .frame(width: 24, height: 26)
-                .contentShape(.rect)
-                .offset(y: -Self.pinY - 3)
-                .gesture(DragGesture(minimumDistance: 0, coordinateSpace: .named("timeline")).onChanged { value in drag(value.location.x) })
-                .allowsHitTesting(draggable)
-        }
-        .frame(width: 24)
-        .offset(x: px - 12, y: Self.pinY)
-    }
-
-    private func scissorPin(at px: CGFloat) -> some View {
-        ZStack(alignment: .top) {
-            Rectangle().fill(EditorTheme.clipBottom.opacity(0.9)).frame(width: 1.5, height: Self.clipHeight + 30)
-            EditorPinShape()
-                .fill(EditorTheme.clipBottom)
-                .frame(width: 30, height: 36)
-                .overlay(alignment: .top) {
-                    Image(systemName: "scissors")
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundStyle(.black.opacity(0.85))
-                        .padding(.top, 8)
-                }
-                .offset(y: -18)
-        }
-        .offset(x: px - 15, y: Self.markerY - 4)
-        .allowsHitTesting(false)
     }
 
     // MARK: Formatting
@@ -434,5 +360,119 @@ struct EditorZoomBlock: View {
             .gesture(DragGesture(coordinateSpace: .named("timeline")).onChanged { drag in
                 move(max(0, min(editor.duration, Double((drag.location.x - EditorTimeline.margin) / scale))))
             })
+    }
+}
+
+/// The pointer over the timeline, shared with the layer that draws its pins.
+@Observable
+final class TimelineHover {
+    var x: CGFloat?
+}
+
+/// The grey pin under the pointer, the scissors' amber pin, and the ghost "+ Zoom" on the
+/// empty zoom track: everything that follows the pointer, in a layer of its own.
+private struct TimelinePointerLayer: View {
+    let hover: TimelineHover
+    let scale: CGFloat
+    let height: CGFloat
+    @Environment(EditorModel.self) private var editor
+
+    var body: some View {
+        ZStack(alignment: .topLeading) {
+            if let x = hover.x {
+                if editor.isCutting {
+                    scissorPin(at: x)
+                } else {
+                    TimelinePin(color: EditorTheme.hoverPin, height: height)
+                        .offset(x: x - 12, y: EditorTimeline.pinY)
+                    if isOverEmptyZoomTrack(x) {
+                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                            .fill(EditorTheme.zoomTop.opacity(0.18))
+                            .overlay {
+                                Label("Zoom", systemImage: "plus")
+                                    .font(.system(size: 13, weight: .medium))
+                                    .foregroundStyle(EditorTheme.accentSoft.opacity(0.8))
+                            }
+                            .frame(width: 110, height: EditorTimeline.zoomHeight)
+                            .offset(x: x - 55, y: EditorTimeline.zoomY)
+                    }
+                }
+            }
+        }
+        .allowsHitTesting(false)
+    }
+
+    private func isOverEmptyZoomTrack(_ px: CGFloat) -> Bool {
+        let time = Double((px - EditorTimeline.margin) / max(0.0001, scale))
+        let timeline = editor.timeline
+        return !editor.project.zoom.contains { segment in
+            time >= timeline.outputTime(at: segment.start) - 0.3 && time <= timeline.outputTime(at: segment.end) + 0.3
+        }
+    }
+
+    private func scissorPin(at px: CGFloat) -> some View {
+        ZStack(alignment: .top) {
+            Rectangle().fill(EditorTheme.clipBottom.opacity(0.9)).frame(width: 1.5, height: EditorTimeline.clipHeight + 30)
+            EditorPinShape()
+                .fill(EditorTheme.clipBottom)
+                .frame(width: 30, height: 36)
+                .overlay(alignment: .top) {
+                    Image(systemName: "scissors")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(.black.opacity(0.85))
+                        .padding(.top, 8)
+                }
+                .offset(y: -18)
+        }
+        .offset(x: px - 15, y: EditorTimeline.markerY - 4)
+    }
+}
+
+/// The playhead, in a layer of its own: it moves 30 times a second while playing, and
+/// only it redraws. Zoomed in, the view pages along with it.
+private struct TimelinePlayheadLayer: View {
+    let scale: CGFloat
+    let height: CGFloat
+    let visible: CGFloat
+    @Binding var scroll: ScrollPosition
+    let scrollX: CGFloat
+    @Environment(EditorModel.self) private var editor
+
+    var body: some View {
+        let x = EditorTimeline.margin + CGFloat(editor.currentTime) * scale
+        TimelinePin(color: EditorTheme.playhead, height: height, draggable: true) { location in
+            editor.seek(to: max(0, min(editor.duration, Double((location - EditorTimeline.margin) / max(0.0001, scale)))))
+        }
+        .offset(x: x - 12, y: EditorTimeline.pinY)
+        .onChange(of: editor.currentTime) { _, time in
+            guard editor.isPlaying, editor.timelineZoom > 1 else { return }
+            let px = EditorTimeline.margin + CGFloat(time) * scale
+            if px > scrollX + visible - 60 || px < scrollX {
+                withAnimation(.easeInOut(duration: 0.35)) { scroll.scrollTo(x: max(0, px - 80)) }
+            }
+        }
+    }
+}
+
+/// A pin with its line down the timeline; only the head takes a drag.
+private struct TimelinePin: View {
+    let color: Color
+    let height: CGFloat
+    var draggable = false
+    var drag: (CGFloat) -> Void = { _ in }
+
+    var body: some View {
+        ZStack(alignment: .top) {
+            Rectangle().fill(color).frame(width: 1.5, height: height - EditorTimeline.pinY).allowsHitTesting(false)
+            EditorPinShape()
+                .fill(color)
+                .frame(width: 14, height: 18)
+                .frame(width: 24, height: 26)
+                .contentShape(.rect)
+                .offset(y: -EditorTimeline.pinY - 3)
+                .gesture(DragGesture(minimumDistance: 0, coordinateSpace: .named("timeline")).onChanged { value in drag(value.location.x) })
+                .allowsHitTesting(draggable)
+        }
+        .frame(width: 24)
     }
 }
