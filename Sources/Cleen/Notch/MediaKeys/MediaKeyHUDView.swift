@@ -1,8 +1,9 @@
 import CleenKit
 import SwiftUI
 
-/// The volume or brightness level across the closed notch's wings, NotchNook style:
-/// the symbol on the left of the camera, a thin bar and the percentage on the right.
+/// The volume or brightness level across the closed notch's wings, Droppy style: the
+/// symbol and its name on the left of the camera, a short colored bar and the number
+/// (rolling as it changes) on the right.
 struct MediaKeyHUDWings: View {
     let reading: MediaKeyHUD.Reading
     let notchWidth: Double
@@ -10,11 +11,14 @@ struct MediaKeyHUDWings: View {
 
     var body: some View {
         HStack(spacing: 0) {
-            MediaKeyHUDSymbol(reading: reading)
+            HStack(spacing: 8) {
+                MediaKeyHUDSymbol(reading: reading)
+                MediaKeyHUDName(reading: reading)
+            }
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.leading, inset + 1)
+                .padding(.leading, inset + 3)
             Spacer(minLength: notchWidth)
-            MediaKeyHUDLevel(reading: reading, barWidth: 48)
+            MediaKeyHUDLevel(reading: reading, barWidth: 40)
                 .frame(maxWidth: .infinity, alignment: .trailing)
                 .padding(.trailing, inset + 2)
         }
@@ -34,7 +38,9 @@ struct MediaKeyHUDPill: View {
     var body: some View {
         HStack(spacing: 9) {
             MediaKeyHUDSymbol(reading: reading)
-            MediaKeyHUDLevel(reading: reading, barWidth: 96)
+            MediaKeyHUDName(reading: reading)
+            MediaKeyHUDLevel(reading: reading, barWidth: 72)
+                .padding(.leading, 6)
         }
         .padding(.leading, 11)
         .padding(.trailing, 12)
@@ -68,7 +74,21 @@ struct MediaKeyHUDSymbol: View {
     }
 }
 
-/// A thin bar with the percentage after it, sized for "100 %" so neither moves as the
+/// "Volume" or "Tela", the way Droppy names what's changing.
+struct MediaKeyHUDName: View {
+    let reading: MediaKeyHUD.Reading
+
+    var body: some View {
+        Text(reading.kind == .volume ? "Volume" : "Tela")
+            .font(.system(size: 12.5, weight: .medium))
+            .foregroundStyle(reading.isSilent ? NotchStyle.secondary : NotchStyle.primary)
+            .lineLimit(1)
+            .fixedSize()
+            .contentTransition(.opacity)
+    }
+}
+
+/// A thin bar with the number after it, sized for "100 %" so neither moves as the
 /// digits change.
 struct MediaKeyHUDLevel: View {
     let reading: MediaKeyHUD.Reading
@@ -81,19 +101,20 @@ struct MediaKeyHUDLevel: View {
                 .overlay(alignment: .leading) {
                     GeometryReader { proxy in
                         Capsule()
-                            .fill(reading.isSilent ? NotchStyle.tertiary : NotchStyle.primary)
+                            .fill(reading.isSilent ? NotchStyle.tertiary : tint)
                             .frame(width: proxy.size.width * fraction)
                     }
                 }
-                .frame(width: barWidth, height: 4)
+                .frame(width: barWidth, height: 5)
                 .clipShape(Capsule())
+            // Sized for "100" so nothing moves as the digits roll.
             ZStack(alignment: .trailing) {
-                Text(verbatim: 1.0.percent).hidden()
-                Text(verbatim: reading.level.percent)
+                Text(verbatim: "100").hidden()
+                Text(verbatim: "\(Int((fraction * 100).rounded()))")
                     .foregroundStyle(reading.isSilent ? NotchStyle.secondary : NotchStyle.primary)
                     .contentTransition(.numericText(value: reading.level))
             }
-            .font(.system(size: 11, weight: .semibold).monospacedDigit())
+            .font(.system(size: 12.5, weight: .semibold).monospacedDigit())
             .lineLimit(1)
             .fixedSize()
         }
@@ -103,4 +124,9 @@ struct MediaKeyHUDLevel: View {
     }
 
     private var fraction: Double { min(1, max(0, reading.level)) }
+
+    /// Green for sound, yellow for light, as Droppy colors them.
+    private var tint: Color {
+        reading.kind == .volume ? Color(red: 0.3, green: 0.85, blue: 0.5) : Color(red: 1, green: 0.8, blue: 0.1)
+    }
 }

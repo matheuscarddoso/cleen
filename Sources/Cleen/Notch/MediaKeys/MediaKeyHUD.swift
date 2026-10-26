@@ -183,6 +183,21 @@ final class MediaKeyHUD {
 
     // MARK: Showing
 
+    /// Volume, then brightness, stepping up a few times, for checking the look
+    /// (`--live volume`).
+    func preview() {
+        Task {
+            for step in 0..<6 {
+                show(Reading(kind: .volume, level: 0.41 + Double(step) * 0.05, isMuted: false, source: nil, display: nil))
+                try? await Task.sleep(for: .milliseconds(260))
+            }
+            for step in 0..<5 {
+                show(Reading(kind: .brightness, level: 0.5 + Double(step) * 0.06, isMuted: false, source: nil, display: nil))
+                try? await Task.sleep(for: .milliseconds(260))
+            }
+        }
+    }
+
     private func show(_ new: Reading) {
         var new = new
         new.display = Self.notchDisplay(for: new.source ?? Self.screenUnderPointer?.displayID)

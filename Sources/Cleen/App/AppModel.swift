@@ -165,10 +165,10 @@ final class AppModel {
             search.query = text
         }
         if let kind = LaunchArguments.liveActivity {
-            Task { [live, agents] in
+            Task { [live, agents, mediaKeys] in
                 try? await Task.sleep(for: .seconds(1.5))
                 if kind == "agent" { agents.previewFinished() }
-                live.preview(kind)
+                if kind == "volume" { mediaKeys.preview() } else { live.preview(kind) }
             }
         }
         if LaunchArguments.settings {
