@@ -21,9 +21,10 @@ nonisolated struct EditorScene: @unchecked Sendable {
     /// instead of chasing every flick of the hand.
     var zoomFocus: CursorPath
     var clicks: [CursorTrack.Click]
-    /// The pointer's picture and its hot spot (from the top-left, in points).
-    var cursorImage: CIImage?
-    var cursorHotSpot: CGPoint
+    /// Each pointer shape's picture and its hot spot (from the top-left, in points).
+    var cursors: [CursorTrack.Shape: (image: CIImage, hotSpot: CGPoint)]
+    /// Which shape the pointer had when.
+    var shapes: CursorTrack
     /// The picture behind the recording, when the background is one.
     var backgroundImage: CIImage?
 
@@ -97,14 +98,15 @@ nonisolated enum EditorRenderer {
                     stage = clickEffect(at: point, size: pointScale * 18 * style.cursorSize / 1.6, progress: progress).composited(over: stage)
                 }
             }
-            if style.showsCursor, let cursor = scene.cursorImage, let position = scene.cursor.position(at: t) {
+            if style.showsCursor, let drawn = scene.cursors[scene.shapes.shape(at: t)] ?? scene.cursors[.arrow], let position = scene.cursor.position(at: t) {
+                let cursor = drawn.image
                 let point = flip(FrameGeometry.place(scene.cropped(position), zoom: pointZoom, content: content), in: canvas)
                 if contentCI.insetBy(dx: -2, dy: -2).contains(point) {
                     let scale = pointScale * style.cursorSize
                     let extent = cursor.extent
                     let placed = cursor
                         .transformed(by: CGAffineTransform(scaleX: scale, y: scale))
-                        .transformed(by: CGAffineTransform(translationX: point.x - scene.cursorHotSpot.x * scale, y: point.y - (extent.height - scene.cursorHotSpot.y) * scale))
+                        .transformed(by: CGAffineTransform(translationX: point.x - drawn.hotSpot.x * scale, y: point.y - (extent.height - drawn.hotSpot.y) * scale))
                     stage = placed.cropped(to: contentCI.insetBy(dx: -60, dy: -60)).composited(over: stage)
                 }
             }

@@ -68,7 +68,8 @@ final class EditorModel {
     @ObservationIgnored private var timeObserver: Any?
     @ObservationIgnored private var endObserver: (any NSObjectProtocol)?
     @ObservationIgnored private var saveTask: Task<Void, Never>?
-    @ObservationIgnored private var cursorImage: (CIImage, CGPoint)?
+    /// The pointer's shapes, drawn once for every editor.
+    private static let cursorImages = CursorShapes.images()
     @ObservationIgnored private var backgroundImage: (key: EditorStyle.Background, image: CIImage?)?
     @ObservationIgnored private var undoStack: [RecordingProject] = []
     @ObservationIgnored private var redoStack: [RecordingProject] = []
@@ -90,13 +91,6 @@ final class EditorModel {
         self.folder = folder
         self.project = project
         track = RecordingProject.loadCursor(from: folder)
-        // The pointer the Mac draws, at its real size; the renderer scales it.
-        let arrow = NSCursor.arrow
-        if let image = arrow.image.cgImage(forProposedRect: nil, context: nil, hints: nil) {
-            let scale = CGFloat(image.width) / max(1, arrow.image.size.width)
-            let ci = CIImage(cgImage: image).transformed(by: CGAffineTransform(scaleX: 1 / scale, y: 1 / scale))
-            cursorImage = (ci, arrow.hotSpot)
-        }
         updateScene()
         load()
         timeObserver = player.addPeriodicTimeObserver(forInterval: CMTime(value: 1, timescale: 30), queue: .main) { [weak self] time in
@@ -291,8 +285,8 @@ final class EditorModel {
             cursor: CursorPath(track: track, smoothing: project.style.cursorSmoothing),
             zoomFocus: CursorPath(track: track, smoothing: 0.97),
             clicks: track.clicks,
-            cursorImage: cursorImage?.0,
-            cursorHotSpot: cursorImage?.1 ?? .zero,
+            cursors: Self.cursorImages,
+            shapes: CursorTrack(shapes: track.shapes),
             backgroundImage: picture(for: project.style.background)
         )
     }
