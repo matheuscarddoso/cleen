@@ -42,7 +42,10 @@ import {
   Zap,
   type LucideIcon,
 } from "lucide-react";
+import type { ReviewItem, ReviewOutcome } from "../../review";
 import { tabs, type TabId } from "../../tabs";
+import { clipboard, events, files, openWindows, personal, quicklink, snippets, systemCommands, webFallback } from "./extras";
+import { smart } from "./smart";
 
 /** ToolPalette (Sources/Cleen/Components/ToolPalette.swift). */
 export const palette = {
@@ -68,10 +71,18 @@ export type ItemIcon =
   | { kind: "app"; look: AppLook }
   | { kind: "emoji"; emoji: string }
   | { kind: "color"; hex: string }
-  | { kind: "lucide"; glyph: LucideIcon };
+  | { kind: "lucide"; glyph: LucideIcon }
+  | { kind: "file"; tag: string; color: string }
+  | { kind: "event"; color: string };
 
-/** What Return does: say what happened (the notch would close), or open a tab. */
-export type Outcome = { kind: "done"; message: string } | { kind: "tab"; tab: TabId };
+/**
+ * What Return does: say what happened (the notch would close), open a tab, or grow into
+ * the deletion review first.
+ */
+export type Outcome =
+  | { kind: "done"; message: string }
+  | { kind: "tab"; tab: TabId }
+  | { kind: "review"; outcome: ReviewOutcome; items: ReviewItem[]; message: string };
 
 /** One row of the search (SearchItem). */
 export type Item = {
@@ -82,6 +93,12 @@ export type Item = {
   keywords?: readonly string[];
   /** The grey word on the right: "App", "Janela", "Comando". */
   kind?: string;
+  /** Return's verb in the key bar, when the kind doesn't already read as one. */
+  verb?: string;
+  /** The person's short name for it: typing it puts the row first. */
+  alias?: string;
+  /** The global shortcut the person gave it. */
+  hotkey?: readonly string[];
   outcome: Outcome;
 };
 
@@ -281,9 +298,10 @@ function bestScore(query: string, title: string, keywords: readonly string[] = [
   return scores.length > 0 ? Math.max(...scores) : null;
 }
 
-/** Best first; letters merely in order only count when nothing matches better. */
+/** Best first; letters merely in order only count when nothing matches better. An exact alias wins. */
 function rank(candidates: Item[], text: string): Item[] {
   const scored = candidates.flatMap((item) => {
+    if (item.alias && fold(item.alias) === fold(text.trim())) return [{ item, match: 2 }];
     const match = bestScore(text, item.title, item.keywords);
     return match === null ? [] : [{ item, match }];
   });
@@ -445,7 +463,8 @@ function matches(text: string, ...fields: readonly string[]) {
 
 // MARK: Results (SearchModel.recompute)
 
-const commands = [...windows, ...tools, ...tabItems];
+/** Every fixed command, with the alias and shortcut the person gave it. */
+const commands = [...windows, ...tools, ...systemCommands, ...tabItems].map((item) => ({ ...item, ...personal[item.id] }));
 const byId = (id: string) => [...apps, ...commands].find((item) => item.id === id);
 
 /** With nothing typed: what you run most, then a few starting points. */
@@ -453,6 +472,7 @@ function suggestions(): Section[] {
   const recent = ["app.Safari", "app.Notas"].flatMap((id) => byId(id) ?? []);
   const starters = ["window.leftHalf", "window.rightHalf", "window.maximize", "tool.colorPicker", "tool.clipboard", "tool.emoji"].flatMap((id) => byId(id) ?? []);
   return [
+    { title: "Agenda de hoje", items: events.slice(1, 2) },
     { title: "Recentes", items: recent },
     { title: "Sugestões", items: starters.slice(0, 6 - Math.min(recent.length, 3)) },
   ];
@@ -465,15 +485,41 @@ export function results(query: string): Section[] {
   const sections: Section[] = [];
   const calc = calculation(text);
   if (calc) sections.push({ title: "Calculadora", items: [calc] });
+  const converted = calc ? null : smart(text);
+  if (converted) {
+    const { result } = converted;
+    sections.push({
+      title: converted.section,
+      items: [{ id: "smart", title: result.title, subtitle: result.subtitle, icon: { kind: "symbol", color: palette.orange, glyph: Equal }, kind: "Copiar", outcome: { kind: "done", message: `${result.copy} copiado` } }],
+    });
+  }
   const swatch = color(text);
   if (swatch) sections.push({ title: "Cor", items: [swatch] });
-  const ranked = swatch ? [] : rank([...apps, ...commands], text);
-  if (ranked.length > 0) sections.push({ title: "Resultados", items: ranked.slice(0, 12) });
-  if (text.length >= 2 && !calc && !swatch) {
+  const link = quicklink(text);
+  if (link) sections.push({ title: "Link rápido", items: [link] });
+  if (calc || converted || swatch || link) return sections;
+
+  const ranked = rank([...apps, ...commands], text);
+  if (ranked.length > 0) sections.push({ title: "Resultados", items: ranked.slice(0, 8) });
+  const strong = (items: Item[]) => rank(items, text).filter((item) => (bestScore(text, item.title, item.keywords) ?? 0) >= 0.5 || item.alias === text);
+  const windowsOpen = strong(openWindows).slice(0, 3);
+  if (windowsOpen.length > 0) sections.push({ title: "Janelas abertas", items: windowsOpen });
+  if (text.length >= 2) {
+    const today = strong(events);
+    if (today.length > 0) sections.push({ title: "Agenda de hoje", items: today });
+    const texts = strong(snippets);
+    if (texts.length > 0) sections.push({ title: "Snippets", items: texts });
+    const found = strong(files).slice(0, 3);
+    if (found.length > 0) sections.push({ title: "Arquivos", items: found });
+    const clips = clipboard.filter((item) => fold(item.title).includes(fold(text))).slice(0, 3);
+    if (clips.length > 0) sections.push({ title: "Área de transferência", items: clips });
     const faces = emoji.filter((item) => matches(text, item.name, ...item.keywords)).slice(0, 4);
     if (faces.length > 0) sections.push({ title: "Emoji", items: faces.map((item) => ({ id: `emoji.${item.emoji}`, title: item.name, icon: { kind: "emoji", emoji: item.emoji }, kind: "Colar", outcome: { kind: "done", message: `${item.emoji} colado` } })) });
     const icons = lucide.filter((item) => matches(text, item.name, ...item.tags)).slice(0, 4);
     if (icons.length > 0) sections.push({ title: "Ícones Lucide", items: icons.map((item) => ({ id: `lucide.${item.name}`, title: item.name, icon: { kind: "lucide", glyph: item.glyph }, kind: "Copiar SVG", outcome: { kind: "done", message: `${item.name}.svg copiado` } })) });
   }
+  // Nothing matched well: the web instead of a dead end.
+  const weak = sections.length === 0 || (sections.length === 1 && ranked.every((item) => (bestScore(text, item.title, item.keywords) ?? 0) < 0.5));
+  if (weak && text.length >= 2) sections.push({ title: `Usar “${text}” com…`, items: [webFallback(text)] });
   return sections;
 }

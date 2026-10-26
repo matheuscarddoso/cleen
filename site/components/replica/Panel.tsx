@@ -51,6 +51,7 @@ export function Panel({
   onSettings,
   width = panel.width,
   height = panel.height,
+  overlay,
   children,
 }: {
   title: string;
@@ -61,12 +62,14 @@ export function Panel({
   onSettings: () => void;
   width?: number;
   height?: number;
+  /** Covers everything under the header strip: the deletion review. */
+  overlay?: ReactNode;
   children: ReactNode;
 }) {
   const body = width - panel.topRadius * 2;
   return (
     <div
-      className="relative text-white transition-[width,height] duration-500"
+      className="relative text-left text-white transition-[width,height] duration-500"
       style={{ width, height, transitionTimingFunction: "cubic-bezier(0.32, 0.72, 0, 1)" }}
     >
       <svg aria-hidden className="absolute inset-0 overflow-visible drop-shadow-[0_18px_34px_rgba(0,0,0,0.55)]" width={width} height={height}>
@@ -110,6 +113,11 @@ export function Panel({
                 </button>
               );
             })}
+          </div>
+        )}
+        {overlay && (
+          <div className="absolute inset-x-0 bottom-0 bg-black" style={{ top: panel.notchHeight, paddingInline: panel.inset }}>
+            {overlay}
           </div>
         )}
       </div>

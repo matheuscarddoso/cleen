@@ -6,6 +6,7 @@ import { ClaudeLive } from "@/components/ClaudeLive";
 import { Everyday } from "@/components/Everyday";
 import { LiveActivities } from "@/components/LiveActivities";
 import { Keycaps } from "@/components/Pieces";
+import { AILimits, CommandHotkeys, SmartAnswers, SnippetExpand } from "@/components/Reasons";
 import { Replica } from "@/components/replica/Replica";
 import type { TabId } from "@/components/replica/tabs";
 import { Tile } from "@/components/Tile";
@@ -23,11 +24,30 @@ const tools: { tab: TabId; title: [string, string]; tone: "blue" | "dusk" | "tea
 
 const included = [
   ["Grátis", "Sem assinatura e sem conta."],
-  ["Todas as ferramentas", "Mais de vinte, e as que vierem."],
+  ["Todas as ferramentas", "Quase trinta, e as que vierem."],
   ["Atualiza sozinho", "Confere a assinatura antes de trocar."],
   ["Sem telemetria", "Nada sai do seu Mac."],
   ["Código aberto", "Para quem quiser conferir."],
   ["Português e inglês", "Segue o idioma do seu Mac."],
+] as const;
+
+/** The rest of the reasons, each with its own small picture. */
+const reasons = [
+  {
+    title: ["Fala português.", "Até nas contas."],
+    text: "Moedas com a cotação do dia, unidades, fusos e datas, escritos do jeito que você falaria.",
+    visual: <SmartAnswers />,
+  },
+  {
+    title: ["Snippets que se", "escrevem sozinhos."],
+    text: "Digite ;email em qualquer app e ele vira o seu e-mail. Também dá para escolher pela busca.",
+    visual: <SnippetExpand />,
+  },
+  {
+    title: ["Os limites das suas IAs.", "Só das que você usa."],
+    text: "Sessão e semana do Claude Code, Codex, Cursor, Copilot e Grok. Você escolhe quais aparecem.",
+    visual: <AILimits />,
+  },
 ] as const;
 
 /** First install, in the order things show up on screen. */
@@ -55,12 +75,14 @@ const install = [
 ];
 
 const faq = [
-  ["O que é o Cleen?", "Um app para Mac que mora no notch. Ele limpa o disco, move janelas, busca apps, cola emoji e ícones, mostra o Claude Code trabalhando e traz mais de vinte ferramentas a um gesto."],
+  ["O que é o Cleen?", "Um app para Mac que mora no notch. Ele limpa o disco, tem um launcher completo no ⌥ Espaço, guarda o que você copiou, mostra o Claude Code trabalhando e os limites das suas IAs, e traz quase trinta ferramentas a um gesto."],
+  ["Dá para usar no lugar do Raycast?", "Para o dia a dia, sim. A busca abre apps, troca de janela pelo título, acha arquivos, converte moedas, unidades, fusos e datas, cola snippets e emoji, roda comandos do sistema e mostra as ações de cada resultado com ⌘K. Cada comando pode ganhar um apelido e um atalho só dele."],
   ["Abre ao passar o mouse ou ao clicar?", "Você escolhe em Ajustes › Aparência. Também abre com ⌃⌥C, com dois dedos para baixo no trackpad, e a busca abre com ⌥ Espaço."],
   ["Quais Macs funcionam?", "Macs com chip Apple e macOS 26 ou mais novo. Em telas sem notch, o Cleen desenha um no topo, inclusive em monitores externos."],
-  ["É seguro limpar o Mac com ele?", "Toda remoção passa por uma trava que protege pastas do sistema e as pastas principais da sua conta. O que é seu vai para o Lixo; só caches que se recriam sozinhos são apagados de vez, sempre com dois cliques."],
+  ["É seguro limpar o Mac com ele?", "Toda remoção passa por uma trava que protege pastas do sistema e as pastas principais da sua conta. Antes de apagar qualquer coisa, o notch cresce e lista o que vai sair, quanto ocupa e se vai para o Lixo ou embora de vez. Nada acontece até você clicar em Confirmar."],
   ["É uma assinatura?", "Não. O Cleen é grátis e o código é aberto no GitHub."],
   ["Como recebo as atualizações?", "Sozinho. A cada seis horas ele procura uma versão nova, confere a integridade e a assinatura, e troca o app. Dá para desligar em Ajustes › Sobre."],
+  ["As notas sincronizam com outro app?", "Sim, em Ajustes › Notas. Com o Obsidian, cada nota vira um arquivo .md numa pasta Cleen do seu cofre, e o que você muda lá volta para cá. Com o app Notas, cada nota ganha uma cópia numa pasta Cleen."],
   ["Meus dados ficam comigo?", "Sim. Nada é coletado nem enviado. A rede só é usada para tempo, cotações, câmbio, ícones do Lucide e para ler os limites das suas ferramentas de IA, direto em cada serviço."],
   ["Por que o macOS avisa na primeira vez?", "O Cleen ainda não é notarizado pela Apple. Na primeira abertura, vá em Ajustes do Sistema › Privacidade e Segurança e clique em Abrir Mesmo Assim. É só uma vez."],
 ] as const;
@@ -85,7 +107,7 @@ export default function Home() {
       <Navigation />
       <div className="ribbon">
         <p className="ribbon-text mx-auto max-w-[1000px] px-5 py-4 text-center text-[14px] leading-[1.43]">
-          Cleen {site.version}: atualiza sozinho e mostra só as IAs que você usa.{" "}
+          Novo na busca do Cleen: ações com ⌘K, troca de janela, arquivos e snippets.{" "}
           <a href={site.download} className="ribbon-link whitespace-nowrap hover:underline">
             Baixe grátis ›
           </a>
@@ -124,17 +146,17 @@ export default function Home() {
         <div id="recursos" className="mt-3 grid scroll-mt-16 gap-3 lg:grid-cols-2 sm:mt-6 sm:gap-6">
           <Tile id="busca" dark eyebrow="Busca" title={<>Um launcher inteiro.<br />No notch.</>} more="#todo-motivo"
               visual={<Replica label="A busca do Cleen" mode="search" tone="teal" />}>
-              ⌥ Espaço abre na hora. Mova janelas, abra apps, faça contas e cole emoji, ícones e cores.
+              ⌥ Espaço abre na hora. Troque de janela, ache arquivos, converta moedas e fusos, cole snippets. E ⌘K mostra o que mais dá para fazer com cada resultado.
           </Tile>
           <Tile id="limpeza" eyebrow="Limpeza" title={<>Seu Mac mais leve.<br />Num clique.</>} more="#perguntas"
               visual={<Replica label="A visão geral do disco" tab="overview" />}>
-              Caches, restos de apps, node_modules parados e duplicados. O que é seu vai para o Lixo.
+              Caches, restos de apps, node_modules parados e duplicados. Antes de apagar, o notch mostra a lista do que sai.
           </Tile>
           <Tile id="claude" eyebrow="Claude Code" title={<>Seus agentes.<br />À vista.</>} more="#ferramentas" visual={<ClaudeLive />}>
-              Cada sessão ao vivo ao lado da câmera, e as permissões aprovadas direto do notch.
+              Cada sessão ao vivo ao lado da câmera, as permissões aprovadas direto do notch e os limites do plano sempre à vista.
           </Tile>
           <Tile dark eyebrow="Notch fechado" title={<>O notch fala.<br />Com você.</>} more="#ferramentas" visual={<LiveActivities />}>
-              Carregador, fones, a próxima reunião, a música nova e o timer. Em tela cheia, fica só preto.
+              O espaço livre, o carregador, os fones, a próxima reunião, a música nova e o timer. Em tela cheia, fica só preto.
           </Tile>
         </div>
 
@@ -182,11 +204,12 @@ export default function Home() {
           <div className="mt-12 grid gap-3 sm:gap-5 lg:grid-cols-3">
             <div className="flex flex-col overflow-hidden rounded-[18px] bg-tile">
               <div className="px-8 pt-10 text-center">
-                <h3 className="text-[24px] font-semibold leading-tight tracking-[-0.015em]">Abra de qualquer lugar,<br />com um atalho.</h3>
+                <h3 className="text-[24px] font-semibold leading-tight tracking-[-0.015em]">Abra de qualquer lugar.<br />E dê um atalho a cada comando.</h3>
               </div>
-              <div className="flex flex-1 items-center py-14">
-                <div className="w-full">
+              <div className="flex flex-1 items-center py-12">
+                <div className="w-full px-6">
                   <Keycaps />
+                  <CommandHotkeys />
                 </div>
               </div>
             </div>
@@ -206,6 +229,19 @@ export default function Home() {
                 <Replica label="Brilho da tela do Mac e do monitor externo" mode="settings" settings="displays" tone="teal" />
               </div>
             </div>
+            {reasons.map((reason) => (
+              <div key={reason.title[0]} className="flex flex-col overflow-hidden rounded-[18px] bg-tile">
+                <div className="px-8 pt-10 text-center">
+                  <h3 className="text-[24px] font-semibold leading-tight tracking-[-0.015em]">
+                    {reason.title[0]}
+                    <br />
+                    {reason.title[1]}
+                  </h3>
+                  <p className="mx-auto mt-3 max-w-[320px] text-[15px] leading-[1.47] text-mute">{reason.text}</p>
+                </div>
+                <div className="mt-auto px-6 pb-8 pt-10">{reason.visual}</div>
+              </div>
+            ))}
           </div>
         </section>
 

@@ -1,13 +1,16 @@
 "use client";
 
-import { ChevronRight, CircleCheck, CodeXml, File, Puzzle, Trash2, type LucideIcon } from "lucide-react";
+import { ChevronRight, CircleCheck, CodeXml, File, FileText, Hammer, Package, Puzzle, Trash2, type LucideIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useDemo, useSteps } from "../DemoContext";
+import { useReplica } from "../ReplicaContext";
+import { reviewTitle, type Review, type ReviewItem } from "../review";
 import { level, notch } from "../style";
 import { bytes, cleaned, cleanSize, findings, formatPercent, rescanned, usedFraction, type Disk } from "./overview/disk";
 
-/** Idle, the press, the scans landing one by one, Limpar, Confirmar, cleaning, the space back. */
-const script = [2000, 220, 800, 650, 650, 2400, 220, 1500, 220, 1700, 4400] as const;
+/** Idle, the press, the scans landing one by one, Limpar, the review, cleaning, the space back. */
+const script = [2000, 220, 800, 650, 650, 2400, 220, 3200, 1700, 4400] as const;
+const steps = { review: 7, cleaning: 8 } as const;
 
 const idle: Disk = { phase: "idle", scanned: false, found: 0, armed: false, pressed: false, report: null, data: findings };
 
@@ -16,26 +19,56 @@ function scripted(step: number): Disk {
   if (step <= 1) return { ...idle, pressed: step === 1 };
   if (step <= 4) return { ...idle, phase: "scanning", found: step - 2 };
   const ready: Disk = { ...idle, phase: "ready", scanned: true, found: 3 };
-  if (step <= 6) return { ...ready, pressed: step === 6 };
-  if (step <= 8) return { ...ready, armed: true, pressed: step === 8 };
-  if (step === 9) return { ...ready, phase: "cleaning" };
+  if (step <= steps.review) return { ...ready, pressed: step === 6 };
+  if (step === steps.cleaning) return { ...ready, phase: "cleaning" };
   return { ...ready, report: cleanSize(findings), data: cleaned(findings) };
+}
+
+/** What "Limpar" lists before it deletes: Lixo's safe caches and the idle projects' folders. */
+function reviewItems(data: Disk["data"]): ReviewItem[] {
+  const items: ReviewItem[] = [];
+  if (data.junkSafe > 0) {
+    const xcode = Math.round(data.junkSafe * 0.59);
+    const apps = Math.round(data.junkSafe * 0.343);
+    items.push({ name: "Caches do Xcode", detail: "DerivedData, que o Xcode recria", size: xcode, icon: Hammer });
+    items.push({ name: "Caches de apps", detail: "~/Library/Caches", size: apps, icon: Package });
+    items.push({ name: "Logs antigos", detail: "Mais de 30 dias", size: data.junkSafe - xcode - apps, icon: FileText });
+  }
+  if (data.projectsSafe > 0) items.push({ name: "node_modules", detail: "~/Projetos/site-antigo", size: data.projectsSafe, icon: CodeXml });
+  return items;
 }
 
 /**
  * Visão geral, as NotchOverviewTab lays it out: free space as one large light figure
  * with the one action under it, a hairline, then what can be cleaned. The script scans,
- * cleans with the two-step confirm, and the free space counts up; every button works.
+ * shows the review of what goes, cleans, and the free space counts up; every button works.
  */
 export function OverviewTab() {
   const { reduced } = useDemo();
   const [step] = useSteps(script, 5);
+  const { review, setReview } = useReplica();
   const [manual, setManual] = useState<Disk | null>(null);
+  const scriptedReview = useRef<Review | null>(null);
   const timers = useRef<number[]>([]);
   const disk = manual ?? scripted(step);
   const { data } = disk;
 
   useEffect(() => () => timers.current.forEach((timer) => window.clearTimeout(timer)), []);
+
+  // The script's review: up on its step, gone (as if confirmed) on the next. The visitor
+  // taking over drops it.
+  useEffect(() => {
+    if (manual === null && step === steps.review) {
+      if (scriptedReview.current) return;
+      const items = reviewItems(findings);
+      const shown: Review = { title: reviewTitle(items.length, "delete"), outcome: "delete", items, onConfirm: () => {} };
+      scriptedReview.current = shown;
+      setReview(shown);
+    } else if (scriptedReview.current) {
+      if (review === scriptedReview.current) setReview(null);
+      scriptedReview.current = null;
+    }
+  }, [manual, review, setReview, step]);
 
   const later = (ms: number, update: (current: Disk) => Disk) => {
     timers.current.push(window.setTimeout(() => setManual((current) => (current ? update(current) : current)), ms));
@@ -51,16 +84,21 @@ export function OverviewTab() {
     [700, 1300, 2000].forEach((ms, index) => later(ms, (current) => ({ ...current, found: index + 1, ...(index === 2 ? { phase: "ready", scanned: true } : {}) })));
   };
 
-  // ConfirmingButton: the first tap arms it, the second cleans; it disarms after 4 s.
+  // ConfirmingButton: the notch grows and lists what goes; Confirmar cleans.
   const clean = () => {
     clearTimers();
-    if (!disk.armed) {
-      setManual({ ...disk, armed: true, pressed: false });
-      later(4000, (current) => ({ ...current, armed: false }));
-      return;
-    }
-    setManual({ ...disk, phase: "cleaning", armed: false, pressed: false });
-    later(1700, (current) => ({ ...current, phase: "ready", report: cleanSize(current.data), data: cleaned(current.data) }));
+    const from = { ...disk, armed: false, pressed: false };
+    setManual(from);
+    const items = reviewItems(from.data);
+    setReview({
+      title: reviewTitle(items.length, "delete"),
+      outcome: "delete",
+      items,
+      onConfirm: () => {
+        setManual({ ...from, phase: "cleaning" });
+        later(1700, (current) => ({ ...current, phase: "ready", report: cleanSize(current.data), data: cleaned(current.data) }));
+      },
+    });
   };
 
   const free = useCountUp(data.free, !reduced);
@@ -91,8 +129,8 @@ export function OverviewTab() {
               {disk.phase === "scanning" ? "Analisando…" : "Limpando…"}
             </span>
           ) : disk.scanned && cleanSize(data) > 0 ? (
-            <Pill kind={disk.armed ? "destructive" : "primary"} pressed={disk.pressed} onClick={clean}>
-              {disk.armed ? "Confirmar" : `Limpar ${bytes(cleanSize(data))}`}
+            <Pill kind="primary" pressed={disk.pressed} onClick={clean}>
+              {`Limpar ${bytes(cleanSize(data))}`}
             </Pill>
           ) : (
             <Pill kind="primary" pressed={disk.pressed} onClick={scan}>

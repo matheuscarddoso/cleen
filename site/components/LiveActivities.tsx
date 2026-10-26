@@ -1,5 +1,6 @@
 "use client";
 
+import { HardDrive } from "lucide-react";
 import type { ReactNode } from "react";
 import { BatteryCharging, Calendar, Headphones, Timer } from "./Icons";
 import { ClosedNotch, Screen, Swap } from "./Notch";
@@ -7,16 +8,31 @@ import { useLoop, useSeconds } from "./useLoop";
 
 type Activity = { key: string; label: string; width: string; left: ReactNode; right: ReactNode };
 
-const durations = [2600, 2600, 2600, 3000, 3200] as const;
+const durations = [2600, 2600, 2600, 2600, 3000, 3200] as const;
 
 /** The closed notch going through what it tells you during a day, one after another. */
 export function LiveActivities() {
-  const { ref, index, setIndex, running } = useLoop<HTMLDivElement>(durations, 2);
-  const elapsed = useSeconds(running && index === 4, index !== 4);
+  const { ref, index, setIndex, running } = useLoop<HTMLDivElement>(durations, 3);
+  const elapsed = useSeconds(running && index === 5, index !== 5);
   const remaining = 25 * 60 - 1 - elapsed;
   const clock = `${Math.floor(remaining / 60)}:${String(remaining % 60).padStart(2, "0")}`;
 
   const activities: Activity[] = [
+    {
+      key: "disk",
+      label: "Disco",
+      width: "300px",
+      left: <Row><HardDrive className="h-4 w-4 text-white/70" strokeWidth={2} /> Livre</Row>,
+      // The closed notch's meter: the figure with a thin bar of what's used under it.
+      right: (
+        <span className="relative pb-[5px] tabular-nums">
+          62,1 GB
+          <span className="absolute inset-x-0 bottom-0 h-[2.5px] overflow-hidden rounded-full bg-white/20">
+            <span className="block h-full w-[75%] rounded-full bg-white/80" />
+          </span>
+        </span>
+      ),
+    },
     {
       key: "power",
       label: "Carregador",
@@ -43,7 +59,7 @@ export function LiveActivities() {
       label: "Música",
       width: "300px",
       left: <span className="h-[18px] w-[18px] rounded-[5px] bg-black bg-[url(/covers/iceman.jpg)] bg-cover bg-center" />,
-      right: <Equalizer playing={running && index === 3} />,
+      right: <Equalizer playing={running && index === 4} />,
     },
     {
       key: "timer",

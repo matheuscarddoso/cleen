@@ -58,6 +58,26 @@ export function ItemGlyph({ icon }: { icon: ItemIcon }) {
       return <span className="flex size-5 items-center justify-center text-[16px] leading-none" aria-hidden>{icon.emoji}</span>;
     case "color":
       return <span className="block size-5 rounded-[5.5px] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.2)]" style={{ background: icon.hex }} />;
+    case "file":
+      // A page with its corner folded and the kind on a colored tag, like Finder's icons.
+      return (
+        <span className="flex size-5 items-center justify-center">
+          <span
+            className="relative flex h-[19px] w-[15px] items-end justify-center rounded-[2.5px] bg-gradient-to-b from-white to-[#dcdce0] pb-[2.5px]"
+            style={{ clipPath: "polygon(0 0, 68% 0, 100% 26%, 100% 100%, 0 100%)" }}
+          >
+            <span className="rounded-[1.5px] px-[1.5px] text-[5px] font-semibold leading-[7px] text-white" style={{ background: icon.color }}>
+              {icon.tag}
+            </span>
+          </span>
+        </span>
+      );
+    case "event":
+      return (
+        <span className="flex size-5 items-center justify-center">
+          <span className="h-[15px] w-[3.5px] rounded-full" style={{ background: icon.color }} />
+        </span>
+      );
     case "lucide": {
       const Glyph = icon.glyph;
       return (
