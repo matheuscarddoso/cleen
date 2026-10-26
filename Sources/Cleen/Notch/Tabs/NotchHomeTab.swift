@@ -8,12 +8,13 @@ struct NotchHomeTab: View {
     @Environment(AgendaModel.self) private var agenda
     @Environment(NotchState.self) private var state
     @Environment(HomeLayout.self) private var layout
-    @Namespace private var mirrorSpace
+    @Environment(MirrorModel.self) private var mirror
 
     var body: some View {
         ZStack(alignment: .top) {
             if state.mirrorExpanded {
-                MirrorExpanded(namespace: mirrorSpace)
+                // The wide mirror itself is the overlay below; this keeps the room.
+                Color.clear
             } else {
                 VStack(alignment: .leading, spacing: 12) {
                     if state.isEditingHome {
@@ -26,14 +27,21 @@ struct NotchHomeTab: View {
                     if layout.items.isEmpty {
                         emptyState
                     } else {
-                        HomeWidgetRow(items: layout.items, available: available, mirrorSpace: mirrorSpace, isEditing: state.isEditingHome)
+                        HomeWidgetRow(items: layout.items, available: available, isEditing: state.isEditingHome)
                             .padding(.top, state.isEditingHome ? 6 : 0)
                     }
                 }
                 .transition(.opacity)
             }
         }
-        .animation(.spring(response: 0.45, dampingFraction: 0.86), value: state.mirrorExpanded)
+        .overlayPreferenceValue(MirrorFrameKey.self) { anchor in
+            GeometryReader { proxy in
+                if mirror.access == .granted, !state.isEditingHome, anchor != nil || state.mirrorExpanded {
+                    MirrorSurface(circle: anchor.map { proxy[$0] }, area: CGRect(origin: .zero, size: proxy.size))
+                }
+            }
+        }
+        .animation(MirrorButton.grow, value: state.mirrorExpanded)
         .animation(.smooth(duration: 0.3), value: state.isEditingHome)
         .task { await nowPlaying.watch() }
         .task { await agenda.watch() }

@@ -4,7 +4,6 @@ import SwiftUI
 /// NotchNook's Mirror: a grey disc with a webcam glyph; once the camera is allowed it
 /// becomes a live round mirror.
 struct MirrorButton: View {
-    let namespace: Namespace.ID
     /// 88 is the round mirror; wider makes it a pill.
     var width = 88.0
     @Environment(MirrorModel.self) private var mirror
@@ -16,10 +15,16 @@ struct MirrorButton: View {
             ZStack {
                 Capsule().fill(Color.white.opacity(isHovered ? 0.14 : 0.1))
                 if mirror.access == .granted {
-                    CameraPreview(layer: mirror.previewLayer)
-                        .clipShape(.rect(cornerRadius: 44, style: .continuous))
-                        .matchedGeometryEffect(id: "mirror", in: namespace)
-                        .transition(.opacity)
+                    if notch.isEditingHome {
+                        // Being arranged, it moves with its widget; there's nothing to grow.
+                        CameraPreview(layer: mirror.previewLayer)
+                            .clipShape(.capsule)
+                    } else {
+                        // The live preview is drawn over this spot by Início (MirrorSurface),
+                        // so the same view can grow from here into the wide mirror.
+                        Color.clear
+                            .anchorPreference(key: MirrorFrameKey.self, value: .bounds) { $0 }
+                    }
                 } else {
                     VStack(spacing: 5) {
                         Image(systemName: mirror.access == .denied ? "video.slash" : "web.camera")
@@ -42,6 +47,9 @@ struct MirrorButton: View {
         .accessibilityLabel("Espelho")
     }
 
+    /// How the mirror grows into the panel and back.
+    static let grow = Animation.spring(response: 0.45, dampingFraction: 0.86)
+
     private var help: String {
         switch mirror.access {
         case .notAsked: String(localized: "Ver como você está antes de uma chamada")
@@ -59,7 +67,7 @@ struct MirrorButton: View {
                 NSWorkspace.shared.open(url)
             }
         case .granted:
-            notch.mirrorExpanded = true
+            withAnimation(Self.grow) { notch.mirrorExpanded = true }
         }
     }
 }

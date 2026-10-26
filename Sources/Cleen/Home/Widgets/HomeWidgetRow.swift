@@ -7,7 +7,6 @@ struct HomeWidgetRow: View {
     let items: [HomeWidgetItem]
     /// The room the row has, in points.
     let available: Double
-    let mirrorSpace: Namespace.ID
     var isEditing = false
 
     static let spacing = 16.0
@@ -26,10 +25,10 @@ struct HomeWidgetRow: View {
                 Group {
                     if isEditing {
                         HomeWidgetEditFrame(item: item) {
-                            HomeWidgetView(item: item, mirrorSpace: mirrorSpace)
+                            HomeWidgetView(item: item)
                         }
                     } else {
-                        HomeWidgetView(item: item, mirrorSpace: mirrorSpace)
+                        HomeWidgetView(item: item)
                     }
                 }
                 .frame(width: widths[index])
