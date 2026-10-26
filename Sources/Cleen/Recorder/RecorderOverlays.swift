@@ -1,4 +1,5 @@
 import AppKit
+import CleenKit
 import AVFoundation
 import SwiftUI
 
@@ -73,11 +74,14 @@ final class RecorderOverlays {
         if camera != nil, cameraSession === session { return }
         hideCamera()
         cameraSession = session
-        let side = 180.0
+        // Screen Studio's preview: a 240 pt squircle.
+        let side = 240.0
         let frame = CGRect(x: screen.visibleFrame.maxX - side - 24, y: screen.visibleFrame.minY + 24, width: side, height: side)
         let window = OverlayWindow(frame: frame, level: .floating, ignoresMouse: false, content: RecorderCameraPreview(session: session))
         window.isMovableByWindowBackground = true
         window.isMovable = true
+        // The system shadow follows the squircle's edge.
+        window.hasShadow = true
         window.orderFrontRegardless()
         camera = window
     }
@@ -127,24 +131,44 @@ private struct CountdownView: View {
 private struct RecorderCameraPreview: NSViewRepresentable {
     let session: AVCaptureSession
 
-    func makeNSView(context: Context) -> NSView {
-        let view = NSView()
-        view.wantsLayer = true
-        let layer = AVCaptureVideoPreviewLayer(session: session)
-        layer.videoGravity = .resizeAspectFill
-        layer.frame = view.bounds
-        layer.autoresizingMask = [.layerWidthSizable, .layerHeightSizable]
-        // A mirror, like the camera on a call.
-        layer.connection?.automaticallyAdjustsVideoMirroring = false
-        layer.connection?.isVideoMirrored = true
-        view.layer = CALayer()
-        view.layer?.addSublayer(layer)
-        view.layer?.cornerRadius = 90
-        view.layer?.masksToBounds = true
-        view.layer?.borderColor = NSColor.white.withAlphaComponent(0.3).cgColor
-        view.layer?.borderWidth = 2
-        return view
+    func makeNSView(context: Context) -> PreviewHost {
+        PreviewHost(session: session)
     }
 
-    func updateNSView(_ view: NSView, context: Context) {}
+    func updateNSView(_ view: PreviewHost, context: Context) {}
+
+    /// The camera, mirrored like on a call, cut to the squircle.
+    final class PreviewHost: NSView {
+        private let preview: AVCaptureVideoPreviewLayer
+        private let mask = CAShapeLayer()
+
+        init(session: AVCaptureSession) {
+            preview = AVCaptureVideoPreviewLayer(session: session)
+            super.init(frame: .zero)
+            wantsLayer = true
+            layer = CALayer()
+            preview.videoGravity = .resizeAspectFill
+            preview.connection?.automaticallyAdjustsVideoMirroring = false
+            preview.connection?.isVideoMirrored = true
+            layer?.addSublayer(preview)
+            layer?.mask = mask
+        }
+
+        required init?(coder: NSCoder) {
+            fatalError("init(coder:) is not used")
+        }
+
+        /// Dragging anywhere on the camera moves it.
+        override var mouseDownCanMoveWindow: Bool { true }
+
+        override func layout() {
+            super.layout()
+            CATransaction.begin()
+            CATransaction.setDisableActions(true)
+            preview.frame = bounds
+            mask.frame = bounds
+            mask.path = Squircle.path(in: bounds)
+            CATransaction.commit()
+        }
+    }
 }

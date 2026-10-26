@@ -122,3 +122,21 @@ struct RecordingProjectTests {
         #expect(next != folder)
     }
 }
+
+struct SquircleTests {
+    /// Screen Studio's camera edge, measured off a 480 px capture: how far in the shape
+    /// starts on each row from the top. (The very first rows are left out: there the
+    /// capture's antialiasing decides more than the curve.)
+    @Test func followsScreenStudiosCorner() {
+        let path = Squircle.path(in: CGRect(x: 0, y: 0, width: 480, height: 480))
+        let measured: [(Double, Double)] = [(4, 54), (8, 41), (16, 26), (24, 18), (32, 12), (48, 6), (64, 3), (96, 0)]
+        for (row, inset) in measured {
+            // The first x inside the path on this row.
+            let first = (0..<480).first { path.contains(CGPoint(x: Double($0) + 0.5, y: row + 0.5)) } ?? 480
+            #expect(abs(Double(first) - inset) <= 6, "row \(row): \(first) vs \(inset)")
+        }
+        // Straight edges between the corners.
+        #expect(path.contains(CGPoint(x: 240, y: 0.5)))
+        #expect(path.contains(CGPoint(x: 0.5, y: 240)))
+    }
+}

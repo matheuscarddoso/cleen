@@ -41,14 +41,18 @@ public struct EditorStyle: Codable, Sendable, Equatable {
         }
 
         public enum Shape: String, Codable, Sendable, CaseIterable {
-            case circle, rounded, square
+            /// A square with Screen Studio's squircle corners (see `Squircle`).
+            case rounded
+            case circle
+            /// The camera's own shape, barely rounded.
+            case square
         }
 
         public var isVisible = true
         public var corner = Corner.bottomRight
         /// The bubble's height as a share of the canvas height.
         public var size = 0.26
-        public var shape = Shape.circle
+        public var shape = Shape.rounded
 
         public init() {}
     }

@@ -50,8 +50,8 @@ struct EditorInspector: View {
                         .pickerStyle(.segmented)
                         slider("Tamanho", value: \.style.camera.size, range: 0.12...0.5)
                         Picker("Forma", selection: binding(\.style.camera.shape)) {
-                            Text("Círculo").tag(EditorStyle.Camera.Shape.circle)
                             Text("Arredondada").tag(EditorStyle.Camera.Shape.rounded)
+                            Text("Círculo").tag(EditorStyle.Camera.Shape.circle)
                             Text("Quadrada").tag(EditorStyle.Camera.Shape.square)
                         }
                         .pickerStyle(.segmented)

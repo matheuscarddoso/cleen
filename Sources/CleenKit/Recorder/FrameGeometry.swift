@@ -26,7 +26,7 @@ public enum FrameGeometry {
     /// edge by the same margin as the padding (or a small one without padding).
     public static func cameraRect(canvas: CGSize, style: EditorStyle.Camera, aspect cameraAspect: Double, padding: Double) -> CGRect {
         let height = canvas.height * style.size
-        let width = style.shape == .circle ? height : height * cameraAspect
+        let width = style.shape == .square ? height * cameraAspect : height
         let margin = max(min(canvas.width, canvas.height) * padding * 0.6, min(canvas.width, canvas.height) * 0.03)
         let x = style.corner == .topLeft || style.corner == .bottomLeft ? margin : canvas.width - margin - width
         let y = style.corner == .topLeft || style.corner == .topRight ? margin : canvas.height - margin - height

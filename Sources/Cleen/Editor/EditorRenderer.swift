@@ -142,15 +142,16 @@ nonisolated enum EditorRenderer {
         let placed = scaled
             .transformed(by: CGAffineTransform(translationX: rect.midX - scaled.extent.midX, y: rect.midY - scaled.extent.midY))
             .cropped(to: rect)
-        let radius: CGFloat = switch style.shape {
-        case .circle: rect.width / 2
-        case .rounded: min(rect.width, rect.height) * 0.18
-        case .square: min(rect.width, rect.height) * 0.04
+        let mask: CIImage = switch style.shape {
+        case .circle: roundedRect(rect, radius: rect.width / 2, color: .white)
+        case .rounded: squircle(rect)
+        case .square: roundedRect(rect, radius: min(rect.width, rect.height) * 0.04, color: .white)
         }
         let masked = placed.applyingFilter("CIBlendWithAlphaMask", parameters: [
             kCIInputBackgroundImageKey: CIImage.empty(),
-            kCIInputMaskImageKey: roundedRect(rect, radius: radius, color: .white),
+            kCIInputMaskImageKey: mask,
         ])
+        let radius = style.shape == .circle ? rect.width / 2 : min(rect.width, rect.height) * 0.2
         let shadow = roundedRect(rect, radius: radius, color: CIColor(red: 0, green: 0, blue: 0, alpha: 0.45))
             .applyingGaussianBlur(sigma: rect.height * 0.06)
             .transformed(by: CGAffineTransform(translationX: 0, y: -rect.height * 0.03))
@@ -177,6 +178,13 @@ nonisolated enum EditorRenderer {
         return edge.cropped(to: box).composited(over: inner.cropped(to: box)).composited(over: disc.cropped(to: box))
     }
 
+    /// Screen Studio's camera squircle as a mask, drawn once per size.
+    private static func squircle(_ rect: CGRect) -> CIImage {
+        let size = CGSize(width: rect.width.rounded(), height: rect.height.rounded())
+        let image = SquircleMasks.shared.mask(size: size)
+        return image.transformed(by: CGAffineTransform(translationX: rect.minX, y: rect.minY))
+    }
+
     private static func roundedRect(_ rect: CGRect, radius: CGFloat, color: CIColor) -> CIImage {
         let generator = CIFilter.roundedRectangleGenerator()
         generator.extent = rect
@@ -192,5 +200,29 @@ nonisolated enum EditorRenderer {
 
     static func flip(_ point: CGPoint, in canvas: CGSize) -> CGPoint {
         CGPoint(x: point.x, y: canvas.height - point.y)
+    }
+}
+
+/// Squircle masks by size: the camera bubble stays one size for a whole export, so it's
+/// drawn once instead of every frame.
+nonisolated final class SquircleMasks: @unchecked Sendable {
+    static let shared = SquircleMasks()
+    private let cache = OSAllocatedUnfairLock<[CGSize: CIImage]>(initialState: [:])
+
+    func mask(size: CGSize) -> CIImage {
+        if let cached = cache.withLock({ $0[size] }) { return cached }
+        let width = max(1, Int(size.width)), height = max(1, Int(size.height))
+        // White on clear: the blend reads the mask's alpha.
+        guard let context = CGContext(data: nil, width: width, height: height, bitsPerComponent: 8, bytesPerRow: 0, space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue) else { return .empty() }
+        context.setFillColor(red: 1, green: 1, blue: 1, alpha: 1)
+        context.addPath(Squircle.path(in: CGRect(x: 0, y: 0, width: width, height: height)))
+        context.fillPath()
+        guard let image = context.makeImage() else { return .empty() }
+        let mask = CIImage(cgImage: image)
+        cache.withLock { cache in
+            if cache.count > 8 { cache.removeAll() }
+            cache[size] = mask
+        }
+        return mask
     }
 }
