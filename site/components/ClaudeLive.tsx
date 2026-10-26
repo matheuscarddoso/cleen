@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { Check } from "./Icons";
+import { useL } from "./LangProvider";
 import { ClosedNotch, Screen, Swap, notchEase } from "./Notch";
 import { useLoop, useSeconds } from "./useLoop";
 
@@ -14,15 +15,16 @@ const steps = { run: 0, ask: 1, approve: 2, resume: 3, done: 4 } as const;
  * permission card when it needs you, the green check when it's finished.
  */
 export function ClaudeLive() {
+  const l = useL();
   const { ref, index, running } = useLoop<HTMLDivElement>(durations, steps.ask);
   const seconds = useSeconds(running && index !== steps.done, index === steps.run, 3);
   const asking = index === steps.ask || index === steps.approve;
   const done = index === steps.done;
-  const label = index === steps.run ? "Rodando Bash" : asking ? "Esperando você" : "Rodando testes";
+  const label = index === steps.run ? l("Rodando Bash", "Running Bash") : asking ? l("Esperando você", "Waiting for you") : l("Rodando testes", "Running tests");
 
   return (
     <div ref={ref}>
-      <Screen tone="dusk" className="aspect-[1280/666] min-h-[250px] rounded-[10px] [clip-path:inset(0_round_10px)]">
+      <Screen lang={l.lang} tone="dusk" className="aspect-[1280/666] min-h-[250px] rounded-[10px] [clip-path:inset(0_round_10px)]">
         <ClosedNotch width={done ? "340px" : "330px"}>
           <Swap shown={!done} className="flex items-center justify-between px-4 text-[14px] font-medium text-white">
             <span className="flex items-center gap-2">
@@ -36,9 +38,9 @@ export function ClaudeLive() {
               <span className="flex h-4 w-4 items-center justify-center rounded-full bg-[#30d158]">
                 <Check className="h-2.5 w-2.5 text-white" strokeWidth={3.5} />
               </span>
-              Pronto
+              {l("Pronto", "Done")}
             </span>
-            <span className="text-white/70">Refatorar o checkout</span>
+            <span className="text-white/70">{l("Refatorar o checkout", "Refactor checkout")}</span>
           </Swap>
         </ClosedNotch>
 
@@ -49,16 +51,16 @@ export function ClaudeLive() {
         >
           <p className="flex items-center gap-2 text-[13px] font-medium">
             <Image src="/claude.svg" alt="" width={14} height={14} />
-            Refatorar o checkout
+            {l("Refatorar o checkout", "Refactor checkout")}
           </p>
-          <p className="mt-0.5 text-[12px] text-white/55">Quer rodar um comando</p>
+          <p className="mt-0.5 text-[12px] text-white/55">{l("Quer rodar um comando", "Wants to run a command")}</p>
           <p className="mt-3 rounded-[10px] bg-white/[0.07] px-3 py-2 font-mono text-[12px] text-white/85">$ npm run test</p>
           <div className="mt-3 flex justify-end gap-2 text-[12px] font-medium">
-            <span className="rounded-full bg-white/10 px-3 py-1">Negar</span>
+            <span className="rounded-full bg-white/10 px-3 py-1">{l("Negar", "Deny")}</span>
             <span
               className={`rounded-full px-3 py-1 text-black transition-[scale,background-color] duration-150 ${index === steps.approve ? "scale-[0.96] bg-white/80" : "bg-white"}`}
             >
-              Permitir ⏎
+              {l("Permitir ⏎", "Allow ⏎")}
             </span>
           </div>
         </div>

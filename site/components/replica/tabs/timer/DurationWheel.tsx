@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
+import { useL } from "@/components/LangProvider";
 import { notch } from "../../style";
 import { minuteRange } from "./session";
 
@@ -23,6 +24,7 @@ export function DurationWheel({
   highlighted: boolean;
   disabled: boolean;
 }) {
+  const l = useL();
   const box = useRef<HTMLDivElement>(null);
   const drag = useRef<{ x: number; start: number } | null>(null);
   const [offset, setOffset] = useState(0);
@@ -98,13 +100,13 @@ export function DurationWheel({
       ref={box}
       role="slider"
       tabIndex={disabled ? -1 : 0}
-      aria-label="Duração"
+      aria-label={l("Duração", "Duration")}
       aria-valuemin={minuteRange.min}
       aria-valuemax={minuteRange.max}
       aria-valuenow={minutes}
-      aria-valuetext={`${minutes} minutos`}
+      aria-valuetext={l(`${minutes} minutos`, `${minutes} minutes`)}
       aria-disabled={disabled}
-      title="Arraste ou role para escolher os minutos"
+      title={l("Arraste ou role para escolher os minutos", "Drag or scroll to choose the minutes")}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={endDrag}

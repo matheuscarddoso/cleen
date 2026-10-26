@@ -1,8 +1,11 @@
 /**
  * The converter's catalog and arithmetic, as CleenKit has them: nine categories, their
- * units in the picker's order, Foundation's factors, and numbers read and written the
- * Brazilian way (comma for decimals, dot for thousands).
+ * units in the picker's order, Foundation's factors, and numbers written in the page's
+ * locale (pt: comma for decimals, dot for thousands; en: the other way round). Reading
+ * accepts both, like ConverterNumber.parse.
  */
+
+import { locale, type Lang } from "@/lib/lang";
 
 export type CategoryId = "length" | "mass" | "temperature" | "volume" | "speed" | "area" | "data" | "time" | "currency";
 
@@ -17,7 +20,17 @@ export type Unit = {
 
 export type Category = { id: CategoryId; title: string; units: Unit[]; pair: { from: string; to: string } };
 
-const u = (id: string, name: string, symbol: string, factor?: number): Unit => ({ id, name, symbol, factor });
+/** A name as the app localizes it: one string when both languages read the same, else [pt, en]. */
+type Text = string | readonly [pt: string, en: string];
+
+type UnitSource = { id: string; name: Text; symbol: Text; factor?: number };
+type CategorySource = { id: CategoryId; title: Text; units: UnitSource[]; pair: Record<Lang, { from: string; to: string }> | { from: string; to: string } };
+
+const u = (id: string, name: Text, symbol: Text, factor?: number): UnitSource => ({ id, name, symbol, factor });
+
+function text(value: Text, lang: Lang): string {
+  return typeof value === "string" ? value : value[lang === "en" ? 1 : 0];
+}
 
 /**
  * One day's reference rates, as Frankfurter publishes them from the ECB: how many of
@@ -36,40 +49,40 @@ const rates: Record<string, number> = {
   MXN: 18.362,
 };
 
-export const categories: Category[] = [
+const sources: CategorySource[] = [
   {
     id: "length",
-    title: "Comprimento",
+    title: ["Comprimento", "Length"],
     pair: { from: "km", to: "mi" },
     units: [
-      u("mm", "Milímetros", "mm", 0.001),
-      u("cm", "Centímetros", "cm", 0.01),
-      u("m", "Metros", "m", 1),
-      u("km", "Quilômetros", "km", 1000),
-      u("in", "Polegadas", "pol", 0.0254),
-      u("ft", "Pés", "pés", 0.3048),
-      u("yd", "Jardas", "jd", 0.9144),
-      u("mi", "Milhas", "mi", 1609.344),
-      u("nmi", "Milhas náuticas", "mn", 1852),
+      u("mm", ["Milímetros", "Millimeters"], "mm", 0.001),
+      u("cm", ["Centímetros", "Centimeters"], "cm", 0.01),
+      u("m", ["Metros", "Meters"], "m", 1),
+      u("km", ["Quilômetros", "Kilometers"], "km", 1000),
+      u("in", ["Polegadas", "Inches"], "pol", 0.0254),
+      u("ft", ["Pés", "Feet"], ["pés", "ft"], 0.3048),
+      u("yd", ["Jardas", "Yards"], "jd", 0.9144),
+      u("mi", ["Milhas", "Miles"], "mi", 1609.344),
+      u("nmi", ["Milhas náuticas", "Nautical miles"], "mn", 1852),
     ],
   },
   {
     id: "mass",
-    title: "Massa",
+    title: ["Massa", "Mass"],
     pair: { from: "kg", to: "lb" },
     units: [
-      u("mg", "Miligramas", "mg", 1e-6),
-      u("g", "Gramas", "g", 0.001),
-      u("kg", "Quilos", "kg", 1),
-      u("t", "Toneladas", "t", 1000),
-      u("oz", "Onças", "oz", 0.028349523125),
-      u("lb", "Libras", "lb", 0.45359237),
+      u("mg", ["Miligramas", "Milligrams"], "mg", 1e-6),
+      u("g", ["Gramas", "Grams"], "g", 0.001),
+      u("kg", ["Quilos", "Kilograms"], "kg", 1),
+      u("t", ["Toneladas", "Tonnes"], "t", 1000),
+      u("oz", ["Onças", "Ounces"], "oz", 0.028349523125),
+      u("lb", ["Libras", "Pounds"], "lb", 0.45359237),
       u("st", "Stones", "st", 6.35029318),
     ],
   },
   {
     id: "temperature",
-    title: "Temperatura",
+    title: ["Temperatura", "Temperature"],
     pair: { from: "c", to: "f" },
     units: [u("c", "Celsius", "°C"), u("f", "Fahrenheit", "°F"), u("k", "Kelvin", "K")],
   },
@@ -78,40 +91,40 @@ export const categories: Category[] = [
     title: "Volume",
     pair: { from: "l", to: "gal" },
     units: [
-      u("ml", "Mililitros", "ml", 0.001),
-      u("l", "Litros", "l", 1),
-      u("m3", "Metros cúbicos", "m³", 1000),
-      u("tsp", "Colheres de chá", "c. chá", 0.00492892159375),
-      u("tbsp", "Colheres de sopa", "c. sopa", 0.01478676478125),
-      u("cup", "Xícaras", "xíc.", 0.24),
-      u("floz", "Onças líquidas", "fl oz", 0.0295735295625),
-      u("gal", "Galões (EUA)", "gal", 3.785411784),
-      u("galuk", "Galões (RU)", "gal RU", 4.54609),
+      u("ml", ["Mililitros", "Milliliters"], "ml", 0.001),
+      u("l", ["Litros", "Liters"], "l", 1),
+      u("m3", ["Metros cúbicos", "Cubic meters"], "m³", 1000),
+      u("tsp", ["Colheres de chá", "Teaspoons"], ["c. chá", "tsp"], 0.00492892159375),
+      u("tbsp", ["Colheres de sopa", "Tablespoons"], ["c. sopa", "tbsp"], 0.01478676478125),
+      u("cup", ["Xícaras", "Cups"], "xíc.", 0.24),
+      u("floz", ["Onças líquidas", "Fluid ounces"], "fl oz", 0.0295735295625),
+      u("gal", ["Galões (EUA)", "Gallons (US)"], "gal", 3.785411784),
+      u("galuk", ["Galões (RU)", "Gallons (UK)"], ["gal RU", "gal UK"], 4.54609),
     ],
   },
   {
     id: "speed",
-    title: "Velocidade",
+    title: ["Velocidade", "Speed"],
     pair: { from: "kmh", to: "mph" },
-    units: [u("mps", "Metros por segundo", "m/s", 1), u("kmh", "Quilômetros por hora", "km/h", 1 / 3.6), u("mph", "Milhas por hora", "mph", 0.44704), u("kn", "Nós", "nós", 1852 / 3600)],
+    units: [u("mps", ["Metros por segundo", "Meters per second"], "m/s", 1), u("kmh", ["Quilômetros por hora", "Kilometers per hour"], "km/h", 1 / 3.6), u("mph", ["Milhas por hora", "Miles per hour"], "mph", 0.44704), u("kn", ["Nós", "Knots"], ["nós", "kn"], 1852 / 3600)],
   },
   {
     id: "area",
-    title: "Área",
+    title: ["Área", "Area"],
     pair: { from: "m2", to: "ft2" },
     units: [
-      u("cm2", "Centímetros quadrados", "cm²", 1e-4),
-      u("m2", "Metros quadrados", "m²", 1),
+      u("cm2", ["Centímetros quadrados", "Square centimeters"], "cm²", 1e-4),
+      u("m2", ["Metros quadrados", "Square meters"], "m²", 1),
       u("ha", "Hectares", "ha", 1e4),
-      u("km2", "Quilômetros quadrados", "km²", 1e6),
-      u("ft2", "Pés quadrados", "pés²", 0.09290304),
+      u("km2", ["Quilômetros quadrados", "Square kilometers"], "km²", 1e6),
+      u("ft2", ["Pés quadrados", "Square feet"], ["pés²", "ft²"], 0.09290304),
       u("ac", "Acres", "ac", 4046.8564224),
-      u("mi2", "Milhas quadradas", "mi²", 2589988.110336),
+      u("mi2", ["Milhas quadradas", "Square miles"], "mi²", 2589988.110336),
     ],
   },
   {
     id: "data",
-    title: "Dados",
+    title: ["Dados", "Data"],
     pair: { from: "GB", to: "MB" },
     units: [
       u("bit", "Bits", "bit", 0.125),
@@ -127,40 +140,61 @@ export const categories: Category[] = [
   },
   {
     id: "time",
-    title: "Tempo",
+    title: ["Duração", "Duration"],
     pair: { from: "h", to: "min" },
     units: [
-      u("ms", "Milissegundos", "ms", 0.001),
-      u("s", "Segundos", "s", 1),
-      u("min", "Minutos", "min", 60),
-      u("h", "Horas", "h", 3600),
-      u("d", "Dias", "d", 86400),
-      u("wk", "Semanas", "sem", 604800),
+      u("ms", ["Milissegundos", "Milliseconds"], "ms", 0.001),
+      u("s", ["Segundos", "Seconds"], "s", 1),
+      u("min", ["Minutos", "Minutes"], "min", 60),
+      u("h", ["Horas", "Hours"], "h", 3600),
+      u("d", ["Dias", "Days"], "d", 86400),
+      u("wk", ["Semanas", "Weeks"], "sem", 604800),
       // The Gregorian average year, 365,2425 days, like the app.
-      u("yr", "Anos", "anos", 31556952),
+      u("yr", ["Anos", "Years"], "anos", 31556952),
     ],
   },
   {
     id: "currency",
-    title: "Moeda",
-    pair: { from: "BRL", to: "USD" },
+    title: ["Moeda", "Currency"],
+    // The app opens on BRL → USD; an English visitor more likely converts dollars.
+    pair: { pt: { from: "BRL", to: "USD" }, en: { from: "USD", to: "EUR" } },
     units: [
-      u("BRL", "Real brasileiro", "BRL"),
-      u("USD", "Dólar americano", "USD"),
+      u("BRL", ["Real brasileiro", "Brazilian Real"], "BRL"),
+      u("USD", ["Dólar americano", "US Dollar"], "USD"),
       u("EUR", "Euro", "EUR"),
-      u("GBP", "Libra esterlina", "GBP"),
-      u("JPY", "Iene japonês", "JPY"),
-      u("CAD", "Dólar canadense", "CAD"),
-      u("AUD", "Dólar australiano", "AUD"),
-      u("CHF", "Franco suíço", "CHF"),
-      u("CNY", "Yuan chinês", "CNY"),
-      u("MXN", "Peso mexicano", "MXN"),
+      u("GBP", ["Libra esterlina", "British Pound"], "GBP"),
+      u("JPY", ["Iene japonês", "Japanese Yen"], "JPY"),
+      u("CAD", ["Dólar canadense", "Canadian Dollar"], "CAD"),
+      u("AUD", ["Dólar australiano", "Australian Dollar"], "AUD"),
+      u("CHF", ["Franco suíço", "Swiss Franc"], "CHF"),
+      u("CNY", ["Yuan chinês", "Chinese Yuan"], "CNY"),
+      u("MXN", ["Peso mexicano", "Mexican Peso"], "MXN"),
     ],
   },
 ];
 
-export function category(id: CategoryId): Category {
-  return categories.find((entry) => entry.id === id) ?? categories[0]!;
+function build(lang: Lang): Category[] {
+  return sources.map(({ id, title, units, pair }) => ({
+    id,
+    title: text(title, lang),
+    pair: "from" in pair ? pair : pair[lang],
+    units: units.map((unit) => ({ id: unit.id, name: text(unit.name, lang), symbol: text(unit.symbol, lang), factor: unit.factor })),
+  }));
+}
+
+const built: Record<Lang, Category[]> = { pt: build("pt"), en: build("en") };
+
+/** The nine categories with their names in `lang`. */
+export function categoriesFor(lang: Lang): Category[] {
+  return built[lang];
+}
+
+/** The Portuguese catalog, as before the English page. */
+export const categories: Category[] = built.pt;
+
+export function category(id: CategoryId, lang: Lang = "pt"): Category {
+  const list = built[lang];
+  return list.find((entry) => entry.id === id) ?? list[0]!;
 }
 
 function toCelsius(value: number, id: string): number {
@@ -231,18 +265,20 @@ export function parseNumber(text: string): number | null {
 }
 
 /**
- * A result as people read it: "1,6093", "12.345,7", "0,0006214" (ConverterNumber.format).
- * Around six significant digits, never trailing zeros; money always shows cents.
+ * A result as people read it: "1,6093", "12.345,7", "0,0006214" (ConverterNumber.format),
+ * or "1.6093", "12,345.7" in English. Around six significant digits, never trailing zeros;
+ * money always shows cents.
  */
-export function formatNumber(value: number, isCurrency = false): string {
+export function formatNumber(value: number, isCurrency = false, lang: Lang = "pt"): string {
+  const tag = locale[lang];
   if (!Number.isFinite(value)) return "—";
   if (value === 0) return "0";
   const magnitude = Math.abs(value);
-  if (magnitude >= 1e15 || magnitude < 1e-9) return new Intl.NumberFormat("pt-BR", { notation: "scientific", maximumSignificantDigits: 4 }).format(value);
-  if (isCurrency && magnitude >= 0.01) return new Intl.NumberFormat("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
+  if (magnitude >= 1e15 || magnitude < 1e-9) return new Intl.NumberFormat(tag, { notation: "scientific", maximumSignificantDigits: 4 }).format(value);
+  if (isCurrency && magnitude >= 0.01) return new Intl.NumberFormat(tag, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
   if (magnitude >= 1) {
     const integerDigits = Math.floor(Math.log10(magnitude)) + 1;
-    return new Intl.NumberFormat("pt-BR", { maximumFractionDigits: Math.max(0, Math.min(4, 6 - integerDigits)) }).format(value);
+    return new Intl.NumberFormat(tag, { maximumFractionDigits: Math.max(0, Math.min(4, 6 - integerDigits)) }).format(value);
   }
-  return new Intl.NumberFormat("pt-BR", { maximumSignificantDigits: 4 }).format(value);
+  return new Intl.NumberFormat(tag, { maximumSignificantDigits: 4 }).format(value);
 }

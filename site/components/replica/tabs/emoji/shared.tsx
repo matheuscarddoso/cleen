@@ -2,6 +2,7 @@
 
 import { Search } from "lucide-react";
 import { useCallback, useEffect, useRef, useState, type ReactNode, type RefObject } from "react";
+import { useL } from "@/components/LangProvider";
 import { useDemo } from "../../DemoContext";
 import { notch } from "../../style";
 
@@ -79,6 +80,7 @@ export function SearchField({
   onChange: (value: string) => void;
   onSubmit: () => void;
 }) {
+  const l = useL();
   return (
     <label
       className="relative flex h-[26px] w-[200px] shrink-0 items-center gap-1.5 rounded-[7px] px-[9px]"
@@ -111,7 +113,7 @@ export function SearchField({
         )}
       </span>
       {value.length > 0 && (
-        <button type="button" onClick={() => onChange("")} aria-label="Limpar busca" title="Limpar busca" className="flex shrink-0 items-center">
+        <button type="button" onClick={() => onChange("")} aria-label={l("Limpar busca", "Clear Search")} title={l("Limpar busca", "Clear Search")} className="flex shrink-0 items-center">
           <ClearGlyph />
         </button>
       )}

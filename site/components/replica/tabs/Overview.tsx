@@ -2,6 +2,8 @@
 
 import { ChevronRight, CircleCheck, CodeXml, File, FileText, Hammer, Package, Puzzle, Trash2, type LucideIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { useL } from "@/components/LangProvider";
+import { pick, type Lang } from "@/lib/lang";
 import { useDemo, useSteps } from "../DemoContext";
 import { useReplica } from "../ReplicaContext";
 import { reviewTitle, type Review, type ReviewItem } from "../review";
@@ -25,16 +27,17 @@ function scripted(step: number): Disk {
 }
 
 /** What "Limpar" lists before it deletes: Lixo's safe caches and the idle projects' folders. */
-function reviewItems(data: Disk["data"]): ReviewItem[] {
+function reviewItems(data: Disk["data"], lang: Lang): ReviewItem[] {
+  const l = pick(lang);
   const items: ReviewItem[] = [];
   if (data.junkSafe > 0) {
     const xcode = Math.round(data.junkSafe * 0.59);
     const apps = Math.round(data.junkSafe * 0.343);
-    items.push({ name: "Caches do Xcode", detail: "DerivedData, que o Xcode recria", size: xcode, icon: Hammer });
-    items.push({ name: "Caches de apps", detail: "~/Library/Caches", size: apps, icon: Package });
-    items.push({ name: "Logs antigos", detail: "Mais de 30 dias", size: data.junkSafe - xcode - apps, icon: FileText });
+    items.push({ name: l("Caches do Xcode", "Xcode caches"), detail: l("DerivedData, que o Xcode recria", "DerivedData, which Xcode rebuilds"), size: xcode, icon: Hammer });
+    items.push({ name: l("Caches de apps", "App caches"), detail: "~/Library/Caches", size: apps, icon: Package });
+    items.push({ name: l("Logs antigos", "Old logs"), detail: l("Mais de 30 dias", "Older than 30 days"), size: data.junkSafe - xcode - apps, icon: FileText });
   }
-  if (data.projectsSafe > 0) items.push({ name: "node_modules", detail: "~/Projetos/site-antigo", size: data.projectsSafe, icon: CodeXml });
+  if (data.projectsSafe > 0) items.push({ name: "node_modules", detail: l("~/Projetos/site-antigo", "~/Projects/old-site"), size: data.projectsSafe, icon: CodeXml });
   return items;
 }
 
@@ -44,6 +47,8 @@ function reviewItems(data: Disk["data"]): ReviewItem[] {
  * shows the review of what goes, cleans, and the free space counts up; every button works.
  */
 export function OverviewTab() {
+  const l = useL();
+  const { lang } = l;
   const { reduced } = useDemo();
   const [step] = useSteps(script, 5);
   const { review, setReview } = useReplica();
@@ -60,15 +65,15 @@ export function OverviewTab() {
   useEffect(() => {
     if (manual === null && step === steps.review) {
       if (scriptedReview.current) return;
-      const items = reviewItems(findings);
-      const shown: Review = { title: reviewTitle(items.length, "delete"), outcome: "delete", items, onConfirm: () => {} };
+      const items = reviewItems(findings, lang);
+      const shown: Review = { title: reviewTitle(items.length, "delete", lang), outcome: "delete", items, onConfirm: () => {} };
       scriptedReview.current = shown;
       setReview(shown);
     } else if (scriptedReview.current) {
       if (review === scriptedReview.current) setReview(null);
       scriptedReview.current = null;
     }
-  }, [manual, review, setReview, step]);
+  }, [lang, manual, review, setReview, step]);
 
   const later = (ms: number, update: (current: Disk) => Disk) => {
     timers.current.push(window.setTimeout(() => setManual((current) => (current ? update(current) : current)), ms));
@@ -89,9 +94,9 @@ export function OverviewTab() {
     clearTimers();
     const from = { ...disk, armed: false, pressed: false };
     setManual(from);
-    const items = reviewItems(from.data);
+    const items = reviewItems(from.data, lang);
     setReview({
-      title: reviewTitle(items.length, "delete"),
+      title: reviewTitle(items.length, "delete", lang),
       outcome: "delete",
       items,
       onConfirm: () => {
@@ -104,15 +109,18 @@ export function OverviewTab() {
   const free = useCountUp(data.free, !reduced);
   const used = usedFraction(data);
   const busy = disk.phase === "scanning" || disk.phase === "cleaning";
-  const value = (index: number, size: number) => (disk.phase === "scanning" ? (disk.found > index ? bytes(size) : "…") : disk.scanned ? bytes(size) : "—");
+  const value = (index: number, size: number) => (disk.phase === "scanning" ? (disk.found > index ? bytes(size, lang) : "…") : disk.scanned ? bytes(size, lang) : "—");
 
   return (
     <div className="flex h-full items-start gap-[18px] pt-1">
       <div className="flex w-[240px] shrink-0 flex-col gap-1.5 pl-1">
-        <span className="text-[12px] font-medium leading-[14px]" style={{ color: notch.secondary }}>Disco</span>
-        <span className="text-[34px] font-light leading-[41px] tabular-nums" aria-label={`${bytes(data.free)} livres`}>{bytes(free)}</span>
+        <span className="text-[12px] font-medium leading-[14px]" style={{ color: notch.secondary }}>{l("Disco", "Disk")}</span>
+        <span className="text-[34px] font-light leading-[41px] tabular-nums" aria-label={l(`${bytes(data.free, lang)} livres`, `${bytes(data.free, lang)} free`)}>{bytes(free, lang)}</span>
         <span className="text-[11px] leading-[13px] tabular-nums" style={{ color: notch.secondary }}>
-          livres de {bytes(data.total)} · {formatPercent(used)} em uso
+          {l(
+            `livres de ${bytes(data.total, lang)} · ${formatPercent(used, lang)} em uso`,
+            `free of ${bytes(data.total, lang)} · ${formatPercent(used, lang)} in use`,
+          )}
         </span>
         <div className="py-1">
           <div className="relative h-[3.5px] overflow-hidden rounded-full" style={{ background: notch.track }}>
@@ -126,22 +134,22 @@ export function OverviewTab() {
           {busy ? (
             <span role="status" className="flex items-center gap-2 text-[11px]" style={{ color: notch.secondary }}>
               <Spinner />
-              {disk.phase === "scanning" ? "Analisando…" : "Limpando…"}
+              {disk.phase === "scanning" ? l("Analisando…", "Scanning…") : l("Limpando…", "Cleaning…")}
             </span>
           ) : disk.scanned && cleanSize(data) > 0 ? (
             <Pill kind="primary" pressed={disk.pressed} onClick={clean}>
-              {`Limpar ${bytes(cleanSize(data))}`}
+              {l(`Limpar ${bytes(cleanSize(data), lang)}`, `Clean ${bytes(cleanSize(data), lang)}`)}
             </Pill>
           ) : (
             <Pill kind="primary" pressed={disk.pressed} onClick={scan}>
-              {disk.scanned ? "Analisar de novo" : "Analisar o Mac"}
+              {disk.scanned ? l("Analisar de novo", "Scan Again") : l("Analisar o Mac", "Scan the Mac")}
             </Pill>
           )}
         </div>
         {disk.report !== null && !busy && (
           <p className="flex animate-[numeric_300ms_ease-out] items-center gap-1.5 text-[12px] font-medium leading-[14px] tabular-nums">
             <CircleCheck size={13} strokeWidth={2.4} style={{ color: notch.good }} aria-hidden />
-            {bytes(disk.report)} liberados
+            {l(`${bytes(disk.report, lang)} liberados`, `${bytes(disk.report, lang)} freed`)}
           </p>
         )}
       </div>
@@ -150,14 +158,14 @@ export function OverviewTab() {
         className="min-w-0 flex-1 overflow-hidden rounded-[12px]"
         style={{ background: notch.card, boxShadow: `inset 0 0 0 1px ${notch.cardStroke}` }}
       >
-        <MeterRow icon={Trash2} label="Lixo" value={value(0, data.junk)} />
+        <MeterRow icon={Trash2} label={l("Lixo", "Trash")} value={value(0, data.junk)} />
         <Hairline />
-        <MeterRow icon={CodeXml} label="Projetos parados" value={value(2, data.projects)} />
+        <MeterRow icon={CodeXml} label={l("Projetos parados", "Idle projects")} value={value(2, data.projects)} />
         <Hairline />
-        <MeterRow icon={Puzzle} label="Restos de apps" value={value(1, data.orphans)} />
+        <MeterRow icon={Puzzle} label={l("Restos de apps", "App Leftovers")} value={value(1, data.orphans)} />
         <Hairline />
         {/* Not part of the smart scan: it stays a dash until its own tab looks. */}
-        <MeterRow icon={File} label="Arquivos grandes" value="—" />
+        <MeterRow icon={File} label={l("Arquivos grandes", "Large Files")} value="—" />
       </div>
     </div>
   );

@@ -2,10 +2,12 @@
 
 import { Car, Clock, Flag, Heart, Lightbulb, PawPrint, Smile, Utensils, Volleyball, type LucideIcon } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useL } from "@/components/LangProvider";
+import type { Lang } from "@/lib/lang";
 import { useDemo, useTypewriter } from "../DemoContext";
 import { HeaderButton } from "../Panel";
 import { notch } from "../style";
-import { categoryTitles, emojiItem, searchEmoji, sections, type EmojiCategory, type EmojiItem } from "./emoji/data";
+import { categoryTitlesFor, emojiItem, searchEmoji, sectionsFor, type EmojiCategory, type EmojiItem } from "./emoji/data";
 import { ConfirmationPill, FadeScroll, SearchField, copyText, useBeats, useConfirmation } from "./emoji/shared";
 
 type Jump = "recents" | EmojiCategory;
@@ -23,17 +25,24 @@ const jumpIcons: Record<Jump, LucideIcon> = {
 };
 
 /** The full grid first, then three searches; each walks the matches and picks one. */
-const queries = ["", "coração", "fogo", "festa"] as const;
+const queries: Record<Lang, readonly string[]> = { pt: ["", "coração", "fogo", "festa"], en: ["", "heart", "fire", "party"] };
 
-/** Where the pointer goes in each search's results; the last stop is the pick. */
-const paths: readonly (readonly number[])[] = [[], [0, 1, 2, 0], [1, 2, 1, 0], [0, 1, 2, 3]];
+/**
+ * Where the pointer goes in each search's results; the last stop is the pick. English
+ * ranks differently ("Heart hands" leads "heart"), so its walks land on the same kind of
+ * pick: the red heart, the fire, the party popper.
+ */
+const paths: Record<Lang, readonly (readonly number[])[]> = {
+  pt: [[], [0, 1, 2, 0], [1, 2, 1, 0], [0, 1, 2, 3]],
+  en: [[], [0, 1, 2, 3], [1, 2, 1, 0], [0, 2, 0, 1]],
+};
 
 /** After the word: a beat to read, three hovers, the press, then the pill. */
 const beats = [450, 520, 520, 520, 160, 1500] as const;
 const hold = beats.reduce((sum, beat) => sum + beat, 0) + 160;
 
 /** What the previous round left in Recentes. */
-const scriptedRecents = ["🎊", "🔥", "❤️", "👍"];
+const scriptedRecents: Record<Lang, string[]> = { pt: ["🎊", "🔥", "❤️", "👍"], en: ["🎉", "🔥", "❤️", "👍"] };
 
 /**
  * Emoji, as NotchEmojiTab lays it out: the outlined search and the category jumps on
@@ -43,7 +52,9 @@ const scriptedRecents = ["🎊", "🔥", "❤️", "👍"];
  */
 export function EmojiTab() {
   const { reduced } = useDemo();
-  const typing = useTypewriter(queries, { speed: 120, hold });
+  const l = useL();
+  const lang = l.lang;
+  const typing = useTypewriter(queries[lang], { speed: 120, hold });
   const [manual, setManual] = useState<{ query: string; recents: string[] } | null>(null);
   const [picked, showPicked] = useConfirmation<string>(1200);
   const [jump, setJump] = useState<{ to: Jump; stamp: number } | null>(null);
@@ -51,13 +62,15 @@ export function EmojiTab() {
 
   const scriptedIndex = reduced ? 1 : typing.index;
   const beat = useBeats(!manual && !reduced && typing.finished ? String(typing.index) : null, beats);
-  const query = manual ? manual.query : reduced ? queries[1] : typing.text;
-  const results = useMemo(() => searchEmoji(query), [query]);
+  const query = manual ? manual.query : reduced ? (queries[lang][1] ?? "") : typing.text;
+  const results = useMemo(() => searchEmoji(query, lang), [query, lang]);
   const searching = query.trim().length > 0;
-  const path = paths[scriptedIndex] ?? [];
+  const path = paths[lang][scriptedIndex] ?? [];
   const highlighted = manual ? -1 : reduced ? 0 : beat >= 1 && beat <= 5 ? (path[Math.min(beat, 4) - 1] ?? -1) : -1;
   const scriptedPick = !manual && beat === 5 ? results[highlighted] : undefined;
-  const recents = manual ? manual.recents : scriptedRecents;
+  const recents = manual ? manual.recents : scriptedRecents[lang];
+  const sections = sectionsFor(lang);
+  const categoryTitles = categoryTitlesFor(lang);
 
   const take = () => manual ?? { query, recents };
   const use = (entry: EmojiItem) => {
@@ -82,7 +95,7 @@ export function EmojiTab() {
       <div className="flex h-[26px] shrink-0 items-center gap-2">
         <SearchField
           value={query}
-          placeholder="Buscar emoji"
+          placeholder={l("Buscar emoji", "Search emoji")}
           caret={!manual && !reduced}
           onChange={(value) => setManual({ ...take(), query: value })}
           onSubmit={() => {
@@ -96,7 +109,7 @@ export function EmojiTab() {
             <HeaderButton
               key={target}
               icon={jumpIcons[target]}
-              label={target === "recents" ? "Recentes" : categoryTitles[target]}
+              label={target === "recents" ? l("Recentes", "Recents") : categoryTitles[target]}
               onClick={() => {
                 setManual({ ...take(), query: "" });
                 setJump({ to: target, stamp: Date.now() });
@@ -108,7 +121,7 @@ export function EmojiTab() {
       {searching && results.length === 0 ? (
         <div className="flex flex-1 flex-col items-center justify-center gap-[5px]">
           <Smile size={18} strokeWidth={1.8} style={{ color: notch.tertiary }} aria-hidden />
-          <p className="text-[11.5px]" style={{ color: notch.secondary }}>Nenhum emoji encontrado</p>
+          <p className="text-[11.5px]" style={{ color: notch.secondary }}>{l("Nenhum emoji encontrado", "No emoji found")}</p>
         </div>
       ) : (
         <FadeScroll key={searching ? "results" : "all"} scrollRef={scroller}>
@@ -118,7 +131,7 @@ export function EmojiTab() {
             ) : (
               <>
                 {recents.length > 0 && (
-                  <Section id="recents" title="Recentes" items={recents.map((emoji) => emojiItem(emoji) ?? { emoji, name: emoji, category: "symbols", terms: [], nameWords: 0 })} onUse={use} />
+                  <Section id="recents" title={l("Recentes", "Recents")} items={recents.map((emoji) => emojiItem(emoji, lang) ?? { emoji, name: emoji, category: "symbols", terms: [], nameWords: 0 })} onUse={use} />
                 )}
                 {sections.map((section) => (
                   <Section key={section.category} id={section.category} title={categoryTitles[section.category]} items={section.items} onUse={use} />
@@ -130,7 +143,7 @@ export function EmojiTab() {
       )}
       <ConfirmationPill shown={pill !== null} live={manual !== null}>
         <span className="text-[14px] leading-none">{pill}</span>
-        Copiado
+        {l("Copiado", "Copied")}
       </ConfirmationPill>
     </div>
   );

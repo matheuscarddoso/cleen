@@ -4,6 +4,7 @@
  * build that pins the CPU and presses memory (bars go orange, then red), and the cool
  * down. Noise comes from a seeded generator so every run reads the same.
  */
+import type { Lang } from "@/lib/lang";
 import { random } from "../stocks/market";
 
 const gib = 1024 ** 3;
@@ -81,10 +82,12 @@ function clamp(value: number, low: number, high: number): number {
   return Math.min(Math.max(value, low), high);
 }
 
-// MARK: Formatting, pt-BR like Foundation's byte counts
+// MARK: Formatting, like Foundation's byte counts in each locale
 
-function decimal(value: number, digits: number): string {
-  return value.toFixed(digits).replace(".", ",");
+/** `6,38` in Portuguese, `6.38` in English. */
+function decimal(value: number, digits: number, lang: Lang): string {
+  const text = value.toFixed(digits);
+  return lang === "pt" ? text.replace(".", ",") : text;
 }
 
 /** `60%` */
@@ -92,19 +95,19 @@ export function percent(fraction: number): string {
   return `${Math.round(fraction * 100)}%`;
 }
 
-/** `6,38 GB` in binary units (the memory style). */
-export function memoryBytes(bytes: number): string {
-  return `${decimal(bytes / gib, 2)} GB`;
+/** `6,38 GB` (`6.38 GB` in English) in binary units (the memory style). */
+export function memoryBytes(bytes: number, lang: Lang = "pt"): string {
+  return `${decimal(bytes / gib, 2, lang)} GB`;
 }
 
-/** `51,78 GB`, `185 kB`, `12,4 MB`: decimal units, the file style. */
-export function bytes(value: number): string {
-  if (value >= 1e9) return `${decimal(value / 1e9, 2)} GB`;
-  if (value >= 999_500) return `${decimal(value / 1e6, 1)} MB`;
-  if (value >= 1e3) return `${Math.round(value / 1e3)} kB`;
+/** `51,78 GB`, `185 kB`, `12,4 MB`: decimal units, the file style. English reads `51.78 GB`, `185 KB`. */
+export function bytes(value: number, lang: Lang = "pt"): string {
+  if (value >= 1e9) return `${decimal(value / 1e9, 2, lang)} GB`;
+  if (value >= 999_500) return `${decimal(value / 1e6, 1, lang)} MB`;
+  if (value >= 1e3) return `${Math.round(value / 1e3)} ${lang === "pt" ? "kB" : "KB"}`;
   return `${Math.round(value)} bytes`;
 }
 
-export function rate(perSecond: number): string {
-  return `${bytes(perSecond)}/s`;
+export function rate(perSecond: number, lang: Lang = "pt"): string {
+  return `${bytes(perSecond, lang)}/s`;
 }

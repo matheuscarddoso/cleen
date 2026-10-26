@@ -1,22 +1,24 @@
 import Image from "next/image";
 import { DownloadButton } from "./Buttons";
+import { pick, type Lang } from "@/lib/lang";
 import { site } from "@/lib/site";
 
 /** Apple's two-tier header: a thin global bar, then the product's own sticky bar. */
-export function Navigation() {
+export function Navigation({ lang }: { lang: Lang }) {
+  const l = pick(lang);
   const global = [
-    { href: "#busca", label: "Busca" },
-    { href: "#limpeza", label: "Limpeza" },
+    { href: "#busca", label: l("Busca", "Search") },
+    { href: "#limpeza", label: l("Limpeza", "Cleanup") },
     { href: "#claude", label: "Claude Code" },
-    { href: "#ferramentas", label: "Ferramentas" },
+    { href: "#ferramentas", label: l("Ferramentas", "Tools") },
     { href: site.repo, label: "GitHub" },
   ];
   const local = [
-    { href: "#topo", label: "Visão geral" },
-    { href: "#recursos", label: "Recursos" },
-    { href: "#ferramentas", label: "Ferramentas" },
-    { href: "#instalar", label: "Instalar" },
-    { href: "#perguntas", label: "Perguntas" },
+    { href: "#topo", label: l("Visão geral", "Overview") },
+    { href: "#recursos", label: l("Recursos", "Features") },
+    { href: "#ferramentas", label: l("Ferramentas", "Tools") },
+    { href: "#instalar", label: l("Instalar", "Install") },
+    { href: "#perguntas", label: l("Perguntas", "Questions") },
   ];
   return (
     <>
@@ -30,7 +32,7 @@ export function Navigation() {
               {link.label}
             </a>
           ))}
-          <a href={site.download} aria-label="Baixar o Cleen" className="transition-colors hover:text-ink">
+          <a href={site.download} aria-label={l("Baixar o Cleen", "Download Cleen")} className="transition-colors hover:text-ink">
             <svg viewBox="0 0 16 16" className="h-[14px] w-[14px]" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
               <path d="M8 2v8m0 0-3-3m3 3 3-3M3 13.5h10" />
             </svg>
@@ -50,7 +52,7 @@ export function Navigation() {
                 </a>
               ))}
             </div>
-            <DownloadButton size="sm" />
+            <DownloadButton lang={lang} size="sm" />
           </div>
         </nav>
       </header>

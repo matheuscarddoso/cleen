@@ -2,11 +2,12 @@
 
 import { Search, SquareArrowOutUpRight } from "lucide-react";
 import { useMemo, useRef, useState } from "react";
+import { useL } from "@/components/LangProvider";
 import { useDemo, useTypewriter } from "../DemoContext";
 import { notch } from "../style";
 import { ConfirmationPill, FadeScroll, SearchField, copyText, useBeats, useConfirmation } from "./emoji/shared";
 import { catalog, componentName, searchIcons, type IconEntry } from "./icons/catalog";
-import { ContextMenu, IconCell, copiedLabel, type CopyKind } from "./icons/parts";
+import { ContextMenu, IconCell, copiedLabels, type CopyKind } from "./icons/parts";
 
 /** One moment of the script after a word is typed. */
 type Frame = { hover?: number; menu?: boolean; item?: number; pressed?: boolean; copied?: CopyKind };
@@ -63,6 +64,7 @@ function svgMarkup(root: HTMLElement | null, name: string): string | null {
  */
 export function IconsTab() {
   const { reduced } = useDemo();
+  const l = useL();
   const typing = useTypewriter(queries, { speed: 120, hold });
   const [manual, setManual] = useState<{ query: string; recents: string[] } | null>(null);
   const [menu, setMenu] = useState<{ entry: IconEntry; x: number; y: number } | null>(null);
@@ -97,7 +99,14 @@ export function IconsTab() {
   };
 
   const count = searching ? results.length : catalog.length;
-  const countLabel = searching ? (count === 1 ? "1 resultado" : `${count.toLocaleString("pt-BR")} resultados`) : count === 1 ? "1 ícone" : `${count.toLocaleString("pt-BR")} ícones`;
+  const shownCount = count.toLocaleString(l.locale);
+  const countLabel = searching
+    ? count === 1
+      ? l("1 resultado", "1 result")
+      : l(`${shownCount} resultados`, `${shownCount} results`)
+    : count === 1
+      ? l("1 ícone", "1 icon")
+      : l(`${shownCount} ícones`, `${shownCount} icons`);
   const cell = (entry: IconEntry, position: number, inResults: boolean, prefix: string) => (
     <IconCell
       key={`${prefix}-${entry.name}`}
@@ -115,7 +124,7 @@ export function IconsTab() {
       <div className="flex h-[26px] shrink-0 items-center gap-2">
         <SearchField
           value={query}
-          placeholder="Buscar ícone"
+          placeholder={l("Buscar ícone", "Search icons")}
           caret={!manual && !reduced}
           onChange={(value) => setManual({ ...take(), query: value })}
           onSubmit={() => {
@@ -131,8 +140,8 @@ export function IconsTab() {
           href="https://lucide.dev/icons/"
           target="_blank"
           rel="noopener noreferrer"
-          aria-label="Abrir lucide.dev"
-          title="Abrir lucide.dev"
+          aria-label={l("Abrir lucide.dev", "Open lucide.dev")}
+          title={l("Abrir lucide.dev", "Open lucide.dev")}
           className="flex h-6 w-[26px] items-center justify-center rounded-[7px] transition-colors duration-150 hover:bg-white/10 hover:text-white text-white/55"
         >
           <SquareArrowOutUpRight size={13} strokeWidth={2.1} aria-hidden />
@@ -141,7 +150,7 @@ export function IconsTab() {
       {searching && results.length === 0 ? (
         <div className="flex flex-1 flex-col items-center justify-center gap-[5px]">
           <Search size={18} strokeWidth={1.8} style={{ color: notch.tertiary }} aria-hidden />
-          <p className="text-[11.5px]" style={{ color: notch.secondary }}>Nenhum ícone encontrado</p>
+          <p className="text-[11.5px]" style={{ color: notch.secondary }}>{l("Nenhum ícone encontrado", "No icons found")}</p>
         </div>
       ) : (
         <FadeScroll key={searching ? "results" : "all"}>
@@ -150,9 +159,9 @@ export function IconsTab() {
               results.map((entry, position) => cell(entry, position, true, "result"))
             ) : (
               <>
-                {recents.length > 0 && <SectionTitle>Recentes</SectionTitle>}
+                {recents.length > 0 && <SectionTitle>{l("Recentes", "Recents")}</SectionTitle>}
                 {recents.map((entry, position) => cell(entry, position, false, "recent"))}
-                <SectionTitle>Todos</SectionTitle>
+                <SectionTitle>{l("Todos", "All")}</SectionTitle>
                 {catalog.map((entry, position) => cell(entry, position, false, "all"))}
               </>
             )}
@@ -182,7 +191,7 @@ export function IconsTab() {
       )}
       <ConfirmationPill shown={pill !== null} live={manual !== null}>
         {pill && <pill.entry.icon size={15} strokeWidth={2} aria-hidden />}
-        {pill ? copiedLabel[pill.kind] : ""}
+        {pill ? copiedLabels[l.lang][pill.kind] : ""}
       </ConfirmationPill>
     </div>
   );

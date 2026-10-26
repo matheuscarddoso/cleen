@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useL } from "@/components/LangProvider";
 import { useDemo, useSteps } from "../DemoContext";
 import { useReplica } from "../ReplicaContext";
 import { notch, panel } from "../style";
@@ -34,6 +35,7 @@ const displaysBeats = displaysScript.map((beat) => beat.ms);
  * hands everything to the visitor, and the panel size really changes the panel.
  */
 export function SettingsView({ initial }: { initial: "appearance" | "displays" }) {
+  const l = useL();
   const { setSize } = useReplica();
   const { reduced } = useDemo();
   const [step] = useSteps(initial === "appearance" ? appearanceBeats : displaysBeats);
@@ -83,14 +85,15 @@ export function SettingsView({ initial }: { initial: "appearance" | "displays" }
     element.scrollTo({ top, behavior: reduced ? "auto" : "smooth" });
   }, [reduced, scroll]);
 
-  const section = sections[state.section];
+  const sectionsShown = sections(l.lang);
+  const section = sectionsShown[state.section];
 
   return (
     <div className="flex h-full items-stretch tracking-[0.003em]">
-      <nav aria-label="Seções dos ajustes" className="h-full w-[150px] shrink-0">
+      <nav aria-label={l("Seções dos ajustes", "Settings sections")} className="h-full w-[150px] shrink-0">
         <ScrollFade className="h-full">
           <div className="flex flex-col gap-px">
-            {sidebar.map((group) => (
+            {sidebar(l.lang).map((group) => (
               <div key={group.title ?? "top"} className="contents">
                 {group.title && (
                   <p className="px-2 pb-0.5 pt-1.5 text-[9.5px] font-semibold uppercase leading-[11px] tracking-[0.6px]" style={{ color: notch.tertiary }}>
@@ -98,7 +101,7 @@ export function SettingsView({ initial }: { initial: "appearance" | "displays" }
                   </p>
                 )}
                 {group.sections.map((id) => (
-                  <SidebarRow key={id} section={sections[id]} selected={id === state.section} onSelect={() => take({ section: id })} />
+                  <SidebarRow key={id} section={sectionsShown[id]} selected={id === state.section} onSelect={() => take({ section: id })} />
                 ))}
               </div>
             ))}

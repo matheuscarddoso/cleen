@@ -3,6 +3,7 @@
 import { Pause } from "lucide-react";
 import { OpticalPlay } from "../OpticalPlay";
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useL } from "@/components/LangProvider";
 import { useDemo, useSteps } from "../DemoContext";
 import { notch } from "../style";
 import { DurationWheel } from "./timer/DurationWheel";
@@ -56,6 +57,7 @@ const stillSession: TimerSession = { ...newSession(25), status: "paused", remain
  * starts, pauses, adds a minute and runs a Pomodoro; any click hands it to the visitor.
  */
 export function TimerTab() {
+  const l = useL();
   const { playing, reduced } = useDemo();
   const [step] = useSteps(durations);
   const [scripted, setScripted] = useState<TimerSession>(() => newSession(10));
@@ -89,7 +91,7 @@ export function TimerTab() {
   const active = isActive(session);
   const running = session.status === "running";
   const paused = session.status === "paused";
-  const primaryTitle = running ? "Pausar" : paused ? "Continuar" : "Iniciar";
+  const primaryTitle = running ? l("Pausar", "Pause") : paused ? l("Continuar", "Continue") : l("Iniciar", "Start");
   const canReset = active || session.round !== 1 || session.phase !== (session.mode === "pomodoro" ? "focus" : "countdown");
 
   return (
@@ -120,14 +122,14 @@ export function TimerTab() {
         </div>
         <div className="flex h-[26px] items-center">
           {session.mode === "countdown" ? (
-            <div className="flex gap-0.5" role="group" aria-label="Durações">
+            <div className="flex gap-0.5" role="group" aria-label={l("Durações", "Durations")}>
               {presets.map((minutes) => (
                 <Chip
                   key={minutes}
                   selected={session.minutes === minutes}
                   disabled={active}
                   pressed={pressed === "chip" && session.minutes === minutes}
-                  label={`${minutes} minutos`}
+                  label={l(`${minutes} minutos`, `${minutes} minutes`)}
                   onClick={() => act((current) => setMinutes(current, minutes))}
                 >
                   {minutes}
@@ -139,19 +141,19 @@ export function TimerTab() {
           )}
         </div>
         <div className="flex items-center gap-1.5">
-          <Pill kind="primary" pressed={pressed === "primary"} title={`${primaryTitle} (espaço)`} onClick={() => act(toggle)}>
+          <Pill kind="primary" pressed={pressed === "primary"} title={l(`${primaryTitle} (espaço)`, `${primaryTitle} (space)`)} onClick={() => act(toggle)}>
             <span className="flex min-w-[72px] items-center justify-center gap-[7px]">
               {running ? <Pause size={11} fill="currentColor" strokeWidth={0} aria-hidden /> : <OpticalPlay size={11} fill="currentColor" strokeWidth={1} strokeLinejoin="round" aria-hidden />}
               {primaryTitle}
             </span>
           </Pill>
-          <Pill pressed={pressed === "reset"} disabled={!canReset} onClick={() => act(reset)}>Zerar</Pill>
-          <Pill pressed={pressed === "add"} disabled={session.mode === "pomodoro" && !active} title="Mais um minuto" onClick={() => act(addMinute)}>
+          <Pill pressed={pressed === "reset"} disabled={!canReset} onClick={() => act(reset)}>{l("Zerar", "Reset")}</Pill>
+          <Pill pressed={pressed === "add"} disabled={session.mode === "pomodoro" && !active} title={l("Mais um minuto", "One more minute")} onClick={() => act(addMinute)}>
             +1 min
           </Pill>
           {session.mode === "pomodoro" && (
-            <Pill pressed={pressed === "skip"} title={session.phase === "focus" ? "Pular para a pausa" : "Pular a pausa"} onClick={() => act(skip)}>
-              Pular
+            <Pill pressed={pressed === "skip"} title={session.phase === "focus" ? l("Pular para a pausa", "Skip to the Break") : l("Pular a pausa", "Skip the Break")} onClick={() => act(skip)}>
+              {l("Pular", "Skip")}
             </Pill>
           )}
         </div>
@@ -162,11 +164,12 @@ export function TimerTab() {
 
 /** The ring with the phase glyph (play/pause on hover), and the countdown beside it. */
 function ClockFace({ session, still, onToggle }: { session: TimerSession; still: boolean; onToggle: () => void }) {
+  const l = useL();
   const [hovered, setHovered] = useState(false);
   const running = session.status === "running";
   const paused = session.status === "paused";
   const tint = phaseTint(session.phase);
-  const status = running ? `termina às ${endText(session)}` : paused ? "pausado" : "pronto para começar";
+  const status = running ? l(`termina às ${endText(session)}`, `ends at ${endText(session, "en")}`) : paused ? l("pausado", "paused") : l("pronto para começar", "ready to start");
   const clock = clockText(session.remaining);
   return (
     <div className="flex shrink-0 items-center gap-[18px]">
@@ -175,7 +178,7 @@ function ClockFace({ session, still, onToggle }: { session: TimerSession; still:
         onClick={onToggle}
         onPointerEnter={() => setHovered(true)}
         onPointerLeave={() => setHovered(false)}
-        aria-label={running ? "Pausar" : "Iniciar"}
+        aria-label={running ? l("Pausar", "Pause") : l("Iniciar", "Start")}
         className="rounded-full"
       >
         <TimerRing remaining={remainingFraction(session)} size={100} lineWidth={5} color={tint} running={running} still={still}>
@@ -193,7 +196,7 @@ function ClockFace({ session, still, onToggle }: { session: TimerSession; still:
         </TimerRing>
       </button>
       <div className="flex flex-col gap-0.5 whitespace-nowrap" role="timer" aria-live="off">
-        <span className="text-[11px] font-medium" style={{ color: notch.secondary }}>{phaseDetail(session)}</span>
+        <span className="text-[11px] font-medium" style={{ color: notch.secondary }}>{phaseDetail(session, l.lang)}</span>
         <span
           className="-ml-0.5 text-[44px] font-light leading-[1.05] tracking-[-0.01em] transition-colors duration-300"
           style={{ color: paused ? notch.secondary : notch.primary }}
@@ -211,6 +214,7 @@ function ClockFace({ session, still, onToggle }: { session: TimerSession; still:
 
 /** NotchSegmented: pill segments, white for the chosen one. */
 function Segmented({ value, disabled, pressed, onChange }: { value: TimerSession["mode"]; disabled: boolean; pressed: boolean; onChange: (mode: TimerSession["mode"]) => void }) {
+  const l = useL();
   const options = [
     { value: "countdown", label: "Timer" },
     { value: "pomodoro", label: "Pomodoro" },
@@ -218,8 +222,8 @@ function Segmented({ value, disabled, pressed, onChange }: { value: TimerSession
   return (
     <div
       role="radiogroup"
-      aria-label="Modo"
-      title={disabled ? "Zere o timer para trocar de modo" : "Timer simples ou Pomodoro"}
+      aria-label={l("Modo", "Mode")}
+      title={disabled ? l("Zere o timer para trocar de modo", "Reset the timer to switch modes") : l("Timer simples ou Pomodoro", "Simple timer or Pomodoro")}
       className="flex shrink-0 gap-0.5 rounded-full p-0.5 transition-[opacity,scale] duration-150"
       style={{ background: notch.control, opacity: disabled ? 0.4 : 1, scale: pressed ? 0.97 : 1 }}
     >
@@ -268,10 +272,11 @@ function Chip({ selected, disabled, pressed, label, onClick, children }: { selec
 
 /** Pomodoro's rhythm with the phase under way lifted, and the cycle's rounds. */
 function PomodoroPlan({ session }: { session: TimerSession }) {
+  const l = useL();
   const steps = [
-    { title: "Foco", minutes: plan.focus, current: session.phase === "focus" },
-    { title: "Pausa", minutes: plan.shortBreak, current: session.phase === "shortBreak" },
-    { title: "Longa", minutes: plan.longBreak, current: session.phase === "longBreak" },
+    { title: l("Foco", "Focus"), minutes: plan.focus, current: session.phase === "focus" },
+    { title: l("Pausa", "Break"), minutes: plan.shortBreak, current: session.phase === "shortBreak" },
+    { title: l("Longa", "Long"), minutes: plan.longBreak, current: session.phase === "longBreak" },
   ];
   const progress = session.phase === "focus" ? 1 - remainingFraction(session) : 1;
   return (
@@ -286,7 +291,7 @@ function PomodoroPlan({ session }: { session: TimerSession }) {
           <span className="tabular-nums" style={{ color: step.current ? notch.secondary : notch.tertiary }}>{step.minutes}</span>
         </span>
       ))}
-      <span className="flex gap-[3px] pl-2.5" role="img" aria-label={`Rodada ${session.round} de ${plan.rounds}`}>
+      <span className="flex gap-[3px] pl-2.5" role="img" aria-label={l(`Rodada ${session.round} de ${plan.rounds}`, `Round ${session.round} of ${plan.rounds}`)}>
         {Array.from({ length: plan.rounds }, (_, index) => {
           const round = index + 1;
           const fill = round < session.round ? 1 : round === session.round ? Math.max(0, Math.min(1, progress)) : 0;

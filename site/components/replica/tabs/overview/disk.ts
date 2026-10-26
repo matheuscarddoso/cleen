@@ -1,4 +1,6 @@
 /** What the overview knows about the Mac: the disk, and what each scan found. */
+
+import { locale, type Lang } from "@/lib/lang";
 export type Findings = {
   free: number;
   total: number;
@@ -58,10 +60,13 @@ export function cleanSize(data: Findings) {
   return data.junkSafe + data.projectsSafe;
 }
 
-const formats = [0, 1, 2].map((digits) => new Intl.NumberFormat("pt-BR", { maximumFractionDigits: digits }));
+const formats = {
+  pt: [0, 1, 2].map((digits) => new Intl.NumberFormat(locale.pt, { maximumFractionDigits: digits })),
+  en: [0, 1, 2].map((digits) => new Intl.NumberFormat(locale.en, { maximumFractionDigits: digits })),
+} satisfies Record<Lang, Intl.NumberFormat[]>;
 
-/** `.byteCount(style: .file)` in Portuguese: decimal units, 0 digits for kB, 1 for MB, 2 above. */
-export function bytes(value: number): string {
+/** `.byteCount(style: .file)`: decimal units, 0 digits for kB, 1 for MB, 2 above; "1,28 GB", "1.28 GB". */
+export function bytes(value: number, lang: Lang = "pt"): string {
   const units = ["kB", "MB", "GB", "TB"] as const;
   if (value < 1000) return `${Math.round(value)} bytes`;
   let amount = value / 1000;
@@ -70,15 +75,18 @@ export function bytes(value: number): string {
     amount /= 1000;
     unit += 1;
   }
-  return `${formats[Math.min(unit, 2)]!.format(amount)} ${units[unit]}`;
+  return `${formats[lang][Math.min(unit, 2)]!.format(amount)} ${units[unit]}`;
 }
 
-const percent = new Intl.NumberFormat("pt-BR", { style: "percent", maximumFractionDigits: 0 });
+const percent = {
+  pt: new Intl.NumberFormat(locale.pt, { style: "percent", maximumFractionDigits: 0 }),
+  en: new Intl.NumberFormat(locale.en, { style: "percent", maximumFractionDigits: 0 }),
+} satisfies Record<Lang, Intl.NumberFormat>;
 
 export function usedFraction(data: Findings) {
   return (data.total - data.free) / data.total;
 }
 
-export function formatPercent(fraction: number) {
-  return percent.format(fraction);
+export function formatPercent(fraction: number, lang: Lang = "pt") {
+  return percent[lang].format(fraction);
 }

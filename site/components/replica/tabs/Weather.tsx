@@ -2,6 +2,8 @@
 
 import { MapPin, Search, X } from "lucide-react";
 import { useState } from "react";
+import { useL } from "@/components/LangProvider";
+import type { Lang } from "@/lib/lang";
 import { HeaderButton } from "../Panel";
 import { useSteps } from "../DemoContext";
 import { notch } from "../style";
@@ -18,61 +20,120 @@ type Place = {
   week: { day: string; sky: Sky; high: number; low: number; chance?: number }[];
 };
 
-const places: Place[] = [
-  {
-    name: "São Paulo",
-    temperature: 22,
-    sky: "cloud",
-    description: "Nublado",
-    feels: 24,
-    humidity: 79,
-    week: [
-      { day: "Hoje", sky: "cloud", high: 24, low: 17 },
-      { day: "Sex", sky: "rain", high: 21, low: 16, chance: 80 },
-      { day: "Sáb", sky: "storm", high: 23, low: 17, chance: 65 },
-      { day: "Dom", sky: "partly", high: 26, low: 17 },
-      { day: "Seg", sky: "sun", high: 28, low: 18 },
-      { day: "Ter", sky: "sun", high: 29, low: 19 },
-      { day: "Qua", sky: "partly", high: 27, low: 18, chance: 20 },
-    ],
-  },
-  {
-    name: "Lisboa",
-    temperature: 18,
-    sky: "sun",
-    description: "Céu limpo",
-    feels: 17,
-    humidity: 62,
-    week: [
-      { day: "Hoje", sky: "sun", high: 21, low: 13 },
-      { day: "Sex", sky: "sun", high: 22, low: 14 },
-      { day: "Sáb", sky: "partly", high: 20, low: 14 },
-      { day: "Dom", sky: "rain", high: 17, low: 12, chance: 70 },
-      { day: "Seg", sky: "cloud", high: 18, low: 12, chance: 30 },
-      { day: "Ter", sky: "partly", high: 19, low: 12 },
-      { day: "Qua", sky: "sun", high: 21, low: 13 },
-    ],
-  },
-  {
-    name: "Tóquio",
-    temperature: 15,
-    sky: "rain",
-    description: "Chuva fraca",
-    feels: 13,
-    humidity: 88,
-    week: [
-      { day: "Hoje", sky: "rain", high: 16, low: 11, chance: 90 },
-      { day: "Sex", sky: "cloud", high: 17, low: 11, chance: 40 },
-      { day: "Sáb", sky: "partly", high: 19, low: 12 },
-      { day: "Dom", sky: "sun", high: 20, low: 13 },
-      { day: "Seg", sky: "sun", high: 21, low: 13 },
-      { day: "Ter", sky: "partly", high: 19, low: 12, chance: 20 },
-      { day: "Qua", sky: "rain", high: 16, low: 11, chance: 75 },
-    ],
-  },
-];
+/**
+ * The demo's cities. English swaps São Paulo for Atlanta (as humid, as stormy) and reads
+ * Fahrenheit; every figure stays two digits so nothing reflows.
+ */
+const places: Record<Lang, Place[]> = {
+  pt: [
+    {
+      name: "São Paulo",
+      temperature: 22,
+      sky: "cloud",
+      description: "Nublado",
+      feels: 24,
+      humidity: 79,
+      week: [
+        { day: "Hoje", sky: "cloud", high: 24, low: 17 },
+        { day: "Sex", sky: "rain", high: 21, low: 16, chance: 80 },
+        { day: "Sáb", sky: "storm", high: 23, low: 17, chance: 65 },
+        { day: "Dom", sky: "partly", high: 26, low: 17 },
+        { day: "Seg", sky: "sun", high: 28, low: 18 },
+        { day: "Ter", sky: "sun", high: 29, low: 19 },
+        { day: "Qua", sky: "partly", high: 27, low: 18, chance: 20 },
+      ],
+    },
+    {
+      name: "Lisboa",
+      temperature: 18,
+      sky: "sun",
+      description: "Céu limpo",
+      feels: 17,
+      humidity: 62,
+      week: [
+        { day: "Hoje", sky: "sun", high: 21, low: 13 },
+        { day: "Sex", sky: "sun", high: 22, low: 14 },
+        { day: "Sáb", sky: "partly", high: 20, low: 14 },
+        { day: "Dom", sky: "rain", high: 17, low: 12, chance: 70 },
+        { day: "Seg", sky: "cloud", high: 18, low: 12, chance: 30 },
+        { day: "Ter", sky: "partly", high: 19, low: 12 },
+        { day: "Qua", sky: "sun", high: 21, low: 13 },
+      ],
+    },
+    {
+      name: "Tóquio",
+      temperature: 15,
+      sky: "rain",
+      description: "Chuva fraca",
+      feels: 13,
+      humidity: 88,
+      week: [
+        { day: "Hoje", sky: "rain", high: 16, low: 11, chance: 90 },
+        { day: "Sex", sky: "cloud", high: 17, low: 11, chance: 40 },
+        { day: "Sáb", sky: "partly", high: 19, low: 12 },
+        { day: "Dom", sky: "sun", high: 20, low: 13 },
+        { day: "Seg", sky: "sun", high: 21, low: 13 },
+        { day: "Ter", sky: "partly", high: 19, low: 12, chance: 20 },
+        { day: "Qua", sky: "rain", high: 16, low: 11, chance: 75 },
+      ],
+    },
+  ],
+  en: [
+    {
+      name: "Atlanta",
+      temperature: 72,
+      sky: "cloud",
+      description: "Overcast",
+      feels: 75,
+      humidity: 79,
+      week: [
+        { day: "Today", sky: "cloud", high: 75, low: 63 },
+        { day: "Fri", sky: "rain", high: 70, low: 61, chance: 80 },
+        { day: "Sat", sky: "storm", high: 73, low: 63, chance: 65 },
+        { day: "Sun", sky: "partly", high: 79, low: 63 },
+        { day: "Mon", sky: "sun", high: 82, low: 64 },
+        { day: "Tue", sky: "sun", high: 84, low: 66 },
+        { day: "Wed", sky: "partly", high: 81, low: 64, chance: 20 },
+      ],
+    },
+    {
+      name: "Lisbon",
+      temperature: 64,
+      sky: "sun",
+      description: "Clear sky",
+      feels: 63,
+      humidity: 62,
+      week: [
+        { day: "Today", sky: "sun", high: 70, low: 55 },
+        { day: "Fri", sky: "sun", high: 72, low: 57 },
+        { day: "Sat", sky: "partly", high: 68, low: 57 },
+        { day: "Sun", sky: "rain", high: 63, low: 54, chance: 70 },
+        { day: "Mon", sky: "cloud", high: 64, low: 54, chance: 30 },
+        { day: "Tue", sky: "partly", high: 66, low: 54 },
+        { day: "Wed", sky: "sun", high: 70, low: 55 },
+      ],
+    },
+    {
+      name: "Tokyo",
+      temperature: 59,
+      sky: "rain",
+      description: "Light rain",
+      feels: 55,
+      humidity: 88,
+      week: [
+        { day: "Today", sky: "rain", high: 61, low: 52, chance: 90 },
+        { day: "Fri", sky: "cloud", high: 63, low: 52, chance: 40 },
+        { day: "Sat", sky: "partly", high: 66, low: 54 },
+        { day: "Sun", sky: "sun", high: 68, low: 55 },
+        { day: "Mon", sky: "sun", high: 70, low: 55 },
+        { day: "Tue", sky: "partly", high: 66, low: 54, chance: 20 },
+        { day: "Wed", sky: "rain", high: 61, low: 52, chance: 75 },
+      ],
+    },
+  ],
+};
 
-/** São Paulo, then a hover across the week, then the city search swapping to Lisboa and Tóquio. */
+/** São Paulo (Atlanta), then a hover across the week, then the city search swapping to Lisboa and Tóquio. */
 const script = [2600, 1400, 1800, 2600, 1400, 1800, 2600] as const;
 
 /**
@@ -80,12 +141,14 @@ const script = [2600, 1400, 1800, 2600, 1400, 1800, 2600] as const;
  * hairline, then the week as seven columns. The magnifier swaps the week for the search.
  */
 export function WeatherTab() {
+  const l = useL();
   const [step] = useSteps(script);
   const [manual, setManual] = useState<{ place: number; searching: boolean } | null>(null);
   // The script: 0 SP, 1 search open, 2 Lisboa picked, 3 Lisboa, 4 search, 5 Tóquio, 6 Tóquio.
   const scripted = { place: step < 2 ? 0 : step < 5 ? 1 : 2, searching: step === 1 || step === 4 };
   const state = manual ?? scripted;
-  const place = places[state.place] ?? places[0]!;
+  const cities = places[l.lang];
+  const place = cities[state.place] ?? cities[0]!;
   const choose = (index: number) => setManual({ place: index, searching: false });
 
   return (
@@ -95,7 +158,7 @@ export function WeatherTab() {
           <span className="truncate text-[12px] font-medium" style={{ color: notch.secondary }}>{place.name}</span>
           <HeaderButton
             icon={state.searching ? X : Search}
-            label={state.searching ? "Fechar a busca" : "Trocar de cidade"}
+            label={state.searching ? l("Fechar a busca", "Close Search") : l("Trocar de cidade", "Change City")}
             active={state.searching}
             onClick={() => setManual({ place: state.place, searching: !state.searching })}
           />
@@ -106,13 +169,13 @@ export function WeatherTab() {
         </div>
         <p className="mt-1 text-[12px] font-medium text-white/85">{place.description}</p>
         <p className="mt-0.5 text-[10.5px]" style={{ color: notch.tertiary }}>
-          Sensação {place.feels}° · Umidade {place.humidity}%
+          {l(`Sensação ${place.feels}° · Umidade ${place.humidity}%`, `Feels like ${place.feels}° · Humidity ${place.humidity}%`)}
         </p>
       </div>
       <div className="w-px self-stretch" style={{ background: notch.separator }} />
       <div className="relative min-w-0 flex-1 self-stretch">
         {state.searching ? (
-          <CitySearch typed={manual ? "" : step === 1 ? "Lisboa" : "Tóquio"} onPick={choose} />
+          <CitySearch places={cities} typed={manual ? "" : step === 1 ? l("Lisboa", "Lisbon") : l("Tóquio", "Tokyo")} onPick={choose} />
         ) : (
           <div className="flex gap-0.5">
             {place.week.map((day, index) => (
@@ -126,11 +189,12 @@ export function WeatherTab() {
 }
 
 function DayColumn({ day, sky, high, low, chance, today, highlighted }: Place["week"][number] & { today: boolean; highlighted: boolean }) {
+  const l = useL();
   return (
     <div
       className="flex flex-1 flex-col items-center gap-1 rounded-[10px] py-2 transition-colors duration-150 hover:bg-white/[0.06]"
       style={{ background: highlighted ? "rgba(255,255,255,0.06)" : today ? notch.card : undefined }}
-      title={`${day}: máxima ${high}°, mínima ${low}°`}
+      title={l(`${day}: máxima ${high}°, mínima ${low}°`, `${day}: high ${high}°, low ${low}°`)}
     >
       <span className="text-[11px] font-medium" style={{ color: today ? notch.primary : notch.secondary }}>{day}</span>
       <span className="pt-0.5"><WeatherGlyph sky={sky} size={19} /></span>
@@ -144,7 +208,8 @@ function DayColumn({ day, sky, high, low, chance, today, highlighted }: Place["w
 }
 
 /** The city search that opens in the week's place (WeatherSearchPanel). */
-function CitySearch({ typed, onPick }: { typed: string; onPick: (index: number) => void }) {
+function CitySearch({ places, typed, onPick }: { places: Place[]; typed: string; onPick: (index: number) => void }) {
+  const l = useL();
   const [query, setQuery] = useState(typed);
   const shown = query.trim().length > 0 ? places.map((place, index) => ({ place, index })).filter(({ place }) => place.name.toLowerCase().startsWith(query.trim().toLowerCase().slice(0, 2))) : [];
   return (
@@ -155,17 +220,17 @@ function CitySearch({ typed, onPick }: { typed: string; onPick: (index: number) 
           <input
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Buscar cidade"
-            aria-label="Buscar cidade"
+            placeholder={l("Buscar cidade", "Search for a city")}
+            aria-label={l("Buscar cidade", "Search for a city")}
             className="w-full bg-transparent text-[12px] text-white outline-none placeholder:text-white/35"
           />
         </label>
         <button type="button" className="flex h-[26px] items-center gap-1 rounded-full bg-white px-2.5 text-[11px] font-medium text-black" onClick={() => onPick(0)}>
-          <MapPin size={11} aria-hidden /> Usar minha localização
+          <MapPin size={11} aria-hidden /> {l("Usar minha localização", "Use My Location")}
         </button>
       </div>
       {shown.length === 0 ? (
-        <p className="px-1 text-[10.5px]" style={{ color: notch.tertiary }}>Digite o nome de uma cidade.</p>
+        <p className="px-1 text-[10.5px]" style={{ color: notch.tertiary }}>{l("Digite o nome de uma cidade.", "Type the name of a city.")}</p>
       ) : (
         shown.map(({ place, index }) => (
           <button key={place.name} type="button" onClick={() => onPick(index)} className="flex items-center justify-between rounded-[8px] px-2 py-1.5 text-left text-[12px] hover:bg-white/10" style={{ background: notch.card }}>

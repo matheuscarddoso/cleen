@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useL } from "@/components/LangProvider";
+import type { Lang } from "@/lib/lang";
 import { notch } from "../../style";
 import type { IconEntry } from "./catalog";
 
@@ -14,6 +16,11 @@ export const copiedLabel: Record<CopyKind, string> = {
   html: "HTML copiado",
 };
 
+export const copiedLabels: Record<Lang, Record<CopyKind, string>> = {
+  pt: copiedLabel,
+  en: { svg: "SVG copied", name: "Name copied", jsx: "JSX copied", html: "HTML copied" },
+};
+
 /** The cell's context menu, in the app's order; the last item opens the icon's page. */
 export const menuItems: { label: string; kind: CopyKind | "page" }[] = [
   { label: "Copiar SVG", kind: "svg" },
@@ -22,6 +29,18 @@ export const menuItems: { label: string; kind: CopyKind | "page" }[] = [
   { label: "Copiar como Blade/HTML", kind: "html" },
   { label: "Abrir em lucide.dev", kind: "page" },
 ];
+
+const englishMenuItems: typeof menuItems = [
+  { label: "Copy SVG", kind: "svg" },
+  { label: "Copy Name", kind: "name" },
+  { label: "Copy JSX", kind: "jsx" },
+  { label: "Copy as Blade/HTML", kind: "html" },
+  { label: "Open on lucide.dev", kind: "page" },
+];
+
+export function menuItemsFor(lang: Lang): typeof menuItems {
+  return lang === "en" ? englishMenuItems : menuItems;
+}
 
 let measurer: CanvasRenderingContext2D | null = null;
 
@@ -72,6 +91,7 @@ export function IconCell({
   onCopy: (entry: IconEntry, kind: CopyKind) => void;
   onMenu: (entry: IconEntry, at: { clientX: number; clientY: number }) => void;
 }) {
+  const l = useL();
   const Glyph = entry.icon;
   return (
     <button
@@ -84,7 +104,7 @@ export function IconCell({
       }}
       title={entry.name}
       aria-label={entry.name}
-      aria-description="Copia o SVG"
+      aria-description={l("Copia o SVG", "Copies the SVG")}
       className={`group flex h-16 flex-col items-center justify-center gap-[5px] rounded-[10px] px-1 transition-[background-color,box-shadow,scale] duration-150 hover:bg-white/10 active:scale-[0.94] ${hovered ? "bg-white/10" : "bg-white/[0.045]"}`}
       style={{
         boxShadow: `inset 0 0 0 1px ${suggested ? "rgba(255,255,255,0.35)" : notch.cardStroke}`,
@@ -116,9 +136,10 @@ export function ContextMenu({
   onPick: (kind: CopyKind | "page") => void;
   onClose: () => void;
 }) {
+  const l = useL();
   return (
     <>
-      <button type="button" aria-label="Fechar menu" className="absolute inset-0 z-20 cursor-default" onClick={onClose} onContextMenu={(event) => {
+      <button type="button" aria-label={l("Fechar menu", "Close menu")} className="absolute inset-0 z-20 cursor-default" onClick={onClose} onContextMenu={(event) => {
           event.preventDefault();
           onClose();
         }}
@@ -136,7 +157,7 @@ export function ContextMenu({
         }}
         onKeyDown={(event) => event.key === "Escape" && onClose()}
       >
-        {menuItems.map((item, index) => (
+        {menuItemsFor(l.lang).map((item, index) => (
           <div key={item.kind}>
             {item.kind === "page" && <div className="mx-2 my-[4px] h-px bg-white/10" />}
             <button

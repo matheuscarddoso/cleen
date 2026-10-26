@@ -2,6 +2,8 @@
 
 import { CircleCheck, Search } from "lucide-react";
 import { useEffect, useId, useMemo, useRef, useState, type KeyboardEvent } from "react";
+import { useL } from "@/components/LangProvider";
+import type { Lang } from "@/lib/lang";
 import { useDemo, usePlayingInterval, useTypewriter } from "../DemoContext";
 import { useReplica } from "../ReplicaContext";
 import { notch } from "../style";
@@ -10,8 +12,14 @@ import { actionsFor, type Action } from "./search/actions";
 import { results, type Item } from "./search/catalog";
 import { ClearGlyph, ItemGlyph } from "./search/Glyphs";
 
-/** What the script types, and how many times it presses ↓ once each query is in. */
-const queries = ["met", "100 usd em brl", "15h em tóquio", "figma", "orçamento", "gh cleen", ";email", "reuni"] as const;
+/**
+ * What the script types in each language, and how many times it presses ↓ once each
+ * query is in. Both run the same features in the same order.
+ */
+const script: Record<Lang, readonly string[]> = {
+  pt: ["met", "100 usd em brl", "15h em tóquio", "figma", "orçamento", "gh cleen", ";email", "reuni"],
+  en: ["left", "100 usd to eur", "3pm in tokyo", "figma", "budget", "gh cleen", ";email", "meeting"],
+};
 const presses = [2, 0, 0, 0, 0, 0, 0, 1] as const;
 /** The query whose result the script opens ⌘K on. */
 const actionsQuery = 3;
@@ -25,6 +33,8 @@ const actionsQuery = 3;
 export function SearchView() {
   const { playing, reduced } = useDemo();
   const { setMode, setTab, setReview } = useReplica();
+  const l = useL();
+  const queries = script[l.lang];
   const typed = useTypewriter(queries, { hold: 2800 });
   const [moves, setMoves] = useState({ index: 0, count: 0 });
   const [manual, setManual] = useState<{ query: string; selection: number } | null>(null);
@@ -66,13 +76,13 @@ export function SearchView() {
   }, []);
 
   // With reduced motion the first query stands typed in, as one still.
-  const scriptedQuery = reduced ? queries[0] : typed.text;
+  const scriptedQuery = reduced ? (queries[0] ?? "") : typed.text;
   const query = manual?.query ?? scriptedQuery;
-  const sections = useMemo(() => results(query), [query]);
+  const sections = useMemo(() => results(query, l.lang), [query, l.lang]);
   const items = useMemo(() => sections.flatMap((section) => section.items), [sections]);
   const selection = items.length === 0 ? -1 : Math.min(manual?.selection ?? scriptedMoves, items.length - 1);
   const selected = items[selection];
-  const actionList = selected ? actionsFor(selected) : [];
+  const actionList = selected ? actionsFor(selected, l.lang) : [];
   const actionSelection = manual ? actions : scriptedActions ? 0 : null;
 
   // Keep the selected row in view, scrolling only the list, never the page.
@@ -112,7 +122,7 @@ export function SearchView() {
     if (outcome.kind === "review") {
       // Deleting asks first, from the launcher too: the review covers it.
       setReview({
-        title: reviewTitle(outcome.items.length, outcome.outcome),
+        title: reviewTitle(outcome.items.length, outcome.outcome, l.lang),
         outcome: outcome.outcome,
         items: outcome.items,
         onConfirm: () => finish(outcome.message),
@@ -183,8 +193,8 @@ export function SearchView() {
             }}
             onBlur={() => setFocused(false)}
             onKeyDown={onKeyDown}
-            placeholder="Buscar apps, janelas, arquivos, cálculos…"
-            aria-label="Buscar apps, janelas, arquivos, cálculos"
+            placeholder={l("Buscar apps, janelas, arquivos, cálculos…", "Search apps, files, windows, commands…")}
+            aria-label={l("Buscar apps, janelas, arquivos, cálculos", "Search apps, files, windows, commands")}
             role="combobox"
             aria-expanded={items.length > 0}
             aria-controls={`${id}-results`}
@@ -205,8 +215,8 @@ export function SearchView() {
         {query.length > 0 && (
           <button
             type="button"
-            aria-label="Limpar a busca"
-            title="Limpar a busca"
+            aria-label={l("Limpar a busca", "Clear Search")}
+            title={l("Limpar a busca", "Clear Search")}
             onClick={() => {
               setDone(null);
               setManual({ query: "", selection: 0 });
@@ -227,14 +237,14 @@ export function SearchView() {
         </p>
       ) : items.length === 0 ? (
         <p className="flex flex-1 items-center justify-center text-[12px] font-medium" style={{ color: notch.tertiary }}>
-          Nada encontrado
+          {l("Nada encontrado", "Nothing found")}
         </p>
       ) : (
         <div
           ref={list}
           id={`${id}-results`}
           role="listbox"
-          aria-label="Resultados"
+          aria-label={l("Resultados", "Results")}
           className="relative min-h-0 flex-1 overflow-y-auto px-2.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           onScroll={(event) => setScrolled(event.currentTarget.scrollTop > 0)}
           style={{ maskImage: `linear-gradient(to bottom, ${scrolled ? "transparent, #000 14px" : "#000"}, #000 calc(100% - 14px), transparent)` }}
@@ -280,7 +290,7 @@ export function SearchView() {
         />
       )}
       <KeyBar
-        action={selected ? actionLabel(selected) : null}
+        action={selected ? actionLabel(selected, l.lang) : null}
         onActions={() => {
           setManual(take());
           setActions(actions === null && selected ? 0 : null);
@@ -293,21 +303,24 @@ export function SearchView() {
 }
 
 /** Return's verb for a row, as the app's key bar words it. */
-function actionLabel(item: Item): string {
-  const kind = item.kind;
+function actionLabel(item: Item, lang: Lang): string {
+  const l = (pt: string, en: string) => (lang === "en" ? en : pt);
+  const [group] = item.id.split(".");
   if (item.verb) return item.verb;
-  if (kind === "App" || kind === "Cleen" || kind === undefined) return "Abrir";
-  if (kind === "Janela") return "Ajustar janela";
-  if (kind === "Comando") return "Executar";
-  return kind;
+  // Apps and tabs open; window layouts arrange; Cleen's commands and the Mac's run.
+  if (group === "app" || group === "tab" || item.kind === undefined) return l("Abrir", "Open");
+  if (group === "window") return l("Ajustar janela", "Arrange Window");
+  if (group === "tool" || group === "lorem" || group === "system") return l("Executar", "Run");
+  return item.kind;
 }
 
 /** The bottom bar (FooterKey): what Return does to the selected row, ⌘K, ↑↓ and Esc. */
 function KeyBar({ action, onActions, actionsOpen }: { action: string | null; onActions: () => void; actionsOpen: boolean }) {
+  const l = useL();
   const keys: { label: string; keys: string[]; emphasized?: boolean }[] = [
     ...(action ? [{ label: action, keys: ["⏎"], emphasized: true }] : []),
-    { label: "Mover", keys: ["↑", "↓"] },
-    { label: "Fechar", keys: ["esc"] },
+    { label: l("Mover", "Move"), keys: ["↑", "↓"] },
+    { label: l("Fechar", "Close"), keys: ["esc"] },
   ];
   return (
     <div className="mb-1.5 flex h-8 shrink-0 items-center justify-end gap-3.5 border-t px-[26px]" style={{ borderColor: notch.separator }}>
@@ -324,7 +337,7 @@ function KeyBar({ action, onActions, actionsOpen }: { action: string | null; onA
         className="-mx-1.5 flex items-center gap-1.5 rounded-[6px] px-1.5 py-0.5 text-[12px] font-medium transition-colors duration-150 hover:bg-white/10"
         style={{ color: actionsOpen ? notch.primary : notch.secondary }}
       >
-        Ações
+        {l("Ações", "Actions")}
         <Keys keys={["⌘", "K"]} />
       </button>
     </div>
@@ -348,10 +361,11 @@ function Keys({ keys }: { keys: readonly string[] }) {
  * corner, each with its shortcut. The first one is Return's.
  */
 function ActionPanel({ item, actions, selection, onHover, onRun }: { item: Item; actions: Action[]; selection: number; onHover: (index: number) => void; onRun: (action: Action) => void }) {
+  const l = useL();
   return (
     <div
       role="menu"
-      aria-label={`Ações de ${item.title}`}
+      aria-label={l(`Ações de ${item.title}`, `Actions for ${item.title}`)}
       className="absolute bottom-[46px] right-3 z-10 w-[272px] origin-bottom-right animate-[actions_180ms_cubic-bezier(0.2,0,0,1)] overflow-hidden rounded-[12px] p-1 shadow-[0_18px_40px_rgba(0,0,0,0.6)]"
       style={{ background: "rgb(30,30,32)", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.1), 0 18px 40px rgba(0,0,0,0.6)" }}
     >
@@ -374,7 +388,7 @@ function ActionPanel({ item, actions, selection, onHover, onRun }: { item: Item;
       ))}
       <span aria-hidden className="mx-1 mt-1 block h-px" style={{ background: notch.separator }} />
       <span aria-hidden className="block px-2 pb-1 pt-1.5 text-[12px]" style={{ color: notch.tertiary }}>
-        Buscar ações…
+        {l("Buscar ações…", "Search actions…")}
       </span>
     </div>
   );
@@ -382,6 +396,7 @@ function ActionPanel({ item, actions, selection, onHover, onRun }: { item: Item;
 
 /** One result (SearchRow): icon, title and subtitle, the kind on the right. */
 function Row({ id, index, item, selected, onHover, onRun }: { id: string; index: number; item: Item; selected: boolean; onHover: () => void; onRun: () => void }) {
+  const l = useL();
   return (
     <div
       id={id}
@@ -407,7 +422,7 @@ function Row({ id, index, item, selected, onHover, onRun }: { id: string; index:
         </span>
       )}
       {item.hotkey && (
-        <span className="flex shrink-0 gap-[3px]" aria-label={`Atalho ${item.hotkey.join("")}`}>
+        <span className="flex shrink-0 gap-[3px]" aria-label={l(`Atalho ${item.hotkey.join("")}`, `Shortcut ${item.hotkey.join("")}`)}>
           {item.hotkey.map((glyph) => (
             <span key={glyph} className="flex h-[18px] min-w-[18px] items-center justify-center rounded-[4px] px-1 text-[10.5px]" style={{ background: notch.control, color: notch.secondary }}>
               {glyph}

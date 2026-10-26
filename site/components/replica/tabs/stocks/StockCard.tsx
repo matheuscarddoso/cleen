@@ -2,6 +2,7 @@
 
 import { Minus } from "lucide-react";
 import { useId, useLayoutEffect, useRef, useState, type DragEvent } from "react";
+import { useL } from "@/components/LangProvider";
 import { notch } from "../../style";
 import { NumericText } from "./NumericText";
 import { absoluteChange, change, price, sessionLength, type Listing, type Quote } from "./market";
@@ -41,6 +42,7 @@ export function StockCard({
   onRemove: () => void;
   onMove: (dragged: string) => void;
 }) {
+  const l = useL();
   const card = useRef<HTMLDivElement>(null);
   const place = useRef<{ x: number; y: number } | null>(null);
   const [targeted, setTargeted] = useState(false);
@@ -57,9 +59,10 @@ export function StockCard({
   });
 
   const color = tint(quote.direction);
-  const shownPrice = price(quote.price, item.currency);
-  const shownChange = change(quote.change);
-  const previous = price(quote.previousClose, item.currency);
+  const shownPrice = price(quote.price, item.currency, l.lang);
+  const shownChange = change(quote.change, l.lang);
+  const previous = price(quote.previousClose, item.currency, l.lang);
+  const moved = absoluteChange(quote.price - quote.previousClose, l.lang);
 
   const drop = (event: DragEvent) => {
     event.preventDefault();
@@ -82,7 +85,7 @@ export function StockCard({
       }}
       onDragLeave={() => setTargeted(false)}
       onDrop={drop}
-      title={`${item.name} · Fechamento anterior ${previous} · ${absoluteChange(quote.price - quote.previousClose)} hoje`}
+      title={l(`${item.name} · Fechamento anterior ${previous} · ${moved} hoje`, `${item.name} · Previous close ${previous} · ${moved} today`)}
       aria-label={`${item.symbol}, ${item.name}, ${shownPrice}, ${shownChange}`}
       role="group"
       data-hovered={hovered || undefined}
@@ -114,8 +117,8 @@ export function StockCard({
       <button
         type="button"
         onClick={onRemove}
-        aria-label={`Remover ${item.symbol} da lista`}
-        title="Remover da lista"
+        aria-label={l(`Remover ${item.symbol} da lista`, `Remove ${item.symbol} from list`)}
+        title={l("Remover da lista", "Remove from list")}
         className="flex size-[18px] shrink-0 items-center justify-center rounded-full opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-data-hovered:opacity-100 focus-visible:opacity-100"
         style={{ background: notch.controlHover }}
       >

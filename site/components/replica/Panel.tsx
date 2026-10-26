@@ -2,6 +2,7 @@
 
 import { Pin, Search, Settings, X, type LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
+import { useL } from "@/components/LangProvider";
 import { notch, panel } from "./style";
 import { tabs, type TabId } from "./tabs";
 
@@ -66,6 +67,7 @@ export function Panel({
   overlay?: ReactNode;
   children: ReactNode;
 }) {
+  const l = useL();
   const body = width - panel.topRadius * 2;
   return (
     <div
@@ -79,9 +81,9 @@ export function Panel({
         <div className="flex shrink-0 items-center gap-1" style={{ height: panel.notchHeight, paddingInline: panel.inset - 2 }}>
           <span className="text-[15px] font-semibold">{title}</span>
           <span className="flex-1" />
-          {mode !== "search" && <HeaderButton icon={Search} label="Buscar (⌥ Espaço)" onClick={onSearch} />}
-          <HeaderButton icon={Pin} label="Manter aberto" active />
-          <HeaderButton icon={mode === "settings" ? X : Settings} label={mode === "settings" ? "Fechar ajustes" : "Ajustes"} active={mode === "settings"} onClick={onSettings} />
+          {mode !== "search" && <HeaderButton icon={Search} label={l("Buscar (⌥ Espaço)", "Search (⌥ Space)")} onClick={onSearch} />}
+          <HeaderButton icon={Pin} label={l("Manter aberto", "Keep Open")} active />
+          <HeaderButton icon={mode === "settings" ? X : Settings} label={mode === "settings" ? l("Fechar ajustes", "Close Settings") : l("Ajustes", "Settings")} active={mode === "settings"} onClick={onSettings} />
         </div>
         <div
           className="relative min-h-0 flex-1 overflow-hidden"
@@ -94,8 +96,9 @@ export function Panel({
           {children}
         </div>
         {mode === "tool" && (
-          <div className="flex shrink-0 justify-center gap-0.5" style={{ paddingTop: 6, paddingBottom: 10 }} role="tablist" aria-label="Ferramentas">
-            {tabs.map(({ id, title: name, icon: Icon }) => {
+          <div className="flex shrink-0 justify-center gap-0.5" style={{ paddingTop: 6, paddingBottom: 10 }} role="tablist" aria-label={l("Ferramentas", "Tools")}>
+            {tabs.map(({ id, title, en, icon: Icon }) => {
+              const name = l(title, en);
               const selected = id === tab;
               return (
                 <button

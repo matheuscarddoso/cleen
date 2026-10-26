@@ -43,6 +43,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import type { ReviewItem, ReviewOutcome } from "../../review";
+import { pick, type Lang } from "@/lib/lang";
 import { tabs, type TabId } from "../../tabs";
 import { clipboard, events, files, openWindows, personal, quicklink, snippets, systemCommands, webFallback } from "./extras";
 import { smart } from "./smart";
@@ -104,137 +105,193 @@ export type Item = {
 
 export type Section = { title: string; items: Item[] };
 
-const windowItem = (id: string, title: string, region: Region, keywords: readonly string[], message: string): Item => ({
-  id: `window.${id}`,
-  title,
-  icon: { kind: "window", region },
-  keywords,
-  kind: "Janela",
-  outcome: { kind: "done", message },
-});
+/** The catalog's fixed rows in one language: built once per language, then reused. */
+type Catalog = { apps: Item[]; commands: Item[]; emoji: { emoji: string; name: string; keywords: readonly string[] }[] };
 
-/** SearchCatalog.windows(), in the app's order. */
-const windows: Item[] = [
-  windowItem("leftHalf", "Metade esquerda", [0, 0, 0.5, 1], ["left half"], "Janela na metade esquerda"),
-  windowItem("rightHalf", "Metade direita", [0.5, 0, 0.5, 1], ["right half"], "Janela na metade direita"),
-  windowItem("topHalf", "Metade de cima", [0, 0, 1, 0.5], ["top half"], "Janela na metade de cima"),
-  windowItem("bottomHalf", "Metade de baixo", [0, 0.5, 1, 0.5], ["bottom half"], "Janela na metade de baixo"),
-  windowItem("maximize", "Maximizar", [0, 0, 1, 1], ["maximize", "fill", "tela cheia"], "Janela maximizada"),
-  windowItem("almostMaximize", "Quase maximizar", [0.12, 0.14, 0.76, 0.72], ["almost maximize"], "Janela quase maximizada"),
-  windowItem("center", "Centralizar", [0.25, 0.22, 0.5, 0.56], ["center"], "Janela no centro"),
-  windowItem("topLeft", "Canto superior esquerdo", [0, 0, 0.5, 0.5], ["top left quarter"], "Janela no canto superior esquerdo"),
-  windowItem("topRight", "Canto superior direito", [0.5, 0, 0.5, 0.5], ["top right quarter"], "Janela no canto superior direito"),
-  windowItem("bottomLeft", "Canto inferior esquerdo", [0, 0.5, 0.5, 0.5], ["bottom left quarter"], "Janela no canto inferior esquerdo"),
-  windowItem("bottomRight", "Canto inferior direito", [0.5, 0.5, 0.5, 0.5], ["bottom right quarter"], "Janela no canto inferior direito"),
-  windowItem("firstThird", "Primeiro terço", [0, 0, 1 / 3, 1], ["first third"], "Janela no primeiro terço"),
-  windowItem("centerThird", "Terço do meio", [1 / 3, 0, 1 / 3, 1], ["center third"], "Janela no terço do meio"),
-  windowItem("lastThird", "Último terço", [2 / 3, 0, 1 / 3, 1], ["last third"], "Janela no último terço"),
-  windowItem("firstTwoThirds", "Dois terços à esquerda", [0, 0, 2 / 3, 1], ["first two thirds"], "Janela em dois terços à esquerda"),
-  windowItem("lastTwoThirds", "Dois terços à direita", [1 / 3, 0, 2 / 3, 1], ["last two thirds"], "Janela em dois terços à direita"),
-  {
-    id: "window.nextDisplay",
-    title: "Próxima tela",
-    icon: { kind: "symbol", color: palette.blue, glyph: Copy },
-    keywords: ["next display", "move to next screen", "monitor"],
-    kind: "Janela",
-    outcome: { kind: "done", message: "Janela na próxima tela" },
-  },
-  {
-    id: "window.restore",
-    title: "Restaurar tamanho",
-    icon: { kind: "symbol", color: palette.blue, glyph: Undo2 },
-    keywords: ["restore"],
-    kind: "Janela",
-    outcome: { kind: "done", message: "Janela de volta ao tamanho de antes" },
-  },
-];
+const built: Partial<Record<Lang, Catalog>> = {};
 
-const command = (id: string, title: string, color: string, glyph: LucideIcon, keywords: readonly string[], outcome: Outcome, subtitle?: string): Item => ({
-  id,
-  title,
-  subtitle,
-  icon: { kind: "symbol", color, glyph },
-  keywords,
-  kind: "Comando",
-  outcome,
-});
+function catalog(lang: Lang): Catalog {
+  const cached = built[lang];
+  if (cached) return cached;
+  const l = pick(lang);
 
-const lorem = ["lorem ipsum", "placeholder", "texto"];
+  const windowKind = l("Janela", "Window");
+  const windowItem = (id: string, title: string, region: Region, keywords: readonly string[], message: string): Item => ({
+    id: `window.${id}`,
+    title,
+    icon: { kind: "window", region },
+    keywords,
+    kind: windowKind,
+    outcome: { kind: "done", message },
+  });
 
-/** SearchCatalog.tools(): Cleen's own commands. */
-const tools: Item[] = [
-  command("tool.colorPicker", "Conta-gotas", palette.pink, Pipette, ["color picker", "cor", "pick color", "hex"], { kind: "done", message: "#0071E3 copiado" }, "Pega uma cor da tela e copia o hex"),
-  command("tool.confetti", "Confete", palette.orange, PartyPopper, ["confetti", "celebrar", "festa"], { kind: "done", message: "Confete na tela" }),
-  command("lorem.paragraph", "Lorem ipsum: 1 parágrafo", palette.gray, TextAlignStart, lorem, { kind: "done", message: "1 parágrafo colado" }),
-  command("lorem.paragraphs", "Lorem ipsum: 3 parágrafos", palette.gray, TextAlignStart, lorem, { kind: "done", message: "3 parágrafos colados" }),
-  command("lorem.sentence", "Lorem ipsum: 1 frase", palette.gray, TextAlignStart, lorem, { kind: "done", message: "1 frase colada" }),
-  command("lorem.words", "Lorem ipsum: 10 palavras", palette.gray, TextAlignStart, lorem, { kind: "done", message: "10 palavras coladas" }),
-  command("tool.emoji", "Buscar emoji", palette.yellow, Smile, ["emoji", "search emoji"], { kind: "tab", tab: "emoji" }),
-  command("tool.clipboard", "Histórico da área de transferência", palette.indigo, ClipboardList, ["clipboard history", "copiados"], { kind: "done", message: "Histórico aberto" }),
-  command("tool.icons", "Buscar ícones Lucide", palette.teal, Grid3x3, ["lucide", "icons", "ícones", "svg"], { kind: "tab", tab: "icons" }),
-  command("system.lock", "Bloquear tela", palette.gray, Lock, ["lock screen"], { kind: "done", message: "Tela bloqueada" }),
-  command("system.sleep", "Repouso", palette.gray, Moon, ["sleep", "dormir"], { kind: "done", message: "O Mac entrou em repouso" }),
-];
+  /** SearchCatalog.windows(), in the app's order. */
+  const windows: Item[] = [
+    windowItem("leftHalf", l("Metade esquerda", "Left Half"), [0, 0, 0.5, 1], ["left half"], l("Janela na metade esquerda", "Window on the left half")),
+    windowItem("rightHalf", l("Metade direita", "Right Half"), [0.5, 0, 0.5, 1], ["right half"], l("Janela na metade direita", "Window on the right half")),
+    windowItem("topHalf", l("Metade de cima", "Top Half"), [0, 0, 1, 0.5], ["top half"], l("Janela na metade de cima", "Window on the top half")),
+    windowItem("bottomHalf", l("Metade de baixo", "Bottom Half"), [0, 0.5, 1, 0.5], ["bottom half"], l("Janela na metade de baixo", "Window on the bottom half")),
+    windowItem("maximize", l("Maximizar", "Maximize"), [0, 0, 1, 1], ["maximize", "fill", "tela cheia"], l("Janela maximizada", "Window maximized")),
+    windowItem("almostMaximize", l("Quase maximizar", "Almost Maximize"), [0.12, 0.14, 0.76, 0.72], ["almost maximize"], l("Janela quase maximizada", "Window almost maximized")),
+    windowItem("center", l("Centralizar", "Center"), [0.25, 0.22, 0.5, 0.56], ["center"], l("Janela no centro", "Window centered")),
+    windowItem("topLeft", l("Canto superior esquerdo", "Top Left Quarter"), [0, 0, 0.5, 0.5], ["top left quarter"], l("Janela no canto superior esquerdo", "Window in the top left quarter")),
+    windowItem("topRight", l("Canto superior direito", "Top Right Quarter"), [0.5, 0, 0.5, 0.5], ["top right quarter"], l("Janela no canto superior direito", "Window in the top right quarter")),
+    windowItem("bottomLeft", l("Canto inferior esquerdo", "Bottom Left Quarter"), [0, 0.5, 0.5, 0.5], ["bottom left quarter"], l("Janela no canto inferior esquerdo", "Window in the bottom left quarter")),
+    windowItem("bottomRight", l("Canto inferior direito", "Bottom Right Quarter"), [0.5, 0.5, 0.5, 0.5], ["bottom right quarter"], l("Janela no canto inferior direito", "Window in the bottom right quarter")),
+    windowItem("firstThird", l("Primeiro terço", "First Third"), [0, 0, 1 / 3, 1], ["first third"], l("Janela no primeiro terço", "Window in the first third")),
+    windowItem("centerThird", l("Terço do meio", "Center Third"), [1 / 3, 0, 1 / 3, 1], ["center third"], l("Janela no terço do meio", "Window in the center third")),
+    windowItem("lastThird", l("Último terço", "Last Third"), [2 / 3, 0, 1 / 3, 1], ["last third"], l("Janela no último terço", "Window in the last third")),
+    windowItem("firstTwoThirds", l("Dois terços à esquerda", "First Two Thirds"), [0, 0, 2 / 3, 1], ["first two thirds"], l("Janela em dois terços à esquerda", "Window in the first two thirds")),
+    windowItem("lastTwoThirds", l("Dois terços à direita", "Last Two Thirds"), [1 / 3, 0, 2 / 3, 1], ["last two thirds"], l("Janela em dois terços à direita", "Window in the last two thirds")),
+    {
+      id: "window.nextDisplay",
+      title: l("Próxima tela", "Next Display"),
+      icon: { kind: "symbol", color: palette.blue, glyph: Copy },
+      keywords: ["next display", "move to next screen", "monitor"],
+      kind: windowKind,
+      outcome: { kind: "done", message: l("Janela na próxima tela", "Window on the next display") },
+    },
+    {
+      id: "window.restore",
+      title: l("Restaurar tamanho", "Restore"),
+      icon: { kind: "symbol", color: palette.blue, glyph: Undo2 },
+      keywords: ["restore"],
+      kind: windowKind,
+      outcome: { kind: "done", message: l("Janela de volta ao tamanho de antes", "Window back to its previous size") },
+    },
+  ];
 
-/** SearchCatalog.tabs(): jump straight to a tab of the notch. */
-const tabItems: Item[] = tabs.map((tab) => ({
-  id: `tab.${tab.id}`,
-  title: tab.id === "home" ? "Início" : tab.title,
-  icon: { kind: "symbol", color: palette.tab, glyph: tab.icon },
-  keywords: [tab.id],
-  kind: "Cleen",
-  outcome: { kind: "tab", tab: tab.id },
-}));
+  const commandKind = l("Comando", "Command");
+  const command = (id: string, title: string, color: string, glyph: LucideIcon, keywords: readonly string[], outcome: Outcome, subtitle?: string): Item => ({
+    id,
+    title,
+    subtitle,
+    icon: { kind: "symbol", color, glyph },
+    keywords,
+    kind: commandKind,
+    outcome,
+  });
 
-const app = (name: string, look: AppLook, keywords: readonly string[] = []): Item => ({
-  id: `app.${name}`,
-  title: name,
-  icon: { kind: "app", look },
-  keywords,
-  kind: "App",
-  outcome: { kind: "done", message: `${name} aberto` },
-});
+  const lorem = ["lorem ipsum", "placeholder", "texto"];
 
-/** A handful of the Mac's own apps, with the names Finder shows in Portuguese. */
-const apps: Item[] = [
-  app("Ajustes do Sistema", { from: "#a1a1a6", to: "#5b5b60", glyph: Settings }, ["system settings", "preferences"]),
-  app("Calculadora", { from: "#6e6e73", to: "#2c2c2e", glyph: Calculator, ink: "#ff9f0a" }, ["calculator"]),
-  app("Calendário", { from: "#ffffff", to: "#e5e5ea", glyph: Calendar, ink: "#ff3b30" }, ["calendar"]),
-  app("FaceTime", { from: "#5de07a", to: "#1fae45", glyph: Video }),
-  app("Finder", { from: "#6ac4ff", to: "#1a73e8", glyph: Smile }),
-  app("Fotos", { from: "#ffd36b", to: "#ff7a45", glyph: Flower2 }, ["photos"]),
-  app("Lembretes", { from: "#ffffff", to: "#e5e5ea", glyph: ListChecks, ink: "#0a84ff" }, ["reminders"]),
-  app("Mail", { from: "#6ac4ff", to: "#0a6cff", glyph: Mail }),
-  app("Mapas", { from: "#7ee08f", to: "#2fb35a", glyph: Map }, ["maps"]),
-  app("Mensagens", { from: "#6ef07f", to: "#20c33d", glyph: MessageCircle }, ["messages"]),
-  app("Monitor de Atividade", { from: "#3a3a3c", to: "#111113", glyph: Activity, ink: "#5cd685" }, ["activity monitor"]),
-  app("Música", { from: "#ff6b81", to: "#f52d4b", glyph: Music }, ["music"]),
-  app("Notas", { from: "#ffe27a", to: "#f5b800", glyph: StickyNote }, ["notes"]),
-  app("Pré-Visualização", { from: "#8ad1ff", to: "#2a8cf0", glyph: Image }, ["preview"]),
-  app("Safari", { from: "#5ac8fa", to: "#0a6cff", glyph: Compass }),
-  app("Terminal", { from: "#48484a", to: "#1c1c1e", glyph: SquareTerminal }),
-  app("Xcode", { from: "#5ab0ff", to: "#1662d6", glyph: Hammer }),
-];
+  /** SearchCatalog.tools(): Cleen's own commands. */
+  const tools: Item[] = [
+    command("tool.colorPicker", l("Conta-gotas", "Color Picker"), palette.pink, Pipette, ["color picker", "cor", "pick color", "hex"], { kind: "done", message: l("#0071E3 copiado", "#0071E3 copied") }, l("Pega uma cor da tela e copia o hex", "Picks a color from the screen and copies its hex")),
+    command("tool.confetti", l("Confete", "Confetti"), palette.orange, PartyPopper, ["confetti", "celebrar", "festa"], { kind: "done", message: l("Confete na tela", "Confetti on screen") }),
+    command("lorem.paragraph", l("Lorem ipsum: 1 parágrafo", "Lorem Ipsum: 1 Paragraph"), palette.gray, TextAlignStart, lorem, { kind: "done", message: l("1 parágrafo colado", "1 paragraph pasted") }),
+    command("lorem.paragraphs", l("Lorem ipsum: 3 parágrafos", "Lorem Ipsum: 3 Paragraphs"), palette.gray, TextAlignStart, lorem, { kind: "done", message: l("3 parágrafos colados", "3 paragraphs pasted") }),
+    command("lorem.sentence", l("Lorem ipsum: 1 frase", "Lorem Ipsum: 1 Sentence"), palette.gray, TextAlignStart, lorem, { kind: "done", message: l("1 frase colada", "1 sentence pasted") }),
+    command("lorem.words", l("Lorem ipsum: 10 palavras", "Lorem Ipsum: 10 Words"), palette.gray, TextAlignStart, lorem, { kind: "done", message: l("10 palavras coladas", "10 words pasted") }),
+    command("tool.emoji", l("Buscar emoji", "Search emoji"), palette.yellow, Smile, ["emoji", "search emoji"], { kind: "tab", tab: "emoji" }),
+    command("tool.clipboard", l("Histórico da área de transferência", "Clipboard history"), palette.indigo, ClipboardList, ["clipboard history", "copiados"], { kind: "done", message: l("Histórico aberto", "History opened") }),
+    command("tool.icons", l("Buscar ícones Lucide", "Search Lucide Icons"), palette.teal, Grid3x3, ["lucide", "icons", "ícones", "svg"], { kind: "tab", tab: "icons" }),
+    command("system.lock", l("Bloquear tela", "Lock Screen"), palette.gray, Lock, ["lock screen"], { kind: "done", message: l("Tela bloqueada", "Screen locked") }),
+    command("system.sleep", l("Repouso", "Sleep"), palette.gray, Moon, ["sleep", "dormir"], { kind: "done", message: l("O Mac entrou em repouso", "Your Mac is asleep") }),
+  ];
 
-/** A few emoji with their Portuguese names (EmojiModel). */
-const emoji: { emoji: string; name: string; keywords: readonly string[] }[] = [
-  { emoji: "🔥", name: "fogo", keywords: ["chama", "fire"] },
-  { emoji: "🎉", name: "confete", keywords: ["festa", "parabéns", "tada"] },
-  { emoji: "🥳", name: "rosto festejando", keywords: ["festa", "aniversário"] },
-  { emoji: "🎂", name: "bolo de aniversário", keywords: ["festa", "bolo"] },
-  { emoji: "❤️", name: "coração vermelho", keywords: ["amor", "heart"] },
-  { emoji: "🚀", name: "foguete", keywords: ["lançamento", "rocket"] },
-  { emoji: "👍", name: "polegar para cima", keywords: ["joinha", "ok", "curtir"] },
-  { emoji: "😂", name: "rosto chorando de rir", keywords: ["risada", "rir"] },
-  { emoji: "✅", name: "marca de seleção", keywords: ["feito", "ok", "check"] },
-  { emoji: "☕", name: "café", keywords: ["bebida quente", "coffee"] },
-  { emoji: "⭐", name: "estrela", keywords: ["star"] },
-  { emoji: "💡", name: "lâmpada", keywords: ["ideia"] },
-  { emoji: "🙏", name: "mãos juntas", keywords: ["obrigado", "por favor"] },
-  { emoji: "🌧️", name: "nuvem com chuva", keywords: ["chuva", "tempo"] },
-  { emoji: "🍕", name: "pizza", keywords: ["comida"] },
-  { emoji: "👀", name: "olhos", keywords: ["olhando"] },
-];
+  /** SearchCatalog.tabs(): jump straight to a tab of the notch. */
+  const tabItems: Item[] = tabs.map((tab) => ({
+    id: `tab.${tab.id}`,
+    title: tab.id === "home" ? l("Início", "Home") : l(tab.title, tabTitles[tab.id]),
+    icon: { kind: "symbol", color: palette.tab, glyph: tab.icon },
+    keywords: [tab.id],
+    kind: "Cleen",
+    outcome: { kind: "tab", tab: tab.id },
+  }));
+
+  const app = (id: string, name: string, look: AppLook, keywords: readonly string[] = []): Item => ({
+    id: `app.${id}`,
+    title: name,
+    icon: { kind: "app", look },
+    keywords,
+    kind: "App",
+    outcome: { kind: "done", message: l(`${name} aberto`, `${name} opened`) },
+  });
+  /** An app by its Finder name in each language; the id stays the Portuguese one. */
+  const named = (pt: string, en: string, look: AppLook, keywords: readonly string[] = []) => app(pt, l(pt, en), look, l(keywords, []));
+
+  /** A handful of the Mac's own apps, with the names Finder shows in each language. */
+  const apps: Item[] = [
+    app("Ajustes do Sistema", l("Ajustes do Sistema", "System Settings"), { from: "#a1a1a6", to: "#5b5b60", glyph: Settings }, l(["system settings", "preferences"], ["preferences"])),
+    named("Calculadora", "Calculator", { from: "#6e6e73", to: "#2c2c2e", glyph: Calculator, ink: "#ff9f0a" }, ["calculator"]),
+    named("Calendário", "Calendar", { from: "#ffffff", to: "#e5e5ea", glyph: Calendar, ink: "#ff3b30" }, ["calendar"]),
+    app("FaceTime", "FaceTime", { from: "#5de07a", to: "#1fae45", glyph: Video }),
+    app("Finder", "Finder", { from: "#6ac4ff", to: "#1a73e8", glyph: Smile }),
+    named("Fotos", "Photos", { from: "#ffd36b", to: "#ff7a45", glyph: Flower2 }, ["photos"]),
+    named("Lembretes", "Reminders", { from: "#ffffff", to: "#e5e5ea", glyph: ListChecks, ink: "#0a84ff" }, ["reminders"]),
+    app("Mail", "Mail", { from: "#6ac4ff", to: "#0a6cff", glyph: Mail }),
+    named("Mapas", "Maps", { from: "#7ee08f", to: "#2fb35a", glyph: Map }, ["maps"]),
+    named("Mensagens", "Messages", { from: "#6ef07f", to: "#20c33d", glyph: MessageCircle }, ["messages"]),
+    named("Monitor de Atividade", "Activity Monitor", { from: "#3a3a3c", to: "#111113", glyph: Activity, ink: "#5cd685" }, ["activity monitor"]),
+    named("Música", "Music", { from: "#ff6b81", to: "#f52d4b", glyph: Music }, ["music"]),
+    named("Notas", "Notes", { from: "#ffe27a", to: "#f5b800", glyph: StickyNote }, ["notes"]),
+    named("Pré-Visualização", "Preview", { from: "#8ad1ff", to: "#2a8cf0", glyph: Image }, ["preview"]),
+    app("Safari", "Safari", { from: "#5ac8fa", to: "#0a6cff", glyph: Compass }),
+    app("Terminal", "Terminal", { from: "#48484a", to: "#1c1c1e", glyph: SquareTerminal }),
+    app("Xcode", "Xcode", { from: "#5ab0ff", to: "#1662d6", glyph: Hammer }),
+  ];
+
+  /** Every fixed command, with the alias and shortcut the person gave it. */
+  const aliases = personal(lang);
+  const commands = [...windows, ...tools, ...systemCommands(lang), ...tabItems].map((item) => ({ ...item, ...aliases[item.id] }));
+
+  const result = { apps, commands, emoji: emoji[lang] };
+  built[lang] = result;
+  return result;
+}
+
+/** The tab bar's names in English (Localizable.strings), next to tabs.ts's Portuguese. */
+const tabTitles: Record<TabId, string> = {
+  home: "Home",
+  timer: "Timer",
+  weather: "Weather",
+  stocks: "Stocks",
+  converter: "Converter",
+  emoji: "Emoji",
+  icons: "Icons",
+  overview: "Overview",
+  system: "System",
+};
+
+/** A few emoji with their names in each language (EmojiModel). */
+const emoji: Record<Lang, { emoji: string; name: string; keywords: readonly string[] }[]> = {
+  pt: [
+    { emoji: "🔥", name: "fogo", keywords: ["chama", "fire"] },
+    { emoji: "🎉", name: "confete", keywords: ["festa", "parabéns", "tada"] },
+    { emoji: "🥳", name: "rosto festejando", keywords: ["festa", "aniversário"] },
+    { emoji: "🎂", name: "bolo de aniversário", keywords: ["festa", "bolo"] },
+    { emoji: "❤️", name: "coração vermelho", keywords: ["amor", "heart"] },
+    { emoji: "🚀", name: "foguete", keywords: ["lançamento", "rocket"] },
+    { emoji: "👍", name: "polegar para cima", keywords: ["joinha", "ok", "curtir"] },
+    { emoji: "😂", name: "rosto chorando de rir", keywords: ["risada", "rir"] },
+    { emoji: "✅", name: "marca de seleção", keywords: ["feito", "ok", "check"] },
+    { emoji: "☕", name: "café", keywords: ["bebida quente", "coffee"] },
+    { emoji: "⭐", name: "estrela", keywords: ["star"] },
+    { emoji: "💡", name: "lâmpada", keywords: ["ideia"] },
+    { emoji: "🙏", name: "mãos juntas", keywords: ["obrigado", "por favor"] },
+    { emoji: "🌧️", name: "nuvem com chuva", keywords: ["chuva", "tempo"] },
+    { emoji: "🍕", name: "pizza", keywords: ["comida"] },
+    { emoji: "👀", name: "olhos", keywords: ["olhando"] },
+  ],
+  en: [
+    { emoji: "🔥", name: "fire", keywords: ["flame", "hot", "lit"] },
+    { emoji: "🎉", name: "party popper", keywords: ["party", "celebration", "tada"] },
+    { emoji: "🥳", name: "partying face", keywords: ["party", "birthday"] },
+    { emoji: "🎂", name: "birthday cake", keywords: ["party", "cake"] },
+    { emoji: "❤️", name: "red heart", keywords: ["love", "heart"] },
+    { emoji: "🚀", name: "rocket", keywords: ["launch", "space"] },
+    { emoji: "👍", name: "thumbs up", keywords: ["like", "ok", "yes"] },
+    { emoji: "😂", name: "face with tears of joy", keywords: ["laugh", "lol"] },
+    { emoji: "✅", name: "check mark button", keywords: ["done", "ok", "check"] },
+    { emoji: "☕", name: "hot beverage", keywords: ["coffee", "tea"] },
+    { emoji: "⭐", name: "star", keywords: ["favorite"] },
+    { emoji: "💡", name: "light bulb", keywords: ["idea"] },
+    { emoji: "🙏", name: "folded hands", keywords: ["thanks", "please"] },
+    { emoji: "🌧️", name: "cloud with rain", keywords: ["rain", "weather"] },
+    { emoji: "🍕", name: "pizza", keywords: ["food"] },
+    { emoji: "👀", name: "eyes", keywords: ["looking"] },
+  ],
+};
 
 /** A few Lucide icons, found by their English names and tags. */
 const lucide: { name: string; glyph: LucideIcon; tags: readonly string[] }[] = [
@@ -255,8 +312,6 @@ const lucide: { name: string; glyph: LucideIcon; tags: readonly string[] }[] = [
   { name: "book", glyph: Book, tags: ["read", "notes"] },
   { name: "music", glyph: Music, tags: ["song", "musica"] },
 ];
-
-// MARK: Matching (FuzzyMatch.swift)
 
 export function fold(text: string): string {
   return text.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
@@ -309,11 +364,20 @@ function rank(candidates: Item[], text: string): Item[] {
   return (strong.length > 0 ? strong : scored).sort((a, b) => b.match - a.match).map(({ item }) => item);
 }
 
-// MARK: Calculator (Calculator.swift, with the Brazilian comma)
+// MARK: Calculator (Calculator.swift, with the Brazilian comma in Portuguese, the dot in English)
 
 type Token = { kind: "number"; value: number } | { kind: "op"; op: string } | { kind: "open" } | { kind: "close" } | { kind: "percent" };
 
-function parseNumber(raw: string): number | null {
+function parseNumber(raw: string, lang: Lang): number | null {
+  if (lang === "en") {
+    // The mirror image: "1,250.5", "1,250", and a lone comma that can't be thousands is a decimal.
+    let text = raw;
+    if (text.includes(",") && text.includes(".")) text = text.replaceAll(",", "");
+    else if (text.split(",").length === 2 && text.length - text.indexOf(",") !== 4) text = text.replace(",", ".");
+    else text = text.replaceAll(",", "");
+    const value = Number(text);
+    return Number.isFinite(value) ? value : null;
+  }
   let text = raw;
   if (text.includes(",") && text.includes(".")) text = text.replaceAll(".", "");
   else if (text.split(".").length === 2 && text.length - text.indexOf(".") !== 4) text = text.replace(".", ",");
@@ -322,12 +386,12 @@ function parseNumber(raw: string): number | null {
   return Number.isFinite(value) ? value : null;
 }
 
-function tokenize(text: string): Token[] | null {
+function tokenize(text: string, lang: Lang): Token[] | null {
   const tokens: Token[] = [];
   let number = "";
   const flush = () => {
     if (number.length === 0) return true;
-    const value = parseNumber(number);
+    const value = parseNumber(number, lang);
     number = "";
     if (value === null) return false;
     tokens.push({ kind: "number", value });
@@ -351,8 +415,8 @@ function tokenize(text: string): Token[] | null {
   return flush() ? tokens : null;
 }
 
-function evaluate(text: string): number | null {
-  const tokens = tokenize(text);
+function evaluate(text: string, lang: Lang): number | null {
+  const tokens = tokenize(text, lang);
   if (!tokens || !tokens.some((token) => token.kind === "op" || token.kind === "percent")) return null;
   let position = 0;
   const current = () => tokens[position];
@@ -436,24 +500,29 @@ function evaluate(text: string): number | null {
   return value !== null && position === tokens.length && Number.isFinite(value) ? value : null;
 }
 
-const decimal = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 10 });
+const decimal: Record<Lang, Intl.NumberFormat> = {
+  pt: new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 10 }),
+  en: new Intl.NumberFormat("en-US", { maximumFractionDigits: 10 }),
+};
 
-function calculation(text: string): Item | null {
-  const value = evaluate(text);
+function calculation(text: string, lang: Lang): Item | null {
+  const l = pick(lang);
+  const value = evaluate(text, lang);
   if (value === null) return null;
-  const result = decimal.format(value);
-  return { id: "calc", title: result, subtitle: text, icon: { kind: "symbol", color: palette.orange, glyph: Equal }, kind: "Copiar", outcome: { kind: "done", message: `${result} copiado` } };
+  const result = decimal[lang].format(value);
+  return { id: "calc", title: result, subtitle: text, icon: { kind: "symbol", color: palette.orange, glyph: Equal }, kind: l("Copiar", "Copy"), outcome: { kind: "done", message: l(`${result} copiado`, `${result} copied`) } };
 }
 
 /** A hex color typed in: its swatch, to copy. */
-function color(text: string): Item | null {
+function color(text: string, lang: Lang): Item | null {
+  const l = pick(lang);
   const match = /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(text);
   if (!match?.[1]) return null;
   const digits = match[1].length === 3 ? [...match[1]].map((digit) => digit + digit).join("") : match[1];
   const hex = `#${digits.toUpperCase()}`;
   const value = Number.parseInt(digits, 16);
   const rgb = `rgb(${(value >> 16) & 255}, ${(value >> 8) & 255}, ${value & 255})`;
-  return { id: `color.${hex}`, title: hex, subtitle: rgb, icon: { kind: "color", hex }, kind: "Copiar", outcome: { kind: "done", message: `${hex} copiado` } };
+  return { id: `color.${hex}`, title: hex, subtitle: rgb, icon: { kind: "color", hex }, kind: l("Copiar", "Copy"), outcome: { kind: "done", message: l(`${hex} copiado`, `${hex} copied`) } };
 }
 
 function matches(text: string, ...fields: readonly string[]) {
@@ -461,65 +530,63 @@ function matches(text: string, ...fields: readonly string[]) {
   return fields.some((field) => fold(field).split(/\s+/).some((word) => word.startsWith(query)) || fold(field).includes(query));
 }
 
-// MARK: Results (SearchModel.recompute)
-
-/** Every fixed command, with the alias and shortcut the person gave it. */
-const commands = [...windows, ...tools, ...systemCommands, ...tabItems].map((item) => ({ ...item, ...personal[item.id] }));
-const byId = (id: string) => [...apps, ...commands].find((item) => item.id === id);
-
 /** With nothing typed: what you run most, then a few starting points. */
-function suggestions(): Section[] {
+function suggestions(lang: Lang): Section[] {
+  const l = pick(lang);
+  const { apps, commands } = catalog(lang);
+  const byId = (id: string) => [...apps, ...commands].find((item) => item.id === id);
   const recent = ["app.Safari", "app.Notas"].flatMap((id) => byId(id) ?? []);
   const starters = ["window.leftHalf", "window.rightHalf", "window.maximize", "tool.colorPicker", "tool.clipboard", "tool.emoji"].flatMap((id) => byId(id) ?? []);
   return [
-    { title: "Agenda de hoje", items: events.slice(1, 2) },
-    { title: "Recentes", items: recent },
-    { title: "Sugestões", items: starters.slice(0, 6 - Math.min(recent.length, 3)) },
+    { title: l("Agenda de hoje", "Today's schedule"), items: events(lang).slice(1, 2) },
+    { title: l("Recentes", "Recents"), items: recent },
+    { title: l("Sugestões", "Suggestions"), items: starters.slice(0, 6 - Math.min(recent.length, 3)) },
   ];
 }
 
-/** The sections for a query, the way SearchModel builds them. */
-export function results(query: string): Section[] {
+/** The sections for a query, the way SearchModel builds them, in the page's language. */
+export function results(query: string, lang: Lang = "pt"): Section[] {
+  const l = pick(lang);
   const text = query.trim();
-  if (text.length === 0) return suggestions();
+  if (text.length === 0) return suggestions(lang);
+  const { apps, commands, emoji } = catalog(lang);
   const sections: Section[] = [];
-  const calc = calculation(text);
-  if (calc) sections.push({ title: "Calculadora", items: [calc] });
-  const converted = calc ? null : smart(text);
+  const calc = calculation(text, lang);
+  if (calc) sections.push({ title: l("Calculadora", "Calculator"), items: [calc] });
+  const converted = calc ? null : smart(text, lang);
   if (converted) {
     const { result } = converted;
     sections.push({
       title: converted.section,
-      items: [{ id: "smart", title: result.title, subtitle: result.subtitle, icon: { kind: "symbol", color: palette.orange, glyph: Equal }, kind: "Copiar", outcome: { kind: "done", message: `${result.copy} copiado` } }],
+      items: [{ id: "smart", title: result.title, subtitle: result.subtitle, icon: { kind: "symbol", color: palette.orange, glyph: Equal }, kind: l("Copiar", "Copy"), outcome: { kind: "done", message: l(`${result.copy} copiado`, `${result.copy} copied`) } }],
     });
   }
-  const swatch = color(text);
-  if (swatch) sections.push({ title: "Cor", items: [swatch] });
-  const link = quicklink(text);
-  if (link) sections.push({ title: "Link rápido", items: [link] });
+  const swatch = color(text, lang);
+  if (swatch) sections.push({ title: l("Cor", "Color"), items: [swatch] });
+  const link = quicklink(text, lang);
+  if (link) sections.push({ title: l("Link rápido", "Quicklink"), items: [link] });
   if (calc || converted || swatch || link) return sections;
 
   const ranked = rank([...apps, ...commands], text);
-  if (ranked.length > 0) sections.push({ title: "Resultados", items: ranked.slice(0, 8) });
+  if (ranked.length > 0) sections.push({ title: l("Resultados", "Results"), items: ranked.slice(0, 8) });
   const strong = (items: Item[]) => rank(items, text).filter((item) => (bestScore(text, item.title, item.keywords) ?? 0) >= 0.5 || item.alias === text);
-  const windowsOpen = strong(openWindows).slice(0, 3);
-  if (windowsOpen.length > 0) sections.push({ title: "Janelas abertas", items: windowsOpen });
+  const windowsOpen = strong(openWindows(lang)).slice(0, 3);
+  if (windowsOpen.length > 0) sections.push({ title: l("Janelas abertas", "Open Windows"), items: windowsOpen });
   if (text.length >= 2) {
-    const today = strong(events);
-    if (today.length > 0) sections.push({ title: "Agenda de hoje", items: today });
-    const texts = strong(snippets);
+    const today = strong(events(lang));
+    if (today.length > 0) sections.push({ title: l("Agenda de hoje", "Today's schedule"), items: today });
+    const texts = strong(snippets(lang));
     if (texts.length > 0) sections.push({ title: "Snippets", items: texts });
-    const found = strong(files).slice(0, 3);
-    if (found.length > 0) sections.push({ title: "Arquivos", items: found });
-    const clips = clipboard.filter((item) => fold(item.title).includes(fold(text))).slice(0, 3);
-    if (clips.length > 0) sections.push({ title: "Área de transferência", items: clips });
+    const found = strong(files(lang)).slice(0, 3);
+    if (found.length > 0) sections.push({ title: l("Arquivos", "Files"), items: found });
+    const clips = clipboard(lang).filter((item) => fold(item.title).includes(fold(text))).slice(0, 3);
+    if (clips.length > 0) sections.push({ title: l("Área de transferência", "Clipboard"), items: clips });
     const faces = emoji.filter((item) => matches(text, item.name, ...item.keywords)).slice(0, 4);
-    if (faces.length > 0) sections.push({ title: "Emoji", items: faces.map((item) => ({ id: `emoji.${item.emoji}`, title: item.name, icon: { kind: "emoji", emoji: item.emoji }, kind: "Colar", outcome: { kind: "done", message: `${item.emoji} colado` } })) });
+    if (faces.length > 0) sections.push({ title: "Emoji", items: faces.map((item) => ({ id: `emoji.${item.emoji}`, title: item.name, icon: { kind: "emoji", emoji: item.emoji }, kind: l("Colar", "Paste"), outcome: { kind: "done", message: l(`${item.emoji} colado`, `${item.emoji} pasted`) } })) });
     const icons = lucide.filter((item) => matches(text, item.name, ...item.tags)).slice(0, 4);
-    if (icons.length > 0) sections.push({ title: "Ícones Lucide", items: icons.map((item) => ({ id: `lucide.${item.name}`, title: item.name, icon: { kind: "lucide", glyph: item.glyph }, kind: "Copiar SVG", outcome: { kind: "done", message: `${item.name}.svg copiado` } })) });
+    if (icons.length > 0) sections.push({ title: l("Ícones Lucide", "Lucide Icons"), items: icons.map((item) => ({ id: `lucide.${item.name}`, title: item.name, icon: { kind: "lucide", glyph: item.glyph }, kind: l("Copiar SVG", "Copy SVG"), outcome: { kind: "done", message: l(`${item.name}.svg copiado`, `${item.name}.svg copied`) } })) });
   }
-  // Nothing matched well: the web instead of a dead end.
   const weak = sections.length === 0 || (sections.length === 1 && ranked.every((item) => (bestScore(text, item.title, item.keywords) ?? 0) < 0.5));
-  if (weak && text.length >= 2) sections.push({ title: `Usar “${text}” com…`, items: [webFallback(text)] });
+  if (weak && text.length >= 2) sections.push({ title: l(`Usar “${text}” com…`, `Use “${text}” with…`), items: [webFallback(text, lang)] });
   return sections;
 }

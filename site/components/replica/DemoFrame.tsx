@@ -3,6 +3,7 @@
 import { Pause } from "lucide-react";
 import { OpticalPlay } from "./OpticalPlay";
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useL } from "@/components/LangProvider";
 import { Wallpaper } from "../Wallpaper";
 import { DemoContext } from "./DemoContext";
 
@@ -26,6 +27,7 @@ export function DemoFrame({
   control?: "sm" | "lg";
   children: ReactNode;
 }) {
+  const l = useL();
   const box = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState<number | null>(null);
   const [visible, setVisible] = useState(false);
@@ -67,7 +69,7 @@ export function DemoFrame({
     <div
       ref={box}
       role="group"
-      aria-roledescription="demonstração interativa"
+      aria-roledescription={l("demonstração interativa", "interactive demo")}
       aria-label={label}
       className="relative w-full overflow-hidden"
       // The rounding clips by clip-path as well: a border radius with overflow hidden
@@ -90,7 +92,7 @@ export function DemoFrame({
         <button
           type="button"
           onClick={() => setPaused((value) => !value)}
-          aria-label={paused ? "Reproduzir demonstração" : "Pausar demonstração"}
+          aria-label={paused ? l("Reproduzir demonstração", "Play demo") : l("Pausar demonstração", "Pause demo")}
           className="absolute z-10 flex items-center justify-center rounded-full bg-[rgba(210,210,215,0.64)] text-black/55 backdrop-blur-[20px] backdrop-saturate-[1.8] transition-[background-color,color,scale] duration-200 hover:bg-[rgba(223,223,227,0.7)] hover:text-black/65 active:scale-[0.96]"
           style={{ width: button.box, height: button.box, right: button.inset, bottom: button.inset }}
         >
@@ -103,10 +105,14 @@ export function DemoFrame({
 
 /** The menu bar behind the panel; at this crop only the clock shows past its shoulders. */
 function MenuBar() {
+  const l = useL();
+  // 14:32 in the visitor's clock; newer ICU puts a narrow no-break space before PM, and a
+  // plain one keeps the server's render and the browser's equal.
+  const clock = l("14:32", new Intl.DateTimeFormat(l.locale, { hour: "numeric", minute: "2-digit" }).format(new Date(2026, 9, 22, 14, 32)).replace(/\s/g, " "));
   return (
     <div aria-hidden className="absolute inset-x-0 top-0 flex h-8 items-center justify-between bg-black/20 px-3.5 text-[13px] font-medium text-white/90">
       <span />
-      <span className="tabular-nums">14:32</span>
+      <span className="tabular-nums">{clock}</span>
     </div>
   );
 }

@@ -1,3 +1,4 @@
+import type { Lang } from "@/lib/lang";
 import { words } from "./shared";
 
 /** The picker's groups, in the order Apple's own picker uses (EmojiCategory). */
@@ -14,9 +15,25 @@ export const categoryTitles: Record<EmojiCategory, string> = {
   flags: "Bandeiras",
 };
 
+/** The groups' titles as the English app shows them. */
+const englishTitles: Record<EmojiCategory, string> = {
+  people: "Smileys & People",
+  nature: "Animals & Nature",
+  food: "Food & Drink",
+  activity: "Activities",
+  travel: "Travel & Places",
+  objects: "Objects",
+  symbols: "Symbols",
+  flags: "Flags",
+};
+
+export function categoryTitlesFor(lang: Lang): Record<EmojiCategory, string> {
+  return lang === "en" ? englishTitles : categoryTitles;
+}
+
 export type EmojiItem = {
   emoji: string;
-  /** The system's Portuguese name, for the tooltip. */
+  /** The system's name in the page's language, for the tooltip. */
   name: string;
   category: EmojiCategory;
   /** Folded words the search matches: the name's first, then the keywords. */
@@ -27,7 +44,7 @@ export type EmojiItem = {
 
 type Row = readonly [emoji: string, name: string, keywords?: string];
 
-/** A small slice of the system's list: the emoji people reach for, with pt-BR keywords. */
+/** A small slice of the system's list: the emoji people reach for, with pt-BR names and keywords. */
 const rows: Record<EmojiCategory, readonly Row[]> = {
   people: [
     ["😀", "Rosto risonho", "feliz sorriso alegre"],
@@ -246,6 +263,212 @@ const rows: Record<EmojiCategory, readonly Row[]> = {
   ],
 };
 
+/**
+ * The same emoji in English: macOS's own short names (CoreEmoji's AppleName, first
+ * letter capitalized like the app) and English keywords in the spirit of the pt ones.
+ */
+const english: Record<string, readonly [name: string, keywords: string]> = {
+  "😀": ["Grinning face", "happy smile cheerful"],
+  "😃": ["Grinning face with big eyes", "happy smile"],
+  "😄": ["Grinning face with smiling eyes", "happy smile"],
+  "😁": ["Beaming face with smiling eyes", "happy teeth"],
+  "😆": ["Grinning face with squinting eyes", "laugh laughing"],
+  "🥹": ["Smiling face holding back tears", "touched grateful"],
+  "😅": ["Grinning face with sweat", "phew nervous"],
+  "😂": ["Face with tears of joy", "laugh lol funny"],
+  "🤣": ["Rolling on the floor laughing face", "laugh lmao funny"],
+  "🥲": ["Smiling face with tear", "grateful relieved"],
+  "☺️": ["Smiling face", "happy cute"],
+  "😊": ["Smiling face with smiling eyes", "happy blush"],
+  "😇": ["Smiling face with halo", "angel innocent"],
+  "🙂": ["Slightly smiling face", "smile"],
+  "🙃": ["Upside down face", "irony silly"],
+  "😉": ["Winking face", "wink"],
+  "😌": ["Relieved face", "calm peace"],
+  "😍": ["Smiling face with heart-eyes", "love crush"],
+  "🥰": ["Smiling face with hearts", "love crush affection"],
+  "😘": ["Face blowing a kiss", "kiss love heart"],
+  "😋": ["Smiling face licking lips", "delicious yummy"],
+  "😜": ["Winking face with stuck-out tongue", "kidding"],
+  "🤪": ["Goofy face", "crazy wacky"],
+  "🤓": ["Smiling face with glasses", "nerd glasses smart"],
+  "😎": ["Smiling face with sunglasses", "cool sun"],
+  "🤩": ["Face with starry eyes", "star wow"],
+  "🥳": ["Party face", "party birthday celebration"],
+  "😏": ["Smirking face", "smug"],
+  "😔": ["Sad pensive face", "sad down"],
+  "😢": ["Crying face", "sad tear"],
+  "😭": ["Loudly crying face", "sad sobbing"],
+  "😤": ["Face with steam from nose", "proud annoyed"],
+  "😡": ["Red angry face", "anger mad"],
+  "🤯": ["Exploding head", "shocked mind blown"],
+  "😳": ["Face with wide open eyes", "embarrassed"],
+  "🥵": ["Hot face", "heat hot"],
+  "🥶": ["Cold face", "freezing icy"],
+  "😱": ["Face screaming in fear", "scared panic"],
+  "😰": ["Anxious face with sweat", "nervous fear"],
+  "🤔": ["Thinking face", "thinking hmm doubt"],
+  "🤗": ["Hugging face", "hug affection"],
+  "🫡": ["Saluting face", "yes sir respect"],
+  "🤫": ["Shushing face", "shh secret"],
+  "🫠": ["Melting face", "heat embarrassed"],
+  "😴": ["Sleeping face", "sleepy zzz tired"],
+  "🙄": ["Face with rolling eyes", "bored"],
+  "😬": ["Grimacing face", "nervous"],
+  "🤠": ["Cowboy face", "cowboy"],
+  "😈": ["Smiling face with horns", "devil mischievous"],
+  "💀": ["Skull", "dead dying"],
+  "👻": ["Ghost", "halloween boo"],
+  "🤖": ["Robot face", "machine"],
+  "👋": ["Waving hand", "hi bye hello"],
+  "👍": ["Thumbs up", "ok like approve"],
+  "👎": ["Thumbs down", "no bad"],
+  "👏": ["Clapping hands", "applause congrats"],
+  "🙌": ["Hands raised in celebration", "hooray celebration party"],
+  "🫶": ["Heart hands", "love affection"],
+  "🙏": ["Hands pressed together", "please thanks prayer"],
+  "🤝": ["Handshake", "deal agreement"],
+  "💪": ["Flexed bicep", "strength strong gym"],
+  "✌️": ["Peace hand sign", "peace victory"],
+  "🤞": ["Fingers crossed", "luck hope"],
+  "👀": ["Eyes", "look watching"],
+  "🐶": ["Dog face", "puppy pet"],
+  "🐱": ["Cat face", "kitty pet"],
+  "🦊": ["Fox face", "animal"],
+  "🐻": ["Bear face", "animal"],
+  "🐼": ["Panda face", "bear"],
+  "🐨": ["Koala face", "animal"],
+  "🦁": ["Lion face", "animal king"],
+  "🐸": ["Frog face", "animal"],
+  "🐵": ["Monkey face", "animal"],
+  "🐧": ["Penguin", "animal cold"],
+  "🦋": ["Butterfly", "insect"],
+  "🐢": ["Turtle", "animal slow"],
+  "🐙": ["Octopus", "sea"],
+  "🐬": ["Dolphin", "sea"],
+  "🌸": ["Cherry blossom", "flower spring"],
+  "🌹": ["Rose", "flower love"],
+  "🌻": ["Sunflower", "flower sun"],
+  "🌵": ["Cactus", "desert plant"],
+  "🌴": ["Palm tree", "beach summer"],
+  "🍀": ["Four leaf clover", "luck"],
+  "🍁": ["Maple leaf", "autumn fall"],
+  "☀️": ["Sun", "heat day"],
+  "🌙": ["Crescent moon", "night"],
+  "⭐": ["Star", "shine"],
+  "⚡": ["Lightning bolt", "electricity energy"],
+  "🔥": ["Fire", "flame hot lit"],
+  "🌈": ["Rainbow", "rain colors"],
+  "❄️": ["Snowflake", "cold winter"],
+  "🌊": ["Wave", "sea beach"],
+  "💧": ["Droplet", "water sweat"],
+  "🍎": ["Red apple", "fruit"],
+  "🍌": ["Banana", "fruit"],
+  "🍉": ["Watermelon", "fruit summer"],
+  "🍓": ["Strawberry", "fruit"],
+  "🥑": ["Avocado", "fruit"],
+  "🌶️": ["Hot pepper", "spicy hot chili"],
+  "🌽": ["Ear of corn", "corn maize"],
+  "🧀": ["Cheese wedge", "cheese"],
+  "🍔": ["Hamburger", "burger"],
+  "🍟": ["French fries", "fries snack"],
+  "🍕": ["Pizza", "slice"],
+  "🌮": ["Taco", "mexican"],
+  "🍣": ["Sushi", "japanese fish"],
+  "🍿": ["Popcorn", "cinema movie"],
+  "🍩": ["Doughnut", "donut sweet"],
+  "🎂": ["Birthday cake", "party birthday"],
+  "🍫": ["Chocolate bar", "sweet candy"],
+  "🍦": ["Soft ice cream", "sweet summer"],
+  "☕": ["Hot beverage", "coffee tea"],
+  "🧉": ["Maté", "mate yerba"],
+  "🍺": ["Beer mug", "beer bar"],
+  "🍻": ["Clinking beer mugs", "cheers party bar"],
+  "🥂": ["Clinking glasses", "cheers toast celebration"],
+  "🍷": ["Wine glass", "drink"],
+  "🍾": ["Bottle with popping cork", "champagne party celebration"],
+  "🎃": ["Jack-o-lantern", "halloween pumpkin"],
+  "🎄": ["Christmas tree", "christmas"],
+  "🎆": ["Fireworks", "party new year"],
+  "🎇": ["Firework sparkler", "fireworks celebration"],
+  "🧨": ["Firecracker", "fireworks explosion"],
+  "✨": ["Sparkles", "magic new"],
+  "🎈": ["Balloon", "party birthday"],
+  "🎉": ["Party popper", "party celebration congrats"],
+  "🎊": ["Confetti ball", "party celebration"],
+  "🎁": ["Present", "gift birthday"],
+  "🪅": ["Piñata", "party"],
+  "🪩": ["Mirror ball", "party disco dance"],
+  "🏆": ["Trophy", "champion win"],
+  "🥇": ["Gold medal", "gold champion"],
+  "⚽": ["Soccer ball", "football goal"],
+  "🏀": ["Basketball", "ball"],
+  "🎾": ["Tennis ball", "ball racket"],
+  "🏐": ["Volleyball", "ball"],
+  "🎮": ["Video game controller", "game controller"],
+  "🎲": ["Game die", "game luck"],
+  "🎯": ["Bullseye", "dart target"],
+  "🎸": ["Guitar", "music rock"],
+  "🚗": ["Car", "automobile"],
+  "🚕": ["Taxi", "car"],
+  "🚌": ["Bus", "transport"],
+  "🚒": ["Fire engine", "fire truck"],
+  "🚲": ["Bicycle", "bike pedal"],
+  "✈️": ["Airplane", "travel flight"],
+  "🚀": ["Rocket", "space launch"],
+  "🏠": ["House", "home"],
+  "🏖️": ["Beach with umbrella", "vacation summer"],
+  "🌋": ["Volcano", "fire eruption"],
+  "⛺": ["Tent", "camping"],
+  "🌍": ["Globe showing Europe and Africa", "world earth"],
+  "⌚": ["Watch", "time"],
+  "📱": ["Mobile phone", "phone iphone"],
+  "💻": ["Laptop", "computer mac"],
+  "⌨️": ["Keyboard", "computer"],
+  "📷": ["Camera", "photo"],
+  "🎧": ["Headphones", "music"],
+  "💡": ["Light bulb", "idea light"],
+  "🕯️": ["Candle", "light flame"],
+  "🧯": ["Fire extinguisher", "fire"],
+  "💰": ["Money bag", "cash"],
+  "📦": ["Package", "box delivery"],
+  "📚": ["Books", "study reading"],
+  "✏️": ["Pencil", "write"],
+  "📌": ["Pushpin", "pin"],
+  "📎": ["Paperclip", "attachment"],
+  "🔑": ["Key", "password"],
+  "🔒": ["Closed lock", "secure"],
+  "❤️": ["Red heart", "love"],
+  "🩷": ["Pink heart", "love cute"],
+  "🧡": ["Orange heart", "love"],
+  "💛": ["Yellow heart", "love friendship"],
+  "💚": ["Green heart", "love"],
+  "💙": ["Blue heart", "love"],
+  "💜": ["Purple heart", "love"],
+  "🖤": ["Black heart", "mourning"],
+  "🤍": ["White heart", "peace"],
+  "🤎": ["Brown heart", "love"],
+  "💔": ["Broken heart", "sad end"],
+  "❤️‍🔥": ["Heart on fire", "fire passion"],
+  "💕": ["Two hearts", "love heart"],
+  "💖": ["Sparkling heart", "love heart"],
+  "💘": ["Heart with arrow", "cupid love"],
+  "💯": ["Hundred points symbol", "perfect"],
+  "✅": ["Check mark symbol", "done ok right"],
+  "❌": ["Cross mark", "wrong no"],
+  "⚠️": ["Warning", "careful attention"],
+  "❓": ["Red question mark", "question doubt"],
+  "💬": ["Speech balloon", "chat message"],
+  "💤": ["Sleeping sign", "sleep"],
+  "🏁": ["Chequered flag", "race finish"],
+  "🏳️‍🌈": ["Rainbow flag", "pride"],
+  "🇧🇷": ["Flag of Brazil", "brazil"],
+  "🇵🇹": ["Flag of Portugal", "portugal"],
+  "🇦🇷": ["Flag of Argentina", "argentina"],
+  "🇺🇸": ["Flag of the United States", "usa america"],
+  "🇯🇵": ["Flag of Japan", "japan"],
+};
+
 function item(category: EmojiCategory, [emoji, name, keywords = ""]: Row): EmojiItem {
   const nameWords = words(name);
   const terms = [...nameWords];
@@ -254,16 +477,31 @@ function item(category: EmojiCategory, [emoji, name, keywords = ""]: Row): Emoji
   return { emoji, name, category, terms, nameWords: nameWords.length };
 }
 
-export const sections = (Object.keys(rows) as EmojiCategory[]).map((category) => ({
-  category,
-  items: rows[category].map((row) => item(category, row)),
-}));
+type Section = { category: EmojiCategory; items: EmojiItem[] };
 
-const all = sections.flatMap((section) => section.items);
-const byEmoji = new Map(all.map((entry) => [entry.emoji, entry]));
+function build(lang: Lang): { sections: Section[]; all: EmojiItem[]; byEmoji: Map<string, EmojiItem> } {
+  const sections = (Object.keys(rows) as EmojiCategory[]).map((category) => ({
+    category,
+    items: rows[category].map((row) => {
+      const translated = lang === "en" ? english[row[0]] : undefined;
+      return item(category, translated ? [row[0], translated[0], translated[1]] : row);
+    }),
+  }));
+  const all = sections.flatMap((section) => section.items);
+  return { sections, all, byEmoji: new Map(all.map((entry) => [entry.emoji, entry])) };
+}
 
-export function emojiItem(emoji: string): EmojiItem | undefined {
-  return byEmoji.get(emoji);
+const built: Record<Lang, ReturnType<typeof build>> = { pt: build("pt"), en: build("en") };
+
+/** The Portuguese sections, as before the English page. */
+export const sections = built.pt.sections;
+
+export function sectionsFor(lang: Lang): Section[] {
+  return built[lang].sections;
+}
+
+export function emojiItem(emoji: string, lang: Lang = "pt"): EmojiItem | undefined {
+  return built[lang].byEmoji.get(emoji);
 }
 
 /** Lower is better; null when some typed word matches nothing (EmojiSearch.score). */
@@ -286,7 +524,8 @@ function score(tokens: string[], entry: EmojiItem): number | null {
 }
 
 /** The matches, best first; ties keep the picker's order. Typing an emoji finds it. */
-export function searchEmoji(query: string): EmojiItem[] {
+export function searchEmoji(query: string, lang: Lang = "pt"): EmojiItem[] {
+  const all = built[lang].all;
   const trimmed = query.trim();
   if (!trimmed) return [];
   const tokens = words(trimmed);

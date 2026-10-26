@@ -1,6 +1,7 @@
 "use client";
 
 import { Check, Plus } from "lucide-react";
+import { useL } from "@/components/LangProvider";
 import { notch } from "../../style";
 import type { Listing } from "./market";
 
@@ -42,13 +43,14 @@ export function SearchHit({
   adding: boolean;
   onPick: () => void;
 }) {
+  const l = useL();
   return (
     <button
       type="button"
       onClick={onPick}
       disabled={listed}
       aria-label={`${item.symbol}, ${item.name}`}
-      aria-description={listed ? "Já está na lista" : "Adicionar à lista"}
+      aria-description={listed ? l("Já está na lista", "Already on the list") : l("Adicionar à lista", "Add to list")}
       data-selected={selected || undefined}
       className="group flex h-[26px] min-w-0 items-center gap-2 rounded-[8px] px-2 text-left transition-[background-color] duration-[120ms] hover:bg-white/[0.06] data-selected:bg-white/[0.14] disabled:cursor-default"
     >

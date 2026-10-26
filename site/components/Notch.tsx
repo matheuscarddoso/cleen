@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { pick, type Lang } from "@/lib/lang";
 import { Wallpaper } from "./Wallpaper";
 
 /** Apple's ease for things that grow out of the notch: quick out, long settle. */
@@ -8,16 +9,17 @@ export const notchEase = "cubic-bezier(0.32, 0.72, 0, 1)";
  * The top of a Mac screen: wallpaper, a translucent menu bar, and whatever hangs from the
  * notch in the middle. Purely a stage, so it stays out of the accessibility tree.
  */
-export function Screen({ tone, children, className = "" }: { tone: "blue" | "dusk" | "teal"; children: ReactNode; className?: string }) {
+export function Screen({ lang, tone, children, className = "" }: { lang: Lang; tone: "blue" | "dusk" | "teal"; children: ReactNode; className?: string }) {
+  const l = pick(lang);
   return (
     <div className={`relative overflow-hidden ${className}`}>
       <Wallpaper tone={tone} />
       <div aria-hidden className="absolute inset-x-0 top-0 flex h-[34px] items-center justify-between bg-black/15 px-4 text-[13px] font-medium text-white/85">
         <span className="hidden gap-4 sm:flex">
           <span className="font-semibold">Finder</span>
-          <span>Arquivo</span>
+          <span>{l("Arquivo", "File")}</span>
         </span>
-        <span className="ml-auto tabular-nums">14:32</span>
+        <span className="ml-auto tabular-nums">{l("14:32", "2:32 PM")}</span>
       </div>
       <div className="relative flex h-full flex-col items-center">{children}</div>
     </div>

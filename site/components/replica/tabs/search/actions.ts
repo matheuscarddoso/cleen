@@ -1,69 +1,78 @@
+import { pick, type Lang } from "@/lib/lang";
 import type { Item } from "./catalog";
 
 /** One entry of the ⌘K panel: what it does, its shortcut, and what it says once done. */
 export type Action = { title: string; keys?: readonly string[]; message: string; destructive?: boolean };
 
 /** Alias and global shortcut, offered on everything found the same way every time. */
-const personalize = (item: Item): Action[] => [
-  { title: item.alias ? `Mudar apelido (${item.alias})` : "Dar um apelido", message: `Apelido de “${item.title}” guardado` },
-  { title: item.hotkey ? `Mudar atalho (${item.hotkey.join("")})` : "Dar um atalho global", message: `Atalho de “${item.title}” guardado` },
-  ...(item.hotkey ? [{ title: "Tirar o atalho", message: "Atalho tirado" }] : []),
-];
+const personalize = (item: Item, lang: Lang): Action[] => {
+  const l = pick(lang);
+  return [
+    { title: item.alias ? l(`Mudar apelido (${item.alias})`, `Change Alias (${item.alias})`) : l("Dar um apelido", "Add Alias"), message: l(`Apelido de “${item.title}” guardado`, `Alias for “${item.title}” saved`) },
+    { title: item.hotkey ? l(`Mudar atalho (${item.hotkey.join("")})`, `Change Shortcut (${item.hotkey.join("")})`) : l("Dar um atalho global", "Add Global Shortcut"), message: l(`Atalho de “${item.title}” guardado`, `Shortcut for “${item.title}” saved`) },
+    ...(item.hotkey ? [{ title: l("Tirar o atalho", "Remove Shortcut"), message: l("Atalho tirado", "Shortcut removed") }] : []),
+  ];
+};
 
 /**
  * The secondary actions of a result, as ⌘K lists them in the app (SearchCatalog.swift):
  * the first one is Return's, the rest have their own keys. Picked by the kind of row.
  */
-export function actionsFor(item: Item): Action[] {
-  const main = (title: string): Action => ({ title, keys: ["↩"], message: item.outcome.kind === "done" ? item.outcome.message : "Feito" });
+export function actionsFor(item: Item, lang: Lang = "pt"): Action[] {
+  const l = pick(lang);
+  const main = (title: string): Action => ({ title, keys: ["↩"], message: item.outcome.kind === "done" ? item.outcome.message : l("Feito", "Done") });
+  const copy = (message: string): Action => ({ title: l("Copiar", "Copy"), keys: ["⌘", "C"], message });
   const [kind] = item.id.split(".");
   switch (kind) {
     case "app":
       return [
-        main("Abrir"),
-        { title: "Mostrar no Finder", keys: ["⌘", "↩"], message: `${item.title} no Finder` },
-        { title: "Copiar caminho", keys: ["⌘", "⇧", "C"], message: "Caminho copiado" },
-        { title: "Ocultar", keys: ["⌘", "H"], message: `${item.title} oculto` },
-        { title: "Sair", keys: ["⌘", "Q"], message: `${item.title} fechado` },
-        { title: "Forçar saída", message: "Pronto para revisar", destructive: true },
-        ...personalize(item),
+        main(l("Abrir", "Open")),
+        { title: l("Mostrar no Finder", "Show in Finder"), keys: ["⌘", "↩"], message: l(`${item.title} no Finder`, `${item.title} in Finder`) },
+        { title: l("Copiar caminho", "Copy Path"), keys: ["⌘", "⇧", "C"], message: l("Caminho copiado", "Path copied") },
+        { title: l("Ocultar", "Hide"), keys: ["⌘", "H"], message: l(`${item.title} oculto`, `${item.title} hidden`) },
+        { title: l("Sair", "Quit"), keys: ["⌘", "Q"], message: l(`${item.title} fechado`, `${item.title} quit`) },
+        { title: l("Forçar saída", "Force Quit"), message: l("Pronto para revisar", "Ready to review"), destructive: true },
+        ...personalize(item, lang),
       ];
     case "openWindow":
       return [
-        main("Ir para a janela"),
-        { title: "Fechar janela", keys: ["⌘", "W"], message: "Janela fechada" },
-        { title: `Sair do ${item.subtitle ?? "app"}`, keys: ["⌘", "Q"], message: `${item.subtitle ?? "App"} fechado` },
+        main(l("Ir para a janela", "Go to Window")),
+        { title: l("Fechar janela", "Close Window"), keys: ["⌘", "W"], message: l("Janela fechada", "Window closed") },
+        { title: l(`Sair do ${item.subtitle ?? "app"}`, `Quit ${item.subtitle ?? "App"}`), keys: ["⌘", "Q"], message: l(`${item.subtitle ?? "App"} fechado`, `${item.subtitle ?? "App"} quit`) },
       ];
     case "file":
       return [
-        main("Abrir"),
-        { title: "Mostrar no Finder", keys: ["⌘", "↩"], message: `${item.title} no Finder` },
-        { title: "Abrir com Pré-Visualização", message: `${item.title} aberto` },
-        { title: "Copiar caminho", keys: ["⌘", "⇧", "C"], message: "Caminho copiado" },
-        { title: "Copiar arquivo", keys: ["⌘", "C"], message: "Arquivo copiado" },
-        { title: "Mover para o Lixo", keys: ["⌘", "⌫"], message: "Pronto para revisar", destructive: true },
+        main(l("Abrir", "Open")),
+        { title: l("Mostrar no Finder", "Show in Finder"), keys: ["⌘", "↩"], message: l(`${item.title} no Finder`, `${item.title} in Finder`) },
+        { title: l("Abrir com Pré-Visualização", "Open with Preview"), message: l(`${item.title} aberto`, `${item.title} opened`) },
+        { title: l("Copiar caminho", "Copy Path"), keys: ["⌘", "⇧", "C"], message: l("Caminho copiado", "Path copied") },
+        { title: l("Copiar arquivo", "Copy File"), keys: ["⌘", "C"], message: l("Arquivo copiado", "File copied") },
+        { title: l("Mover para o Lixo", "Move to Trash"), keys: ["⌘", "⌫"], message: l("Pronto para revisar", "Ready to review"), destructive: true },
       ];
     case "clip":
-      return [main("Colar"), { title: "Copiar", keys: ["⌘", "C"], message: "Copiado" }];
-    case "event":
+      return [main(l("Colar", "Paste")), copy(l("Copiado", "Copied"))];
+    case "event": {
+      const join = l("Entrar na reunião", "Join Meeting");
       return [
-        main(item.verb ?? "Abrir"),
-        { title: "Abrir no Calendário", keys: ["⌘", "↩"], message: `${item.title} no Calendário` },
-        ...(item.verb === "Entrar na reunião" ? [{ title: "Copiar link da reunião", keys: ["⌘", "C"], message: "Link da reunião copiado" }] : []),
+        main(item.verb ?? l("Abrir", "Open")),
+        { title: l("Abrir no Calendário", "Open in Calendar"), keys: ["⌘", "↩"], message: l(`${item.title} no Calendário`, `${item.title} in Calendar`) },
+        ...(item.verb === join ? [{ title: l("Copiar link da reunião", "Copy Meeting Link"), keys: ["⌘", "C"], message: l("Link da reunião copiado", "Meeting link copied") }] : []),
       ];
+    }
     case "snippet":
-      return [main("Colar"), { title: "Copiar", keys: ["⌘", "C"], message: "Copiado" }, ...personalize(item)];
+      return [main(l("Colar", "Paste")), copy(l("Copiado", "Copied")), ...personalize(item, lang)];
     case "calc":
     case "smart":
     case "color":
-      return [main("Copiar"), { title: "Colar", keys: ["⌘", "↩"], message: "Colado" }];
+      return [main(l("Copiar", "Copy")), { title: l("Colar", "Paste"), keys: ["⌘", "↩"], message: l("Colado", "Pasted") }];
     case "emoji":
-      return [main("Colar"), { title: "Copiar", keys: ["⌘", "C"], message: "Copiado" }];
+      return [main(l("Colar", "Paste")), copy(l("Copiado", "Copied"))];
     case "quicklink":
-      return [main("Abrir"), { title: "Copiar", keys: ["⌘", "C"], message: "Endereço copiado" }, ...personalize(item)];
+      return [main(l("Abrir", "Open")), copy(l("Endereço copiado", "URL copied")), ...personalize(item, lang)];
     case "web":
-      return [main("Buscar"), { title: "Copiar", keys: ["⌘", "C"], message: "Endereço copiado" }];
+      return [main(l("Buscar", "Search")), copy(l("Endereço copiado", "URL copied"))];
     default:
-      return [main(item.kind === "Janela" ? "Ajustar janela" : "Executar"), ...personalize(item)];
+      // Window layouts arrange; Cleen's commands, the Mac's and the tabs run.
+      return [main(kind === "window" ? l("Ajustar janela", "Arrange Window") : l("Executar", "Run")), ...personalize(item, lang)];
   }
 }

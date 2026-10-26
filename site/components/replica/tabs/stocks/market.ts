@@ -1,9 +1,12 @@
 /**
  * The replica's market: a fixed catalog of public tickers with made-up but plausible
  * prices, and their intraday lines as seeded random walks, so the server and the first
- * client render draw the same day. Numbers are written the way Ações writes them in
- * Portuguese (StockFormat): `R$ 58,83`, `US$ 347,72`, an index in points, `+0,76%`.
+ * client render draw the same day. Numbers are written the way Ações writes them
+ * (StockFormat): in Portuguese `R$ 58,83`, `US$ 347,72`, an index in points, `+0,76%`;
+ * in English `R$58.83`, `$347.72`, `204,128.40`, `+0.76%`.
  */
+
+import type { Lang } from "@/lib/lang";
 
 export type Listing = {
   /** As the list shows it (StockSymbol.display): no `^`, no `.SA`. */
@@ -43,8 +46,32 @@ export const catalog: readonly Listing[] = [
   { symbol: "V", name: "Visa Inc.", exchange: "NYSE", currency: "USD", close: 344.9, volatility: 0.0009, trend: 0.002 },
 ];
 
-/** The app's first-run list (StockSymbol.defaultWatchlist). */
+/**
+ * Tickers only the English page offers: the US index that stands in for the Ibovespa,
+ * and Alphabet's other class, so typing "GOOG" finds two like "VALE" does.
+ */
+const englishOnly = {
+  GSPC: { symbol: "GSPC", name: "S&P 500", exchange: "SNP", currency: null, close: 7_184.6, volatility: 0.0007, trend: 0.0048 },
+  GOOG: { symbol: "GOOG", name: "Alphabet Inc.", exchange: "NASDAQ", currency: "USD", close: 249.6, volatility: 0.0014, trend: 0.005 },
+} as const satisfies Record<string, Listing>;
+
+/** What each page's search knows: the Portuguese catalog as it was, the English one with its extras in place. */
+const catalogs: Record<Lang, readonly Listing[]> = {
+  pt: catalog,
+  en: [englishOnly.GSPC, ...catalog.flatMap((item) => (item.symbol === "GOOGL" ? [item, englishOnly.GOOG] : [item]))],
+};
+
+export function catalogFor(lang: Lang): readonly Listing[] {
+  return catalogs[lang];
+}
+
+/**
+ * The app's first-run list (StockSymbol.defaultWatchlist), Portuguese. The English page
+ * opens on the US equivalents: the S&P 500 for the Ibovespa, Tesla for Petrobras.
+ */
 export const defaultWatchlist = ["BVSP", "AAPL", "NVDA", "PETR4"] as const;
+
+export const defaultWatchlists: Record<Lang, readonly string[]> = { pt: defaultWatchlist, en: ["GSPC", "AAPL", "NVDA", "TSLA"] };
 
 /** More than this stops reading as a glance (StockSymbol.maximumCount). */
 export const maximumCount = 16;
@@ -52,7 +79,7 @@ export const maximumCount = 16;
 /** One session in five-minute bars: 10:00 to 16:30. */
 export const sessionLength = 78;
 
-const bySymbol = new Map(catalog.map((listing) => [listing.symbol, listing]));
+const bySymbol = new Map(catalogs.en.map((listing) => [listing.symbol, listing]));
 
 export function listing(symbol: string): Listing | undefined {
   return bySymbol.get(symbol);
@@ -110,7 +137,9 @@ export type Market = { day: number; days: Record<string, Day> };
 /** Every catalog ticker's session on day `day`, each opening from its last close. */
 export function marketDay(day: number, previous?: Market): Market {
   const days: Record<string, Day> = {};
-  for (const item of catalog) {
+  // Every ticker either page can show; each walk is seeded by its own symbol, so the
+  // extras leave the others' days exactly as they were.
+  for (const item of catalogs.en) {
     const before = previous?.days[item.symbol];
     const close = before ? (before.closes[before.closes.length - 1] ?? item.close) : item.close;
     days[item.symbol] = walkDay(item, close, day);
@@ -139,30 +168,36 @@ export function quote(day: Day, revealed: number): Quote {
   return { price, previousClose: day.previousClose, change, direction: rounded > 0 ? "up" : rounded < 0 ? "down" : "flat", closes };
 }
 
-// MARK: Formatting (pt-BR, written by hand so server and browser print the same thing)
+// MARK: Formatting (pt-BR and en-US, written by hand so server and browser print the same thing)
 
-export function number(value: number, digits = 2): string {
+export function number(value: number, digits = 2, lang: Lang = "pt"): string {
   const [whole = "0", fraction] = Math.abs(value).toFixed(digits).split(".");
-  const grouped = whole.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-  return `${value < 0 ? "-" : ""}${grouped}${fraction ? `,${fraction}` : ""}`;
+  const [group, decimal] = lang === "en" ? [",", "."] : [".", ","];
+  const grouped = whole.replace(/\B(?=(\d{3})+(?!\d))/g, group);
+  return `${value < 0 ? "-" : ""}${grouped}${fraction ? `${decimal}${fraction}` : ""}`;
 }
 
-export function price(value: number, currency: Listing["currency"]): string {
+export function price(value: number, currency: Listing["currency"], lang: Lang = "pt"): string {
+  if (lang === "en") {
+    if (currency === "BRL") return `R$${number(value, 2, lang)}`;
+    if (currency === "USD") return `$${number(value, 2, lang)}`;
+    return number(value, 2, lang);
+  }
   if (currency === "BRL") return `R$ ${number(value)}`;
   if (currency === "USD") return `US$ ${number(value)}`;
   return number(value);
 }
 
-export function change(fraction: number): string {
+export function change(fraction: number, lang: Lang = "pt"): string {
   const rounded = Math.round(fraction * 10_000) / 100;
-  if (rounded === 0) return "0,00%";
-  return `${rounded > 0 ? "+" : "-"}${number(Math.abs(rounded))}%`;
+  if (rounded === 0) return lang === "en" ? "0.00%" : "0,00%";
+  return `${rounded > 0 ? "+" : "-"}${number(Math.abs(rounded), 2, lang)}%`;
 }
 
-export function absoluteChange(value: number): string {
+export function absoluteChange(value: number, lang: Lang = "pt"): string {
   const rounded = Math.round(value * 100) / 100;
-  if (rounded === 0) return "0,00";
-  return `${rounded > 0 ? "+" : "-"}${number(Math.abs(rounded))}`;
+  if (rounded === 0) return lang === "en" ? "0.00" : "0,00";
+  return `${rounded > 0 ? "+" : "-"}${number(Math.abs(rounded), 2, lang)}`;
 }
 
 // MARK: Search
@@ -172,11 +207,12 @@ function fold(text: string): string {
 }
 
 /** What Yahoo's search would answer, from the catalog: ticker prefix or a word of the name. */
-export function search(query: string): Listing[] {
+export function search(query: string, lang: Lang = "pt"): Listing[] {
   const wanted = fold(query.trim());
   if (!wanted) return [];
-  const tickers = catalog.filter((item) => fold(item.symbol).startsWith(wanted));
-  const names = catalog.filter((item) => !tickers.includes(item) && fold(item.name).split(/[\s.,-]+/).some((word) => word.startsWith(wanted)));
+  const known = catalogs[lang];
+  const tickers = known.filter((item) => fold(item.symbol).startsWith(wanted));
+  const names = known.filter((item) => !tickers.includes(item) && fold(item.name).split(/[\s.,-]+/).some((word) => word.startsWith(wanted)));
   return [...tickers, ...names].slice(0, 6);
 }
 

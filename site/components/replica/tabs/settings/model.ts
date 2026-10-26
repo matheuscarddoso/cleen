@@ -1,4 +1,5 @@
 import { Info, LayoutGrid, PanelTop, Settings, Sun, Trash2, type LucideIcon } from "lucide-react";
+import { pick, type Lang } from "@/lib/lang";
 import { panel } from "../../style";
 
 /** The pages of Ajustes (SettingsSection). */
@@ -6,35 +7,48 @@ export type SectionId = "general" | "displays" | "notch" | "tabs" | "cleaning" |
 
 export type Section = { id: SectionId; title: string; subtitle: string; icon: LucideIcon | "claude" };
 
-export const sections: Record<SectionId, Section> = {
-  general: { id: "general", title: "Geral", subtitle: "Como o Cleen começa, onde aparece e quando avisa.", icon: Settings },
-  displays: { id: "displays", title: "Telas", subtitle: "O brilho de cada tela, inclusive a do monitor externo.", icon: Sun },
-  notch: { id: "notch", title: "Aparência", subtitle: "Como o notch abre e o que mostra fechado.", icon: PanelTop },
-  tabs: { id: "tabs", title: "Abas", subtitle: "As ferramentas na barra do notch e a ordem delas.", icon: LayoutGrid },
-  cleaning: { id: "cleaning", title: "Limpeza", subtitle: "O que conta como projeto parado e arquivo grande.", icon: Trash2 },
-  agents: { id: "agents", title: "Claude Code", subtitle: "Os pedidos de permissão, respondidos no notch.", icon: "claude" },
-  about: { id: "about", title: "Sobre", subtitle: "Permissões e o que o Cleen já fez.", icon: Info },
-};
+/** SettingsSection's titles and subtitles, in the app's words for each language. */
+export function sections(lang: Lang = "pt"): Record<SectionId, Section> {
+  const l = pick(lang);
+  return {
+    general: { id: "general", title: l("Geral", "General"), subtitle: l("Como o Cleen começa, onde aparece e quando avisa.", "How Cleen starts, where it shows up, and when it notifies you."), icon: Settings },
+    displays: { id: "displays", title: l("Telas", "Displays"), subtitle: l("O brilho de cada tela, inclusive a do monitor externo.", "The brightness of every display, the external monitor's too."), icon: Sun },
+    notch: { id: "notch", title: l("Aparência", "Appearance"), subtitle: l("Como o notch abre e o que mostra fechado.", "How the notch opens and what it shows when closed."), icon: PanelTop },
+    tabs: { id: "tabs", title: l("Abas", "Tabs"), subtitle: l("As ferramentas na barra do notch e a ordem delas.", "The tools in the notch bar and their order."), icon: LayoutGrid },
+    cleaning: { id: "cleaning", title: l("Limpeza", "Cleanup"), subtitle: l("O que conta como projeto parado e arquivo grande.", "What counts as an idle project and a large file."), icon: Trash2 },
+    agents: { id: "agents", title: "Claude Code", subtitle: l("Os pedidos de permissão, respondidos no notch.", "Permission requests, answered in the notch."), icon: "claude" },
+    about: { id: "about", title: l("Sobre", "About"), subtitle: l("Permissões e o que o Cleen já fez.", "Permissions and what Cleen has done so far."), icon: Info },
+  };
+}
 
 /** Sidebar headings, as in the app: none over the first pair, then NOTCH, FERRAMENTAS, CLEEN. */
-export const sidebar: { title: string | null; sections: SectionId[] }[] = [
-  { title: null, sections: ["general", "displays"] },
-  { title: "Notch", sections: ["notch", "tabs"] },
-  { title: "Ferramentas", sections: ["cleaning", "agents"] },
-  { title: "Cleen", sections: ["about"] },
-];
+export function sidebar(lang: Lang = "pt"): { title: string | null; sections: SectionId[] }[] {
+  const l = pick(lang);
+  return [
+    { title: null, sections: ["general", "displays"] },
+    { title: "Notch", sections: ["notch", "tabs"] },
+    { title: l("Ferramentas", "Tools"), sections: ["cleaning", "agents"] },
+    { title: "Cleen", sections: ["about"] },
+  ];
+}
 
 /** NotchSettings.widths / heights, in points of the real panel. */
-export const widths = [
-  { label: "Padrão", value: 680 },
-  { label: "Largo", value: 780 },
-  { label: "Extra", value: 880 },
-] as const;
-export const heights = [
-  { label: "Padrão", value: 234 },
-  { label: "Alto", value: 274 },
-  { label: "Mais alto", value: 314 },
-] as const;
+export function widths(lang: Lang = "pt") {
+  const l = pick(lang);
+  return [
+    { label: l("Padrão", "Default"), value: 680 },
+    { label: l("Largo", "Wide"), value: 780 },
+    { label: "Extra", value: 880 },
+  ] as const;
+}
+export function heights(lang: Lang = "pt") {
+  const l = pick(lang);
+  return [
+    { label: l("Padrão", "Default"), value: 234 },
+    { label: l("Alto", "Tall"), value: 274 },
+    { label: l("Mais alto", "Tallest"), value: 314 },
+  ] as const;
+}
 
 /**
  * The size the replica can actually take. The demo canvas is 760 wide, so the real

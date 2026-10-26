@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useL } from "@/components/LangProvider";
+import type { Lang } from "@/lib/lang";
 import { useDemo, useTypewriter } from "../DemoContext";
 import { notch } from "../style";
 import { CategoryBar, ConverterBox, SwapButton, UnitMenu } from "./converter/parts";
@@ -12,22 +14,37 @@ type Pair = { from: string; to: string };
 /** Everything the visitor can change: the category, and per category what's typed and the pair. */
 type State = { category: CategoryId; inputs: Partial<Record<CategoryId, string>>; pairs: Partial<Record<CategoryId, Pair>> };
 
-/** Three conversions, typed one after another, each in its own category. */
-const script: readonly { category: CategoryId; typed: string; beats: readonly number[] }[] = [
-  { category: "length", typed: "42", beats: [4000] },
-  // Moeda: the amount, then the swap turns BRL → USD into USD → BRL.
-  { category: "currency", typed: "250", beats: [1300, 2700] },
-  // Temperatura: the result, then Return copies it.
-  { category: "temperature", typed: "36,6", beats: [900, 1500, 1600] },
-];
-const typed = script.map((entry) => entry.typed);
+type Step = { category: CategoryId; typed: string; beats: readonly number[] };
 
-/** The ECB publishes on weekdays: the last one before today, as "22 de out.". */
-function lastPublication(now: Date): string {
+/** Three conversions, typed one after another, each in its own category. */
+const scripts: Record<Lang, readonly Step[]> = {
+  pt: [
+    { category: "length", typed: "42", beats: [4000] },
+    // Moeda: the amount, then the swap turns BRL → USD into USD → BRL.
+    { category: "currency", typed: "250", beats: [1300, 2700] },
+    // Temperatura: the result, then Return copies it.
+    { category: "temperature", typed: "36,6", beats: [900, 1500, 1600] },
+  ],
+  // The same three, typed the way an English visitor writes a decimal; the currency
+  // opens on USD → EUR, so the swap turns it into EUR → USD.
+  en: [
+    { category: "length", typed: "42", beats: [4000] },
+    { category: "currency", typed: "250", beats: [1300, 2700] },
+    { category: "temperature", typed: "36.6", beats: [900, 1500, 1600] },
+  ],
+};
+/** Module-level per language, so the typewriter sees the same array every render. */
+const typedTexts: Record<Lang, readonly string[]> = { pt: scripts.pt.map((entry) => entry.typed), en: scripts.en.map((entry) => entry.typed) };
+
+/** The pair the script's swap leaves the currency on: the default pair, reversed. */
+const swappedCurrency: Record<Lang, Pair> = { pt: { from: "USD", to: "BRL" }, en: { from: "EUR", to: "USD" } };
+
+/** The ECB publishes on weekdays: the last one before today, as "22 de out." ("Oct 22"). */
+function lastPublication(now: Date, tag: string): string {
   const day = new Date(now);
   do day.setDate(day.getDate() - 1);
   while (day.getDay() === 0 || day.getDay() === 6);
-  return new Intl.DateTimeFormat("pt-BR", { day: "numeric", month: "short" }).format(day);
+  return new Intl.DateTimeFormat(tag, { day: "numeric", month: "short" }).format(day);
 }
 
 /** Half a turn of the swap's arrows (the glyph reads the same upside down). */
@@ -49,7 +66,9 @@ function resultSize(text: string): number {
  */
 export function ConverterTab() {
   const { reduced } = useDemo();
-  const typing = useTypewriter(typed, { speed: 150, hold: 4200 });
+  const l = useL();
+  const script = scripts[l.lang];
+  const typing = useTypewriter(typedTexts[l.lang], { speed: 150, hold: 4200 });
   const [manual, setManual] = useState<State | null>(null);
   const [copied, showCopied] = useConfirmation<true>(1400);
   const [published, setPublished] = useState<string | null>(null);
@@ -61,10 +80,10 @@ export function ConverterTab() {
   const scripted: State = {
     category: step.category,
     inputs: { [step.category]: reduced ? step.typed : typing.text },
-    pairs: step.category === "currency" && beat >= 1 ? { currency: { from: "USD", to: "BRL" } } : {},
+    pairs: step.category === "currency" && beat >= 1 ? { currency: swappedCurrency[l.lang] } : {},
   };
   const state = manual ?? scripted;
-  const kind = category(state.category);
+  const kind = category(state.category, l.lang);
   const pair = state.pairs[state.category] ?? kind.pair;
   const pick = (id: string, fallback: number): Unit => kind.units.find((unit) => unit.id === id) ?? kind.units[fallback]!;
   const from = pick(pair.from, 0);
@@ -73,12 +92,12 @@ export function ConverterTab() {
   const value = parseNumber(input);
   const result = value === null ? null : convert(value, from, to, kind.id);
   const isCurrency = kind.id === "currency";
-  const resultText = result === null ? "—" : formatNumber(result, isCurrency);
+  const resultText = result === null ? "—" : formatNumber(result, isCurrency, l.lang);
   const rate = from.id === to.id ? null : convert(1, from, to, kind.id);
-  const rateText = rate === null ? null : `1 ${from.symbol} = ${formatNumber(rate)} ${to.symbol}`;
+  const rateText = rate === null ? null : `1 ${from.symbol} = ${formatNumber(rate, false, l.lang)} ${to.symbol}`;
   const showCopiedBadge = manual ? copied !== null : step.category === "temperature" && beat === 1;
 
-  useEffect(() => setPublished(lastPublication(new Date())), []);
+  useEffect(() => setPublished(lastPublication(new Date(), l.locale)), [l.locale]);
 
   const swappedByScript = !manual && step.category === "currency" && beat >= 1;
   useEffect(() => {
@@ -122,7 +141,7 @@ export function ConverterTab() {
               inputMode="decimal"
               autoComplete="off"
               spellCheck={false}
-              aria-label={`Valor em ${from.name}`}
+              aria-label={l(`Valor em ${from.name}`, `Value in ${from.name}`)}
               className="block h-[29px] w-full bg-transparent text-[24px] font-semibold tabular-nums outline-none placeholder:text-white/25"
               style={{ color: value === null && input.length > 0 ? notch.critical : notch.primary }}
             />
@@ -164,9 +183,11 @@ export function ConverterTab() {
         )}
         <span className="flex-1" />
         {isCurrency ? (
-          <span title="Taxas de referência do Banco Central Europeu, via Frankfurter">{published ? `Cotação de ${published} · BCE` : "Cotação do BCE"}</span>
+          <span title={l("Taxas de referência do Banco Central Europeu, via Frankfurter", "European Central Bank reference rates, via Frankfurter")}>
+            {published ? l(`Cotação de ${published} · BCE`, `Rates from ${published} · ECB`) : l("Cotação do BCE", "ECB rates")}
+          </span>
         ) : (
-          <span>Return copia o resultado</span>
+          <span>{l("Return copia o resultado", "Return copies the result")}</span>
         )}
       </div>
     </div>

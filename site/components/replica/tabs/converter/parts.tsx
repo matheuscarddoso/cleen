@@ -2,15 +2,17 @@
 
 import { ArrowLeftRight, Check, ChevronsUpDown, Copy } from "lucide-react";
 import type { ReactNode, Ref } from "react";
+import { useL } from "@/components/LangProvider";
 import { notch } from "../../style";
-import { categories, type CategoryId, type Unit } from "./units";
+import { categoriesFor, type CategoryId, type Unit } from "./units";
 
 /** The nine categories as one pill row, white for the chosen one (NotchSegmented). */
 export function CategoryBar({ selected, onSelect }: { selected: CategoryId; onSelect: (id: CategoryId) => void }) {
+  const l = useL();
   return (
     <div className="shrink-0 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-      <div role="radiogroup" aria-label="Categoria" className="flex w-fit gap-0.5 rounded-full p-0.5" style={{ background: notch.control }}>
-        {categories.map(({ id, title }) => {
+      <div role="radiogroup" aria-label={l("Categoria", "Category")} className="flex w-fit gap-0.5 rounded-full p-0.5" style={{ background: notch.control }}>
+        {categoriesFor(l.lang).map(({ id, title }) => {
           const isSelected = id === selected;
           return (
             <button
@@ -37,6 +39,7 @@ export function CategoryBar({ selected, onSelect }: { selected: CategoryId; onSe
  * select laid over the label), so it opens past the panel like the app's.
  */
 export function UnitMenu({ units, selected, onSelect }: { units: Unit[]; selected: Unit; onSelect: (id: string) => void }) {
+  const l = useL();
   return (
     <span className="relative inline-flex w-fit items-center gap-1 text-white/90 transition-colors duration-150 hover:text-white">
       <ChevronsUpDown size={10} strokeWidth={2.6} aria-hidden className="shrink-0" />
@@ -44,7 +47,7 @@ export function UnitMenu({ units, selected, onSelect }: { units: Unit[]; selecte
       <select
         value={selected.id}
         onChange={(event) => onSelect(event.target.value)}
-        aria-label={`Unidade: ${selected.name}`}
+        aria-label={l(`Unidade: ${selected.name}`, `Unit: ${selected.name}`)}
         className="absolute inset-0 cursor-pointer appearance-none opacity-0"
       >
         {units.map((unit) => (
@@ -62,6 +65,7 @@ export function UnitMenu({ units, selected, onSelect }: { units: Unit[]; selecte
  * The result side shows a copy button on hover and "Copiado" once copied.
  */
 export function ConverterBox({ children, unit, copy }: { children: ReactNode; unit: ReactNode; copy?: { copied: boolean; live: boolean; onCopy: () => void } }) {
+  const l = useL();
   return (
     <div
       className="group relative flex min-w-0 flex-1 flex-col justify-center gap-[3px] rounded-[12px] py-2.5 pl-3.5 pr-2.5"
@@ -74,14 +78,14 @@ export function ConverterBox({ children, unit, copy }: { children: ReactNode; un
           {copy.copied ? (
             <span role={copy.live ? "status" : undefined} className="flex h-[22px] items-center gap-1 rounded-full px-2 text-[10.5px] font-medium" style={{ background: notch.control, color: notch.good }}>
               <Check size={10} strokeWidth={2.8} aria-hidden />
-              Copiado
+              {l("Copiado", "Copied")}
             </span>
           ) : (
             <button
               type="button"
               onClick={copy.onCopy}
-              aria-label="Copiar resultado"
-              title="Copiar resultado"
+              aria-label={l("Copiar resultado", "Copy Result")}
+              title={l("Copiar resultado", "Copy Result")}
               className="flex h-6 w-[26px] items-center justify-center rounded-[7px] opacity-0 transition-[opacity,background-color,color] duration-150 hover:bg-white/10 hover:text-white focus-visible:opacity-100 group-hover:opacity-100 text-white/55"
             >
               <Copy size={12} strokeWidth={2.1} aria-hidden />
@@ -95,12 +99,13 @@ export function ConverterBox({ children, unit, copy }: { children: ReactNode; un
 
 /** The round swap between the boxes; the arrows turn half a circle each time. */
 export function SwapButton({ onSwap, glyph }: { onSwap: () => void; glyph: Ref<HTMLSpanElement> }) {
+  const l = useL();
   return (
     <button
       type="button"
       onClick={onSwap}
-      aria-label="Inverter unidades"
-      title="Inverter unidades"
+      aria-label={l("Inverter unidades", "Swap Units")}
+      title={l("Inverter unidades", "Swap Units")}
       className="flex size-[30px] shrink-0 items-center justify-center self-center rounded-full bg-white/10 transition-[background-color,color] duration-150 hover:bg-white/[0.16] hover:text-white text-white/55"
     >
       <span ref={glyph} className="flex">

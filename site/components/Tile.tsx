@@ -1,11 +1,13 @@
 import type { ReactNode } from "react";
 import { DownloadButton, MoreLink } from "./Buttons";
+import { pick, type Lang } from "@/lib/lang";
 
 /**
  * One of Apple's product tiles: eyebrow, a two-line headline, a sentence, the two calls
  * to action, and the product picture filling the bottom. `dark` flips it to black.
  */
 export function Tile({
+  lang,
   id,
   eyebrow,
   title,
@@ -14,6 +16,7 @@ export function Tile({
   visual,
   dark = false,
 }: {
+  lang: Lang;
   id?: string;
   eyebrow: string;
   title: ReactNode;
@@ -22,6 +25,7 @@ export function Tile({
   visual: ReactNode;
   dark?: boolean;
 }) {
+  const l = pick(lang);
   return (
     <article
       id={id}
@@ -32,8 +36,8 @@ export function Tile({
         <h2 className="mx-auto mt-1 text-[clamp(28px,3vw,36px)] font-semibold leading-[1.05]">{title}</h2>
         <p className={`mx-auto mt-4 max-w-[420px] text-[17px] leading-[1.47] ${dark ? "text-white/70" : "text-mute"}`}>{children}</p>
         <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-3.5 sm:mt-5">
-          <DownloadButton />
-          {more && <MoreLink href={more}>Saiba mais</MoreLink>}
+          <DownloadButton lang={lang} />
+          {more && <MoreLink href={more}>{l("Saiba mais", "Learn more")}</MoreLink>}
         </div>
       </div>
       <div className="mt-auto w-full px-5 pb-5 pt-10 sm:px-10 sm:pb-10">{visual}</div>

@@ -2,6 +2,7 @@
 
 import { CalendarCheck, Circle, CircleCheck } from "lucide-react";
 import { useState } from "react";
+import { useL } from "@/components/LangProvider";
 import { notch } from "../../style";
 import { dayLetter, dayName, dayShort, events, firstDay, isWeekend, lastDay, monthLabel, today, type Reminder } from "./data";
 
@@ -28,12 +29,14 @@ export function Agenda({
   onSelect: (day: number) => void;
   onComplete: (reminder: Reminder) => void;
 }) {
+  const l = useL();
+  const dayEvents = events(l.lang);
   const days = Array.from({ length: lastDay - firstDay + 1 }, (_, index) => firstDay + index);
   const before = (selected - firstDay) * cell;
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center gap-1.5">
-        <span className="text-[16px] font-semibold">{monthLabel}</span>
+        <span className="text-[16px] font-semibold">{monthLabel(l.lang)}</span>
         <div
           className="relative h-[34px] min-w-0 flex-1 overflow-hidden"
           style={{ maskImage: "linear-gradient(to right, transparent 0%, #000 18%, #000 82%, transparent 100%)" }}
@@ -43,7 +46,7 @@ export function Agenda({
             style={{ transform: `translateX(${-(before + selectedCell / 2)}px)`, transitionTimingFunction: "cubic-bezier(0.32, 0.72, 0, 1)" }}
           >
             {days.map((day) => (
-              <DayCell key={day} day={day} selected={day === selected} hasEvents={(events[day]?.length ?? 0) > 0 || (day === today && reminders.length > 0)} onSelect={() => onSelect(day)} />
+              <DayCell key={day} day={day} selected={day === selected} hasEvents={(dayEvents[day]?.length ?? 0) > 0 || (day === today && reminders.length > 0)} onSelect={() => onSelect(day)} />
             ))}
           </div>
         </div>
@@ -54,6 +57,7 @@ export function Agenda({
 }
 
 function DayCell({ day, selected, hasEvents, onSelect }: { day: number; selected: boolean; hasEvents: boolean; onSelect: () => void }) {
+  const { lang } = useL();
   const weekend = isWeekend(day);
   const label = selected ? "rgba(255,255,255,0.75)" : weekend ? "rgba(255,115,115,0.55)" : notch.tertiary;
   const number = selected ? todayBlue : weekend ? "rgba(255,115,115,0.7)" : notch.secondary;
@@ -61,12 +65,12 @@ function DayCell({ day, selected, hasEvents, onSelect }: { day: number; selected
     <button
       type="button"
       onClick={onSelect}
-      aria-label={dayName(day)}
+      aria-label={dayName(day, lang)}
       aria-pressed={selected}
       className="flex h-[34px] shrink-0 flex-col items-center justify-center gap-px transition-[width] duration-300"
       style={{ width: selected ? selectedCell : cell }}
     >
-      <span className="text-[8px] font-semibold leading-[10px]" style={{ color: label }}>{selected ? dayShort(day) : dayLetter(day)}</span>
+      <span className="text-[8px] font-semibold leading-[10px]" style={{ color: label }}>{selected ? dayShort(day, lang) : dayLetter(day, lang)}</span>
       <span className="font-semibold leading-[15px] tabular-nums transition-[font-size,color] duration-300" style={{ fontSize: selected ? 14 : 12, color: number }}>
         {String(day).padStart(2, "0")}
       </span>
@@ -77,14 +81,15 @@ function DayCell({ day, selected, hasEvents, onSelect }: { day: number; selected
 
 /** CalendarDayAgenda: one event and one reminder, two of either, or a quiet empty state. */
 function DayAgenda({ day, reminders, hovered, onComplete }: { day: number; reminders: Reminder[]; hovered: string | null; onComplete: (reminder: Reminder) => void }) {
-  const list = events[day] ?? [];
+  const l = useL();
+  const list = events(l.lang)[day] ?? [];
   const shownEvents = list.slice(0, reminders.length === 0 ? 2 : 1);
   const shownReminders = reminders.slice(0, list.length === 0 ? 2 : 1);
   if (shownEvents.length === 0 && shownReminders.length === 0) {
     return (
       <div className="flex h-[54px] flex-col items-center justify-center gap-1.5">
         <CalendarCheck size={13} strokeWidth={1.8} style={{ color: notch.tertiary }} aria-hidden />
-        <span className="text-[11px] font-medium" style={{ color: notch.secondary }}>{day === today ? "Nada para hoje" : "Nada neste dia"}</span>
+        <span className="text-[11px] font-medium" style={{ color: notch.secondary }}>{day === today ? l("Nada para hoje", "Nothing for today") : l("Nada neste dia", "Nothing this day")}</span>
       </div>
     );
   }
@@ -108,6 +113,7 @@ function DayAgenda({ day, reminders, hovered, onComplete }: { day: number; remin
 
 /** AgendaReminderRow: an open reminder with a circle that checks it off, as in Lembretes. */
 function ReminderRow({ reminder, hovered, onComplete }: { reminder: Reminder; hovered: boolean; onComplete: () => void }) {
+  const l = useL();
   const [hover, setHover] = useState(false);
   const lit = hover || hovered;
   return (
@@ -117,8 +123,8 @@ function ReminderRow({ reminder, hovered, onComplete }: { reminder: Reminder; ho
         onClick={onComplete}
         onPointerEnter={() => setHover(true)}
         onPointerLeave={() => setHover(false)}
-        aria-label={`Concluir ${reminder.title}`}
-        title="Concluir"
+        aria-label={l(`Concluir ${reminder.title}`, `Complete ${reminder.title}`)}
+        title={l("Concluir", "Complete")}
         className="flex size-3 shrink-0 items-center justify-center rounded-full transition-colors duration-150"
         style={{ color: lit ? notch.primary : notch.secondary }}
       >

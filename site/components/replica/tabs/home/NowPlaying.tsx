@@ -1,6 +1,7 @@
 "use client";
 
 import { Pause, SkipBack, SkipForward, type LucideIcon } from "lucide-react";
+import { useL } from "@/components/LangProvider";
 import type { Track } from "./data";
 import { OpticalPlay } from "../../OpticalPlay";
 
@@ -25,6 +26,7 @@ export function NowPlaying({
   onToggle: () => void;
   onNext: () => void;
 }) {
+  const l = useL();
   return (
     <div className="flex items-center gap-3.5">
       <div className="relative size-[88px] shrink-0">
@@ -40,9 +42,9 @@ export function NowPlaying({
         <span className="truncate text-[14px] font-medium leading-[17px]" style={{ color: "rgba(255,255,255,0.62)" }}>{track.album}</span>
         <span className="truncate text-[14px] font-medium leading-[17px]" style={{ color: "rgba(255,255,255,0.45)" }}>{track.artist}</span>
         <div className="-ml-1.5 flex gap-1 pt-0.5">
-          <PlayerButton icon={SkipBack} label="Anterior" lit={pressed === "previous"} onClick={onPrevious} />
-          <PlayerButton icon={playing ? Pause : OpticalPlay} label={playing ? "Pausar" : "Tocar"} lit={pressed === "toggle"} onClick={onToggle} />
-          <PlayerButton icon={SkipForward} label="Próxima" lit={pressed === "next"} onClick={onNext} />
+          <PlayerButton icon={SkipBack} label={l("Anterior", "Previous")} lit={pressed === "previous"} onClick={onPrevious} />
+          <PlayerButton icon={playing ? Pause : OpticalPlay} label={playing ? l("Pausar", "Pause") : l("Tocar", "Play")} lit={pressed === "toggle"} onClick={onToggle} />
+          <PlayerButton icon={SkipForward} label={l("Próxima", "Next")} lit={pressed === "next"} onClick={onNext} />
         </div>
       </div>
     </div>

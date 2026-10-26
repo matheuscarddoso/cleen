@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useL } from "@/components/LangProvider";
 import { useDemo, useSteps } from "../DemoContext";
 import { useReplica } from "../ReplicaContext";
 import { notch } from "../style";
 import { Agenda } from "./home/Agenda";
-import { reminders, today, tracks, type Reminder } from "./home/data";
+import { reminders, today, todayLabel, tracks, type Reminder } from "./home/data";
 import { NowPlaying } from "./home/NowPlaying";
 import { TimerWidget } from "./home/TimerWidget";
 import { isActive, newSession, tick, toggle, type TimerSession } from "./timer/session";
@@ -34,6 +35,7 @@ const startTimer: TimerSession = { ...newSession(25), status: "running", remaini
  * (medium), which takes what's left of the row.
  */
 export function HomeTab() {
+  const l = useL();
   const { playing, reduced } = useDemo();
   const { setTab } = useReplica();
   const [step] = useSteps(script);
@@ -55,7 +57,7 @@ export function HomeTab() {
 
   const state = manual ?? scriptedState(step);
   const track = tracks[state.track] ?? tracks[0]!;
-  const open = reminders.filter((reminder) => !state.done.includes(reminder.id));
+  const open = reminders(l.lang).filter((reminder) => !state.done.includes(reminder.id));
   const change = (next: (current: State) => State) => {
     setPressed(null);
     setManual(next(state));
@@ -74,8 +76,8 @@ export function HomeTab() {
   return (
     <div className="flex flex-col gap-3">
       <div className="flex flex-col gap-px">
-        <span className="text-[15px] font-semibold leading-[18px]">Boa tarde, Ana!</span>
-        <span className="text-[10.5px] leading-[13px]" style={{ color: notch.secondary }}>Quinta-feira, 22 de outubro</span>
+        <span className="text-[15px] font-semibold leading-[18px]">{l("Boa tarde, Ana!", "Good afternoon, Ana!")}</span>
+        <span className="text-[10.5px] leading-[13px]" style={{ color: notch.secondary }}>{todayLabel(l.lang)}</span>
       </div>
       <div className="flex items-center gap-4">
         <div className="w-[270px] shrink-0">

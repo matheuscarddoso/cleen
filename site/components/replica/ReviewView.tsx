@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useL } from "@/components/LangProvider";
 import { bytes } from "./tabs/overview/disk";
 import { consequence, type Review } from "./review";
 import { notch } from "./style";
@@ -10,6 +11,7 @@ import { notch } from "./style";
  * Cancelar (Esc) beside Confirmar (Return). It covers the tool, which stays underneath.
  */
 export function ReviewView({ review, onClose }: { review: Review; onClose: () => void }) {
+  const l = useL();
   const confirm = useRef<HTMLButtonElement>(null);
   const items = [...review.items].sort((a, b) => (b.size ?? 0) - (a.size ?? 0));
   const total = items.reduce((sum, item) => sum + (item.size ?? 0), 0);
@@ -41,11 +43,11 @@ export function ReviewView({ review, onClose }: { review: Review; onClose: () =>
         <div className="flex min-w-0 flex-col gap-0.5">
           <span className="text-[15px] font-semibold leading-[18px]">{review.title}</span>
           <span className="text-[11px] leading-[13px]" style={{ color: review.outcome === "trash" ? notch.secondary : notch.warning }}>
-            {consequence(review.outcome)}
+            {consequence(review.outcome, l.lang)}
           </span>
         </div>
         <span className="flex-1" />
-        {total > 0 && <span className="text-[15px] font-semibold tabular-nums">{bytes(total)}</span>}
+        {total > 0 && <span className="text-[15px] font-semibold tabular-nums">{bytes(total, l.lang)}</span>}
       </div>
       <div className="min-h-0 flex-1 overflow-hidden">
         <div className="overflow-hidden rounded-[12px]" style={{ background: notch.card, boxShadow: `inset 0 0 0 1px ${notch.cardStroke}` }}>
@@ -69,7 +71,7 @@ export function ReviewView({ review, onClose }: { review: Review; onClose: () =>
                   <span className="flex-1" />
                   {item.size !== undefined && (
                     <span className="shrink-0 text-[11px] font-medium tabular-nums" style={{ color: notch.secondary }}>
-                      {bytes(item.size)}
+                      {bytes(item.size, l.lang)}
                     </span>
                   )}
                 </div>
@@ -85,7 +87,7 @@ export function ReviewView({ review, onClose }: { review: Review; onClose: () =>
           className="flex h-[26px] items-center rounded-full px-3 text-[12px] font-medium transition-[background-color,scale] duration-150 hover:bg-white/16 active:scale-[0.96]"
           style={{ background: notch.control }}
         >
-          Cancelar
+          {l("Cancelar", "Cancel")}
         </button>
         <button
           ref={confirm}
@@ -97,7 +99,7 @@ export function ReviewView({ review, onClose }: { review: Review; onClose: () =>
           className="flex h-[26px] items-center rounded-full px-3 text-[12px] font-medium text-white transition-[opacity,scale] duration-150 hover:opacity-95 active:scale-[0.96]"
           style={{ background: notch.critical }}
         >
-          Confirmar
+          {l("Confirmar", "Confirm")}
         </button>
       </div>
     </div>

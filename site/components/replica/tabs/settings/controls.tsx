@@ -2,6 +2,7 @@
 
 import { Minus, Plus, type LucideIcon } from "lucide-react";
 import { Children, cloneElement, isValidElement, useEffect, useRef, useState, type ReactElement, type ReactNode, type Ref } from "react";
+import { useL } from "@/components/LangProvider";
 import { notch } from "../../style";
 
 /** Height of the app's brightness pill (BrightnessSlider.height). */
@@ -169,14 +170,15 @@ export function Stepper<Value extends number>({
   minWidth?: number;
   disabled?: boolean;
 }) {
+  const l = useL();
   const index = Math.max(0, choices.indexOf(value));
   return (
     <div role="group" aria-label={label} className="flex h-6 items-center rounded-full transition-opacity duration-200" style={{ background: notch.control, opacity: disabled ? 0.4 : 1 }}>
-      <StepButton icon={Minus} label="Diminuir" disabled={disabled || index === 0} onClick={() => onChange(choices[Math.max(0, index - 1)] ?? value)} />
+      <StepButton icon={Minus} label={l("Diminuir", "Decrease")} disabled={disabled || index === 0} onClick={() => onChange(choices[Math.max(0, index - 1)] ?? value)} />
       <span aria-live="polite" className="text-center text-[11px] font-semibold tabular-nums" style={{ minWidth }}>
         {format(value)}
       </span>
-      <StepButton icon={Plus} label="Aumentar" disabled={disabled || index === choices.length - 1} onClick={() => onChange(choices[Math.min(choices.length - 1, index + 1)] ?? value)} />
+      <StepButton icon={Plus} label={l("Aumentar", "Increase")} disabled={disabled || index === choices.length - 1} onClick={() => onChange(choices[Math.min(choices.length - 1, index + 1)] ?? value)} />
     </div>
   );
 }

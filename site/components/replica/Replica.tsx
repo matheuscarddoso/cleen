@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useL } from "@/components/LangProvider";
 import { DemoContext } from "./DemoContext";
 import { DemoFrame } from "./DemoFrame";
 import { Panel } from "./Panel";
@@ -38,6 +39,7 @@ export function Replica({
    *  and no demo playing (the share image). */
   bare?: boolean;
 }) {
+  const l = useL();
   const [tab, setTab] = useState<TabId>(initialTab);
   const [mode, setMode] = useState<Mode>(initialMode);
   const [size, setSize] = useState<{ width: number; height: number }>({ width: panel.width, height: panel.height });
@@ -46,7 +48,7 @@ export function Replica({
   // The launcher and the deletion review grow the panel so a page of rows fits, like the
   // app (404 pt there; as tall as the stage allows here).
   const height = mode === "search" || review ? Math.max(size.height, 356) : size.height;
-  const title = mode === "search" ? "Buscar" : mode === "settings" ? "Ajustes" : tabTitle(tab);
+  const title = mode === "search" ? l("Buscar", "Search") : mode === "settings" ? l("Ajustes", "Settings") : tabTitle(tab, l.lang);
 
   const content = (
       <ReplicaContext.Provider value={{ tab, setTab, mode, setMode, size, setSize, review, setReview }}>

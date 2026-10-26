@@ -2,10 +2,12 @@
 
 import { ChartLine, CircleAlert, Moon, Plus, Search } from "lucide-react";
 import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode, type RefObject } from "react";
+import { useL } from "@/components/LangProvider";
+import type { Lang } from "@/lib/lang";
 import { usePlayingInterval, useDemo, useSteps } from "../DemoContext";
 import { notch } from "../style";
 import {
-  defaultWatchlist,
+  defaultWatchlists,
   firstDay,
   listing,
   lookup,
@@ -28,7 +30,8 @@ import { usePresence } from "./stocks/usePresence";
  * 0 ticking · 1–5 letters · 6 hits · 7 adding · 8 added · 9 hover · 10 removed · 11 closed
  */
 const script = [3200, 160, 160, 160, 750, 160, 1700, 450, 3000, 1300, 11000, 4200] as const;
-const words = ["VALE3", "MSFT"] as const;
+/** The tickers the script types: a B3 one in Portuguese, its US counterpart in English (same length, two hits at four letters). */
+const scriptedWords: Record<Lang, readonly [string, string]> = { pt: ["VALE3", "MSFT"], en: ["GOOGL", "MSFT"] };
 /** One five-minute bar per tick. */
 const tickMs = 1100;
 /** Where the session stands when the loop starts, so it reaches the close with the script. */
@@ -44,6 +47,9 @@ type Visitor = { symbols: string[]; query: string };
  */
 export function StocksTab() {
   const { reduced } = useDemo();
+  const l = useL();
+  const words = scriptedWords[l.lang];
+  const defaultWatchlist = defaultWatchlists[l.lang];
   const [step] = useSteps(script);
   const [market, setMarket] = useState<Market>(firstDay);
   const [revealed, setRevealed] = useState(opening);
@@ -83,7 +89,7 @@ export function StocksTab() {
   const settled = useSettled(query, 280);
   const searching = query.trim().length > 0;
   const waiting = searching && settled !== query;
-  const hits = searching && !waiting ? search(settled) : [];
+  const hits = searching && !waiting ? search(settled, l.lang) : [];
   const selection = cursor.query === settled ? Math.min(cursor.index, Math.max(hits.length - 1, 0)) : 0;
 
   useEffect(() => {
@@ -111,12 +117,12 @@ export function StocksTab() {
   const add = (symbol: string) => {
     const current = take();
     if (adding) return;
-    if (current.symbols.includes(symbol)) return setNotice(`${symbol} já está na lista`);
-    if (current.symbols.length >= maximumCount) return setNotice(`A lista já tem ${maximumCount} ações`);
+    if (current.symbols.includes(symbol)) return setNotice(l(`${symbol} já está na lista`, `${symbol} is already on the list`));
+    if (current.symbols.length >= maximumCount) return setNotice(l(`A lista já tem ${maximumCount} ações`, `The list already has ${maximumCount} stocks`));
     setAdding(symbol);
     window.setTimeout(() => {
       setAdding(null);
-      if (!listing(symbol)) return setNotice(`Não encontrei ${symbol}`);
+      if (!listing(symbol)) return setNotice(l(`Não encontrei ${symbol}`, `Couldn't find ${symbol}`));
       setVisitor((state) => (state && !state.symbols.includes(symbol) ? { symbols: [...state.symbols, symbol], query: "" } : state));
     }, 450);
   };
@@ -128,7 +134,7 @@ export function StocksTab() {
     const typed = lookup(query);
     if (typed) return add(typed);
     take();
-    setNotice("Código inválido");
+    setNotice(l("Código inválido", "Invalid symbol"));
   };
 
   const remove = (symbol: string) => {
@@ -189,8 +195,8 @@ export function StocksTab() {
             value={query}
             onChange={(event) => type(event.target.value)}
             onKeyDown={keys}
-            placeholder="Buscar código ou empresa"
-            aria-label="Buscar código ou empresa"
+            placeholder={l("Buscar código ou empresa", "Search symbol or company")}
+            aria-label={l("Buscar código ou empresa", "Search symbol or company")}
             spellCheck={false}
             autoComplete="off"
             className="h-full min-w-0 flex-1 bg-transparent text-[12px] text-white outline-none placeholder:text-white/[0.32]"
@@ -199,7 +205,7 @@ export function StocksTab() {
             <Spinner size={11} />
           ) : (
             query && (
-              <button type="button" onClick={() => type("")} aria-label="Limpar a busca" title="Limpar" className="shrink-0 text-white/[0.32] transition-[color] duration-150 hover:text-white/55">
+              <button type="button" onClick={() => type("")} aria-label={l("Limpar a busca", "Clear Search")} title={l("Limpar", "Clear")} className="shrink-0 text-white/[0.32] transition-[color] duration-150 hover:text-white/55">
                 <ClearGlyph size={11} />
               </button>
             )
@@ -209,8 +215,8 @@ export function StocksTab() {
           type="button"
           onClick={addCurrent}
           disabled={!searching || shownAdding !== null}
-          aria-label="Adicionar à lista"
-          title="Adicionar à lista"
+          aria-label={l("Adicionar à lista", "Add to list")}
+          title={l("Adicionar à lista", "Add to list")}
           className="flex size-[26px] shrink-0 items-center justify-center rounded-[7px] bg-white/10 text-white transition-[background-color,opacity,scale] duration-150 hover:bg-white/[0.16] active:scale-95 disabled:opacity-40 disabled:hover:bg-white/10"
         >
           {shownAdding ? <Spinner size={11} /> : <Plus size={16} strokeWidth={1.7} aria-hidden />}
@@ -271,6 +277,7 @@ function useSettled(value: string, ms: number): string {
 
 /** Quiet, on the right: what went wrong with the last add, otherwise whether the market is open. */
 function Status({ notice, closed }: { notice: string | null; closed: boolean }) {
+  const l = useL();
   if (notice) {
     return (
       <span role="status" className="flex shrink-0 items-center gap-1.5 text-[13px] starting:opacity-0 transition-opacity duration-200" style={{ color: notch.warning }}>
@@ -283,7 +290,7 @@ function Status({ notice, closed }: { notice: string | null; closed: boolean }) 
   return (
     <span role="status" className="flex shrink-0 items-center gap-[5px] text-[13px] starting:opacity-0 transition-opacity duration-300" style={{ color: notch.tertiary }}>
       <Moon size={10} fill="currentColor" strokeWidth={0} aria-hidden />
-      Mercado fechado
+      {l("Mercado fechado", "Market closed")}
     </span>
   );
 }
@@ -339,9 +346,14 @@ function SearchResults({
   adding: string | null;
   onPick: (symbol: string) => void;
 }) {
+  const l = useL();
   if (hits.length === 0) {
     const typed = lookup(query);
-    const hint = waiting ? "Buscando…" : typed ? `Nada encontrado. Return tenta ${typed} direto.` : "Nada encontrado com esse nome.";
+    const hint = waiting
+      ? l("Buscando…", "Searching…")
+      : typed
+        ? l(`Nada encontrado. Return tenta ${typed} direto.`, `Nothing found. Return tries ${typed} directly.`)
+        : l("Nada encontrado com esse nome.", "Nothing found with that name.");
     return (
       <p aria-live="polite" className="pl-0.5 text-[10.5px] starting:opacity-0 transition-opacity duration-200" style={{ color: notch.tertiary }}>
         {hint}
@@ -349,7 +361,7 @@ function SearchResults({
     );
   }
   return (
-    <div role="group" aria-label="Resultados da busca" className="grid grid-cols-2 gap-x-1 gap-y-0.5 starting:opacity-0 transition-opacity duration-200">
+    <div role="group" aria-label={l("Resultados da busca", "Search results")} className="grid grid-cols-2 gap-x-1 gap-y-0.5 starting:opacity-0 transition-opacity duration-200">
       {hits.map((item, index) => (
         <SearchHit
           key={item.symbol}
@@ -366,11 +378,14 @@ function SearchResults({
 
 /** Nothing on the list yet (NotchStocksTab.empty). */
 function Empty() {
+  const l = useL();
   return (
     <div className="flex h-full flex-col items-center justify-center gap-1 starting:opacity-0 transition-opacity duration-200">
       <ChartLine size={22} strokeWidth={2} className="mb-1" style={{ color: notch.tertiary }} aria-hidden />
-      <p className="text-[13px] font-semibold">Nenhuma ação na lista</p>
-      <p className="text-[10.5px]" style={{ color: notch.secondary }}>Busque um código, como PETR4 ou AAPL, e adicione com +.</p>
+      <p className="text-[13px] font-semibold">{l("Nenhuma ação na lista", "No stocks on the list")}</p>
+      <p className="text-[10.5px]" style={{ color: notch.secondary }}>
+        {l("Busque um código, como PETR4 ou AAPL, e adicione com +.", "Search for a symbol, like PETR4 or AAPL, and add it with +.")}
+      </p>
     </div>
   );
 }

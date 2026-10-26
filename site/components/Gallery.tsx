@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { useL } from "./LangProvider";
 
 /**
  * Apple's horizontal gallery: cards that snap as they scroll, and two round paddles
@@ -59,12 +60,13 @@ export function Gallery({ children, label }: { children: ReactNode; label: strin
 }
 
 function Paddle({ direction, disabled, onClick }: { direction: "previous" | "next"; disabled: boolean; onClick: () => void }) {
+  const l = useL();
   return (
     <button
       type="button"
       onClick={onClick}
       disabled={disabled}
-      aria-label={direction === "previous" ? "Anterior" : "Próxima"}
+      aria-label={direction === "previous" ? l("Anterior", "Previous") : l("Próxima", "Next")}
       className="group relative flex h-11 w-11 items-center justify-center text-ink disabled:cursor-default disabled:text-faint"
     >
       <span aria-hidden className="absolute h-[30px] w-[30px] rounded-full shadow-[inset_0_0_0_2px_currentColor] transition-colors duration-150 group-enabled:group-hover:bg-ink" />

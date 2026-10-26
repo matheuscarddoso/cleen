@@ -4,6 +4,8 @@
  * second at a time, so the replica can play a script without a real clock. `clock` is
  * the replica's wall clock in seconds since midnight, for "termina às 14:57".
  */
+import type { Lang } from "@/lib/lang";
+
 export type TimerMode = "countdown" | "pomodoro";
 export type TimerPhase = "countdown" | "focus" | "shortBreak" | "longBreak";
 
@@ -127,27 +129,32 @@ export function lengthText(seconds: number): string {
   return minutes % 60 === 0 ? `${minutes / 60}h` : `${Math.floor(minutes / 60)}h ${minutes % 60}min`;
 }
 
-/** The wall-clock time the running phase ends, as "14:57". */
-export function endText(session: TimerSession): string {
+/** The wall-clock time the running phase ends, as "14:57", or "2:57 PM" in English (en-US's hour and minute). */
+export function endText(session: TimerSession, lang: Lang = "pt"): string {
   const end = (session.clock + session.remaining) % 86400;
-  return `${String(Math.floor(end / 3600)).padStart(2, "0")}:${String(Math.floor((end % 3600) / 60)).padStart(2, "0")}`;
+  const hours = Math.floor(end / 3600);
+  const minutes = String(Math.floor((end % 3600) / 60)).padStart(2, "0");
+  if (lang === "en") return `${hours % 12 || 12}:${minutes} ${hours < 12 ? "AM" : "PM"}`;
+  return `${String(hours).padStart(2, "0")}:${minutes}`;
 }
 
-/** "Timer", "Foco" or "Pausa". */
-export function phaseTitle(phase: TimerPhase): string {
+/** "Timer", "Foco" or "Pausa" ("Timer", "Focus" or "Break"). */
+export function phaseTitle(phase: TimerPhase, lang: Lang = "pt"): string {
+  if (lang === "en") return phase === "countdown" ? "Timer" : phase === "focus" ? "Focus" : "Break";
   return phase === "countdown" ? "Timer" : phase === "focus" ? "Foco" : "Pausa";
 }
 
-/** "Timer de 10 min", "Foco · rodada 2 de 4", "Pausa longa". */
-export function phaseDetail(session: TimerSession): string {
+/** "Timer de 10 min", "Foco · rodada 2 de 4", "Pausa longa" ("10 min timer", "Focus · round 2 of 4", "Long break"). */
+export function phaseDetail(session: TimerSession, lang: Lang = "pt"): string {
+  const en = lang === "en";
   switch (session.phase) {
     case "countdown":
-      return `Timer de ${lengthText(session.duration)}`;
+      return en ? `${lengthText(session.duration)} timer` : `Timer de ${lengthText(session.duration)}`;
     case "focus":
-      return `Foco · rodada ${session.round} de ${plan.rounds}`;
+      return en ? `Focus · round ${session.round} of ${plan.rounds}` : `Foco · rodada ${session.round} de ${plan.rounds}`;
     case "shortBreak":
-      return `Pausa · rodada ${session.round} de ${plan.rounds}`;
+      return en ? `Break · round ${session.round} of ${plan.rounds}` : `Pausa · rodada ${session.round} de ${plan.rounds}`;
     case "longBreak":
-      return "Pausa longa";
+      return en ? "Long break" : "Pausa longa";
   }
 }

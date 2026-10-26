@@ -1,7 +1,9 @@
+import { pick, type Lang } from "@/lib/lang";
 import { site } from "@/lib/site";
 
 /** Apple's blue pill. */
-export function DownloadButton({ label = "Baixar", size = "md" }: { label?: string; size?: "md" | "sm" }) {
+export function DownloadButton({ lang, label, size = "md" }: { lang: Lang; label?: string; size?: "md" | "sm" }) {
+  const l = pick(lang);
   // Apple's sizes: 8×16 at 17 pt, 4×11 at 12 pt in the bar.
   const sizing = size === "md" ? "px-4 py-2 text-[17px] leading-[1.18]" : "px-[11px] py-1 text-[12px] leading-[1.33]";
   return (
@@ -9,7 +11,7 @@ export function DownloadButton({ label = "Baixar", size = "md" }: { label?: stri
       href={site.download}
       className={`inline-flex items-center rounded-full bg-accent font-normal text-white transition-colors duration-200 ease-(--ease-apple) hover:bg-[#0077ed] ${sizing}`}
     >
-      {label}
+      {label ?? l("Baixar", "Download")}
     </a>
   );
 }

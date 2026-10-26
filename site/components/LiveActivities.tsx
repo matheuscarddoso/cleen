@@ -3,6 +3,7 @@
 import { HardDrive } from "lucide-react";
 import type { ReactNode } from "react";
 import { BatteryCharging, Calendar, Headphones, Timer } from "./Icons";
+import { useL } from "./LangProvider";
 import { ClosedNotch, Screen, Swap } from "./Notch";
 import { useLoop, useSeconds } from "./useLoop";
 
@@ -12,6 +13,7 @@ const durations = [2600, 2600, 2600, 2600, 3000, 3200] as const;
 
 /** The closed notch going through what it tells you during a day, one after another. */
 export function LiveActivities() {
+  const l = useL();
   const { ref, index, setIndex, running } = useLoop<HTMLDivElement>(durations, 3);
   const elapsed = useSeconds(running && index === 5, index !== 5);
   const remaining = 25 * 60 - 1 - elapsed;
@@ -20,13 +22,13 @@ export function LiveActivities() {
   const activities: Activity[] = [
     {
       key: "disk",
-      label: "Disco",
+      label: l("Disco", "Disk"),
       width: "300px",
-      left: <Row><HardDrive className="h-4 w-4 text-white/70" strokeWidth={2} /> Livre</Row>,
+      left: <Row><HardDrive className="h-4 w-4 text-white/70" strokeWidth={2} />{l(" Livre", " Free")}</Row>,
       // The closed notch's meter: the figure with a thin bar of what's used under it.
       right: (
         <span className="relative pb-[5px] tabular-nums">
-          62,1 GB
+          {l("62,1 GB", "62.1 GB")}
           <span className="absolute inset-x-0 bottom-0 h-[2.5px] overflow-hidden rounded-full bg-white/20">
             <span className="block h-full w-[75%] rounded-full bg-white/80" />
           </span>
@@ -35,28 +37,28 @@ export function LiveActivities() {
     },
     {
       key: "power",
-      label: "Carregador",
+      label: l("Carregador", "Charger"),
       width: "330px",
-      left: <Row><BatteryCharging className="h-[18px] w-[18px] text-[#30d158]" /> Carregando</Row>,
+      left: <Row><BatteryCharging className="h-[18px] w-[18px] text-[#30d158]" />{l(" Carregando", " Charging")}</Row>,
       right: <span className="text-[#30d158]">82%</span>,
     },
     {
       key: "headphones",
-      label: "Fones",
+      label: l("Fones", "Headphones"),
       width: "350px",
       left: <Row><Headphones className="h-4 w-4" /> AirPods Pro</Row>,
-      right: <span className="text-[#30d158]">Conectado</span>,
+      right: <span className="text-[#30d158]">{l("Conectado", "Connected")}</span>,
     },
     {
       key: "meeting",
-      label: "Reunião",
+      label: l("Reunião", "Meeting"),
       width: "300px",
       left: <Row><Calendar className="h-4 w-4 text-[#bf5af2]" /> Design</Row>,
       right: <span>5 min</span>,
     },
     {
       key: "music",
-      label: "Música",
+      label: l("Música", "Music"),
       width: "300px",
       left: <span className="h-[18px] w-[18px] rounded-[5px] bg-black bg-[url(/covers/iceman.jpg)] bg-cover bg-center" />,
       right: <Equalizer playing={running && index === 4} />,
@@ -65,7 +67,7 @@ export function LiveActivities() {
       key: "timer",
       label: "Timer",
       width: "300px",
-      left: <Row><Timer className="h-4 w-4 text-[#ff9f0a]" /> Foco</Row>,
+      left: <Row><Timer className="h-4 w-4 text-[#ff9f0a]" />{l(" Foco", " Focus")}</Row>,
       right: <span className="tabular-nums">{clock}</span>,
     },
   ];
@@ -73,7 +75,7 @@ export function LiveActivities() {
 
   return (
     <div ref={ref}>
-      <Screen tone="teal" className="aspect-[1280/666] min-h-[250px] rounded-[10px] [clip-path:inset(0_round_10px)]">
+      <Screen lang={l.lang} tone="teal" className="aspect-[1280/666] min-h-[250px] rounded-[10px] [clip-path:inset(0_round_10px)]">
         <ClosedNotch width={active.width}>
           {activities.map((activity, position) => (
             <Swap key={activity.key} shown={position === index} className="flex items-center justify-between px-4 text-[14px] font-medium text-white">
