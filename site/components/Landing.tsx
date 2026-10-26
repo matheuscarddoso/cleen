@@ -10,6 +10,9 @@ import { AILimits, CommandHotkeys, SmartAnswers, SnippetExpand } from "@/compone
 import { Replica } from "@/components/replica/Replica";
 import type { TabId } from "@/components/replica/tabs";
 import { Tile } from "@/components/Tile";
+import { LangProvider } from "@/components/LangProvider";
+import { LangSwitch } from "@/components/LangSwitch";
+import { pick, type Lang } from "@/lib/lang";
 import { site } from "@/lib/site";
 
 const tools: { tab: TabId; title: [string, string]; tone: "blue" | "dusk" | "teal" }[] = [
@@ -100,9 +103,11 @@ const structuredData = {
   author: { "@type": "Person", name: site.author, url: site.authorUrl },
 };
 
-export default function Home() {
+/** The whole landing page, in one language. */
+export function Landing({ lang }: { lang: Lang }) {
+  const l = pick(lang);
   return (
-    <>
+    <LangProvider lang={lang}>
       <script type="application/ld+json">{JSON.stringify(structuredData)}</script>
       <Navigation />
       <div className="ribbon">
@@ -357,13 +362,14 @@ export default function Home() {
             </a>
             .
           </p>
-          <div className="flex gap-5">
+          <div className="flex flex-wrap gap-5">
+            <LangSwitch />
             <a href={site.repo} className="hover:underline">GitHub</a>
             <a href={site.releases} className="hover:underline">Versões</a>
             <a href={`${site.repo}/issues`} className="hover:underline">Pedir um recurso</a>
           </div>
         </div>
       </footer>
-    </>
+    </LangProvider>
   );
 }
