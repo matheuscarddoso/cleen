@@ -36,6 +36,14 @@ final class NotchState {
     /// review of something about to be deleted.
     var isTall: Bool { isOpen && !showsWelcome && (showsSearch || showsSettings || deletionReview != nil || tab == .emoji) }
 
+    /// The open panel's height: tall for the above, taller still for the wide mirror so
+    /// the whole camera picture shows.
+    var panelHeight: NotchGeometry.PanelHeight {
+        if isTall { return .tall }
+        if isOpen, !showsWelcome, tab == .home, mirrorExpanded { return .mirror }
+        return .standard
+    }
+
     /// Something is about to be deleted: the panel lists it and waits for Confirmar.
     private(set) var deletionReview: DeletionReview?
     /// Whether the panel was held open before the review took over.

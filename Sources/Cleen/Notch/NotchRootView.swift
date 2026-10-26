@@ -23,7 +23,7 @@ struct NotchRootView: View {
             let welcomes = state.isOpen && state.showsWelcome
             // The teleprompter reading: the panel is all script, an arc of light behind it.
             let prompting = state.isOpen && state.isPrompting && state.tab == .teleprompter && !welcomes && !state.showsSearch && !state.showsSettings
-            let open = geometry.openSize(showsSearch: state.isTall)
+            let open = geometry.openSize(state.panelHeight)
             let size = state.isOpen ? (welcomes ? geometry.welcomeSize : open) : closed
             let shape = NotchShape(
                 topRadius: state.isOpen ? NotchStyle.openTopRadius : NotchStyle.closedTopRadius,
