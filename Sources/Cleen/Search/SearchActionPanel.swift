@@ -1,3 +1,4 @@
+import AppKit
 import CleenKit
 import SwiftUI
 
@@ -11,6 +12,8 @@ struct SearchActionPanel: View {
     @Environment(SearchModel.self) private var search
     @State private var alias = ""
     @FocusState private var aliasFocused: Bool
+    /// The pointer where it was when the panel opened: only moving it picks a row.
+    @State private var restingPointer: CGPoint?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -33,6 +36,7 @@ struct SearchActionPanel: View {
         }
         .overlay { RoundedRectangle(cornerRadius: 12, style: .continuous).strokeBorder(NotchStyle.cardStroke) }
         .clipShape(.rect(cornerRadius: 12, style: .continuous))
+        .onAppear { restingPointer = NSEvent.mouseLocation }
     }
 
     private var header: some View {
@@ -79,7 +83,12 @@ struct SearchActionPanel: View {
                     .contentShape(.rect)
                 }
                 .buttonStyle(.plain)
-                .onHover { if $0 { search.actionSelection = index } }
+                .onHover { hovering in
+                    let pointer = NSEvent.mouseLocation
+                    guard hovering, pointer != restingPointer else { return }
+                    restingPointer = nil
+                    search.actionSelection = index
+                }
             }
         }
         .padding(5)

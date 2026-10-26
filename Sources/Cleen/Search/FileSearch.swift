@@ -70,7 +70,8 @@ final class FileSearch {
         guard !words.isEmpty,
               let query = MDQueryCreate(kCFAllocatorDefault, words.joined(separator: " && ") as CFString, [kMDItemPath, kMDItemDisplayName, kMDItemLastUsedDate] as CFArray, nil)
         else { return [] }
-        let home = URL.homeDirectory.path(percentEncoded: false)
+        var home = URL.homeDirectory.path(percentEncoded: false)
+        if home.hasSuffix("/") { home.removeLast() }
         MDQuerySetSearchScope(query, [home, "/Applications"] as CFArray, 0)
         // Enough to sort by use and still have `limit` left after the filtering below.
         MDQuerySetMaxCount(query, 400)

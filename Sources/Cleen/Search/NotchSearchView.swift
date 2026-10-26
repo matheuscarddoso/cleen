@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 
 /// The launcher inside the notch: a field, then results grouped by kind. Arrows move,
@@ -8,6 +9,9 @@ struct NotchSearchView: View {
     @Environment(SearchModel.self) private var search
     @Environment(NotchState.self) private var state
     @FocusState private var focused: Bool
+    /// Where the pointer was when the list last changed. Rows sliding under a pointer
+    /// that hasn't moved mustn't take the selection, as in Raycast; only moving it does.
+    @State private var restingPointer: CGPoint?
 
     var body: some View {
         @Bindable var search = search
@@ -85,6 +89,7 @@ struct NotchSearchView: View {
 
             footer
         }
+        .onChange(of: search.query, initial: true) { restingPointer = NSEvent.mouseLocation }
         .onAppear {
             focused = true
             state.escapeHandler = { [search] in
@@ -134,7 +139,10 @@ struct NotchSearchView: View {
                                     .id(item.id)
                                     .onTapGesture { perform(item) }
                                     .onHover { hovering in
-                                        if hovering, !search.showsActions, let index = search.items.firstIndex(where: { $0.id == item.id }) { search.selection = index }
+                                        let pointer = NSEvent.mouseLocation
+                                        guard hovering, pointer != restingPointer, !search.showsActions else { return }
+                                        restingPointer = nil
+                                        if let index = search.items.firstIndex(where: { $0.id == item.id }) { search.selection = index }
                                     }
                             }
                         }
