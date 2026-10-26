@@ -64,6 +64,11 @@ struct LiveActivityBanner: View {
                     .foregroundStyle(NotchStyle.secondary)
             }
             label(text)
+        case .notice(let title, _, let symbol):
+            Image(systemName: symbol)
+                .font(.system(size: 12, weight: .medium))
+                .foregroundStyle(NotchStyle.secondary)
+            label(title)
         }
     }
 
@@ -88,6 +93,9 @@ struct LiveActivityBanner: View {
         case .copied:
             Text("Copiado")
                 .foregroundStyle(NotchStyle.good)
+        case .notice(_, let detail, _):
+            Text(detail)
+                .foregroundStyle(NotchStyle.secondary)
         }
     }
 

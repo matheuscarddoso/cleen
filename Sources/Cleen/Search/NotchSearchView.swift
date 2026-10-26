@@ -1,7 +1,8 @@
 import SwiftUI
 
 /// The launcher inside the notch: a field, then results grouped by kind. Arrows move,
-/// Return runs, Esc closes — it never needs the mouse.
+/// Return runs, ⌘K shows what else the row can do, ⌘Return runs the first of those,
+/// Esc steps back — it never needs the mouse.
 struct NotchSearchView: View {
     let controller: NotchController
     @Environment(SearchModel.self) private var search
@@ -17,7 +18,19 @@ struct NotchSearchView: View {
                 Image(systemName: "magnifyingglass")
                     .font(.system(size: 15, weight: .medium))
                     .foregroundStyle(NotchStyle.secondary)
-                TextField("Buscar apps, janelas, emoji, cálculos…", text: $search.query)
+                if search.mode != .all {
+                    Button { search.setMode(.all) } label: {
+                        Text(search.mode.title)
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundStyle(NotchStyle.primary)
+                            .padding(.horizontal, 8)
+                            .frame(height: 22)
+                            .background(NotchStyle.control, in: .rect(cornerRadius: 6, style: .continuous))
+                    }
+                    .buttonStyle(.plain)
+                    .help("Voltar para tudo")
+                }
+                TextField(search.mode.placeholder, text: $search.query)
                     .textFieldStyle(.plain)
                     .font(.system(size: 17))
                     .focused($focused)
@@ -25,6 +38,20 @@ struct NotchSearchView: View {
                     .onKeyPress(.downArrow) { search.move(1); return .handled }
                     .onKeyPress(.upArrow) { search.move(-1); return .handled }
                     .onKeyPress(.tab) { search.move(1); return .handled }
+                    .onKeyPress(keys: ["k"]) { press in
+                        guard press.modifiers.contains(.command), search.selectedItem != nil else { return .ignored }
+                        search.showsActions.toggle()
+                        return .handled
+                    }
+                    .onKeyPress(phases: .down) { press in
+                        runShortcut(press) ? .handled : .ignored
+                    }
+                    .onKeyPress(.delete) {
+                        // ⌫ on an empty field leaves the narrowed mode.
+                        guard search.query.isEmpty, search.mode != .all else { return .ignored }
+                        search.setMode(.all)
+                        return .handled
+                    }
                 if !search.query.isEmpty {
                     Button {
                         search.query = ""
@@ -46,17 +73,46 @@ struct NotchSearchView: View {
 
             results
                 .frame(maxHeight: .infinity)
+                .overlay(alignment: .bottomTrailing) {
+                    if search.showsActions, let item = search.selectedItem {
+                        SearchActionPanel(item: item, actions: search.actions(for: item)) { perform($0, of: item) }
+                            .padding(.trailing, 12)
+                            .padding(.bottom, 8)
+                            .transition(.opacity.combined(with: .scale(scale: 0.97, anchor: .bottomTrailing)))
+                    }
+                }
+                .animation(.smooth(duration: 0.18), value: search.showsActions)
 
             footer
         }
-        .onAppear { focused = true }
+        .onAppear {
+            focused = true
+            state.escapeHandler = { [search] in
+                // Esc steps back one level before it closes the launcher.
+                if search.editing != nil {
+                    search.cancelEditing()
+                } else if search.showsActions {
+                    search.showsActions = false
+                } else if search.mode != .all {
+                    search.setMode(.all)
+                } else {
+                    return false
+                }
+                return true
+            }
+        }
+        .onDisappear { state.escapeHandler = nil }
         .onChange(of: state.searchFocusRequest) { focused = true }
+        .onChange(of: search.editing) { _, editing in
+            // Back from the alias field: the keyboard returns to the search.
+            if editing == nil { focused = true }
+        }
     }
 
     @ViewBuilder
     private var results: some View {
         if search.sections.isEmpty {
-            Text("Nada encontrado")
+            Text(emptyText)
                 .font(.system(size: 12, weight: .medium))
                 .foregroundStyle(NotchStyle.tertiary)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -69,14 +125,17 @@ struct NotchSearchView: View {
                             Text(section.title)
                                 .font(.system(size: 11, weight: .medium))
                                 .foregroundStyle(NotchStyle.tertiary)
+                                .lineLimit(1)
                                 .padding(.horizontal, 10)
                                 .padding(.top, 8)
                                 .padding(.bottom, 3)
                             ForEach(section.items) { item in
-                                SearchRow(item: item, isSelected: item.id == selectedID)
+                                SearchRow(item: item, isSelected: item.id == selectedID, alias: search.library.aliases[item.id], hotKey: search.library.hotKeys[item.id])
                                     .id(item.id)
                                     .onTapGesture { perform(item) }
-                                    .onHover { hovering in if hovering, let index = search.items.firstIndex(where: { $0.id == item.id }) { search.selection = index } }
+                                    .onHover { hovering in
+                                        if hovering, !search.showsActions, let index = search.items.firstIndex(where: { $0.id == item.id }) { search.selection = index }
+                                    }
                             }
                         }
                     }
@@ -92,15 +151,23 @@ struct NotchSearchView: View {
         }
     }
 
-    /// The keys, as Raycast shows them: what Return does to the selected row, and Esc.
+    private var emptyText: String {
+        switch search.mode {
+        case .files: search.query.count < 2 ? String(localized: "Digite parte do nome do arquivo") : (search.files.isSearching ? String(localized: "Buscando…") : String(localized: "Nenhum arquivo com esse nome"))
+        case .windows: String(localized: "Nenhuma janela aberta com esse nome")
+        case .all: String(localized: "Nada encontrado")
+        }
+    }
+
+    /// The keys, as Raycast shows them: what Return does to the selected row, ⌘K, and Esc.
     private var footer: some View {
         HStack(spacing: 14) {
             Spacer()
             if let item = search.selectedItem {
-                FooterKey(label: actionLabel(for: item), keys: ["⏎"], emphasized: true)
+                FooterKey(label: item.verb ?? String(localized: "Abrir"), keys: ["↩"], emphasized: true)
+                FooterKey(label: String(localized: "Mais ações"), keys: ["⌘", "K"])
             }
-            FooterKey(label: String(localized: "Mover"), keys: ["↑", "↓"])
-            FooterKey(label: String(localized: "Fechar"), keys: ["esc"])
+            FooterKey(label: search.mode == .all ? String(localized: "Fechar") : String(localized: "Voltar"), keys: ["esc"])
         }
         .padding(.horizontal, NotchOpenContent.inset + 6)
         .frame(height: 32)
@@ -110,23 +177,49 @@ struct NotchSearchView: View {
         .padding(.bottom, 6)
     }
 
-    /// Return's verb for a row: the kinds that already read as one stay as they are.
-    private func actionLabel(for item: SearchItem) -> String {
-        switch item.kind {
-        case String(localized: "App"), String(localized: "Cleen"): String(localized: "Abrir")
-        case String(localized: "Janela"): String(localized: "Ajustar janela")
-        case String(localized: "Comando"): String(localized: "Executar")
-        case let kind?: kind
-        case nil: String(localized: "Abrir")
+    /// The keys listed next to each ⌘K action work straight from the list: ⌘C, ⌘⇧C,
+    /// ⌘Q… ⌘↩ falls back to the first action when none claims it. The field keeps the
+    /// text-editing ones (⌘A, ⌘X, ⌘V, ⌘Z).
+    private func runShortcut(_ press: KeyPress) -> Bool {
+        guard press.modifiers.contains(.command), search.editing == nil, let item = search.selectedItem else { return false }
+        let key: String
+        switch press.key {
+        case .return: key = "↩"
+        case .delete: key = "⌫"
+        default:
+            guard let character = press.characters.first, character.isLetter || character.isNumber else { return false }
+            key = String(character).uppercased()
         }
+        guard !["A", "X", "V", "Z", "K"].contains(key) || press.modifiers.contains(.shift) else { return false }
+        let shortcut = "⌘" + (press.modifiers.contains(.shift) ? "⇧" : "") + key
+        let actions = search.actions(for: item).dropFirst()
+        if let action = actions.first(where: { $0.shortcut == shortcut }) ?? (shortcut == "⌘↩" ? actions.first : nil) {
+            perform(action, of: item)
+            return true
+        }
+        return false
     }
 
     private func runSelected() {
-        if let item = search.selectedItem { perform(item) }
+        guard let item = search.selectedItem else { return }
+        if search.showsActions {
+            let actions = search.actions(for: item)
+            if actions.indices.contains(search.actionSelection) { perform(actions[search.actionSelection], of: item) }
+        } else {
+            perform(item)
+        }
     }
 
     private func perform(_ item: SearchItem) {
-        switch search.run(item) {
+        handle(search.run(item))
+    }
+
+    private func perform(_ action: SearchAction, of item: SearchItem) {
+        handle(search.run(action, of: item))
+    }
+
+    private func handle(_ outcome: SearchItem.Outcome) {
+        switch outcome {
         case .close: controller.closeSearch(paste: false)
         case .closeAndPaste: controller.closeSearch(paste: true)
         case .openTab(let tab):
@@ -134,7 +227,16 @@ struct NotchSearchView: View {
                 state.showsSearch = false
                 state.tab = tab
             }
-        case .stay: break
+        case .mode(let mode):
+            search.setMode(mode)
+        case .review(let review):
+            state.review(review)
+        case .edit(let editing):
+            search.beginEditing(editing)
+        case .fill(let text):
+            search.query = text
+        case .stay:
+            break
         }
     }
 }

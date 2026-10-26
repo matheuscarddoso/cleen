@@ -2,8 +2,8 @@ import AppKit
 import ApplicationServices
 import CleenKit
 
-/// Moves and resizes the front app's window through Accessibility, Rectangle/Raycast
-/// style. The notch never takes focus, so "the front app" is the one you were in.
+/// Moves and resizes the window of the app you were in through Accessibility,
+/// Rectangle/Raycast style.
 enum WindowManager {
     /// Each window's frame before Cleen first moved it, for "Restaurar".
     private static var originals: [Int: CGRect] = [:]
@@ -40,8 +40,15 @@ enum WindowManager {
 
     // MARK: Accessibility
 
+    /// The app you were in: while the search is open Cleen is the active app (it has
+    /// the keyboard), so that's the one remembered when it opened.
+    private static var targetApp: NSRunningApplication? {
+        if let front = NSWorkspace.shared.frontmostApplication, front.processIdentifier != getpid() { return front }
+        return PasteKeystroke.target.flatMap { $0.isTerminated ? nil : $0 }
+    }
+
     private static func focusedWindow() -> AXUIElement? {
-        guard let app = NSWorkspace.shared.frontmostApplication, app.processIdentifier != getpid() else { return nil }
+        guard let app = targetApp else { return nil }
         let element = AXUIElementCreateApplication(app.processIdentifier)
         var window: CFTypeRef?
         guard AXUIElementCopyAttributeValue(element, kAXFocusedWindowAttribute as CFString, &window) == .success, let window else { return nil }

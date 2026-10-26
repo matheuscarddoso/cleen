@@ -5,6 +5,7 @@ enum SettingsSection: String, CaseIterable, Identifiable {
     case notch
     case tabs
     case cleaning
+    case search
     case aiUsage
     case notes
     case agents
@@ -19,6 +20,7 @@ enum SettingsSection: String, CaseIterable, Identifiable {
         case .notch: String(localized: "Aparência")
         case .tabs: String(localized: "Abas")
         case .cleaning: String(localized: "Limpeza")
+        case .search: String(localized: "Busca")
         case .aiUsage: String(localized: "Uso de IA")
         case .notes: String(localized: "Notas")
         case .agents: String(localized: "Claude Code")
@@ -33,6 +35,7 @@ enum SettingsSection: String, CaseIterable, Identifiable {
         case .notch: String(localized: "Como o notch abre e o que mostra fechado.")
         case .tabs: String(localized: "As ferramentas na barra do notch e a ordem delas.")
         case .cleaning: String(localized: "O que conta como projeto parado e arquivo grande.")
+        case .search: String(localized: "Links rápidos, snippets, apelidos e atalhos da busca (⌥Espaço).")
         case .aiUsage: String(localized: "As ferramentas de IA que aparecem no Uso de IA e no Início.")
         case .notes: String(localized: "Sincronizar com o Obsidian ou o app Notas.")
         case .agents: String(localized: "Os pedidos de permissão, respondidos no notch.")
@@ -47,6 +50,7 @@ enum SettingsSection: String, CaseIterable, Identifiable {
         case .notch: "rectangle.topthird.inset.filled"
         case .tabs: "square.grid.2x2"
         case .cleaning: "trash"
+        case .search: "magnifyingglass"
         case .aiUsage: "chart.bar.xaxis"
         case .notes: "note.text"
         case .agents: ClaudeLogo.symbolName
@@ -58,7 +62,7 @@ enum SettingsSection: String, CaseIterable, Identifiable {
     static let groups: [(title: String?, sections: [SettingsSection])] = [
         (nil, [.general, .displays]),
         (String(localized: "Notch"), [.notch, .tabs]),
-        (String(localized: "Ferramentas"), [.cleaning, .notes, .aiUsage, .agents]),
+        (String(localized: "Ferramentas"), [.search, .cleaning, .notes, .aiUsage, .agents]),
         ("Cleen", [.about]),
     ]
 }

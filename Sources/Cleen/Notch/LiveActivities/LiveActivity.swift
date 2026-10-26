@@ -11,6 +11,9 @@ enum LiveActivity: Hashable {
     case timerEnded(phase: String)
     /// Something went to the clipboard from the search (a picked color, a result).
     case copied(text: String, color: NSColor?)
+    /// The result of a command run from the search with the notch already closed
+    /// ("Discos" · "2 ejetados").
+    case notice(title: String, detail: String, symbol: String)
 
     enum Power: Hashable {
         case charging

@@ -4,6 +4,8 @@ import SwiftUI
 /// The copies as a horizontally scrolling row of cards, pinned first.
 struct ClipboardCards: View {
     @Environment(ClipboardModel.self) private var model
+    /// ⌘ is held: the first nine cards show the number that pastes them.
+    var showsNumbers = false
     let paste: (ClipboardEntry) -> Void
 
     var body: some View {
@@ -22,8 +24,21 @@ struct ClipboardCards: View {
             ScrollViewReader { proxy in
                 ScrollView(.horizontal) {
                     LazyHStack(spacing: 8) {
-                        ForEach(entries) { entry in
+                        ForEach(Array(entries.enumerated()), id: \.element.id) { index, entry in
                             ClipboardCard(entry: entry, isSelected: entry.id == model.selected?.id) { paste(entry) }
+                                .overlay(alignment: .bottomTrailing) {
+                                    if showsNumbers, index < 9 {
+                                        Text(verbatim: "⌘\(index + 1)")
+                                            .font(.system(size: 10.5, weight: .medium).monospacedDigit())
+                                            .foregroundStyle(NotchStyle.primary)
+                                            .padding(.horizontal, 5)
+                                            .frame(height: 17)
+                                            .background(Color(white: 0.2), in: .rect(cornerRadius: 5, style: .continuous))
+                                            .padding(7)
+                                            .transition(.opacity)
+                                    }
+                                }
+                                .animation(.easeOut(duration: 0.12), value: showsNumbers)
                                 .id(entry.id)
                         }
                     }

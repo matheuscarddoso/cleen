@@ -89,6 +89,14 @@ final class NotchCoordinator {
         (controllerUnderPointer ?? primary)?.openSearch()
     }
 
+    /// Something run from a shortcut that needs confirming first: the panel opens on the
+    /// review.
+    func review(_ review: DeletionReview) {
+        guard let controller = controllerUnderPointer ?? primary else { return }
+        controller.openHeld()
+        controller.state.review(review)
+    }
+
     func toggleUnderPointer() {
         (controllerUnderPointer ?? primary)?.toggle()
     }

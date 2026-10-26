@@ -87,6 +87,11 @@ final class LiveActivityCenter {
         show(.copied(text: text, color: color))
     }
 
+    /// Says how a command run from the search went, once the notch has closed.
+    func notice(_ title: String, detail: String, symbol: String) {
+        show(.notice(title: title, detail: detail, symbol: symbol))
+    }
+
     /// Called by the player when what's playing changes.
     func trackChanged(_ track: NowPlayingTrack?) {
         guard let track, track.isPlaying else { return }

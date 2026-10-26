@@ -1,4 +1,5 @@
 import AppKit
+import CleenKit
 import EventKit
 
 /// A calendar event, copied out of EventKit so views hold plain values.
@@ -9,6 +10,8 @@ nonisolated struct AgendaEvent: Identifiable, Equatable, Sendable {
     let end: Date
     let isAllDay: Bool
     let color: NSColor
+    /// The video call in the invite (Meet, Zoom, Teams…), wherever it was put.
+    let meetingURL: URL?
 
     init(_ event: EKEvent) {
         id = event.eventIdentifier ?? UUID().uuidString
@@ -17,6 +20,7 @@ nonisolated struct AgendaEvent: Identifiable, Equatable, Sendable {
         end = event.endDate
         isAllDay = event.isAllDay
         color = event.calendar.map { NSColor(cgColor: $0.cgColor) ?? .systemBlue } ?? .systemBlue
+        meetingURL = MeetingLink.find(in: [event.url?.absoluteString, event.location, event.notes])
     }
 
     var timeText: String {

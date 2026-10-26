@@ -101,6 +101,8 @@ final class AppModel {
     private func installNotch() {
         if AppLocation.needsMove, AppLocation.offerMove() { return }
         notch.install()
+        // The commands' own shortcuts and the snippet keywords work from the start.
+        search.start()
         if OnboardingModel.isNeeded, LaunchArguments.onboarding || (!LaunchArguments.settings && LaunchArguments.notchTab == nil) {
             startOnboarding()
             return

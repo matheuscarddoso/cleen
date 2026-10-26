@@ -1,10 +1,14 @@
 import AppKit
+import CleenKit
 import SwiftUI
 
-/// One result: icon, title (and subtitle), and the kind on the right.
+/// One result: icon, title (and subtitle), its alias and shortcut if it has them, and
+/// the kind on the right.
 struct SearchRow: View {
     let item: SearchItem
     let isSelected: Bool
+    var alias: String?
+    var hotKey: KeyCombo?
 
     var body: some View {
         HStack(spacing: 10) {
@@ -14,17 +18,37 @@ struct SearchRow: View {
                 .font(.system(size: 13, weight: .medium))
                 .foregroundStyle(NotchStyle.primary)
                 .lineLimit(1)
+                .layoutPriority(1)
             if let subtitle = item.subtitle {
                 Text(subtitle)
                     .font(.system(size: 12))
                     .foregroundStyle(NotchStyle.tertiary)
                     .lineLimit(1)
+                    .truncationMode(.middle)
             }
             Spacer(minLength: 8)
+            if let alias {
+                Text(alias)
+                    .font(.system(size: 10.5, weight: .medium))
+                    .foregroundStyle(NotchStyle.secondary)
+                    .padding(.horizontal, 5)
+                    .frame(height: 16)
+                    .overlay { RoundedRectangle(cornerRadius: 4, style: .continuous).strokeBorder(NotchStyle.primary.opacity(0.16)) }
+                    .accessibilityLabel(Text("Apelido \(alias)"))
+            }
+            if let hotKey {
+                Text(hotKey.display)
+                    .font(.system(size: 10.5, weight: .medium))
+                    .foregroundStyle(NotchStyle.secondary)
+                    .padding(.horizontal, 5)
+                    .frame(height: 16)
+                    .background(NotchStyle.control, in: .rect(cornerRadius: 4, style: .continuous))
+            }
             if let kind = item.kind {
                 Text(kind)
                     .font(.system(size: 12))
                     .foregroundStyle(isSelected ? NotchStyle.secondary : NotchStyle.tertiary)
+                    .lineLimit(1)
             }
         }
         .padding(.horizontal, 10)
@@ -42,7 +66,7 @@ struct SearchRow: View {
                 .foregroundStyle(.white)
                 .frame(width: 20, height: 20)
                 .background(color.gradient, in: .rect(cornerRadius: 5.5, style: .continuous))
-        case .app(let url):
+        case .app(let url), .file(let url):
             FileIcon(url: url, size: 20)
         case .emoji(let emoji):
             Text(emoji).font(.system(size: 16))

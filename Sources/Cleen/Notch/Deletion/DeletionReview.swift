@@ -17,13 +17,16 @@ struct DeletionReview: Identifiable {
         var symbol: String = "doc"
     }
 
-    enum Outcome {
+    enum Outcome: Equatable {
         /// Goes to the Lixo: one drag brings it back.
         case trash
         /// Gone for good.
         case delete
         /// Some of each.
         case mixed
+        /// Not a deletion but just as hard to take back (restart, quit every app): the
+        /// text says what happens.
+        case action(String)
     }
 
     let id = UUID()
@@ -44,6 +47,7 @@ struct DeletionReview: Identifiable {
         case .trash: String(localized: "Vai para o Lixo: dá para recuperar de lá.")
         case .delete: String(localized: "É apagado de vez, sem passar pelo Lixo.")
         case .mixed: String(localized: "Parte vai para o Lixo e parte é apagada de vez.")
+        case .action(let text): text
         }
     }
 
@@ -58,7 +62,7 @@ struct DeletionReview: Identifiable {
     static func title(count: Int, outcome: Outcome) -> String {
         switch outcome {
         case .trash: count == 1 ? String(localized: "Mover 1 item para o Lixo?") : String(localized: "Mover \(count) itens para o Lixo?")
-        case .delete, .mixed: count == 1 ? String(localized: "Apagar 1 item?") : String(localized: "Apagar \(count) itens?")
+        case .delete, .mixed, .action: count == 1 ? String(localized: "Apagar 1 item?") : String(localized: "Apagar \(count) itens?")
         }
     }
 }
