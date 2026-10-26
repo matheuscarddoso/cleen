@@ -65,6 +65,17 @@ struct NotchRootView: View {
                     .shadow(color: .black.opacity(state.isOpen ? 0.55 : 0), radius: 22, y: 10)
             }
 
+            // The tabs' dock, floating under the panel.
+            .overlay(alignment: .top) {
+                if state.showsTabDock {
+                    NotchTabBar(maxWidth: open.width)
+                        .offset(y: size.height + NotchGeometry.dockGap)
+                        .transition(.asymmetric(
+                            insertion: .scale(scale: 0.92, anchor: .top).combined(with: .opacity).animation(.spring(response: 0.42, dampingFraction: 0.82).delay(0.06)),
+                            removal: .opacity.animation(.easeOut(duration: 0.12))
+                        ))
+                }
+            }
             .overlay(alignment: .top) {
                 if state.isOpen, !welcomes, let reading = mediaKeys.reading(on: controller.screen) {
                     MediaKeyHUDPill(reading: reading)

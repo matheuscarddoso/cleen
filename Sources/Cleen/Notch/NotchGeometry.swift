@@ -15,6 +15,13 @@ struct NotchGeometry: Equatable {
     static var openPanelSize: CGSize { NotchSettings.panelSize }
     /// Room around the open panel for its shadow; the window is this much larger.
     static let shadowPadding = 36.0
+    /// The tabs' dock under the open panel: its height and the gap above it.
+    static let dockHeight = 38.0
+    static let dockGap = 8.0
+    /// What the dock gave back to the panel: the tab bar inside it took 42 pt; the tool now
+    /// keeps a 14 pt inset at the bottom instead.
+    static let dockSavings = 28.0
+
     /// The launcher grows the panel this tall, so a page of results fits (Raycast's
     /// window shows about eight rows; this shows about as many).
     static let searchHeight = 404.0
@@ -63,12 +70,12 @@ struct NotchGeometry: Equatable {
         let standard = Self.openPanelSize.height
         switch height {
         case .standard:
-            return CGSize(width: width, height: standard)
+            return CGSize(width: width, height: standard - Self.dockSavings)
         case .tall:
             return CGSize(width: width, height: max(standard, min(Self.searchHeight, screenFrame.height * 0.6)))
         case .compact:
-            // The camera strip, 6 pt, the 64 pt bar, then the tab bar (6 + 26 + 10).
-            return CGSize(width: width, height: min(standard, notchSize.height + 6 + 64 + 6 + 42))
+            // The camera strip, 6 pt, the 64 pt bar and the bottom inset.
+            return CGSize(width: width, height: min(standard, notchSize.height + 6 + 64 + 14))
         case .mirror:
             // The camera strip, the 6 pt above the tool, the picture at 16:9 across the
             // content width, and the inset below it (the tab bar steps aside).
@@ -91,14 +98,16 @@ struct NotchGeometry: Equatable {
     var windowFrame: CGRect {
         let size = CGSize(width: openSize(.tall).width, height: max(openSize(.tall).height, openSize(.mirror).height))
         let width = size.width + Self.shadowPadding * 2
-        let height = size.height + Self.shadowPadding
+        let height = size.height + Self.dockGap + Self.dockHeight + Self.shadowPadding
         return CGRect(x: screenFrame.midX - width / 2, y: screenFrame.maxY - height, width: width, height: height)
     }
 
     /// The area that reacts to the pointer, in global coordinates.
-    func hotZone(isOpen: Bool, showsWings: Bool, height: PanelHeight = .standard) -> CGRect {
+    func hotZone(isOpen: Bool, showsWings: Bool, height: PanelHeight = .standard, dock: Bool = false) -> CGRect {
         let size = isOpen ? openSize(height) : closedSize(showsWings: showsWings)
-        let rect = CGRect(x: screenFrame.midX - size.width / 2, y: screenFrame.maxY - size.height, width: size.width, height: size.height)
+        // The dock below counts as the panel: reaching for a tab never closes it.
+        let reach = isOpen && dock ? Self.dockGap + Self.dockHeight : 0
+        let rect = CGRect(x: screenFrame.midX - size.width / 2, y: screenFrame.maxY - size.height - reach, width: size.width, height: size.height + reach)
         // A little forgiveness: the closed notch is small, the open edge shouldn't be a cliff.
         return isOpen ? rect.insetBy(dx: -14, dy: -14) : rect.insetBy(dx: -6, dy: -3)
     }

@@ -6,23 +6,35 @@ struct NotchTabButton: View {
     var showsClaudeLogo = false
     let title: String
     let isSelected: Bool
+    /// The dock's shared pill, so it slides from tab to tab.
+    let selection: Namespace.ID
     let action: () -> Void
     @State private var isHovered = false
+
+    static let width = 32.0
 
     var body: some View {
         Button(action: action) {
             Group {
                 if showsClaudeLogo {
-                    ClaudeLogo(size: 14, tint: foreground)
+                    ClaudeLogo(size: 13, tint: foreground)
                 } else {
                     Image(systemName: symbol)
-                        .font(.system(size: 13, weight: .medium))
+                        .font(.system(size: 12.5, weight: .medium))
                         .foregroundStyle(foreground)
                 }
             }
-                .frame(width: 30, height: 26)
-                .background(isSelected ? NotchStyle.selection : (isHovered ? NotchStyle.control : .clear), in: .rect(cornerRadius: 7))
-                .contentShape(.rect)
+            .frame(width: Self.width, height: 30)
+            .background {
+                if isSelected {
+                    Capsule()
+                        .fill(NotchStyle.control)
+                        .matchedGeometryEffect(id: "tab", in: selection)
+                } else if isHovered {
+                    Capsule().fill(Color.white.opacity(0.05))
+                }
+            }
+            .contentShape(.capsule)
         }
         .buttonStyle(.plain)
         .onHover { isHovered = $0 }
@@ -33,6 +45,6 @@ struct NotchTabButton: View {
     }
 
     private var foreground: Color {
-        isSelected ? NotchStyle.primary : (isHovered ? NotchStyle.primary.opacity(0.8) : NotchStyle.secondary)
+        isSelected ? NotchStyle.primary : (isHovered ? NotchStyle.primary.opacity(0.8) : Color.white.opacity(0.42))
     }
 }

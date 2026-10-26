@@ -243,7 +243,7 @@ final class NotchController {
     }
 
     private var pointerIsInside: Bool {
-        state.geometry?.hotZone(isOpen: true, showsWings: NotchSettings.showsWings, height: state.panelHeight).contains(NSEvent.mouseLocation) ?? false
+        state.geometry?.hotZone(isOpen: true, showsWings: NotchSettings.showsWings, height: state.panelHeight, dock: state.showsTabDock).contains(NSEvent.mouseLocation) ?? false
     }
 
     /// Opens the panel on Ajustes.
@@ -317,7 +317,7 @@ final class NotchController {
         }
 
         if state.isOpen {
-            let inside = geometry.hotZone(isOpen: true, showsWings: wings, height: state.panelHeight).contains(location)
+            let inside = geometry.hotZone(isOpen: true, showsWings: wings, height: state.panelHeight, dock: state.showsTabDock).contains(location)
             // The window is taller than a short panel; its clear part lets clicks through
             // to the app below, as if the window ended where the panel does.
             if let panel, panel.ignoresMouseEvents == inside { panel.ignoresMouseEvents = !inside }

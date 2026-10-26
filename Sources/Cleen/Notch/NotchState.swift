@@ -36,6 +36,16 @@ final class NotchState {
     /// review of something about to be deleted.
     var isTall: Bool { isOpen && !showsWelcome && (showsSearch || showsSettings || deletionReview != nil || tab == .emoji) }
 
+    /// The tabs' dock floats under the open panel, except where a tool takes the whole
+    /// panel (the wide mirror, Início's edit mode, the teleprompter reading) and over the
+    /// launcher, Ajustes, the welcome and a review.
+    var showsTabDock: Bool {
+        guard isOpen, !showsWelcome, !showsSearch, !showsSettings, deletionReview == nil else { return false }
+        if tab == .home, mirrorExpanded || isEditingHome { return false }
+        if tab == .teleprompter, isPrompting { return false }
+        return true
+    }
+
     /// The open panel's height: tall for the above, taller still for the wide mirror so
     /// the whole camera picture shows.
     var panelHeight: NotchGeometry.PanelHeight {

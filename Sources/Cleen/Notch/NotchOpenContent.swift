@@ -29,18 +29,11 @@ struct NotchOpenContent: View {
             } else {
                 tool
                     .padding(.horizontal, isPrompting ? 0 : NotchOpenContent.inset)
-                    // minHeight 0: a tall tool clips instead of pushing the tab bar down, so the
-                    // bar sits at the same height on every tab.
                     .frame(maxWidth: .infinity, minHeight: 0, maxHeight: .infinity, alignment: .top)
                     .clipped()
                     .padding(.top, isPrompting ? 0 : 6)
-                // The expanded mirror and Início's edit mode take the tab bar's room too.
-                if !hidesTabBar {
-                    NotchTabBar()
-                        .padding(.bottom, 10)
-                        .padding(.top, 6)
-                        .transition(.opacity)
-                }
+                    // The tabs float in their dock below; the tool keeps an inset above the edge.
+                    .padding(.bottom, state.showsTabDock ? 14 : 0)
             }
         }
         .foregroundStyle(NotchStyle.primary)
@@ -56,7 +49,6 @@ struct NotchOpenContent: View {
                     .id(review.id)
             }
         }
-        .animation(.spring(response: 0.45, dampingFraction: 0.86), value: hidesTabBar)
         .overlay(alignment: .bottom) {
             if state.pasteNeedsPermission {
                 PastePermissionBanner()
@@ -67,8 +59,6 @@ struct NotchOpenContent: View {
         }
         .animation(.spring(response: 0.36, dampingFraction: 0.86), value: state.pasteNeedsPermission)
     }
-
-    private var hidesTabBar: Bool { state.tab == .home && (state.mirrorExpanded || state.isEditingHome) || isPrompting }
 
     private var isPrompting: Bool { state.isPrompting && state.tab == .teleprompter }
 
