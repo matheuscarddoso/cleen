@@ -197,28 +197,26 @@ final class NotchController {
         }
         close()
         guard paste else { return }
-        // With one of Cleen's own windows in front (Ajustes, the tour), step back so the
-        // app underneath is the one that gets the paste.
-        if NSApp.isActive { NSApp.deactivate() }
+        // close() handed activation back; the paste goes in once that app is in front
+        // with its field focused again.
         Task {
-            try? await Task.sleep(for: .milliseconds(120))
+            await PasteKeystroke.waitForTarget()
             PasteKeystroke.send()
         }
     }
 
-    /// The panel had the keyboard (search, a text field): hand it back to the app in
-    /// front, which never stopped being active.
-    /// Hands the keyboard back to the app you were in, so a paste lands there.
-    /// `resignKey()` only reports a change, it doesn't make one: the panel stayed key and
-    /// a ⌘V sent after closing went to Cleen. Ordering the panel out is what really gives
-    /// up key status (no closed panel can take it over, see `NotchPanel.acceptsKeyboard`);
-    /// ordering it straight back in keeps the closed notch on screen, so nothing flickers.
-    /// Then the app you were in gets the keyboard back.
+    /// Hands the keyboard back to the app you were in, so typing (and a paste) lands
+    /// there. `resignKey()` only reports a change, it doesn't make one: ordering the
+    /// panel out is what really gives up key status (no closed panel can take it over,
+    /// see `NotchPanel.acceptsKeyboard`); ordering it straight back in keeps the closed
+    /// notch on screen, so nothing flickers. Then activation goes back to that app.
     private func giveBackKeyboard() {
-        guard let panel, panel.isKeyWindow else { return }
-        panel.orderOut(nil)
-        panel.orderFrontRegardless()
-        PasteKeystroke.restoreFocus()
+        guard let panel else { return }
+        if panel.isKeyWindow {
+            panel.orderOut(nil)
+            panel.orderFrontRegardless()
+        }
+        PasteKeystroke.handBack()
     }
 
     func togglePin() {

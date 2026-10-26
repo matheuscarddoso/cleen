@@ -21,32 +21,29 @@ enum PasteKeystroke {
 
     /// The app to paste into: the one in front when the notch took the keyboard. Kept
     /// because, for a moment after the notch closes, macOS may still route keys to Cleen.
+    /// The app in front when the notch opened: where a pick is pasted and where the
+    /// keyboard goes back.
     static var target: NSRunningApplication?
 
-    /// The field that had the cursor in the target app when the notch opened.
-    private static var targetElement: AXUIElement?
-
-    /// Remembers the app in front, and the field in it with the cursor, unless it's
-    /// Cleen itself.
     static func rememberTarget() {
         guard let front = NSWorkspace.shared.frontmostApplication, front.processIdentifier != ProcessInfo.processInfo.processIdentifier else { return }
         target = front
-        targetElement = isAllowed ? focusedElement(of: front.processIdentifier) : nil
     }
 
-    /// Gives the keyboard back to the field you were typing in. macOS doesn't hand it
-    /// back to an app that was already in front when the panel goes, and a browser
-    /// (Dia, Chrome) given back only its window lands on the page, not the field; so the
-    /// app is made frontmost again and the very field focused.
-    static func restoreFocus() {
-        guard isAllowed, let app = target, !app.isTerminated else { return }
-        let application = AXUIElementCreateApplication(app.processIdentifier)
-        AXUIElementSetAttributeValue(application, kAXFrontmostAttribute as CFString, kCFBooleanTrue)
-        if let element = targetElement {
-            let result = AXUIElementSetAttributeValue(element, kAXFocusedAttribute as CFString, kCFBooleanTrue)
-            log.info("focus given back to \(app.bundleIdentifier ?? "?", privacy: .public), field: \(result.rawValue)")
+    /// Gives activation back to the app you were in, the way Raycast does when it
+    /// closes: macOS then brings back that app's own window and the field that had the
+    /// cursor. Only while Cleen is still the active app; if you went to another app by
+    /// clicking it, that's where you stay.
+    static func handBack() {
+        guard NSApp.isActive else { return }
+        // Cleen's own window in front (the tour, Ajustes): that's where you are.
+        guard !NSApp.windows.contains(where: { $0.isVisible && $0.isKeyWindow && !($0 is NotchPanel) }) else { return }
+        if let app = target, !app.isTerminated {
+            NSApp.yieldActivation(to: app)
+            app.activate()
+        } else {
+            NSApp.deactivate()
         }
-        // Where the keyboard actually ended up, for the log.
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
             let system = AXUIElementCreateSystemWide()
             var focusedApp: CFTypeRef?
@@ -55,9 +52,19 @@ enum PasteKeystroke {
             if let focusedApp, CFGetTypeID(focusedApp) == AXUIElementGetTypeID() { AXUIElementGetPid(focusedApp as! AXUIElement, &pid) }
             let role = focusedElement(of: pid).flatMap { string($0, kAXRoleAttribute) } ?? "none"
             let name = NSRunningApplication(processIdentifier: pid)?.bundleIdentifier ?? "none"
-            let key = NSApp.keyWindow.map { "\(type(of: $0)) at \(Int($0.frame.minX)),\(Int($0.frame.minY))" } ?? "none"
-            log.info("keyboard now with \(name, privacy: .public), element \(role, privacy: .public); Cleen key window: \(key, privacy: .public)")
+            log.info("keyboard now with \(name, privacy: .public), element \(role, privacy: .public); Cleen active: \(NSApp.isActive)")
         }
+    }
+
+    /// Waits (up to about half a second) for the app you were in to be in front again,
+    /// so a paste goes in once its field has the cursor back.
+    static func waitForTarget() async {
+        guard let app = target, !app.isTerminated else { return }
+        for _ in 0..<30 where NSWorkspace.shared.frontmostApplication?.processIdentifier != app.processIdentifier {
+            try? await Task.sleep(for: .milliseconds(20))
+        }
+        // The window takes a beat more to hand its field the cursor.
+        try? await Task.sleep(for: .milliseconds(40))
     }
 
     private static func focusedElement(of pid: pid_t) -> AXUIElement? {

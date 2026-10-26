@@ -23,13 +23,22 @@ final class NotchPanel: NSPanel {
         ignoresMouseEvents = true
     }
 
-    /// Whether the panel may take the keyboard (so search and notes take typing without
-    /// activating the app): only while it's open. A closed notch that could become key
+    /// Whether the panel may take the keyboard (search, notes, a text field): only
+    /// while it's open. A closed notch that could become key
     /// gets picked by AppKit as the next key window when another panel gives the keyboard
     /// up (the one on the other screen did, a moment after a paste), and then typing went
     /// to Cleen instead of back to the app you were in.
     var acceptsKeyboard: () -> Bool = { false }
 
     override var canBecomeKey: Bool { acceptsKeyboard() }
+
+    /// Taking the keyboard makes Cleen the active app, as Raycast does when it opens:
+    /// the app you were in then steps back properly, so handing activation back to it
+    /// (`PasteKeystroke.handBack`) puts its window and the field with the cursor back.
+    override func becomeKey() {
+        super.becomeKey()
+        if !NSApp.isActive { NSApp.activate() }
+    }
+
     override var canBecomeMain: Bool { false }
 }
