@@ -141,6 +141,8 @@ final class MediaKeyHUD {
 
     // MARK: Volume
 
+    private nonisolated static let volumeTracker = OSAllocatedUnfairLock(initialState: VolumeTracker())
+
     /// Steps the default output; false (the key goes on to macOS) when its volume
     /// can't be set from here, as with most HDMI outputs.
     private nonisolated static func handleVolume(_ press: MediaKey.Press, fine: Bool, show: (Reading) -> Void) -> Bool {
@@ -149,9 +151,14 @@ final class MediaKeyHUD {
         guard press.isDown else { return true }
         // Held mute doesn't flicker on and off.
         if press.key == .mute, press.isRepeat { return true }
-        guard let before = SystemVolume.read(device) else { return false }
+        guard let reading = SystemVolume.read(device) else { return false }
+        // The level Cleen asked for, not the device's rounded or not-yet-applied one
+        // (see VolumeTracker), so every press moves one step.
+        var before = reading
+        before.level = volumeTracker.withLock { $0.base(reading: reading.level) }
         let after = before.applying(press.key, fine: fine)
-        SystemVolume.write(after, to: device, from: before)
+        volumeTracker.withLock { $0.record(after.level) }
+        SystemVolume.write(after, to: device, from: reading)
         show(Reading(kind: .volume, level: after.level, isMuted: after.isMuted, source: nil, display: nil))
         return true
     }

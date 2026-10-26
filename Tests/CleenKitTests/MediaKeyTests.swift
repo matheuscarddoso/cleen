@@ -1,3 +1,4 @@
+import Foundation
 import Testing
 @testable import CleenKit
 
@@ -69,5 +70,39 @@ struct MediaKeyTests {
         #expect(VolumeState(level: 0.5, isMuted: false).applying(.mute, fine: true).isMuted)
         #expect(muted.applying(.brightnessUp, fine: false) == muted)
         #expect(VolumeState(level: 0, isMuted: false).isSilent)
+    }
+}
+
+struct VolumeTrackerTests {
+    @Test func aDeviceThatRoundsUpCantHoldTheVolumeDown() {
+        var tracker = VolumeTracker()
+        let start = Date(timeIntervalSince1970: 0)
+        // The device rounds 0.6875 up to 0.6944: from its reading, a step down lands back
+        // on 0.6875 again and again. From Cleen's own level, it keeps going.
+        var level = 0.6944
+        for press in 0..<3 {
+            let now = start.addingTimeInterval(Double(press) * 0.2)
+            let next = LevelStep.next(tracker.base(reading: 0.6944, now: now), up: false, fine: false)
+            tracker.record(next, now: now)
+            level = next
+        }
+        #expect(abs(level - 0.5625) < 1e-9)
+    }
+
+    @Test func aQuickBurstIgnoresStaleReadings() {
+        var tracker = VolumeTracker()
+        let now = Date(timeIntervalSince1970: 0)
+        tracker.record(0.75, now: now)
+        // The device hasn't applied the last presses yet and still says 0.5.
+        #expect(tracker.base(reading: 0.5, now: now.addingTimeInterval(0.3)) == 0.75)
+    }
+
+    @Test func aChangeMadeElsewhereWins() {
+        var tracker = VolumeTracker()
+        let now = Date(timeIntervalSince1970: 0)
+        tracker.record(0.75, now: now)
+        #expect(tracker.base(reading: 0.3, now: now.addingTimeInterval(10)) == 0.3)
+        // Only rounded by the device: still Cleen's level.
+        #expect(tracker.base(reading: 0.765, now: now.addingTimeInterval(10)) == 0.75)
     }
 }

@@ -108,3 +108,35 @@ public struct VolumeState: Sendable, Equatable {
     /// Silent either way: muted, or turned all the way down.
     public var isSilent: Bool { isMuted || level <= 0.0001 }
 }
+
+/// The level Cleen last set, as the starting point for the next press.
+///
+/// Outputs round what they're given to their own steps (a USB headset took 0.65 and
+/// settled on 0.69) and take a moment to apply it, so reading the device back between
+/// quick presses gave an old or rounded level: a press down could land right back where
+/// it started, and the volume wouldn't go down. During a burst, or while the device only
+/// rounded what was asked, the level Cleen asked for is the truth; anything further off
+/// was changed elsewhere (the menu bar slider, another app) and the device wins.
+public struct VolumeTracker: Sendable {
+    /// Presses closer together than this are one burst.
+    public static let burst: TimeInterval = 1.5
+    /// How far a device may round a level.
+    public static let rounding = 0.05
+
+    private var target: Double?
+    private var setAt: Date?
+
+    public init() {}
+
+    /// Where the next press starts from, given what the device reports now.
+    public func base(reading: Double, now: Date = .now) -> Double {
+        guard let target, let setAt else { return reading }
+        if now.timeIntervalSince(setAt) < Self.burst || abs(target - reading) < Self.rounding { return target }
+        return reading
+    }
+
+    public mutating func record(_ level: Double, now: Date = .now) {
+        target = level
+        setAt = now
+    }
+}
