@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronDown, ChevronUp, ClipboardList, FileText, Link2, Pause, Play, RefreshCw, RotateCcw } from "lucide-react";
+import Image from "next/image";
 import { useEffect, useRef, useState, type ComponentType, type ReactNode, type SVGProps } from "react";
 import { Camera, Inbox, NotebookPen, Pin, ScrollText, Search, Send, Settings, Timer } from "./Icons";
 import { Shoulders, Swap } from "./Notch";
@@ -459,22 +460,16 @@ function NoteCheck({ checked, text }: { checked: boolean; text: string }) {
 function Mirror() {
   return (
     <Panel title="Espelho" height={340}>
-      <div
-        className="relative mx-auto mt-4 h-[250px] w-[420px] overflow-hidden rounded-[22px]"
-        style={{ background: "radial-gradient(70% 80% at 22% 18%, #f3d9b1 0%, transparent 60%), radial-gradient(60% 70% at 85% 30%, #7a8fa8 0%, transparent 65%), linear-gradient(180deg, #a08a76, #3d3631)" }}
-      >
-        <svg viewBox="0 0 420 250" className="absolute inset-0 h-full w-full blur-[3px]">
-          <defs>
-            <linearGradient id="skin" x1="0" x2="0" y1="0" y2="1">
-              <stop offset="0" stopColor="#d9b49a" />
-              <stop offset="1" stopColor="#a77d62" />
-            </linearGradient>
-          </defs>
-          <rect x="190" y="150" width="40" height="40" rx="14" fill="#b88b6e" />
-          <ellipse cx="210" cy="112" rx="50" ry="62" fill="url(#skin)" />
-          <path d="M158 104c-6-52 40-72 72-62 34 8 46 34 40 62-6-24-26-38-56-36-30 0-50 14-56 36z" fill="#2b211c" />
-          <path d="M70 262c8-58 64-82 140-82s132 24 140 82z" fill="#2f3b4c" />
-        </svg>
+      <div className="relative mx-auto mt-4 h-[250px] w-[420px] overflow-hidden rounded-[22px] bg-[#2a2420] outline outline-1 -outline-offset-1 outline-white/10">
+        {/* Selfie by Vitaly Gariev on Unsplash (Unsplash License), mirrored like the app's camera. */}
+        <Image
+          src="/mirror-selfie.jpg"
+          alt="Uma pessoa sorrindo para a câmera, vista no espelho do notch"
+          width={840}
+          height={500}
+          unoptimized
+          className="h-full w-full object-cover"
+        />
         <span className="absolute left-3 top-3 rounded-full bg-black/50 px-2.5 py-1 text-[12px] font-medium backdrop-blur">Câmera FaceTime HD</span>
       </div>
     </Panel>
