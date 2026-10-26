@@ -1,8 +1,9 @@
 /* Permission prompts, in English. Portuguese is in Info.plist itself (scripts/bundle.sh). */
-"NSAppleEventsUsageDescription" = "Cleen asks your browser which tab is playing, to show the site's icon, and uses macOS to ask for the administrator password when a cleanup needs it.";
 "NSCameraUsageDescription" = "Cleen uses the camera in Mirror, so you can check yourself before a call, and in screen recordings you choose to appear in. Nothing leaves your Mac.";
 "NSCalendarsFullAccessUsageDescription" = "Cleen shows today's events in the notch.";
 "NSRemindersFullAccessUsageDescription" = "Cleen shows your reminders in the notch and lets you check them off.";
 "NSLocationUsageDescription" = "Cleen uses your location only to show the weather where you are, and only when you ask.";
 "NSLocationWhenInUseUsageDescription" = "Cleen uses your location only to show the weather where you are, and only when you ask.";
 "NSMicrophoneUsageDescription" = "Cleen uses the microphone in the teleprompter, so the ring follows your voice, and in screen recordings where you choose to record your voice. Nothing leaves your Mac.";
+"NSAppleEventsUsageDescription" = "Cleen asks your browser which tab is playing, to show the site's icon, sends through Messages the replies you write in the notch, and uses macOS to ask for the administrator password when a cleanup needs it.";
+"NSContactsUsageDescription" = "Cleen shows the name and photo of who messaged you instead of the number. Nothing leaves your Mac.";

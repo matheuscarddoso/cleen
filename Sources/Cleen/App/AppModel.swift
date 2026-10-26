@@ -30,6 +30,7 @@ final class AppModel {
     let tabs = TabPreferences()
     let homeLayout = HomeLayout()
     let live = LiveActivityCenter()
+    let messages = MessagesModel()
     let agents = AgentsModel()
     let displays = DisplaysModel()
     let updates = UpdateModel()
@@ -78,6 +79,8 @@ final class AppModel {
         LiveActivitySettings.register()
         nowPlaying.onTrackChange = { [live] track in live.trackChanged(track) }
         live.start(agenda: agenda)
+        messages.onIncoming = { [live] message in live.messageArrived(message) }
+        messages.start()
         timer.onPhaseEnd = { [live] ended in
             switch ended {
             case .countdown: live.timerEnded(phase: String(localized: "Timer"))
@@ -226,7 +229,7 @@ final class AppModel {
         case .leftovers: orphans.startScan()
         case .apps: Task { await apps.load() }
         case .calendar, .shelf, .clipboard, .screenshots, .ai, .system, .startup, .maintenance,
-             .timer, .notes, .reminders, .converter, .emoji, .weather, .shortcuts, .agents, .icons, .stocks, .teleprompter, .recorder, .assistant: break
+             .timer, .notes, .reminders, .converter, .emoji, .weather, .shortcuts, .agents, .messages, .icons, .stocks, .teleprompter, .recorder, .assistant: break
         }
     }
 

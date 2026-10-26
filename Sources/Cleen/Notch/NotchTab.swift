@@ -15,6 +15,7 @@ enum NotchTab: String, CaseIterable, Identifiable, Codable {
     case weather
     case shortcuts
     case agents
+    case messages
     case icons
     case stocks
     case teleprompter
@@ -50,6 +51,7 @@ enum NotchTab: String, CaseIterable, Identifiable, Codable {
         case .weather: String(localized: "Tempo")
         case .shortcuts: String(localized: "Atalhos")
         case .agents: String(localized: "Agentes")
+        case .messages: String(localized: "Mensagens")
         case .icons: String(localized: "Ícones")
         case .stocks: String(localized: "Ações")
         case .teleprompter: String(localized: "Teleprompter")
@@ -88,6 +90,7 @@ enum NotchTab: String, CaseIterable, Identifiable, Codable {
         case .weather: "cloud.sun"
         case .shortcuts: "square.2.layers.3d"
         case .agents: "asterisk"
+        case .messages: "message.fill"
         case .icons: "square.grid.3x3.square"
         case .stocks: "chart.line.uptrend.xyaxis"
         case .teleprompter: "text.aligncenter"

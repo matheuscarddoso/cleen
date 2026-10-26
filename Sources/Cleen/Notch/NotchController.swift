@@ -69,7 +69,10 @@ final class NotchController {
         if !state.isOpen { PasteKeystroke.rememberTarget() }
         pendingClose?.cancel()
         // While recording, opening the notch is for Stop.
-        let tab = tab ?? (app.recorder.isRecording && !state.isOpen ? .recorder : nil)
+        // Over a new message's island, it's the message you came for.
+        let message = state.isOpen ? nil : app.live.shownMessage
+        if let message { app.messages.selectedChat = message.chatGUID }
+        let tab = tab ?? (app.recorder.isRecording && !state.isOpen ? .recorder : (message != nil ? .messages : nil))
         if let tab {
             state.tab = tab
             state.showsSettings = false

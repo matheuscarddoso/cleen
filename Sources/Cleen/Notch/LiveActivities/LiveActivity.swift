@@ -1,4 +1,5 @@
 import AppKit
+import CleenKit
 
 /// Something worth a glance on the closed notch. Banners widen the wings for a few
 /// seconds and go; a meeting about to start stays, compact, until it begins.
@@ -16,6 +17,8 @@ enum LiveActivity: Hashable {
     case notice(title: String, detail: String, symbol: String)
     /// A download that just finished: the notch grows into an island with the file.
     case downloaded(url: URL, size: Int64)
+    /// A message that just arrived: an island with who sent it and what they said.
+    case message(ChatMessage)
 
     enum Power: Hashable {
         case charging
@@ -34,8 +37,10 @@ enum LiveActivity: Hashable {
 
     /// The finished-download island: wider than the wings, and taller than the notch.
     var isIsland: Bool {
-        if case .downloaded = self { return true }
-        return false
+        switch self {
+        case .downloaded, .message: return true
+        default: return false
+        }
     }
 
     static let islandWingWidth = 130.0

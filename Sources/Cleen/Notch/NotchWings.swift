@@ -16,6 +16,7 @@ struct NotchWings: View {
     @Environment(TimerModel.self) private var timer
     @Environment(AgentsModel.self) private var agents
     @Environment(RecorderModel.self) private var recorder
+    @Environment(MessagesModel.self) private var messages
     @AppStorage(LiveActivitySettings.agentsKey) private var showsAgents = true
     @AppStorage(LiveActivitySettings.idleKey) private var idle = LiveActivitySettings.Idle.disk.rawValue
 
@@ -25,6 +26,10 @@ struct NotchWings: View {
                 .transition(.opacity)
         } else if let banner = live.banner, banner.isIsland, case .downloaded(let url, let size) = banner {
             DownloadIsland(url: url, size: size, notchHeight: notchHeight)
+                .id(banner)
+                .transition(.trackSwap)
+        } else if let banner = live.banner, case .message(let message) = banner {
+            MessageIsland(message: message, sender: messages.sender(of: message), image: messages.contacts.image(for: message.handle), notchHeight: notchHeight)
                 .id(banner)
                 .transition(.trackSwap)
         } else if let banner = live.banner, !isBusy {

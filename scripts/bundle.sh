@@ -58,7 +58,8 @@ cat > "$APP/Contents/Info.plist" <<PLIST
   <key>LSUIElement</key><true/>
   <key>NSHighResolutionCapable</key><true/>
   <key>NSHumanReadableCopyright</key><string>© Matheus Cardoso</string>
-  <key>NSAppleEventsUsageDescription</key><string>O Cleen pergunta ao navegador qual aba está tocando, para mostrar o ícone do site, e usa o macOS para pedir a senha de administrador quando uma limpeza precisa dela.</string>
+  <key>NSAppleEventsUsageDescription</key><string>O Cleen pergunta ao navegador qual aba está tocando, para mostrar o ícone do site, envia pelo Mensagens as respostas que você escreve no notch e usa o macOS para pedir a senha de administrador quando uma limpeza precisa dela.</string>
+  <key>NSContactsUsageDescription</key><string>O Cleen mostra o nome e a foto de quem mandou mensagem, no lugar do número. Nada sai do seu Mac.</string>
   <!-- The Espelho is a plain mirror: no hand-gesture Reactions. Leaving them on made
        macOS load its gesture models every time the camera started. -->
   <key>NSCameraReactionEffectGesturesEnabledDefault</key><false/>

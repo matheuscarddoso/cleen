@@ -42,5 +42,6 @@ extension View {
             .environment(app.assistant)
             .environment(app.stocks)
             .environment(app.recorder)
+            .environment(app.messages)
     }
 }

@@ -1460,3 +1460,18 @@
 "Download" = "Download";
 "O progresso e o tempo que falta enquanto baixa, e o arquivo quando termina." = "Progress and time left while it downloads, and the file when it finishes.";
 "Downloads" = "Downloads";
+
+/* Messages */
+"Abrir no Mensagens" = "Open in Messages";
+"Anexo" = "Attachment";
+"Enviar" = "Send";
+"Mensagem" = "Message";
+"Mensagens" = "Messages";
+"Nenhuma conversa nas últimas duas semanas" = "No conversations in the last two weeks";
+"Não deu para enviar. Permita o Cleen controlar o Mensagens em Ajustes do Sistema › Privacidade › Automação." = "Couldn't send. Allow Cleen to control Messages in System Settings › Privacy › Automation.";
+"O Cleen lê as suas conversas do Mensagens neste Mac para mostrá-las aqui. Nada sai do seu Mac." = "Cleen reads your Messages conversations on this Mac to show them here. Nothing leaves your Mac.";
+"Permita o Acesso Total ao Disco" = "Allow Full Disk Access";
+"Quem mandou e o que disse, assim que chega no Mensagens." = "Who sent it and what they said, as soon as it arrives in Messages.";
+"Reagir" = "React";
+"Você: " = "You: ";
+"📷 Foto" = "📷 Photo";

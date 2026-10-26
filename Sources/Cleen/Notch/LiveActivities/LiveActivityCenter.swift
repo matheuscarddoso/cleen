@@ -90,6 +90,18 @@ final class LiveActivityCenter {
         }
     }
 
+    /// A message from someone else arrived in Messages.
+    func messageArrived(_ message: ChatMessage) {
+        guard LiveActivitySettings.messages else { return }
+        show(.message(message), for: .seconds(6))
+    }
+
+    /// The message on the island, if one is showing: opening the notch goes to it.
+    var shownMessage: ChatMessage? {
+        if case .message(let message) = banner { return message }
+        return nil
+    }
+
     /// Called by the timer when a countdown or a Pomodoro phase runs out.
     func timerEnded(phase: String) {
         show(.timerEnded(phase: phase))
@@ -139,6 +151,8 @@ final class LiveActivityCenter {
         case "headphones": show(.headphones(name: "AirPods Pro de Matheus", connected: true))
         case "track": show(.track(title: "Clair de Lune", artist: "Claude Debussy"))
         case "meeting": meeting = .meeting(title: "Daily", start: .now.addingTimeInterval(5 * 60), color: .systemPurple)
+        case "message":
+            show(.message(ChatMessage(id: 0, chatGUID: "preview", chatName: nil, handle: "Sam Rivera", text: "Coffee there Friday?", date: .now, isFromMe: false, isGroup: false, imagePath: nil, service: "iMessage")), for: .seconds(6))
         case "download":
             let url = URL.downloadsDirectory.appending(path: "Launch Assets.zip")
             show(.downloaded(url: url, size: 1_480_000_000), for: .seconds(4.5))

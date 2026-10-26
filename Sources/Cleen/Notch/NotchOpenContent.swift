@@ -86,6 +86,7 @@ struct NotchOpenContent: View {
         case .weather: NotchWeatherTab()
         case .shortcuts: NotchShortcutsTab()
         case .agents: NotchAgentsTab()
+        case .messages: NotchMessagesTab()
         case .icons: NotchIconsTab()
         case .stocks: NotchStocksTab()
         case .teleprompter: NotchTeleprompterTab()
