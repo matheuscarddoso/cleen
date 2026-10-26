@@ -106,7 +106,12 @@ struct NotchSearchView: View {
                 return true
             }
         }
-        .onDisappear { state.escapeHandler = nil }
+        .onDisappear {
+            state.escapeHandler = nil
+            // Leaving with the shortcut recorder up would leave its key monitor eating
+            // every key typed in Cleen.
+            search.showsActions = false
+        }
         .onChange(of: state.searchFocusRequest) { focused = true }
         .onChange(of: search.editing) { _, editing in
             // Back from the alias field: the keyboard returns to the search.

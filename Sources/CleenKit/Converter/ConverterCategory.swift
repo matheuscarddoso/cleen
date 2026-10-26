@@ -24,7 +24,7 @@ public enum ConverterCategory: String, CaseIterable, Codable, Sendable, Identifi
         case .speed: String(localized: "Velocidade")
         case .area: String(localized: "Área")
         case .data: String(localized: "Dados")
-        case .time: String(localized: "Tempo")
+        case .time: String(localized: "Duração")
         case .currency: String(localized: "Moeda")
         }
     }

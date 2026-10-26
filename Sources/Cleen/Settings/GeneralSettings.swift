@@ -21,7 +21,7 @@ struct GeneralSettings: View {
             SettingRow(
                 title: String(localized: "Buscar"),
                 note: app.notch.searchShortcutAvailable
-                    ? String(localized: "Apps, janelas, emoji, cores e cálculos, de qualquer app.")
+                    ? String(localized: "Apps, arquivos, janelas, comandos, emoji e contas, de qualquer app. ⌘K mostra o que mais cada item faz.")
                     : String(localized: "Outro app já usa ⌥ Espaço (o Raycast?). Tire o atalho de lá e abra o Cleen de novo.")
             ) {
                 Text("⌥ Espaço")

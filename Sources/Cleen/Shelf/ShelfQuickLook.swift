@@ -85,6 +85,7 @@ final class ShelfQuickLook: NSObject, QLPreviewPanelDataSource, QLPreviewPanelDe
     }
 
     func previewPanel(_ panel: QLPreviewPanel!, previewItemAt index: Int) -> (any QLPreviewItem)! {
-        urls[index] as NSURL
+        // The shelf can lose a file while Quick Look is up; it asks again with old indexes.
+        urls.indices.contains(index) ? urls[index] as NSURL : nil
     }
 }

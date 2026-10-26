@@ -14,7 +14,8 @@ struct NotchScanning: View {
                 Text(title)
                     .font(NotchStyle.headline)
                 Text(detail.isEmpty ? " " : detail)
-                    .font(.system(size: 10.5).monospaced())
+                    // The path being scanned reads as one; a sentence doesn't.
+                    .font(isPath ? .system(size: 10.5).monospaced() : .system(size: 10.5))
                     .foregroundStyle(NotchStyle.tertiary)
                     .lineLimit(1)
                     .truncationMode(.middle)
@@ -27,4 +28,6 @@ struct NotchScanning: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
+
+    private var isPath: Bool { detail.hasPrefix("/") || detail.hasPrefix("~") }
 }

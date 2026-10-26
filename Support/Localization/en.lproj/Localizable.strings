@@ -912,7 +912,6 @@
 "HTML copiado" = "HTML copied";
 "Sem conexão para baixar o SVG" = "No connection to download the SVG";
 "App" = "App";
-"Apps, janelas, emoji, cores e cálculos, de qualquer app." = "Apps, windows, emoji, colors, and math, from any app.";
 "Bloquear tela" = "Lock Screen";
 "Buscar (⌥ Espaço)" = "Search (⌥ Space)";
 "Buscar ícones Lucide" = "Search Lucide Icons";
@@ -970,8 +969,6 @@
 "Baixando…" = "Downloading…";
 "Instalando, o Cleen abre de novo em seguida." = "Installing; Cleen will reopen right after.";
 "Ações" = "Stocks";
-"Perguntar" = "Ask";
-"Teleprompter" = "Teleprompter";
 
 /* Teleprompter */
 "Cole ou escreva o roteiro…" = "Paste or write the script…";
@@ -1285,3 +1282,5 @@
 " · dia seguinte lá" = " · next day there";
 "Agenda de hoje" = "Today's schedule";
 "Mais ações" = "Actions";
+
+"Apps, arquivos, janelas, comandos, emoji e contas, de qualquer app. ⌘K mostra o que mais cada item faz." = "Apps, files, windows, commands, emoji and math, from any app. ⌘K shows what else each item does.";

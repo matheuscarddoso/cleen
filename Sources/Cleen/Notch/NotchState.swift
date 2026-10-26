@@ -32,9 +32,9 @@ final class NotchState {
     /// Bumped once the panel holds the keyboard, so the search field takes the cursor
     /// right then (asking before the window is key does nothing).
     var searchFocusRequest = 0
-    /// The panel grows tall, like a launcher: the search, Emoji's grid, and the review
-    /// of something about to be deleted.
-    var isTall: Bool { isOpen && !showsWelcome && (showsSearch || deletionReview != nil || (tab == .emoji && !showsSettings)) }
+    /// The panel grows tall, like a launcher: the search, Emoji's grid, Ajustes, and the
+    /// review of something about to be deleted.
+    var isTall: Bool { isOpen && !showsWelcome && (showsSearch || showsSettings || deletionReview != nil || tab == .emoji) }
 
     /// Something is about to be deleted: the panel lists it and waits for Confirmar.
     private(set) var deletionReview: DeletionReview?

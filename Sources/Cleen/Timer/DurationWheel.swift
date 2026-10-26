@@ -79,7 +79,9 @@ struct DurationWheel: View {
 
     /// The picked number and four on each side; the mask fades the outer ones.
     private var visible: [Int] {
-        Array(max(range.lowerBound, minutes - 4)...min(range.upperBound, minutes + 4))
+        // A value from outside the range (an old setting) must not make the bounds cross.
+        let current = min(range.upperBound, max(range.lowerBound, minutes))
+        return Array(max(range.lowerBound, current - 4)...min(range.upperBound, current + 4))
     }
 
     private func pick(_ value: Int) {
