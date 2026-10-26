@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { DemoContext } from "./DemoContext";
 import { DemoFrame } from "./DemoFrame";
 import { Panel } from "./Panel";
 import { ReplicaContext } from "./ReplicaContext";
@@ -24,6 +25,7 @@ export function Replica({
   settings = "appearance",
   tone,
   control,
+  bare = false,
 }: {
   label: string;
   tab?: TabId;
@@ -32,6 +34,9 @@ export function Replica({
   settings?: "appearance" | "displays";
   tone?: "blue" | "dusk" | "teal";
   control?: "sm" | "lg";
+  /** Just the panel, hanging from whatever it's placed under: no Mac screen around it
+   *  and no demo playing (the share image). */
+  bare?: boolean;
 }) {
   const [tab, setTab] = useState<TabId>(initialTab);
   const [mode, setMode] = useState<Mode>(initialMode);
@@ -43,8 +48,7 @@ export function Replica({
   const height = mode === "search" || review ? Math.max(size.height, 356) : size.height;
   const title = mode === "search" ? "Buscar" : mode === "settings" ? "Ajustes" : tabTitle(tab);
 
-  return (
-    <DemoFrame label={label} tone={tone} control={control}>
+  const content = (
       <ReplicaContext.Provider value={{ tab, setTab, mode, setMode, size, setSize, review, setReview }}>
         <Panel
           title={title}
@@ -60,6 +64,17 @@ export function Replica({
           {mode === "search" ? <SearchView /> : mode === "settings" ? <SettingsView initial={settings} /> : <Tool key={tab} />}
         </Panel>
       </ReplicaContext.Provider>
+  );
+  if (bare) {
+    return (
+      <div role="img" aria-label={label}>
+        <DemoContext.Provider value={{ playing: false, reduced: true }}>{content}</DemoContext.Provider>
+      </div>
+    );
+  }
+  return (
+    <DemoFrame label={label} tone={tone} control={control}>
+      {content}
     </DemoFrame>
   );
 }
