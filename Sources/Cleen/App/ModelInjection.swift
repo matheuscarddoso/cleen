@@ -43,5 +43,6 @@ extension View {
             .environment(app.stocks)
             .environment(app.recorder)
             .environment(app.messages)
+            .environment(app.calls)
     }
 }

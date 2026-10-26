@@ -1475,3 +1475,12 @@
 "Reagir" = "React";
 "Você: " = "You: ";
 "📷 Foto" = "📷 Photo";
+
+/* Calls */
+"Compartilhar a tela" = "Share screen";
+"Em chamada no %@" = "In a call on %@";
+"Este app não tem atalho para isso" = "This app has no shortcut for this";
+"Ligar o microfone" = "Unmute";
+"Mostrar" = "Show";
+"Ver as abas" = "Show the tabs";
+"iPhone" = "iPhone";

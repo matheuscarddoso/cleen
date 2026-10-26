@@ -17,6 +17,7 @@ struct NotchRootView: View {
     @Environment(AgentsModel.self) private var agents
     @Environment(MediaKeyHUD.self) private var mediaKeys
     @Environment(RecorderModel.self) private var recorder
+    @Environment(CallMonitor.self) private var calls
 
     var body: some View {
         if let geometry = state.geometry {
@@ -105,6 +106,8 @@ struct NotchRootView: View {
         if recorder.isRecording { return NotchGeometry.wingWidth }
         // A finished download is worth showing even with the wings off.
         if live.banner?.isIsland == true { return LiveActivity.islandWingWidth }
+        // A call too: the time and the voice, like the phone's island.
+        if calls.call != nil { return NotchGeometry.wingWidth + 22 }
         guard showsWings else { return 0 }
         if hidesInFullscreen, fullscreen.isFullscreen(controller.screen) { return 0 }
         let busy = junk.phase == .scanning || junk.isCleaning || app.isSmartScanning || app.isSmartCleaning

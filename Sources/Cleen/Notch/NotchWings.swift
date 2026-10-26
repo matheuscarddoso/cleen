@@ -17,6 +17,7 @@ struct NotchWings: View {
     @Environment(AgentsModel.self) private var agents
     @Environment(RecorderModel.self) private var recorder
     @Environment(MessagesModel.self) private var messages
+    @Environment(CallMonitor.self) private var calls
     @AppStorage(LiveActivitySettings.agentsKey) private var showsAgents = true
     @AppStorage(LiveActivitySettings.idleKey) private var idle = LiveActivitySettings.Idle.disk.rawValue
 
@@ -24,6 +25,9 @@ struct NotchWings: View {
         if let since = recorder.recordingStart {
             RecordingWings(since: since, notchWidth: notchWidth, inset: inset)
                 .transition(.opacity)
+        } else if let call = calls.call, live.banner?.isIsland != true {
+            CallWings(call: call, levels: calls.levels, isMuted: calls.isMicMuted, notchWidth: notchWidth, inset: inset)
+                .transition(.trackSwap)
         } else if let banner = live.banner, banner.isIsland, case .downloaded(let url, let size) = banner {
             DownloadIsland(url: url, size: size, notchHeight: notchHeight)
                 .id(banner)

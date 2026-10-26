@@ -31,6 +31,7 @@ final class AppModel {
     let homeLayout = HomeLayout()
     let live = LiveActivityCenter()
     let messages = MessagesModel()
+    let calls = CallMonitor()
     let agents = AgentsModel()
     let displays = DisplaysModel()
     let updates = UpdateModel()
@@ -81,6 +82,7 @@ final class AppModel {
         live.start(agenda: agenda)
         messages.onIncoming = { [live] message in live.messageArrived(message) }
         messages.start()
+        calls.start()
         timer.onPhaseEnd = { [live] ended in
             switch ended {
             case .countdown: live.timerEnded(phase: String(localized: "Timer"))
@@ -168,10 +170,16 @@ final class AppModel {
             search.query = text
         }
         if let kind = LaunchArguments.liveActivity {
-            Task { [live, agents, mediaKeys] in
+            Task { [live, agents, mediaKeys, calls, notch] in
                 try? await Task.sleep(for: .seconds(1.5))
                 if kind == "agent" { agents.previewFinished() }
-                if kind == "volume" { mediaKeys.preview() } else { live.preview(kind) }
+                if kind == "volume" { mediaKeys.preview() } else if kind == "call" || kind == "callopen" {
+                    calls.preview()
+                    if kind == "callopen" {
+                        try? await Task.sleep(for: .seconds(1))
+                        notch.primary?.open()
+                    }
+                } else { live.preview(kind) }
             }
         }
         if LaunchArguments.settings {

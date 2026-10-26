@@ -40,16 +40,20 @@ final class NotchState {
     /// panel (the wide mirror, Início's edit mode, the teleprompter reading) and over the
     /// launcher, Ajustes, the welcome and a review.
     var showsTabDock: Bool {
-        guard isOpen, !showsWelcome, !showsSearch, !showsSettings, deletionReview == nil else { return false }
+        guard isOpen, !showsWelcome, !showsSearch, !showsSettings, deletionReview == nil, !showsCall else { return false }
         if tab == .home, mirrorExpanded || isEditingHome { return false }
         if tab == .teleprompter, isPrompting { return false }
         return true
     }
 
+    /// Opened during a call: the panel is the call's controls (Droppy's).
+    var showsCall = false
+
     /// The open panel's height: tall for the above, taller still for the wide mirror so
     /// the whole camera picture shows.
     var panelHeight: NotchGeometry.PanelHeight {
         if isTall { return .tall }
+        if isOpen, !showsWelcome, !showsSettings, !showsSearch, showsCall { return .call }
         if isOpen, !showsWelcome, tab == .home, mirrorExpanded { return .mirror }
         if isOpen, !showsWelcome, !showsSettings, !showsSearch, tab == .home, isEditingHome { return .editing }
         // Read with the tab, so leaving Gravar changes the height in the same animation
