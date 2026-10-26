@@ -21,6 +21,8 @@ final class SystemMonitor {
     private(set) var memoryHistory: [Double] = []
     private(set) var downloadHistory: [Double] = []
     private(set) var uploadHistory: [Double] = []
+    /// The battery's temperature, °C, every 10 s.
+    private(set) var temperatureHistory: [Double] = []
 
     /// Called with each disk reading; the low-space alert hangs off this.
     var onDiskReading: (DiskStats) -> Void = { _ in }
@@ -82,6 +84,7 @@ final class SystemMonitor {
         if tick % 5 == 0 {
             refreshDisk()
             battery = BatteryStats.read()
+            if let celsius = battery?.temperatureCelsius { Self.append(celsius, to: &temperatureHistory) }
             thermalState = ProcessInfo.processInfo.thermalState
         }
     }

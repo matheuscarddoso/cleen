@@ -507,7 +507,6 @@
 "Moeda" = "Currency";
 "Monitores externos" = "External displays";
 "Monte o seu notch" = "Build your notch";
-"Mostrar a pasta no Finder" = "Show the Folder in Finder";
 "Mostrar no Finder" = "Show in Finder";
 "Mover o Cleen para Aplicativos?" = "Move Cleen to Applications?";
 "Mover para Aplicativos" = "Move to Applications";
@@ -859,7 +858,6 @@
 "recriado pelo Xcode" = "rebuilt by Xcode";
 "renova em %@" = "resets in %@";
 "ritmo %@" = "pace %@";
-"saúde %@" = "health %@";
 "selecionado" = "selected";
 "selecionados de %@ em %lld arquivos · vão para o Lixo" = "selected of %@ in %lld files · they go to the Trash";
 "selecionados de %@ · %@" = "selected of %@ · %@";
@@ -879,7 +877,6 @@
 "Área" = "Area";
 "Área de transferência" = "Clipboard";
 "Áudio" = "Audio";
-"↓" = "↓";
 "⌃ ⌥ C" = "⌃ ⌥ C";
 "Brilho" = "Brightness";
 "Igual às teclas de brilho" = "Same as the brightness keys";
@@ -1426,3 +1423,36 @@
 "Fechar (Esc)" = "Close (Esc)";
 "Iniciar gravação" = "Start recording";
 "Sem contagem" = "No countdown";
+
+/* Agents (Droppy style) */
+"%.2f segundos" = "%.2f seconds";
+"%lld%% restante" = "%lld%% left";
+"Abrindo…" = "Opening…";
+"Agente: %@" = "Agent: %@";
+"Buscar %@" = "Search %@";
+"Criar %@" = "Write %@";
+"Editar %@" = "Edit %@";
+"Em andamento…" = "Working…";
+"Lendo…" = "Reading…";
+"Ler %@" = "Read %@";
+"Linhas " = "Lines ";
+"Os limites aparecem aqui assim que o Cleen conseguir lê-los." = "Limits show here as soon as Cleen can read them.";
+"Pensando…" = "Thinking…";
+"Procurando…" = "Searching…";
+"Pronto. Esperando você." = "Done. Waiting for you.";
+"Rodando…" = "Running…";
+"Rodar %@" = "Run %@";
+"Um agente está nisso…" = "An agent is on it…";
+"Uso" = "Usage";
+
+/* System (stats style) */
+"Apertada" = "Tight";
+"Morna" = "Warm";
+"No limite" = "Maxed out";
+"Ocupada" = "Busy";
+"Pressão alta" = "High pressure";
+"Quente" = "Hot";
+"Tranquila" = "Calm";
+"de %@" = "of %@";
+"livres" = "free";
+"↑ %@/s" = "↑ %@/s";

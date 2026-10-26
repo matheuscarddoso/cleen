@@ -51,7 +51,9 @@ final class NotchState {
     var panelHeight: NotchGeometry.PanelHeight {
         if isTall { return .tall }
         if isOpen, !showsWelcome, tab == .home, mirrorExpanded { return .mirror }
-        if isOpen, !showsWelcome, !showsSettings, !showsSearch, isCompactTool { return .compact }
+        // Read with the tab, so leaving Gravar changes the height in the same animation
+        // as the switch (the flag itself is only Gravar's to set).
+        if isOpen, !showsWelcome, !showsSettings, !showsSearch, tab == .recorder, isCompactTool { return .compact }
         return .standard
     }
 

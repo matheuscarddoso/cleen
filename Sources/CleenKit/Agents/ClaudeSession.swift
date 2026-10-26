@@ -28,6 +28,8 @@ public struct ClaudeSession: Sendable, Equatable, Identifiable {
     public let updatedAt: Date
     /// When the current state began (the last event's timestamp).
     public let since: Date
+    /// The current turn's steps and Claude's latest sentence.
+    public let activity: ClaudeActivity
 
     /// The same session with background agents at work: they outrank a turn that
     /// ended or a call that's only waiting on them, not one the session itself is running.
@@ -37,19 +39,20 @@ public struct ClaudeSession: Sendable, Equatable, Identifiable {
         case .running(let tool) where ["Agent", "Task", "Workflow"].contains(tool): .delegating(agents: agents)
         default: self.state
         }
-        return ClaudeSession(id: id, title: title, directory: directory, state: state, updatedAt: updatedAt, since: since)
+        return ClaudeSession(id: id, title: title, directory: directory, state: state, updatedAt: updatedAt, since: since, activity: activity)
     }
 
     public var projectName: String? {
         directory.map { URL(filePath: $0).lastPathComponent }
     }
 
-    public init(id: String, title: String, directory: String?, state: State, updatedAt: Date, since: Date) {
+    public init(id: String, title: String, directory: String?, state: State, updatedAt: Date, since: Date, activity: ClaudeActivity = .empty) {
         self.id = id
         self.title = title
         self.directory = directory
         self.state = state
         self.updatedAt = updatedAt
         self.since = since
+        self.activity = activity
     }
 }

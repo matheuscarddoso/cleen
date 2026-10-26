@@ -31,8 +31,26 @@ nonisolated final class CameraCapture: NSObject, AVCaptureFileOutputRecordingDel
         queue.async { self.session.startRunning() }
     }
 
-    func stopSession() {
-        queue.async { self.session.stopRunning() }
+    /// Stops the session off the main thread; `done` runs on the main thread after it.
+    ///
+    /// Stopping waits on the main thread (the movie output checks in there), while a
+    /// preview layer let go on the main thread waits for the session's lock: releasing the
+    /// preview during a stop froze the app. So the preview is only let go in `done`.
+    func stopSession(then done: @escaping @MainActor () -> Void = {}) {
+        let finish = UncheckedSendable(done)
+        queue.async {
+            self.session.stopRunning()
+            DispatchQueue.main.async { MainActor.assumeIsolated { finish.value() } }
+        }
+    }
+
+    /// Runs `done` on the main thread once whatever the camera has queued (a start, a
+    /// stop) is through.
+    func afterPendingWork(_ done: @escaping @MainActor () -> Void) {
+        let finish = UncheckedSendable(done)
+        queue.async {
+            DispatchQueue.main.async { MainActor.assumeIsolated { finish.value() } }
+        }
     }
 
     func start(to url: URL) async throws {
@@ -45,16 +63,20 @@ nonisolated final class CameraCapture: NSObject, AVCaptureFileOutputRecordingDel
         }
     }
 
+    /// Ends the recording and the session; returns once both are stopped.
     func stop() async throws {
-        guard output.isRecording else {
-            queue.async { self.session.stopRunning() }
-            return
+        if output.isRecording {
+            try await withCheckedThrowingContinuation { continuation in
+                finished = continuation
+                queue.async { self.output.stopRecording() }
+            }
         }
-        try await withCheckedThrowingContinuation { continuation in
-            finished = continuation
-            queue.async { self.output.stopRecording() }
+        await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+            queue.async {
+                self.session.stopRunning()
+                continuation.resume()
+            }
         }
-        queue.async { self.session.stopRunning() }
     }
 
     func fileOutput(_ output: AVCaptureFileOutput, didStartRecordingTo fileURL: URL, from connections: [AVCaptureConnection]) {
@@ -101,4 +123,10 @@ nonisolated final class CameraCapture: NSObject, AVCaptureFileOutputRecordingDel
         var allow: UInt32 = 1
         CMIOObjectSetPropertyData(CMIOObjectID(kCMIOObjectSystemObject), &address, 0, nil, UInt32(MemoryLayout<UInt32>.size), &allow)
     }
+}
+
+/// Hands a main-actor closure through the camera's queue and back.
+nonisolated private struct UncheckedSendable<Value>: @unchecked Sendable {
+    let value: Value
+    init(_ value: Value) { self.value = value }
 }

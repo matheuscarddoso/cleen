@@ -14,10 +14,10 @@ public enum ClaudeSessionParser {
         var state: ClaudeSession.State?
         var since: Date?
 
-        // Newest first: the first conversation event found decides the state.
         let lines = tail.split(separator: UInt8(ascii: "\n"))
-        for line in lines.reversed() {
-            guard let object = try? JSONSerialization.jsonObject(with: Data(line)) as? [String: Any] else { continue }
+        let objects = lines.compactMap { try? JSONSerialization.jsonObject(with: Data($0)) as? [String: Any] }
+        // Newest first: the first conversation event found decides the state.
+        for object in objects.reversed() {
             if title == nil, object["type"] as? String == "ai-title", let value = object["aiTitle"] as? String, !value.isEmpty {
                 title = value
             }
@@ -30,7 +30,7 @@ public enum ClaudeSessionParser {
         }
         guard let state else { return nil }
         let name = title ?? directory.map { URL(filePath: $0).lastPathComponent } ?? String(id.prefix(8))
-        return ClaudeSession(id: id, title: name, directory: directory, state: state, updatedAt: updatedAt, since: since ?? updatedAt)
+        return ClaudeSession(id: id, title: name, directory: directory, state: state, updatedAt: updatedAt, since: since ?? updatedAt, activity: ClaudeActivity.read(objects))
     }
 
     /// The state one conversation event leaves the session in; nil for bookkeeping lines

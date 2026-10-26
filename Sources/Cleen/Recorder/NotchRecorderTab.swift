@@ -33,10 +33,9 @@ struct NotchRecorderTab: View {
             withAnimation(NotchController.searchResize) { notch.isCompactTool = compact }
         }
         .onAppear { recorder.tabAppeared() }
-        .onDisappear {
-            notch.isCompactTool = false
-            recorder.tabDisappeared()
-        }
+        // The flag stays as it was: the panel's height only reads it on Gravar, so the
+        // next visit opens at the right height straight away.
+        .onDisappear { recorder.tabDisappeared() }
     }
 
     private var isJustTheBar: Bool {

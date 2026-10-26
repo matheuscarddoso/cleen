@@ -93,6 +93,16 @@ final class RecorderOverlays {
         cameraSession = nil
     }
 
+    /// Takes the preview off screen but hands its window back instead of letting it go:
+    /// its layer may only be released once the camera's session is done stopping.
+    func detachCamera() -> NSWindow? {
+        let window = camera
+        window?.orderOut(nil)
+        camera = nil
+        cameraSession = nil
+        return window
+    }
+
     func hideAll() {
         hideHighlight()
         uncoverDesktopIcons()

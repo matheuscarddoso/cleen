@@ -27,7 +27,11 @@ struct NotchOpenContent: View {
                     .padding(.bottom, 10)
                     .transition(.opacity)
             } else {
-                tool
+                ZStack(alignment: .top) {
+                    tool
+                        .id(state.tab)
+                        .transition(.toolSwap)
+                }
                     .padding(.horizontal, isPrompting ? 0 : NotchOpenContent.inset)
                     .frame(maxWidth: .infinity, minHeight: 0, maxHeight: .infinity, alignment: .top)
                     .clipped()

@@ -21,8 +21,11 @@ final class NotchController {
     private var swipeHandled = false
 
     /// Springy like the system's own island: quick to arrive, settles without wobble.
-    static let openAnimation = Animation.spring(response: 0.42, dampingFraction: 0.8)
-    static let closeAnimation = Animation.spring(response: 0.34, dampingFraction: 0.92)
+    /// Droppy's open: the shape races out in about a tenth of a second and settles with
+    /// a slight overshoot, the content sharpening inside it as it goes.
+    static let openAnimation = Animation.spring(response: 0.36, dampingFraction: 0.74)
+    /// Closing is quicker and doesn't bounce: the content is gone first, the shape follows.
+    static let closeAnimation = Animation.spring(response: 0.28, dampingFraction: 1)
 
     init(app: AppModel, screen: NSScreen) {
         self.app = app
@@ -161,7 +164,7 @@ final class NotchController {
     }
 
     /// How the panel grows into the launcher and back.
-    static let searchResize = Animation.spring(response: 0.4, dampingFraction: 0.86)
+    static let searchResize = Animation.spring(response: 0.38, dampingFraction: 0.82)
 
     func toggleSearch() {
         state.isOpen && state.showsSearch ? close() : openSearch()

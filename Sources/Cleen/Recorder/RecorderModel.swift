@@ -89,6 +89,8 @@ final class RecorderModel {
     /// What the running camera session was set up with.
     @ObservationIgnored private var cameraSetup: (id: String, height: Int)?
     @ObservationIgnored private var previewHide: Task<Void, Never>?
+    /// Previews off screen, kept until their camera's queue has settled (see `retire`).
+    @ObservationIgnored private var retiredPreviews: [NSWindow] = []
     @ObservationIgnored unowned let app: AppModel
     @ObservationIgnored private lazy var picker = SourcePicker(recorder: self)
     private static let log = Logger(subsystem: "app.cleen.Cleen", category: "recorder")
@@ -461,25 +463,50 @@ final class RecorderModel {
         if showsCameraPreview, let camera {
             overlays.showCamera(session: camera.session, on: pointerScreen)
         } else {
-            overlays.hideCamera()
+            retire(overlays.detachCamera(), after: camera)
         }
     }
 
     private func dropCamera() {
-        overlays.hideCamera()
-        camera?.stopSession()
+        let preview = overlays.detachCamera()
+        if let camera {
+            retirePreview(preview)
+            camera.stopSession { [weak self] in self?.releasePreview(preview) }
+        }
         camera = nil
         cameraSetup = nil
+    }
+
+    /// Lets a preview go once `camera` (if any) has nothing in flight: releasing it while
+    /// the session starts or stops deadlocks the main thread.
+    private func retire(_ preview: NSWindow?, after camera: CameraCapture?) {
+        guard let preview else { return }
+        retirePreview(preview)
+        if let camera {
+            camera.afterPendingWork { [weak self] in self?.releasePreview(preview) }
+        } else {
+            releasePreview(preview)
+        }
+    }
+
+    private func retirePreview(_ preview: NSWindow?) {
+        if let preview { retiredPreviews.append(preview) }
+    }
+
+    private func releasePreview(_ preview: NSWindow?) {
+        guard let preview else { return }
+        retiredPreviews.removeAll { $0 === preview }
     }
 
     /// After a take: the recording output is closed, the session goes, and the preview
     /// comes back if Gravar is still open.
     private func releaseCamera() async {
+        // The session is fully stopped before the preview goes (see `retire`).
         try? await camera?.stop()
         camera = nil
         cameraSetup = nil
         holdsCamera = false
-        overlays.hideCamera()
+        retire(overlays.detachCamera(), after: nil)
         refreshCamera()
     }
 

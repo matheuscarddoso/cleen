@@ -69,3 +69,34 @@ struct ClaudeSessionTests {
         #expect(sessions.first?.state.isBusy == true)
     }
 }
+
+struct ClaudeActivityTests {
+    private func object(_ json: String) -> [String: Any] {
+        (try? JSONSerialization.jsonObject(with: Data(json.utf8)) as? [String: Any]) ?? [:]
+    }
+
+    @Test func readsTheTurnsStepsWithTheirResults() throws {
+        let lines = [
+            #"{"type":"user","timestamp":"2026-10-23T15:00:00.000Z","message":{"role":"user","content":"conserta o total"}}"#,
+            #"{"type":"assistant","timestamp":"2026-10-23T15:00:01.000Z","message":{"role":"assistant","content":[{"type":"text","text":"Tracing where the cart total goes stale. Then fix."},{"type":"tool_use","id":"a","name":"Read","input":{"file_path":"/p/CartStore.swift"}}]}}"#,
+            #"{"type":"user","timestamp":"2026-10-23T15:00:02.000Z","toolUseResult":{"type":"text","file":{"filePath":"/p/CartStore.swift","numLines":212}},"message":{"role":"user","content":[{"type":"tool_result","tool_use_id":"a","content":"…"}]}}"#,
+            #"{"type":"assistant","timestamp":"2026-10-23T15:00:03.000Z","message":{"role":"assistant","content":[{"type":"tool_use","id":"b","name":"Edit","input":{"file_path":"/p/CartStore.swift","old_string":"a\nb","new_string":"c"}}]}}"#,
+            #"{"type":"user","timestamp":"2026-10-23T15:00:04.000Z","toolUseResult":{"structuredPatch":[{"lines":["-a","-b","+c","+d"," e"]}]},"message":{"role":"user","content":[{"type":"tool_result","tool_use_id":"b","content":"ok"}]}}"#,
+            #"{"type":"assistant","timestamp":"2026-10-23T15:00:05.000Z","message":{"role":"assistant","content":[{"type":"tool_use","id":"c","name":"Bash","input":{"command":"swift build","description":"Build"}}]}}"#,
+        ]
+        let activity = ClaudeActivity.read(lines.map(object))
+        #expect(activity.steps.map(\.id) == ["a", "b", "c"])
+        #expect(activity.steps[0].kind == .read(file: "/p/CartStore.swift", lines: 212) && activity.steps[0].isDone)
+        #expect(activity.steps[1].kind == .edit(file: "/p/CartStore.swift", added: 2, removed: 2))
+        #expect(activity.steps[2].kind == .command("swift build", description: "Build") && !activity.steps[2].isDone)
+        #expect(activity.note == "Tracing where the cart total goes stale.")
+    }
+
+    @Test func aNewPromptStartsANewTurn() {
+        let lines = [
+            #"{"type":"assistant","message":{"role":"assistant","content":[{"type":"tool_use","id":"a","name":"Read","input":{"file_path":"/x"}}]}}"#,
+            #"{"type":"user","message":{"role":"user","content":"outra coisa"}}"#,
+        ]
+        #expect(ClaudeActivity.read(lines.map(object)).steps.isEmpty)
+    }
+}

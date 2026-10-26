@@ -16,6 +16,8 @@ final class AgentsModel {
     /// Told when a session finishes a turn and starts waiting for the person.
     @ObservationIgnored var onFinished: (ClaudeSession) -> Void = { _ in }
     @ObservationIgnored private var loop: Task<Void, Never>?
+    /// Agentes is on screen: the steps are read often enough to follow along.
+    @ObservationIgnored var isWatching = false
     @ObservationIgnored private let scanner = ClaudeSessionScanner()
 
     /// Busy sessions first, then the ones waiting, newest first within each.
@@ -35,8 +37,9 @@ final class AgentsModel {
             while !Task.isCancelled {
                 guard let self else { return }
                 await self.refresh()
-                // Quick while something is running, relaxed when it's all quiet.
-                try? await Task.sleep(for: .seconds(self.working.isEmpty ? 10 : 3))
+                // Live while watched at work, quick while something runs, relaxed when quiet.
+                let pause = self.working.isEmpty ? 10.0 : (self.isWatching ? 1.0 : 3.0)
+                try? await Task.sleep(for: .seconds(pause))
             }
         }
     }
