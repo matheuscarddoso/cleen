@@ -12,6 +12,20 @@ nonisolated enum BackgroundPresets {
         ("#141E30", "#243B55"),
         ("#FBC2EB", "#A6C1EE"),
         ("#232526", "#414345"),
+        ("#3A1C71", "#D76D77"),
+        ("#00C6FF", "#0072FF"),
+        ("#F7971E", "#FFD200"),
+        ("#8E2DE2", "#4A00E0"),
+        ("#1D976C", "#93F9B9"),
+        ("#FC466B", "#3F5EFB"),
+        ("#0B0B12", "#2B2D42"),
+        ("#E0EAFC", "#CFDEF3"),
+    ]
+
+    /// Flat colors for the Color page.
+    static let solids = [
+        "#000000", "#111318", "#1F2937", "#374151", "#9CA3AF", "#E5E7EB", "#FFFFFF", "#F5F0E8",
+        "#5141F7", "#2563EB", "#0EA5E9", "#10B981", "#84CC16", "#F59E0B", "#F97316", "#EF4444",
     ]
 
     static func colors(_ index: Int) -> (CIColor, CIColor) {

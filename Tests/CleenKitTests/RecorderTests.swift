@@ -113,7 +113,8 @@ struct RecordingProjectTests {
         var project = RecordingProject(source: .display, sourceSize: CGSize(width: 1512, height: 982), duration: 12.5, hasCamera: true)
         project.zoom = [ZoomSegment(start: 1, end: 3, scale: 2)]
         project.style.background = .color("#112233")
-        project.trimStart = 0.5
+        project.clips = EditTimeline(clips: project.clips).splitting(at: 4)
+        project.crop = CGRect(x: 0.1, y: 0.1, width: 0.5, height: 0.5)
         try project.save(to: folder)
         #expect(try RecordingProject.load(from: folder) == project)
         #expect(folder.pathExtension == "cleenrec")
@@ -138,5 +139,64 @@ struct SquircleTests {
         // Straight edges between the corners.
         #expect(path.contains(CGPoint(x: 240, y: 0.5)))
         #expect(path.contains(CGPoint(x: 0.5, y: 240)))
+    }
+}
+
+struct EditTimelineTests {
+    private let timeline = EditTimeline(clips: [
+        ClipSegment(start: 0, end: 4),
+        ClipSegment(start: 6, end: 10, speed: 2),
+    ])
+
+    @Test func mapsTheFinishedVideoToTheRecording() {
+        #expect(timeline.duration == 6)
+        #expect(timeline.sourceTime(at: 3) == 3)
+        // Into the second clip: it starts at 6 and runs twice as fast.
+        #expect(timeline.sourceTime(at: 5) == 8)
+        #expect(timeline.outputTime(at: 8) == 5)
+        // The cut-away stretch maps to the cut.
+        #expect(timeline.outputTime(at: 5) == 4)
+        #expect(timeline.starts == [0, 4])
+    }
+
+    @Test func splitsTheClipUnderThePlayhead() {
+        let clips = timeline.splitting(at: 5)
+        #expect(clips.count == 3)
+        #expect(clips[1].start == 6 && clips[1].end == 8 && clips[1].speed == 2)
+        #expect(clips[2].start == 8 && clips[2].end == 10)
+        // Too close to an edge: nothing to cut.
+        #expect(timeline.splitting(at: 0.02).count == 2)
+    }
+
+    @Test func oldProjectsStillOpen() throws {
+        let json = """
+        {"createdAt": 0, "source": "display", "sourceSize": [100, 50], "duration": 9, "hasCamera": false,
+         "style": {"background": {"gradient": {"_0": 2}}, "padding": 0.1}, "zoom": [], "trimStart": 1, "trimEnd": 8,
+         "export": {"resolution": "1080p", "framesPerSecond": 60}}
+        """
+        let project = try JSONDecoder().decode(RecordingProject.self, from: Data(json.utf8))
+        #expect(project.clips.count == 1 && project.clips[0].start == 1 && project.clips[0].end == 8)
+        #expect(project.style.padding == 0.1 && project.style.layout == .standard && project.style.backgroundBlur == 0)
+    }
+}
+
+struct PlacementTests {
+    @Test func sideBySideKeepsBothInsideTheCanvas() throws {
+        var style = EditorStyle()
+        style.layout = .sideBySide
+        let canvas = CGSize(width: 1920, height: 1080)
+        let placement = FrameGeometry.placement(canvas: canvas, source: CGSize(width: 1600, height: 1000), style: style, cameraAspect: 16.0 / 9, hasCamera: true)
+        let screen = try #require(placement.screen), camera = try #require(placement.camera)
+        #expect(!placement.cameraFloats)
+        #expect(screen.maxX < camera.minX)
+        #expect(CGRect(origin: .zero, size: canvas).contains(camera) && CGRect(origin: .zero, size: canvas).contains(screen))
+        // Without a camera there's nothing to put beside the screen.
+        #expect(FrameGeometry.placement(canvas: canvas, source: CGSize(width: 1600, height: 1000), style: style, cameraAspect: 1, hasCamera: false).camera == nil)
+    }
+
+    @Test func theZoomNeverLeavesTheCanvas() {
+        let canvas = CGSize(width: 1000, height: 500)
+        #expect(FrameGeometry.viewport(canvas: canvas, scale: 2, focus: CGPoint(x: 990, y: 10)) == CGRect(x: 500, y: 0, width: 500, height: 250))
+        #expect(FrameGeometry.viewport(canvas: canvas, scale: 1, focus: CGPoint(x: 0, y: 0)) == CGRect(x: 0, y: 0, width: 1000, height: 500))
     }
 }

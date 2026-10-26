@@ -77,7 +77,8 @@ final class RecorderOverlays {
         // Screen Studio's preview: a 240 pt squircle.
         let side = 240.0
         let frame = CGRect(x: screen.visibleFrame.maxX - side - 24, y: screen.visibleFrame.minY + 24, width: side, height: side)
-        let window = OverlayWindow(frame: frame, level: .floating, ignoresMouse: false, content: RecorderCameraPreview(session: session))
+        // Over the source picker's layers, so it can still be dragged while picking.
+        let window = OverlayWindow(frame: frame, level: NSWindow.Level(rawValue: NSWindow.Level.floating.rawValue + 1), ignoresMouse: false, content: RecorderCameraPreview(session: session))
         window.isMovableByWindowBackground = true
         window.isMovable = true
         // The system shadow follows the squircle's edge.

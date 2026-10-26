@@ -50,17 +50,17 @@ struct NotchRecorderTab: View {
 
 /// The bar itself: sources on the left, inputs in the middle, folder and options right.
 struct RecorderToolbar: View {
+    /// On the floating bar it has no card of its own: the bar is the card.
+    var isFloating = false
     @Environment(RecorderModel.self) private var recorder
     @State private var hovered: String?
-    @State private var displays: [SCDisplay] = []
-    @State private var windows: [SCWindow] = []
     @State private var mobiles: [CaptureDevices.Device] = []
 
     var body: some View {
         HStack(spacing: 4) {
-            displayButton
-            windowButton
-            RecorderSourceButton(title: String(localized: "Área"), symbol: "rectangle.dashed") { recorder.pickArea() }
+            RecorderSourceButton(title: String(localized: "Tela"), symbol: "display", isSelected: recorder.selecting == .display) { recorder.select(.display) }
+            RecorderSourceButton(title: String(localized: "Janela"), symbol: "macwindow", isSelected: recorder.selecting == .window) { recorder.select(.window) }
+            RecorderSourceButton(title: String(localized: "Área"), symbol: "rectangle.dashed", isSelected: recorder.selecting == .area) { recorder.select(.area) }
             deviceButton
             divider
             RecorderCameraMenu()
@@ -84,58 +84,14 @@ struct RecorderToolbar: View {
         .toolbarHoverHighlight($hovered)
         .padding(.horizontal, 6)
         .frame(height: 64)
-        .background(NotchStyle.card, in: .rect(cornerRadius: 16, style: .continuous))
-        .overlay { RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(NotchStyle.cardStroke) }
+        .background(isFloating ? .clear : NotchStyle.card, in: .rect(cornerRadius: 16, style: .continuous))
+        .overlay { RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(isFloating ? .clear : NotchStyle.cardStroke) }
+        .animation(.easeOut(duration: 0.18), value: recorder.selecting)
         .task { await refresh() }
     }
 
     private var divider: some View {
         Rectangle().fill(NotchStyle.separator).frame(width: 1, height: 36).padding(.horizontal, 4)
-    }
-
-    /// One display records at once; with more, a menu says which.
-    @ViewBuilder
-    private var displayButton: some View {
-        if displays.count > 1 {
-            Menu {
-                ForEach(displays, id: \.displayID) { display in
-                    Button(Self.name(of: display)) { recorder.record(.display(display)) }
-                }
-            } label: {
-                RecorderSourceLabel(title: String(localized: "Tela"), symbol: "display")
-            }
-            .menuStyle(.button)
-            .buttonStyle(.plain)
-            .menuIndicator(.hidden)
-        } else {
-            RecorderSourceButton(title: String(localized: "Tela"), symbol: "display") {
-                Task {
-                    if displays.isEmpty { await refresh() }
-                    if let display = displays.first { recorder.record(.display(display)) } else { recorder.requestScreenAccess() }
-                }
-            }
-        }
-    }
-
-    private var windowButton: some View {
-        Menu {
-            if windows.isEmpty {
-                Text("Nenhuma janela para gravar")
-            }
-            ForEach(windows, id: \.windowID) { window in
-                Button {
-                    recorder.record(.window(window))
-                } label: {
-                    Text(verbatim: "\(window.owningApplication?.applicationName ?? "") — \(window.title ?? "")")
-                }
-            }
-        } label: {
-            RecorderSourceLabel(title: String(localized: "Janela"), symbol: "macwindow")
-        }
-        .menuStyle(.button)
-        .buttonStyle(.plain)
-        .menuIndicator(.hidden)
-        .simultaneousGesture(TapGesture().onEnded { Task { await refresh() } })
     }
 
     private var deviceButton: some View {
@@ -156,13 +112,6 @@ struct RecorderToolbar: View {
 
     private func refresh() async {
         mobiles = await Task.detached { CaptureDevices.mobileDevices() }.value
-        guard recorder.hasScreenAccess, let content = await recorder.shareableContent() else { return }
-        displays = content.displays
-        windows = recorder.recordableWindows(in: content)
-    }
-
-    private static func name(of display: SCDisplay) -> String {
-        NSScreen.screens.first { $0.displayID == display.displayID }?.localizedName ?? String(localized: "Tela")
     }
 }
 
@@ -170,11 +119,12 @@ struct RecorderToolbar: View {
 struct RecorderSourceButton: View {
     let title: String
     let symbol: String
+    var isSelected = false
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
-            RecorderSourceLabel(title: title, symbol: symbol)
+            RecorderSourceLabel(title: title, symbol: symbol, isSelected: isSelected)
         }
         .buttonStyle(.plain)
     }
@@ -183,6 +133,7 @@ struct RecorderSourceButton: View {
 struct RecorderSourceLabel: View {
     let title: String
     let symbol: String
+    var isSelected = false
 
     var body: some View {
         VStack(spacing: 4) {
@@ -193,6 +144,8 @@ struct RecorderSourceLabel: View {
                 .font(.system(size: 10.5, weight: .medium))
         }
         .frame(width: 58, height: 52)
+        // The source being picked keeps a backdrop of its own, as in Screen Studio.
+        .background(isSelected ? NotchStyle.control : .clear, in: .rect(cornerRadius: 10, style: .continuous))
         .contentShape(.rect)
         .toolbarHoverItem(title)
     }

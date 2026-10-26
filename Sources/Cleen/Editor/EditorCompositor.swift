@@ -13,15 +13,12 @@ nonisolated final class EditorInstruction: NSObject, AVVideoCompositionInstructi
     let screenTrack: CMPersistentTrackID
     let cameraTrack: CMPersistentTrackID?
     let scene: EditorSceneBox
-    /// Seconds of the recording at the composition's zero (the trim's start).
-    let offset: Double
 
-    init(timeRange: CMTimeRange, screenTrack: CMPersistentTrackID, cameraTrack: CMPersistentTrackID?, scene: EditorSceneBox, offset: Double) {
+    init(timeRange: CMTimeRange, screenTrack: CMPersistentTrackID, cameraTrack: CMPersistentTrackID?, scene: EditorSceneBox) {
         self.timeRange = timeRange
         self.screenTrack = screenTrack
         self.cameraTrack = cameraTrack
         self.scene = scene
-        self.offset = offset
         requiredSourceTrackIDs = ([screenTrack] + (cameraTrack.map { [$0] } ?? [])).map { NSNumber(value: $0) }
     }
 }
@@ -59,7 +56,8 @@ nonisolated final class EditorCompositor: NSObject, AVVideoCompositing, @uncheck
         let screen = request.sourceFrame(byTrackID: instruction.screenTrack).map { CIImage(cvPixelBuffer: $0) }
         let camera = instruction.cameraTrack.flatMap { request.sourceFrame(byTrackID: $0) }.map { CIImage(cvPixelBuffer: $0) }
         let size = request.renderContext.size
-        let time = request.compositionTime.seconds + instruction.offset
+        // The finished video's time; the scene's timeline maps it to the recording's.
+        let time = request.compositionTime.seconds
         let frame = EditorRenderer.render(screen: screen, camera: camera, time: time, canvas: size, scene: scene)
         context.render(frame, to: output, bounds: CGRect(origin: .zero, size: size), colorSpace: colorSpace)
         request.finish(withComposedVideoFrame: output)

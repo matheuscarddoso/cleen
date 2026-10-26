@@ -154,6 +154,12 @@ final class AppModel {
             openEditor(folder)
             if LaunchArguments.exportNow { editors[folder]?.model.exportMovie() }
         }
+        switch LaunchArguments.pick {
+        case "display": recorder.select(.display)
+        case "window": recorder.select(.window)
+        case "area": recorder.select(.area)
+        default: break
+        }
         if let text = LaunchArguments.search {
             notch.primary?.openSearch()
             search.query = text

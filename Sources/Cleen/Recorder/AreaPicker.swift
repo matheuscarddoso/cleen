@@ -12,7 +12,6 @@ final class AreaPicker {
 
     private var windows: [OverlayWindow] = []
     private var continuation: CheckedContinuation<Pick?, Never>?
-    private var monitor: Any?
 
     func pick() async -> Pick? {
         await withCheckedContinuation { continuation in
@@ -26,16 +25,15 @@ final class AreaPicker {
             }
             NSApp.activate()
             windows.first { $0.screen == NSScreen.main }?.makeKey()
-            monitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
-                if event.keyCode == 53 { self?.finish(nil); return nil }
-                return event
-            }
         }
     }
 
+    /// Gives up without a pick (another source was chosen in the bar).
+    func cancel() {
+        finish(nil)
+    }
+
     private func finish(_ pick: Pick?) {
-        if let monitor { NSEvent.removeMonitor(monitor) }
-        monitor = nil
         windows.forEach { $0.orderOut(nil) }
         windows = []
         let pending = continuation
@@ -74,7 +72,7 @@ private struct AreaPickerView: View {
                         HStack(spacing: 8) {
                             Button("Cancelar") { done(nil) }
                                 .buttonStyle(OverlayButtonStyle(prominent: false))
-                            Button("Gravar") { done(rect) }
+                            Button("Iniciar gravação") { done(rect) }
                                 .buttonStyle(OverlayButtonStyle(prominent: true))
                                 .keyboardShortcut(.defaultAction)
                         }
@@ -113,7 +111,7 @@ struct OverlayButtonStyle: ButtonStyle {
             .foregroundStyle(prominent ? .white : .primary)
             .padding(.horizontal, 16)
             .frame(height: 32)
-            .background(prominent ? Color.red : Color.white.opacity(0.9), in: .capsule)
+            .background(prominent ? Color(hex: 0x604EF8) : Color.white.opacity(0.9), in: .capsule)
             .scaleEffect(configuration.isPressed ? 0.96 : 1)
             .environment(\.colorScheme, .light)
     }

@@ -30,6 +30,8 @@ enum LaunchArguments {
     /// exports it right away (for checking the renderer end to end).
     static let editor = value(after: "--editor").map { URL(filePath: $0, directoryHint: .isDirectory) }
     static let exportNow = ProcessInfo.processInfo.arguments.contains("--export")
+    /// `--pick display|window|area` puts the recorder's floating bar up in that mode.
+    static let pick = value(after: "--pick")
 
     private static func value(after flag: String) -> String? {
         let arguments = ProcessInfo.processInfo.arguments

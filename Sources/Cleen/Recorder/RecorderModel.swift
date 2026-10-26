@@ -21,6 +21,11 @@ final class RecorderModel {
         case failed(String)
     }
 
+    /// What the floating bar is choosing, Screen Studio's sources.
+    enum SelectionMode: Equatable {
+        case display, window, area
+    }
+
     enum Target {
         case display(SCDisplay)
         case window(SCWindow)
@@ -29,6 +34,8 @@ final class RecorderModel {
     }
 
     private(set) var state = State.idle
+    /// The floating bar is up, picking a source this way.
+    private(set) var selecting: SelectionMode?
     /// The take just finished, for the quick share card.
     private(set) var lastRecording: URL?
 
@@ -82,7 +89,8 @@ final class RecorderModel {
     /// What the running camera session was set up with.
     @ObservationIgnored private var cameraSetup: (id: String, height: Int)?
     @ObservationIgnored private var previewHide: Task<Void, Never>?
-    @ObservationIgnored private unowned let app: AppModel
+    @ObservationIgnored unowned let app: AppModel
+    @ObservationIgnored private lazy var picker = SourcePicker(recorder: self)
     private static let log = Logger(subsystem: "app.cleen.Cleen", category: "recorder")
 
     private enum Keys {
@@ -168,24 +176,62 @@ final class RecorderModel {
         }
     }
 
-    /// Area mode: drag a rectangle, then record it.
-    func pickArea() {
+    // MARK: Choosing
+
+    /// Puts the floating bar up with `mode`'s layer over the screens (or switches the layer).
+    func select(_ mode: SelectionMode) {
         guard !isBusy else { return }
-        state = .picking
-        app.notch.closeAll()
-        Task {
-            guard let pick = await AreaPicker().pick() else {
-                state = .idle
-                return
-            }
-            guard let content = await shareableContent(),
-                  let display = content.displays.first(where: { $0.displayID == pick.screen.displayID ?? 0 }) else {
-                state = .failed(String(localized: "Não deu para gravar essa tela."))
-                return
-            }
-            state = .idle
-            record(.area(display, pick.rect))
+        guard hasScreenAccess else {
+            requestScreenAccess()
+            return
         }
+        selecting = mode
+        app.notch.closeAll()
+        picker.show(mode)
+        refreshCamera()
+    }
+
+    func cancelSelection() {
+        guard selecting != nil else { return }
+        selecting = nil
+        picker.close()
+        refreshCamera()
+    }
+
+    func recordDisplay(_ screen: NSScreen) async {
+        guard let content = await shareableContent(),
+              let display = content.displays.first(where: { $0.displayID == screen.displayID ?? 0 }) else {
+            failSelection()
+            return
+        }
+        startFromSelection(.display(display))
+    }
+
+    func recordWindow(_ id: CGWindowID) async {
+        guard let content = await shareableContent(), let window = content.windows.first(where: { $0.windowID == id }) else {
+            failSelection()
+            return
+        }
+        startFromSelection(.window(window))
+    }
+
+    func recordArea(_ pick: AreaPicker.Pick) async {
+        guard let content = await shareableContent(),
+              let display = content.displays.first(where: { $0.displayID == pick.screen.displayID ?? 0 }) else {
+            failSelection()
+            return
+        }
+        startFromSelection(.area(display, pick.rect))
+    }
+
+    private func startFromSelection(_ target: Target) {
+        record(target)
+    }
+
+    private func failSelection() {
+        cancelSelection()
+        state = .failed(String(localized: "Não deu para gravar essa tela."))
+        app.notch.present(tab: .recorder)
     }
 
     // MARK: Recording
@@ -194,6 +240,9 @@ final class RecorderModel {
     /// `cancelCountdown`.
     func record(_ target: Target) {
         guard !isBusy else { return }
+        // The take holds the camera before the floating bar goes, so it stays warm.
+        holdsCamera = true
+        cancelSelection()
         countdownTask = Task { await start(target) }
     }
 
@@ -202,16 +251,16 @@ final class RecorderModel {
         if case .device = target {} else {
             guard hasScreenAccess else {
                 requestScreenAccess()
-                state = .failed(String(localized: "Permita a gravação de tela para o Cleen em Ajustes do Sistema › Privacidade e Segurança e tente de novo."))
+                giveUp(String(localized: "Permita a gravação de tela para o Cleen em Ajustes do Sistema › Privacidade e Segurança e tente de novo."))
                 return
             }
         }
         if cameraID != nil, !(await CaptureDevices.request(.video)) {
-            state = .failed(String(localized: "Permita a câmera para o Cleen em Ajustes do Sistema › Privacidade e Segurança."))
+            giveUp(String(localized: "Permita a câmera para o Cleen em Ajustes do Sistema › Privacidade e Segurança."))
             return
         }
         if microphoneID != nil, !(await CaptureDevices.request(.audio)) {
-            state = .failed(String(localized: "Permita o microfone para o Cleen em Ajustes do Sistema › Privacidade e Segurança."))
+            giveUp(String(localized: "Permita o microfone para o Cleen em Ajustes do Sistema › Privacidade e Segurança."))
             return
         }
         holdsCamera = true
@@ -232,6 +281,13 @@ final class RecorderModel {
             take = nil
             state = error is CancellationError ? .idle : .failed(error.localizedDescription)
         }
+    }
+
+    /// A take that couldn't start lets go of the camera and says why.
+    private func giveUp(_ message: String) {
+        holdsCamera = false
+        refreshCamera()
+        state = .failed(message)
     }
 
     /// The camera warms up and the helpers go on screen before the countdown, so the
@@ -371,7 +427,7 @@ final class RecorderModel {
     /// Runs the camera, and its preview, exactly while they're wanted: a camera is picked
     /// and Gravar is on screen or a take is under way.
     private func refreshCamera() {
-        guard let cameraID, tabIsVisible || holdsCamera else {
+        guard let cameraID, tabIsVisible || holdsCamera || selecting != nil else {
             if !holdsCamera { dropCamera() }
             return
         }

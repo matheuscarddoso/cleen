@@ -27,6 +27,11 @@ public struct ZoomState: Equatable, Sendable {
 
     public static let none = ZoomState(scale: 1, center: CGPoint(x: 0.5, y: 0.5))
 
+    public init(scale: Double, center: CGPoint) {
+        self.scale = scale
+        self.center = center
+    }
+
     /// The part of the source on screen, as a 0…1 rect with a top-left origin.
     public var viewport: CGRect {
         let side = 1 / scale
@@ -68,7 +73,7 @@ public enum ZoomPlanner {
     /// The zoom at `t`: eased in over `transition` from each segment's start, eased out
     /// after its end, following `pointer` (already smoothed) unless the segment has a
     /// fixed focus. The view never slides past the recording's edges.
-    public static func state(at t: Double, segments: [ZoomSegment], pointer: (Double) -> CGPoint?) -> ZoomState {
+    public static func state(at t: Double, segments: [ZoomSegment], clamped: Bool = true, pointer: (Double) -> CGPoint?) -> ZoomState {
         var best: (weight: Double, segment: ZoomSegment)?
         for segment in segments {
             let weight: Double
@@ -88,11 +93,11 @@ public enum ZoomPlanner {
         let scale = 1 + (segment.scale - 1) * eased
         let target = segment.focus ?? pointer(t) ?? CGPoint(x: 0.5, y: 0.5)
         let center = CGPoint(x: 0.5 + (target.x - 0.5) * eased, y: 0.5 + (target.y - 0.5) * eased)
-        return ZoomState(scale: scale, center: clamp(center, scale: scale))
+        return ZoomState(scale: scale, center: clamped ? clamp(center, scale: scale) : center)
     }
 
     /// Keeps the viewport inside the recording.
-    static func clamp(_ center: CGPoint, scale: Double) -> CGPoint {
+    public static func clamp(_ center: CGPoint, scale: Double) -> CGPoint {
         let half = 0.5 / scale
         return CGPoint(x: min(1 - half, max(half, center.x)), y: min(1 - half, max(half, center.y)))
     }

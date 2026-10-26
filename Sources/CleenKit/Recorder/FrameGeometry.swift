@@ -33,6 +33,66 @@ public enum FrameGeometry {
         return CGRect(x: x, y: y, width: width, height: height)
     }
 
+    /// Where the screen and the camera sit for a layout.
+    public struct Placement: Equatable, Sendable {
+        /// Nil when only the camera shows.
+        public var screen: CGRect?
+        public var camera: CGRect?
+        /// The camera floats in a corner (shaped by its own style) rather than taking a
+        /// panel of the layout (rounded like the screen).
+        public var cameraFloats: Bool
+    }
+
+    public static func placement(canvas: CGSize, source: CGSize, style: EditorStyle, cameraAspect: Double, hasCamera: Bool) -> Placement {
+        let padding = style.effectivePadding
+        let showsCamera = hasCamera && style.camera.isVisible
+        let standard = Placement(
+            screen: contentRect(canvas: canvas, source: source, padding: padding),
+            camera: showsCamera ? cameraRect(canvas: canvas, style: style.camera, aspect: cameraAspect, padding: padding) : nil,
+            cameraFloats: true
+        )
+        guard showsCamera else { return standard }
+        let inset = min(canvas.width, canvas.height) * max(padding, 0.03)
+        let room = CGRect(origin: .zero, size: canvas).insetBy(dx: inset, dy: inset)
+        switch style.layout {
+        case .standard:
+            return standard
+        case .cameraOnly:
+            return Placement(screen: nil, camera: room, cameraFloats: false)
+        case .sideBySide:
+            let gap = inset * 0.6
+            guard source.width > 0, source.height > 0 else { return standard }
+            if canvas.width >= canvas.height {
+                // Side by side: the camera a third of the width, the screen fitted beside it.
+                let cameraWidth = room.width * 0.3
+                let screenRoom = CGSize(width: room.width - cameraWidth - gap, height: room.height)
+                let scale = min(screenRoom.width / source.width, screenRoom.height / source.height)
+                let screenSize = CGSize(width: source.width * scale, height: source.height * scale)
+                let total = screenSize.width + gap + cameraWidth
+                let x = room.minX + (room.width - total) / 2
+                let screen = CGRect(x: x, y: room.midY - screenSize.height / 2, width: screenSize.width, height: screenSize.height)
+                let camera = CGRect(x: screen.maxX + gap, y: screen.minY, width: cameraWidth, height: screenSize.height)
+                return Placement(screen: screen, camera: camera, cameraFloats: false)
+            } else {
+                // Tall canvas: the screen on top, the camera below it.
+                let scale = room.width / source.width
+                let screenSize = CGSize(width: room.width, height: min(source.height * scale, room.height * 0.55))
+                let screen = CGRect(x: room.minX, y: room.minY, width: screenSize.width, height: screenSize.height)
+                let camera = CGRect(x: room.minX, y: screen.maxY + gap, width: room.width, height: room.maxY - screen.maxY - gap)
+                return Placement(screen: screen, camera: camera, cameraFloats: false)
+            }
+        }
+    }
+
+    /// The canvas rect a zoom shows: `scale` times closer around `focus` (a canvas
+    /// point), never past the canvas's edges.
+    public static func viewport(canvas: CGSize, scale: Double, focus: CGPoint) -> CGRect {
+        let size = CGSize(width: canvas.width / max(1, scale), height: canvas.height / max(1, scale))
+        let x = min(canvas.width - size.width, max(0, focus.x - size.width / 2))
+        let y = min(canvas.height - size.height, max(0, focus.y - size.height / 2))
+        return CGRect(origin: CGPoint(x: x, y: y), size: size)
+    }
+
     /// A point of the source (0…1, top-left) on the canvas, for a zoom state.
     public static func place(_ point: CGPoint, zoom: ZoomState, content: CGRect) -> CGPoint {
         let viewport = zoom.viewport
