@@ -10,14 +10,23 @@ extension NSHostingView {
     /// invalidated the layout again, and AppKit killed the app after a couple hundred
     /// passes. Inside a plain container it only fills the space it's given; the window's
     /// size belongs to its controller alone.
+    ///
+    /// The container is flipped so the content stays pinned to the top when the window
+    /// grows downward (Emoji, the search): unflipped, it sat a frame too low and then
+    /// slid back up.
     static func filling(_ rootView: Content) -> NSView {
         let hosting = NSHostingView(rootView: rootView)
         hosting.sizingOptions = []
         hosting.safeAreaRegions = []
-        let container = NSView()
+        let container = TopAnchoredView()
         hosting.frame = container.bounds
         hosting.autoresizingMask = [.width, .height]
         container.addSubview(hosting)
         return container
     }
+}
+
+/// A container whose subviews hang from its top edge.
+private final class TopAnchoredView: NSView {
+    override var isFlipped: Bool { true }
 }

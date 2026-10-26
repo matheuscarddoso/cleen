@@ -71,6 +71,8 @@ final class NotchController {
         }
         guard !state.isOpen else { return }
         panel?.ignoresMouseEvents = false
+        // The room first, with nothing animating yet; then the shape grows into it.
+        fitWindow(showsSearch: true)
         withAnimation(Self.openAnimation) { state.isOpen = true }
     }
 
@@ -92,6 +94,7 @@ final class NotchController {
         state.showsWelcome = false
         state.opensInstantly = false
         panel?.ignoresMouseEvents = true
+        fitWindow(showsSearch: false)
         giveBackKeyboard()
     }
 
@@ -105,6 +108,7 @@ final class NotchController {
         state.showsWelcome = true
         state.holdsOpen = true
         panel?.ignoresMouseEvents = false
+        fitWindow(showsSearch: true)
         withAnimation(Self.openAnimation) { state.isOpen = true }
     }
 
@@ -164,19 +168,23 @@ final class NotchController {
 
     private var pendingShrink: Task<Void, Never>?
 
-    /// Sizes the window for the launcher at once when it opens; when it goes, waits for
-    /// the panel to finish shrinking before taking the room back.
+    /// The window is the room the shape can grow into. While the panel is open it's
+    /// always the tallest the panel gets (Emoji, the launcher, a review), so switching to
+    /// a taller tab only grows the black shape: resizing the window in the middle of that
+    /// animation made the whole panel drop and then crawl back up. Once the panel has
+    /// closed and finished shrinking, the window goes back to the open panel's size.
     func fitWindow(showsSearch: Bool) {
         pendingShrink?.cancel()
         guard let geometry = state.geometry, let panel else { return }
-        let frame = geometry.windowFrame(showsSearch: showsSearch)
-        if showsSearch {
-            if panel.frame != frame { panel.setFrame(frame, display: true) }
+        if showsSearch || state.isOpen {
+            let frame = geometry.windowFrame(showsSearch: true)
+            if panel.frame != frame { withTransaction(Self.instant) { panel.setFrame(frame, display: true) } }
             return
         }
+        let frame = geometry.windowFrame(showsSearch: false)
         pendingShrink = Task { [weak self] in
             try? await Task.sleep(for: .milliseconds(600))
-            guard !Task.isCancelled, let self, !self.state.showsSearch, let panel = self.panel else { return }
+            guard !Task.isCancelled, let self, !self.state.isOpen, let panel = self.panel else { return }
             if panel.frame != frame { panel.setFrame(frame, display: true) }
         }
     }

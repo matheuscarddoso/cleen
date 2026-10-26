@@ -74,7 +74,7 @@ struct NotchRootView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             .animation(NotchStyle.liveSpring, value: wingWidth)
             .onChange(of: state.isTall) { _, tall in
-                controller.fitWindow(showsSearch: tall)
+                if tall { controller.fitWindow(showsSearch: true) }
             }
 
             .environment(\.colorScheme, .dark)
