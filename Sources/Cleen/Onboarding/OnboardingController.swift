@@ -31,7 +31,7 @@ final class OnboardingController {
 
         let backdrop = OnboardingWindow(frame: screen.frame, ignoresMouse: true)
         backdrop.level = .statusBar + 1
-        backdrop.contentView = NSHostingView(rootView: OnboardingBackdrop().environment(model))
+        backdrop.contentView = NSHostingView.filling(OnboardingBackdrop().environment(model))
         backdrop.orderFrontRegardless()
         self.backdrop = backdrop
 
@@ -46,7 +46,7 @@ final class OnboardingController {
         let root = OnboardingRootView(panelSize: size, notchSize: geometry.notchSize)
             .injecting(app)
             .environment(model)
-        window.contentView = NSHostingView(rootView: root)
+        window.contentView = NSHostingView.filling(root)
         window.makeKeyAndOrderFront(nil)
         self.window = window
         NSApp.activate()

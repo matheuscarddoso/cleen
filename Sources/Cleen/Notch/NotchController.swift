@@ -39,7 +39,7 @@ final class NotchController {
         let root = NotchRootView(controller: self)
             .injecting(app)
             .environment(state)
-        panel.contentView = NSHostingView(rootView: root)
+        panel.contentView = NSHostingView.filling(root)
         panel.orderFrontRegardless()
         self.panel = panel
 
