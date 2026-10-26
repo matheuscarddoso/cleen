@@ -10,6 +10,7 @@ struct ClosedNotchSettings: View {
     @AppStorage(LiveActivitySettings.trackKey) private var track = true
     @AppStorage(LiveActivitySettings.meetingKey) private var meeting = true
     @AppStorage(LiveActivitySettings.agentsKey) private var agents = true
+    @AppStorage(LiveActivitySettings.downloadsKey) private var downloads = true
     @AppStorage(LiveActivitySettings.hideInFullscreenKey) private var hidesInFullscreen = true
 
     var body: some View {
@@ -41,6 +42,9 @@ struct ClosedNotchSettings: View {
                     }
                     SettingRow(title: String(localized: "Claude Code"), note: String(localized: "Quando uma sessão termina e fica esperando você.")) {
                         NotchSwitch(label: String(localized: "Claude Code"), isOn: $agents)
+                    }
+                    SettingRow(title: String(localized: "Downloads"), note: String(localized: "O progresso e o tempo que falta enquanto baixa, e o arquivo quando termina.")) {
+                        NotchSwitch(label: String(localized: "Downloads"), isOn: $downloads)
                     }
                     SettingRow(title: String(localized: "Esconder em tela cheia"), note: String(localized: "Durante um vídeo ou apresentação, o notch fica só preto.")) {
                         NotchSwitch(label: String(localized: "Esconder em tela cheia"), isOn: $hidesInFullscreen)

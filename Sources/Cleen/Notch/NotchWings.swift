@@ -23,6 +23,10 @@ struct NotchWings: View {
         if let since = recorder.recordingStart {
             RecordingWings(since: since, notchWidth: notchWidth, inset: inset)
                 .transition(.opacity)
+        } else if let banner = live.banner, banner.isIsland, case .downloaded(let url, let size) = banner {
+            DownloadIsland(url: url, size: size, notchHeight: notchHeight)
+                .id(banner)
+                .transition(.trackSwap)
         } else if let banner = live.banner, !isBusy {
             LiveActivityBanner(activity: banner, notchWidth: notchWidth, inset: inset, artworkSize: artworkSize)
                 .id(banner)
@@ -54,6 +58,7 @@ struct NotchWings: View {
         .animation(NotchStyle.liveSpring, value: nowPlaying.artwork.map(ObjectIdentifier.init))
         .animation(.smooth(duration: 0.3), value: live.meeting)
         .animation(.smooth(duration: 0.3), value: timer.isActive)
+        .animation(NotchStyle.liveSpring, value: live.download?.id)
         .animation(.spring(response: 0.42, dampingFraction: 0.8), value: showsClaude)
         .accessibilityElement(children: .combine)
         .accessibilityLabel("Cleen")
@@ -88,6 +93,9 @@ struct NotchWings: View {
             WingSpinner(size: artworkSize - 2)
                 .frame(width: artworkSize, height: artworkSize)
                 .transition(.opacity)
+        } else if let download = live.download {
+            DownloadRing(fraction: download.estimate.fraction, size: artworkSize)
+                .transition(.scale(scale: 0.6).combined(with: .opacity))
         } else if timer.isActive {
             TimelineView(.periodic(from: .now, by: 1)) { context in
                 WingRing(fraction: 1 - timer.progress(at: context.date), color: timer.isRunning ? NotchStyle.warning : NotchStyle.secondary)
@@ -113,7 +121,10 @@ struct NotchWings: View {
 
     @ViewBuilder
     private var trailing: some View {
-        if timer.isActive, !isBusy {
+        if let download = live.download, !isBusy {
+            wingText(DownloadText.remaining(download.estimate), color: NotchStyle.primary)
+                .font(.system(size: 12.5, weight: .semibold).monospacedDigit())
+        } else if timer.isActive, !isBusy {
             TimelineView(.periodic(from: .now, by: 1)) { context in
                 wingText(TimerClock.string(timer.remaining(at: context.date)), color: timer.isRunning ? NotchStyle.primary : NotchStyle.secondary)
             }

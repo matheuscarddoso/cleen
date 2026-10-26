@@ -8,6 +8,7 @@ enum LiveActivitySettings {
     static let trackKey = "liveActivityTrack"
     static let meetingKey = "liveActivityMeeting"
     static let agentsKey = "liveActivityAgents"
+    static let downloadsKey = "liveActivityDownloads"
     static let idleKey = "notchIdleIndicator"
     static let hideInFullscreenKey = "notchHidesInFullscreen"
 
@@ -35,6 +36,7 @@ enum LiveActivitySettings {
             trackKey: true,
             meetingKey: true,
             agentsKey: true,
+            downloadsKey: true,
             idleKey: Idle.disk.rawValue,
             hideInFullscreenKey: true,
         ])
@@ -45,5 +47,6 @@ enum LiveActivitySettings {
     static var track: Bool { UserDefaults.standard.bool(forKey: trackKey) }
     static var meeting: Bool { UserDefaults.standard.bool(forKey: meetingKey) }
     static var agents: Bool { UserDefaults.standard.bool(forKey: agentsKey) }
+    static var downloads: Bool { UserDefaults.standard.bool(forKey: downloadsKey) }
     static var hidesInFullscreen: Bool { UserDefaults.standard.bool(forKey: hideInFullscreenKey) }
 }

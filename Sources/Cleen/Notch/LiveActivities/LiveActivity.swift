@@ -14,6 +14,8 @@ enum LiveActivity: Hashable {
     /// The result of a command run from the search with the notch already closed
     /// ("Discos" · "2 ejetados").
     case notice(title: String, detail: String, symbol: String)
+    /// A download that just finished: the notch grows into an island with the file.
+    case downloaded(url: URL, size: Int64)
 
     enum Power: Hashable {
         case charging
@@ -29,4 +31,13 @@ enum LiveActivity: Hashable {
     }
 
     static let bannerWingWidth = 112.0
+
+    /// The finished-download island: wider than the wings, and taller than the notch.
+    var isIsland: Bool {
+        if case .downloaded = self { return true }
+        return false
+    }
+
+    static let islandWingWidth = 130.0
+    static let islandExtraHeight = 62.0
 }

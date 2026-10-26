@@ -20,7 +20,10 @@ struct NotchRootView: View {
 
     var body: some View {
         if let geometry = state.geometry {
-            let closed = geometry.closedSize(wingWidth: wingWidth)
+            let island = !state.isOpen && live.banner?.isIsland == true && !recorder.isRecording
+            let closed = island
+                ? CGSize(width: geometry.notchSize.width + LiveActivity.islandWingWidth * 2, height: geometry.notchSize.height + LiveActivity.islandExtraHeight)
+                : geometry.closedSize(wingWidth: wingWidth)
             let welcomes = state.isOpen && state.showsWelcome
             // The teleprompter reading: the panel is all script, an arc of light behind it.
             let prompting = state.isOpen && state.isPrompting && state.tab == .teleprompter && !welcomes && !state.showsSearch && !state.showsSettings
@@ -28,7 +31,7 @@ struct NotchRootView: View {
             let size = state.isOpen ? (welcomes ? geometry.welcomeSize : open) : closed
             let shape = NotchShape(
                 topRadius: state.isOpen ? NotchStyle.openTopRadius : NotchStyle.closedTopRadius,
-                bottomRadius: state.isOpen ? (welcomes ? 26 : NotchStyle.openBottomRadius) : NotchStyle.closedBottomRadius
+                bottomRadius: state.isOpen ? (welcomes ? 26 : NotchStyle.openBottomRadius) : (island ? 24 : NotchStyle.closedBottomRadius)
             )
 
             ZStack(alignment: .top) {
@@ -100,12 +103,14 @@ struct NotchRootView: View {
         if mediaKeys.reading(on: controller.screen) != nil { return MediaKeyHUD.wingWidth }
         // A recording always shows, wings on or off: it's how you know it's running.
         if recorder.isRecording { return NotchGeometry.wingWidth }
+        // A finished download is worth showing even with the wings off.
+        if live.banner?.isIsland == true { return LiveActivity.islandWingWidth }
         guard showsWings else { return 0 }
         if hidesInFullscreen, fullscreen.isFullscreen(controller.screen) { return 0 }
         let busy = junk.phase == .scanning || junk.isCleaning || app.isSmartScanning || app.isSmartCleaning
         if live.banner != nil, !busy { return LiveActivity.bannerWingWidth }
         let claude = LiveActivitySettings.agents && (!agents.working.isEmpty || agents.justFinished) || !agents.approvals.isEmpty
-        let hasContent = busy || timer.isActive || live.meeting != nil || claude || nowPlaying.track?.isPlaying == true
+        let hasContent = busy || timer.isActive || live.meeting != nil || live.download != nil || claude || nowPlaying.track?.isPlaying == true
             || LiveActivitySettings.Idle(rawValue: idle) != LiveActivitySettings.Idle.none
         // Claude's glyph sits before whatever else is on the left wing.
         return hasContent ? NotchGeometry.wingWidth + (claude ? 20 : 0) : 0

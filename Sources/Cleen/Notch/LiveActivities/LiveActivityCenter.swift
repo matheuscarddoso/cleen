@@ -14,6 +14,13 @@ final class LiveActivityCenter {
     private(set) var banner: LiveActivity?
     /// A meeting starting within the next few minutes (or just started).
     private(set) var meeting: LiveActivity?
+    /// Downloads in progress, with their real progress and time left.
+    let downloads = DownloadWatcher()
+
+    /// The download the closed notch follows, when downloads are shown.
+    var download: DownloadWatcher.Download? {
+        LiveActivitySettings.downloads ? downloads.active.first : nil
+    }
 
     @ObservationIgnored private var bannerTask: Task<Void, Never>?
     @ObservationIgnored private var powerWatcher: PowerSourceWatcher?
@@ -38,6 +45,12 @@ final class LiveActivityCenter {
         audioListener = AudioOutputDevices.watch { [weak self] in
             MainActor.assumeIsolated { self?.audioDevicesChanged() }
         }
+        downloads.onFinished = { [weak self] url, announced in
+            guard LiveActivitySettings.downloads else { return }
+            let onDisk = (try? url.resourceValues(forKeys: [.totalFileSizeKey, .fileSizeKey])).flatMap { $0.totalFileSize ?? $0.fileSize } ?? 0
+            self?.show(.downloaded(url: url, size: max(Int64(onDisk), announced)), for: .seconds(4.5))
+        }
+        downloads.start()
         meetingLoop = Task { [weak self] in
             // The agenda only loads once Calendar access is already granted; the
             // notch never asks for it on its own.
@@ -126,17 +139,20 @@ final class LiveActivityCenter {
         case "headphones": show(.headphones(name: "AirPods Pro de Matheus", connected: true))
         case "track": show(.track(title: "Clair de Lune", artist: "Claude Debussy"))
         case "meeting": meeting = .meeting(title: "Daily", start: .now.addingTimeInterval(5 * 60), color: .systemPurple)
+        case "download":
+            let url = URL.downloadsDirectory.appending(path: "Launch Assets.zip")
+            show(.downloaded(url: url, size: 1_480_000_000), for: .seconds(4.5))
         default: break
         }
     }
 
     // MARK: Banner
 
-    private func show(_ activity: LiveActivity) {
+    private func show(_ activity: LiveActivity, for duration: Duration = bannerDuration) {
         bannerTask?.cancel()
         withAnimation(NotchStyle.liveSpring) { banner = activity }
         bannerTask = Task { [weak self] in
-            try? await Task.sleep(for: Self.bannerDuration)
+            try? await Task.sleep(for: duration)
             guard !Task.isCancelled else { return }
             withAnimation(NotchStyle.liveExit) { self?.banner = nil }
         }

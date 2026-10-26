@@ -69,6 +69,9 @@ struct LiveActivityBanner: View {
                 .font(.system(size: 12, weight: .medium))
                 .foregroundStyle(NotchStyle.secondary)
             label(title)
+        case .downloaded(let url, _):
+            // Drawn as an island (`DownloadIsland`); this is the fallback.
+            label(url.lastPathComponent)
         }
     }
 
@@ -96,6 +99,9 @@ struct LiveActivityBanner: View {
         case .notice(_, let detail, _):
             Text(detail)
                 .foregroundStyle(NotchStyle.secondary)
+        case .downloaded:
+            Image(systemName: "checkmark.circle")
+                .foregroundStyle(NotchStyle.good)
         }
     }
 
