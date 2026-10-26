@@ -47,7 +47,6 @@ struct NotchRecorderTab: View {
 /// The bar itself: sources on the left, inputs in the middle, folder and options right.
 struct RecorderToolbar: View {
     @Environment(RecorderModel.self) private var recorder
-    @Namespace private var hoverSpace
     @State private var hovered: String?
     @State private var displays: [SCDisplay] = []
     @State private var windows: [SCWindow] = []
@@ -78,7 +77,7 @@ struct RecorderToolbar: View {
             .help("Abrir a pasta das gravações")
             RecorderOptionsMenu()
         }
-        .environment(\.toolbarHover, ToolbarHoverContext(namespace: hoverSpace, hovered: $hovered))
+        .toolbarHoverHighlight($hovered)
         .padding(.horizontal, 6)
         .frame(height: 64)
         .background(NotchStyle.card, in: .rect(cornerRadius: 16, style: .continuous))
