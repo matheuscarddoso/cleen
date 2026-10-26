@@ -54,6 +54,8 @@ struct NotchGeometry: Equatable {
         case tall
         /// The wide mirror: the camera's whole 16:9 picture, nothing cropped.
         case mirror
+        /// A tool that's one bar (Gravar): the camera strip, the bar and the tab bar.
+        case compact
     }
 
     func openSize(_ height: PanelHeight) -> CGSize {
@@ -64,6 +66,9 @@ struct NotchGeometry: Equatable {
             return CGSize(width: width, height: standard)
         case .tall:
             return CGSize(width: width, height: max(standard, min(Self.searchHeight, screenFrame.height * 0.6)))
+        case .compact:
+            // The camera strip, 6 pt, the 64 pt bar, then the tab bar (6 + 26 + 10).
+            return CGSize(width: width, height: min(standard, notchSize.height + 6 + 64 + 6 + 42))
         case .mirror:
             // The camera strip, the 6 pt above the tool, the picture at 16:9 across the
             // content width, and the inset below it (the tab bar steps aside).

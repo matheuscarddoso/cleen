@@ -95,6 +95,7 @@ struct NotchOpenContent: View {
         case .icons: NotchIconsTab()
         case .stocks: NotchStocksTab()
         case .teleprompter: NotchTeleprompterTab()
+        case .recorder: NotchRecorderTab()
         case .assistant: NotchAssistantTab()
         case .overview: NotchOverviewTab(controller: controller)
         case .clean: NotchCleanTab()

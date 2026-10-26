@@ -16,6 +16,7 @@ struct NotchRootView: View {
     @Environment(TimerModel.self) private var timer
     @Environment(AgentsModel.self) private var agents
     @Environment(MediaKeyHUD.self) private var mediaKeys
+    @Environment(RecorderModel.self) private var recorder
 
     var body: some View {
         if let geometry = state.geometry {
@@ -86,6 +87,8 @@ struct NotchRootView: View {
         // Volume and brightness stand in for the system's display, so they show even
         // with the wings off or in full screen.
         if mediaKeys.reading(on: controller.screen) != nil { return MediaKeyHUD.wingWidth }
+        // A recording always shows, wings on or off: it's how you know it's running.
+        if recorder.isRecording { return NotchGeometry.wingWidth }
         guard showsWings else { return 0 }
         if hidesInFullscreen, fullscreen.isFullscreen(controller.screen) { return 0 }
         let busy = junk.phase == .scanning || junk.isCleaning || app.isSmartScanning || app.isSmartCleaning

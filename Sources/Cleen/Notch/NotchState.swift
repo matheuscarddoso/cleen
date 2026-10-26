@@ -41,6 +41,7 @@ final class NotchState {
     var panelHeight: NotchGeometry.PanelHeight {
         if isTall { return .tall }
         if isOpen, !showsWelcome, tab == .home, mirrorExpanded { return .mirror }
+        if isOpen, !showsWelcome, !showsSettings, !showsSearch, isCompactTool { return .compact }
         return .standard
     }
 
@@ -79,6 +80,9 @@ final class NotchState {
     /// While true the panel stays open even if the pointer leaves (a confirmation is
     /// waiting, a sheet or open panel is up).
     var holdsOpen = false
+    /// The tool on screen is a single bar (Gravar with nothing else to show): the panel
+    /// shrinks around it.
+    var isCompactTool = false
     /// The teleprompter is reading: the panel is all script, an arc of light behind it.
     var isPrompting = false
     /// Files from another app are being dragged over the open panel: the shelf swaps

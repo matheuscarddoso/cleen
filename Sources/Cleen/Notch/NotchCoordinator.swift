@@ -85,6 +85,11 @@ final class NotchCoordinator {
         (controllerUnderPointer ?? primary)?.openHeld(tab: tab, settings: section)
     }
 
+    /// Every notch shut, out of the way of a recording.
+    func closeAll() {
+        controllers.forEach { $0.close() }
+    }
+
     func openSearch() {
         (controllerUnderPointer ?? primary)?.openSearch()
     }

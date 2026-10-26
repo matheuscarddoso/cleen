@@ -15,11 +15,15 @@ struct NotchWings: View {
     @Environment(LiveActivityCenter.self) private var live
     @Environment(TimerModel.self) private var timer
     @Environment(AgentsModel.self) private var agents
+    @Environment(RecorderModel.self) private var recorder
     @AppStorage(LiveActivitySettings.agentsKey) private var showsAgents = true
     @AppStorage(LiveActivitySettings.idleKey) private var idle = LiveActivitySettings.Idle.disk.rawValue
 
     var body: some View {
-        if let banner = live.banner, !isBusy {
+        if let since = recorder.recordingStart {
+            RecordingWings(since: since, notchWidth: notchWidth, inset: inset)
+                .transition(.opacity)
+        } else if let banner = live.banner, !isBusy {
             LiveActivityBanner(activity: banner, notchWidth: notchWidth, inset: inset, artworkSize: artworkSize)
                 .id(banner)
                 .transition(.trackSwap)

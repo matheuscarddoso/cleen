@@ -8,6 +8,11 @@ public struct RecordingProject: Codable, Sendable, Equatable {
         case display, window, area, device
     }
 
+    /// The screen movie's sound tracks, in the order they were written.
+    public enum AudioSource: String, Codable, Sendable {
+        case system, microphone
+    }
+
     public static let manifestName = "project.json"
     public static let screenName = "screen.mov"
     public static let cameraName = "camera.mov"
@@ -22,6 +27,7 @@ public struct RecordingProject: Codable, Sendable, Equatable {
     /// Seconds.
     public var duration: Double
     public var hasCamera: Bool
+    public var audio: [AudioSource]
     public var style: EditorStyle
     public var zoom: [ZoomSegment]
     /// What's kept, in seconds from the start.
@@ -29,13 +35,14 @@ public struct RecordingProject: Codable, Sendable, Equatable {
     public var trimEnd: Double
     public var export: ExportOptions
 
-    public init(createdAt: Date = .now, source: Source, sourceSize: CGSize, duration: Double, hasCamera: Bool,
+    public init(createdAt: Date = .now, source: Source, sourceSize: CGSize, duration: Double, hasCamera: Bool, audio: [AudioSource] = [],
                 style: EditorStyle = EditorStyle(), zoom: [ZoomSegment] = [], export: ExportOptions = ExportOptions()) {
         self.createdAt = createdAt
         self.source = source
         self.sourceSize = sourceSize
         self.duration = duration
         self.hasCamera = hasCamera
+        self.audio = audio
         self.style = style
         self.zoom = zoom
         self.trimStart = 0

@@ -65,6 +65,8 @@ final class NotchController {
         // Picks in Emoji, Clipboard and the others paste into the app in front now.
         if !state.isOpen { PasteKeystroke.rememberTarget() }
         pendingClose?.cancel()
+        // While recording, opening the notch is for Stop.
+        let tab = tab ?? (app.recorder.isRecording && !state.isOpen ? .recorder : nil)
         if let tab {
             state.tab = tab
             state.showsSettings = false

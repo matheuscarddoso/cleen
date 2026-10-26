@@ -18,6 +18,7 @@ enum NotchTab: String, CaseIterable, Identifiable, Codable {
     case icons
     case stocks
     case teleprompter
+    case recorder
     case assistant
     case overview
     case clean
@@ -52,6 +53,7 @@ enum NotchTab: String, CaseIterable, Identifiable, Codable {
         case .icons: String(localized: "Ícones")
         case .stocks: String(localized: "Ações")
         case .teleprompter: String(localized: "Teleprompter")
+        case .recorder: String(localized: "Gravar")
         case .assistant: String(localized: "Perguntar")
         case .overview: String(localized: "Visão geral")
         case .clean: String(localized: "Limpeza")
@@ -89,6 +91,7 @@ enum NotchTab: String, CaseIterable, Identifiable, Codable {
         case .icons: "square.grid.3x3.square"
         case .stocks: "chart.line.uptrend.xyaxis"
         case .teleprompter: "text.aligncenter"
+        case .recorder: "record.circle"
         case .assistant: "bubble.left.and.text.bubble.right"
         case .overview: "internaldrive.fill"
         case .clean: "trash"

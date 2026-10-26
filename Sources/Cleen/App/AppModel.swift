@@ -49,6 +49,8 @@ final class AppModel {
     let voice = VoiceMeter()
     let assistant = AssistantModel()
     let stocks = StocksModel()
+    @ObservationIgnored private(set) lazy var recorder = RecorderModel(app: self)
+    @ObservationIgnored private var editors: [URL: EditorWindowController] = [:]
     @ObservationIgnored private(set) lazy var notch = NotchCoordinator(app: self)
     @ObservationIgnored private var onboarding: OnboardingController?
 
@@ -98,6 +100,18 @@ final class AppModel {
         Thumbnails.shared.scale = NSScreen.screens.map(\.backingScaleFactor).max() ?? 2
     }
 
+    /// The editor for a recording, in its own window (one per take).
+    func openEditor(_ folder: URL) {
+        if let editor = editors[folder] {
+            editor.show()
+            return
+        }
+        guard let editor = EditorWindowController(folder: folder, app: self) else { return }
+        editor.onClose = { [weak self] in self?.editors[folder] = nil }
+        editors[folder] = editor
+        editor.show()
+    }
+
     private func installNotch() {
         if AppLocation.needsMove, AppLocation.offerMove() { return }
         notch.install()
@@ -135,6 +149,10 @@ final class AppModel {
                 try? await Task.sleep(for: .milliseconds(600))
                 teleprompter.start()
             }
+        }
+        if let folder = LaunchArguments.editor {
+            openEditor(folder)
+            if LaunchArguments.exportNow { editors[folder]?.model.exportMovie() }
         }
         if let text = LaunchArguments.search {
             notch.primary?.openSearch()
@@ -202,7 +220,7 @@ final class AppModel {
         case .leftovers: orphans.startScan()
         case .apps: Task { await apps.load() }
         case .calendar, .shelf, .clipboard, .screenshots, .ai, .system, .startup, .maintenance,
-             .timer, .notes, .reminders, .converter, .emoji, .weather, .shortcuts, .agents, .icons, .stocks, .teleprompter, .assistant: break
+             .timer, .notes, .reminders, .converter, .emoji, .weather, .shortcuts, .agents, .icons, .stocks, .teleprompter, .recorder, .assistant: break
         }
     }
 

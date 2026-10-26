@@ -10,6 +10,10 @@ struct MenuBarMenu: View {
     @Environment(UpdateModel.self) private var updates
 
     var body: some View {
+        if app.recorder.isRecording {
+            Button("Parar a gravação", systemImage: "stop.circle") { Task { await app.recorder.stop() } }
+            Divider()
+        }
         Button("Abrir o Cleen", systemImage: "rectangle.topthird.inset.filled") { app.notch.openHeld() }
             .keyboardShortcut("c", modifiers: [.control, .option])
         Button("Buscar", systemImage: "magnifyingglass") { app.notch.openSearch() }

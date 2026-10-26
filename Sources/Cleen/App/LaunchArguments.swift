@@ -26,6 +26,10 @@ enum LaunchArguments {
     /// `--paste-check <text>` does the same, pasting `text` on the way out (the clipboard
     /// is put back after), for checking the paste and where the keyboard ends up.
     static let pasteCheck = value(after: "--paste-check")
+    /// `--editor <folder>` opens a recording in the editor; with `--export` it also
+    /// exports it right away (for checking the renderer end to end).
+    static let editor = value(after: "--editor").map { URL(filePath: $0, directoryHint: .isDirectory) }
+    static let exportNow = ProcessInfo.processInfo.arguments.contains("--export")
 
     private static func value(after flag: String) -> String? {
         let arguments = ProcessInfo.processInfo.arguments

@@ -62,8 +62,8 @@ cat > "$APP/Contents/Info.plist" <<PLIST
   <!-- The Espelho is a plain mirror: no hand-gesture Reactions. Leaving them on made
        macOS load its gesture models every time the camera started. -->
   <key>NSCameraReactionEffectGesturesEnabledDefault</key><false/>
-  <key>NSCameraUsageDescription</key><string>O Espelho do Cleen mostra a câmera frontal para você se ver antes de uma chamada. Nada é gravado.</string>
-  <key>NSMicrophoneUsageDescription</key><string>O teleprompter do Cleen faz o anel em volta do texto seguir a sua voz. Nada é gravado nem sai do Mac.</string>
+  <key>NSCameraUsageDescription</key><string>O Cleen usa a câmera no Espelho, para você se ver antes de uma chamada, e nas gravações de tela em que você escolhe aparecer. Nada sai do seu Mac.</string>
+  <key>NSMicrophoneUsageDescription</key><string>O Cleen usa o microfone no teleprompter, para o anel seguir a sua voz, e nas gravações de tela em que você escolhe gravar a sua voz. Nada sai do seu Mac.</string>
   <key>NSCalendarsFullAccessUsageDescription</key><string>O Cleen mostra os eventos de hoje no notch.</string>
   <key>NSLocationUsageDescription</key><string>O Cleen usa sua localização só para mostrar o tempo onde você está, e só quando você pede.</string>
   <key>NSLocationWhenInUseUsageDescription</key><string>O Cleen usa sua localização só para mostrar o tempo onde você está, e só quando você pede.</string>
