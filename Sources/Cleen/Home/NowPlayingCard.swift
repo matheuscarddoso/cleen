@@ -11,7 +11,8 @@ struct NowPlayingCard: View {
             NowPlayingArtwork(image: model.artwork, appURL: model.appURL, isIcon: model.artworkIsIcon)
                 .frame(width: 88, height: 88)
             VStack(alignment: .leading, spacing: 2) {
-                Text(model.track?.title ?? String(localized: "Nada tocando"))
+                // A long title scrolls rather than ending in an ellipsis.
+                MarqueeText(text: model.track?.title ?? String(localized: "Nada tocando"))
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundStyle(NotchStyle.primary)
                 Text(secondLine)

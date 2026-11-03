@@ -25,7 +25,7 @@ struct NotchDuplicatesTab: View {
                 NotchSummaryBar(value: model.selectedSize.bytes, caption: caption) {
                     Button("Analisar de novo", action: model.startScan)
                         .buttonStyle(.notchSecondary)
-                    ConfirmingButton(title: String(localized: "Mover para o Lixo"), isWorking: model.isCleaning, items: { model.reviewItems }, action: trash)
+                    NotchActionButton(title: String(localized: "Mover para o Lixo"), isWorking: model.isCleaning, action: trash)
                         .disabled(model.selectedCount == 0)
                 }
                 if let report = model.report {

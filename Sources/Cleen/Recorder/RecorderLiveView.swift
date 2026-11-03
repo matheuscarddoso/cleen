@@ -5,7 +5,6 @@ import SwiftUI
 /// While recording: the time and the two ways out, Stop (opens the editor) and Discard.
 struct RecorderLiveView: View {
     @Environment(RecorderModel.self) private var recorder
-    @Environment(NotchState.self) private var notch
 
     var body: some View {
         HStack(spacing: 16) {
@@ -27,7 +26,7 @@ struct RecorderLiveView: View {
                     .font(NotchStyle.bodyMedium)
                     .foregroundStyle(NotchStyle.secondary)
             } else {
-                Button("Descartar", role: .destructive) { reviewDiscard() }
+                Button("Descartar", role: .destructive) { Task { await recorder.discard() } }
                     .buttonStyle(.notchSecondary)
                 Button {
                     Task { await recorder.stop() }
@@ -39,15 +38,6 @@ struct RecorderLiveView: View {
             }
         }
         .padding(.horizontal, 8)
-    }
-
-    private func reviewDiscard() {
-        notch.review(DeletionReview(
-            title: String(localized: "Descartar a gravação?"),
-            items: [DeletionReview.Item(id: "take", name: String(localized: "Gravação em andamento"), detail: RecorderElapsed.text(from: recorder.recordingStart, to: .now), symbol: "record.circle")],
-            outcome: .delete,
-            confirm: { Task { await recorder.discard() } }
-        ))
     }
 }
 

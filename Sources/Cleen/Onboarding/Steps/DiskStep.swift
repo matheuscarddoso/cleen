@@ -6,7 +6,7 @@ struct DiskStep: View {
     var body: some View {
         OnboardingPage(
             title: String(localized: "Deixe o Cleen ver o disco todo"),
-            message: String(localized: "Para achar o que pesa na Lixeira, no Mail e dentro dos apps, o macOS pede Acesso Total ao Disco. Nada é apagado sem você confirmar."),
+            message: String(localized: "Para achar o que pesa na Lixeira, no Mail e dentro dos apps, o macOS pede Acesso Total ao Disco. Nada é apagado sem você pedir."),
             primary: model.fullDiskAccess ? String(localized: "Continuar") : String(localized: "Abrir Ajustes"),
             secondary: model.fullDiskAccess ? nil : String(localized: "Agora não"),
             footnote: model.fullDiskAccess ? nil : String(localized: "Dá para fazer isso depois em Ajustes › Geral."),

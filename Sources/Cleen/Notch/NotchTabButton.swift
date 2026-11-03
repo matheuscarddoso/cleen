@@ -11,7 +11,7 @@ struct NotchTabButton: View {
     let action: () -> Void
     @State private var isHovered = false
 
-    static let width = 32.0
+    static let width = NotchDockLayout.buttonWidth
 
     var body: some View {
         Button(action: action) {

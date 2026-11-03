@@ -1,36 +1,23 @@
 import AppKit
-import CleenKit
 import SwiftUI
 
-/// The step before anything is deleted: what goes (largest first), how much, where it
-/// ends up, and Cancelar (Esc) beside Confirmar (Return). Shown over the tool, which
-/// stays as it was underneath, so cancelling lands right back where you were.
+/// The step before something that can't be taken back: what it touches, what happens,
+/// and Cancelar (Esc) beside Confirmar (Return). Shown over the tool, which stays as it
+/// was underneath, so cancelling lands right back where you were.
 struct DeletionReviewView: View {
     let review: DeletionReview
     @Environment(NotchState.self) private var state
 
-    /// A long list shows its heaviest rows and counts the rest.
-    private static let shownRows = 200
-
     var body: some View {
-        let items = review.items.sorted { ($0.size ?? 0) > ($1.size ?? 0) }
         VStack(alignment: .leading, spacing: 10) {
             header
             NotchScroll {
                 LazyVStack(spacing: 0) {
-                    ForEach(items.prefix(Self.shownRows)) { item in
+                    ForEach(review.items) { item in
                         DeletionReviewRow(item: item)
-                        if item.id != items.prefix(Self.shownRows).last?.id {
+                        if item.id != review.items.last?.id {
                             Rectangle().fill(NotchStyle.separator).frame(height: 1).padding(.leading, 38)
                         }
-                    }
-                    if items.count > Self.shownRows {
-                        Text("e mais \(items.count - Self.shownRows) itens menores")
-                            .font(NotchStyle.caption)
-                            .foregroundStyle(NotchStyle.tertiary)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 8)
                     }
                 }
                 .background(NotchStyle.card, in: .rect(cornerRadius: 12, style: .continuous))
@@ -43,20 +30,14 @@ struct DeletionReviewView: View {
     }
 
     private var header: some View {
-        HStack(alignment: .firstTextBaseline, spacing: 12) {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(review.title)
-                    .font(NotchStyle.title)
-                Text(review.consequence)
-                    .font(NotchStyle.caption)
-                    .foregroundStyle(review.outcome == .trash ? NotchStyle.secondary : NotchStyle.warning)
-            }
-            Spacer(minLength: 8)
-            if let total = review.totalSize, total > 0 {
-                Text(total.bytes)
-                    .font(.system(size: 15, weight: .semibold).monospacedDigit())
-            }
+        VStack(alignment: .leading, spacing: 2) {
+            Text(review.title)
+                .font(NotchStyle.title)
+            Text(review.consequence)
+                .font(NotchStyle.caption)
+                .foregroundStyle(NotchStyle.warning)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 2)
     }
 
@@ -94,11 +75,6 @@ private struct DeletionReviewRow: View {
                 }
             }
             Spacer(minLength: 8)
-            if let size = item.size {
-                Text(size.bytes)
-                    .font(NotchStyle.captionMedium.monospacedDigit())
-                    .foregroundStyle(NotchStyle.secondary)
-            }
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 6)

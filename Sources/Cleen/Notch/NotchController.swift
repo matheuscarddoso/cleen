@@ -93,7 +93,6 @@ final class NotchController {
         state.holdsOpen = false
         state.mirrorExpanded = false
         state.isEditingHome = false
-        state.showsAllTools = false
         if state.opensInstantly {
             withTransaction(Self.instant) { state.isOpen = false }
         } else {
@@ -251,8 +250,11 @@ final class NotchController {
         return panel.firstResponder is NSText
     }
 
+    /// How tall the dock under the open panel is, 0 when it isn't there.
+    private var dockHeight: Double { state.showsTabDock ? NotchGeometry.dockHeight : 0 }
+
     private var pointerIsInside: Bool {
-        state.geometry?.hotZone(isOpen: true, showsWings: NotchSettings.showsWings, height: state.panelHeight, dock: state.showsTabDock).contains(NSEvent.mouseLocation) ?? false
+        state.geometry?.hotZone(isOpen: true, showsWings: NotchSettings.showsWings, height: state.panelHeight, dockHeight: dockHeight).contains(NSEvent.mouseLocation) ?? false
     }
 
     /// Opens the panel on Ajustes.
@@ -326,7 +328,7 @@ final class NotchController {
         }
 
         if state.isOpen {
-            let inside = geometry.hotZone(isOpen: true, showsWings: wings, height: state.panelHeight, dock: state.showsTabDock).contains(location)
+            let inside = geometry.hotZone(isOpen: true, showsWings: wings, height: state.panelHeight, dockHeight: dockHeight).contains(location)
             // The window is taller than a short panel; its clear part lets clicks through
             // to the app below, as if the window ended where the panel does.
             if let panel, panel.ignoresMouseEvents == inside { panel.ignoresMouseEvents = !inside }
@@ -357,7 +359,7 @@ final class NotchController {
             return
         }
 
-        let overNotch = geometry.hotZone(isOpen: false, showsWings: wings).contains(location)
+        let overNotch = geometry.hotZone(isOpen: false, showsWings: wings, wings: state.closedWings).contains(location)
         if overNotch, event.type == .leftMouseDragged, isDraggingFiles {
             state.isDraggingFiles = true
             open(tab: .shelf)
@@ -413,7 +415,7 @@ final class NotchController {
         swipe.dy += event.scrollingDeltaY * flip
 
         if !state.isOpen {
-            guard geometry.hotZone(isOpen: false, showsWings: wings).insetBy(dx: -10, dy: -6).contains(location) else { return }
+            guard geometry.hotZone(isOpen: false, showsWings: wings, wings: state.closedWings).insetBy(dx: -10, dy: -6).contains(location) else { return }
             if swipe.dy < -Self.swipeThreshold, abs(swipe.dy) > abs(swipe.dx) {
                 swipeHandled = true
                 open()

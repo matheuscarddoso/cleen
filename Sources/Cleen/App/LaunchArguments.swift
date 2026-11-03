@@ -11,7 +11,7 @@ enum LaunchArguments {
     static let settingsSection = value(after: "--settings").flatMap(SettingsSection.init(rawValue:))
     static let scan = ProcessInfo.processInfo.arguments.contains("--scan")
     static let editHome = ProcessInfo.processInfo.arguments.contains("--edit")
-    /// `--tools` opens the dock's grid of every tool.
+    /// `--tools` expands the dock to every tool.
     static let allTools = ProcessInfo.processInfo.arguments.contains("--tools")
     /// `--welcome` shows the greeting the tour ends with.
     static let welcome = ProcessInfo.processInfo.arguments.contains("--welcome")

@@ -117,9 +117,23 @@ final class LiveActivityCenter {
         show(.notice(title: title, detail: detail, symbol: symbol))
     }
 
-    /// Called by the player when what's playing changes.
+    /// Called by the player when what's playing changes. A "playing" arrives only once
+    /// it's confirmed (by sound, or by a claim Core Audio can't check), so a tab whose
+    /// flag was left at playing is never announced, and a video that starts late is
+    /// announced when its sound does.
+    ///
+    /// Only a different item that is really playing is news: pause and resume, the
+    /// button's instant flip and the helper's heartbeats keep the same title and artist,
+    /// so they never bring the banner back. When playback stops, a song banner still up
+    /// goes away with it rather than announce something no longer playing.
     func trackChanged(_ track: NowPlayingTrack?) {
-        guard let track, track.isPlaying else { return }
+        guard let track, track.isPlaying else {
+            if case .track? = banner {
+                bannerTask?.cancel()
+                withAnimation(NotchStyle.liveExit) { banner = nil }
+            }
+            return
+        }
         let identity = "\(track.title)|\(track.artist)"
         defer { lastTrack = identity }
         // The first song after launch isn't news, and neither is pause/resume.

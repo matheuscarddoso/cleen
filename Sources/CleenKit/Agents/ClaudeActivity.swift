@@ -54,8 +54,8 @@ public struct ClaudeActivity: Sendable, Equatable {
     /// How many steps are kept (the newest).
     public static let kept = 8
 
-    /// Reads the turn from transcript lines in file order. A new prompt from the person
-    /// starts a new turn; subagents' own events (sidechains) are left out.
+    /// Reads the turn from transcript lines in file order. A new prompt starts a new
+    /// turn; subagents' own events (sidechains) are left out.
     static func read(_ objects: [[String: Any]]) -> ClaudeActivity {
         var steps: [ClaudeStep] = []
         var index: [String: Int] = [:]
@@ -67,12 +67,19 @@ public struct ClaudeActivity: Sendable, Equatable {
             else { continue }
             let time = (object["timestamp"] as? String).flatMap(parseDate)
             if type == "user" {
-                // A plain prompt (not a tool result) begins a new turn.
-                if message["content"] is String || (message["content"] as? [[String: Any]])?.contains(where: { $0["type"] as? String == "text" }) == true {
+                switch ClaudeSessionParser.userEvent(object) {
+                case .prompt:
+                    // A prompt begins a new turn.
                     steps.removeAll()
                     index.removeAll()
                     note = nil
                     continue
+                // An interruption, a slash command or hook context leaves the turn's
+                // steps where they were.
+                case .interruption, nil:
+                    continue
+                case .toolResult:
+                    break
                 }
                 for block in message["content"] as? [[String: Any]] ?? [] where block["type"] as? String == "tool_result" {
                     guard let id = block["tool_use_id"] as? String, let at = index[id] else { continue }

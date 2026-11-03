@@ -46,6 +46,9 @@ struct NotchSystemTab: View {
             )
         }
         .padding(.top, 4)
+        // Fill the tool's height, whatever size Aparência gives the panel: the history
+        // lines take what the readings leave, down to the tool's bottom inset.
+        .frame(maxHeight: .infinity, alignment: .top)
     }
 
     private var cpuStatus: String {
@@ -150,9 +153,9 @@ private struct StatGauge: View {
                 }
             }
             AreaLine(values: history, scale: scale, color: color)
-                .frame(height: 30)
+                .frame(minHeight: 30, maxHeight: .infinity)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 }
 
@@ -168,7 +171,7 @@ private struct AreaLine: View {
             if points.count > 1 {
                 ZStack(alignment: .topLeading) {
                     area(points, height: proxy.size.height)
-                        .fill(LinearGradient(colors: [color.opacity(0.28), color.opacity(0.02)], startPoint: .top, endPoint: .bottom))
+                        .fill(fill(peak: points.map(\.y).min() ?? 0, height: proxy.size.height))
                     line(points)
                         .stroke(color, style: StrokeStyle(lineWidth: 1.6, lineCap: .round, lineJoin: .round))
                     if let last = points.last {
@@ -184,6 +187,16 @@ private struct AreaLine: View {
             }
         }
         .animation(.smooth(duration: 0.5), value: values)
+    }
+
+    /// The fade runs from the line's peak to the bottom, not from the frame's top, so a
+    /// tall chart with a low line still starts at full tint and ends clear.
+    private func fill(peak: CGFloat, height: CGFloat) -> LinearGradient {
+        let start = height > 0 ? min(max(peak / height, 0), 1) : 0
+        return LinearGradient(
+            colors: [color.opacity(0.28), color.opacity(0)],
+            startPoint: UnitPoint(x: 0.5, y: start), endPoint: .bottom
+        )
     }
 
     private func points(in size: CGSize) -> [CGPoint] {

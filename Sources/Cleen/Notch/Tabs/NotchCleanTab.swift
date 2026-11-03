@@ -30,7 +30,7 @@ struct NotchCleanTab: View {
                 NotchSummaryBar(value: model.selectedSize.bytes, caption: caption) {
                     Button("Analisar de novo", action: model.startScan)
                         .buttonStyle(.notchSecondary)
-                    ConfirmingButton(title: String(localized: "Limpar"), isWorking: model.isCleaning, items: { model.reviewItems }, outcome: model.reviewOutcome, action: clean)
+                    NotchActionButton(title: String(localized: "Limpar"), isWorking: model.isCleaning, action: clean)
                         .disabled(model.selectedCount == 0)
                 }
                 if let report = model.report {

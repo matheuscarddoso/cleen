@@ -15,8 +15,9 @@ struct NotchGeometry: Equatable {
     static var openPanelSize: CGSize { NotchSettings.panelSize }
     /// Room around the open panel for its shadow; the window is this much larger.
     static let shadowPadding = 36.0
-    /// The tabs' dock under the open panel: its height and the gap above it.
-    static let dockHeight = 38.0
+    /// The tabs' dock under the open panel: its height (one row, folded or expanded; see
+    /// `NotchDockLayout`) and the gap above it.
+    static let dockHeight = NotchDockLayout.height
     static let dockGap = 8.0
     /// What the dock gave back to the panel: the tab bar inside it took 42 pt; the tool now
     /// keeps a 14 pt inset at the bottom instead.
@@ -48,7 +49,29 @@ struct NotchGeometry: Equatable {
     }
 
     func closedSize(wingWidth: Double) -> CGSize {
-        CGSize(width: notchSize.width + wingWidth * 2, height: notchSize.height)
+        closedSize(.symmetric(wingWidth))
+    }
+
+    func closedSize(_ wings: ClosedWings) -> CGSize {
+        CGSize(width: notchSize.width + wings.leading + wings.trailing, height: notchSize.height)
+    }
+
+    /// What a wing's content sits in from the notch's edges: the gap the artwork leaves
+    /// above and below it, used on every side so the content is equally far from the
+    /// bottom, the outer edge and the camera, and its corners are concentric with the
+    /// notch's (`closedBottomRadius - inset`).
+    static func wingInset(notchHeight: Double) -> Double {
+        (notchHeight - wingArtworkSize(notchHeight: notchHeight)) / 2
+    }
+
+    /// Artwork as large as the notch allows, up to 20 pt.
+    static func wingArtworkSize(notchHeight: Double) -> Double { min(20, notchHeight - 8) }
+
+    /// A wing just wide enough for `content`: the shoulder's curve, the inset, the
+    /// content and the inset again before the camera. No content, no wing.
+    func wingWidth(fitting content: Double) -> Double {
+        guard content > 0 else { return 0 }
+        return NotchStyle.closedTopRadius + Self.wingInset(notchHeight: notchSize.height) * 2 + content
     }
 
     var openSize: CGSize { openSize(.standard) }
@@ -111,13 +134,42 @@ struct NotchGeometry: Equatable {
         return CGRect(x: screenFrame.midX - width / 2, y: screenFrame.maxY - height, width: width, height: height)
     }
 
-    /// The area that reacts to the pointer, in global coordinates.
-    func hotZone(isOpen: Bool, showsWings: Bool, height: PanelHeight = .standard, dock: Bool = false) -> CGRect {
-        let size = isOpen ? openSize(height) : closedSize(showsWings: showsWings)
+    /// The area that reacts to the pointer, in global coordinates. `dockHeight` is the
+    /// dock's height when it shows (0 when it doesn't); `wings`, the closed notch's wings
+    /// as drawn (the default wing on both sides when not given).
+    func hotZone(isOpen: Bool, showsWings: Bool, height: PanelHeight = .standard, dockHeight: Double = 0, wings: ClosedWings? = nil) -> CGRect {
+        let closedWings = wings ?? .symmetric(showsWings ? Self.wingWidth : 0)
+        let size = isOpen ? openSize(height) : closedSize(closedWings)
         // The dock below counts as the panel: reaching for a tab never closes it.
-        let reach = isOpen && dock ? Self.dockGap + Self.dockHeight : 0
-        let rect = CGRect(x: screenFrame.midX - size.width / 2, y: screenFrame.maxY - size.height - reach, width: size.width, height: size.height + reach)
+        let reach = isOpen && dockHeight > 0 ? Self.dockGap + dockHeight : 0
+        // Closed, wings of different widths shift the notch off the camera's centre.
+        let shift = isOpen ? 0 : closedWings.offset
+        let rect = CGRect(x: screenFrame.midX - size.width / 2 + shift, y: screenFrame.maxY - size.height - reach, width: size.width, height: size.height + reach)
         // A little forgiveness: the closed notch is small, the open edge shouldn't be a cliff.
         return isOpen ? rect.insetBy(dx: -14, dy: -14) : rect.insetBy(dx: -6, dy: -3)
     }
+}
+
+/// How far the closed notch reaches past the camera on each side. Each wing is as wide as
+/// what it holds, so the two can differ: the notch then sits off-centre by `offset`.
+struct ClosedWings: Equatable {
+    var leading: Double
+    var trailing: Double
+
+    static let none = ClosedWings(leading: 0, trailing: 0)
+
+    static func symmetric(_ width: Double) -> ClosedWings { ClosedWings(leading: width, trailing: width) }
+
+    var isEmpty: Bool { leading <= 0 && trailing <= 0 }
+
+    /// How far the notch's centre moves right of the camera's.
+    var offset: Double { (trailing - leading) / 2 }
+}
+
+/// The closed wings' content as laid out, measured by `NotchWings`.
+struct WingContent: Equatable {
+    var leading = 0.0
+    var trailing = 0.0
+
+    var isMeasured: Bool { leading > 0 || trailing > 0 }
 }

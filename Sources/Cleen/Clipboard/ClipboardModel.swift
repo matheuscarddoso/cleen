@@ -39,9 +39,17 @@ final class ClipboardModel {
            let saved = try? JSONDecoder().decode(ClipboardLog.self, from: data) {
             log = saved
         }
-        // The newest images, decoded ahead so the tab opens on ready cards.
-        let images = log.entries.compactMap(\.imageFile).prefix(24).map { folder.appending(path: $0) }
-        Thumbnails.shared.prefetch(Array(images))
+        // The newest images, pasted or copied as files, decoded ahead so the tab opens
+        // on ready cards.
+        let folder = folder
+        let images = log.entries.lazy.compactMap { entry -> URL? in
+            switch entry.preview?.source {
+            case let .storedImage(fileName): folder.appending(path: fileName)
+            case let .imageFile(path): URL(filePath: path)
+            case .quickLook, nil: nil
+            }
+        }
+        Thumbnails.shared.prefetch(Array(images.prefix(24)))
     }
 
     var isEnabled: Bool { UserDefaults.standard.bool(forKey: Self.enabledKey) }

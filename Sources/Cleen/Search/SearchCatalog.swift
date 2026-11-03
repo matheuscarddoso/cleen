@@ -155,16 +155,8 @@ enum SearchCatalog {
                 return .close
             },
             item("emptyTrash", String(localized: "Esvaziar o Lixo"), "trash", ["empty trash", "lixeira", "lixo"]) {
-                let items = SystemCommands.trashItems
-                let rows = items.isEmpty
-                    ? [DeletionReview.Item(id: "trash", name: String(localized: "Tudo o que está no Lixo"), symbol: "trash")]
-                    : items.map { url in DeletionReview.Item(url: url, size: Int64((try? url.resourceValues(forKeys: [.totalFileAllocatedSizeKey]))?.totalFileAllocatedSize ?? 0), detail: String(localized: "Lixo")) }
-                return .review(DeletionReview(
-                    title: String(localized: "Esvaziar o Lixo?"),
-                    items: rows,
-                    outcome: .delete,
-                    confirm: { SystemCommands.emptyTrash() }
-                ))
+                SystemCommands.emptyTrash()
+                return .close
             },
         ]
     }
@@ -259,12 +251,8 @@ enum SearchCatalog {
                 return .close
             },
             SearchAction(String(localized: "Mover para o Lixo"), symbol: "trash", shortcut: "⌘⌫", isDestructive: true) {
-                .review(DeletionReview(
-                    title: DeletionReview.title(count: 1, outcome: .trash),
-                    items: [DeletionReview.Item(url: url, size: nil)],
-                    outcome: .trash,
-                    confirm: { NSWorkspace.shared.recycle([url]) }
-                ))
+                NSWorkspace.shared.recycle([url])
+                return .close
             },
         ]
         return SearchItem(id: "file.\(result.id)", title: result.name, subtitle: folder, icon: .file(url), kind: String(localized: "Arquivo"),

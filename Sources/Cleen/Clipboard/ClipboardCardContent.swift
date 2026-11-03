@@ -3,7 +3,6 @@ import CleenKit
 import SwiftUI
 
 struct ClipboardCardContent: View {
-    @Environment(ClipboardModel.self) private var model
     let entry: ClipboardEntry
 
     var body: some View {
@@ -19,14 +18,19 @@ struct ClipboardCardContent: View {
                 .foregroundStyle(Color(red: 0.45, green: 0.68, blue: 1))
                 .lineLimit(4)
         case .image:
-            if let url = model.imageURL(for: entry) {
-                ThumbnailImage(url: url, mode: .fill)
-                    .clipShape(.rect(cornerRadius: 6, style: .continuous))
+            if let preview = entry.preview {
+                ClipboardPreviewImage(entry: entry, preview: preview) {
+                    Image(systemName: "photo")
+                        .font(.system(size: 18))
+                        .foregroundStyle(NotchStyle.tertiary)
+                }
             }
         case .files:
-            VStack(alignment: .leading, spacing: 4) {
-                if let first = entry.files?.first {
-                    FileIcon(url: URL(filePath: first), size: 34)
+            VStack(alignment: .leading, spacing: 6) {
+                if let first = entry.files?.first, let preview = entry.preview {
+                    ClipboardPreviewImage(entry: entry, preview: preview) {
+                        FileIcon(url: URL(filePath: first), size: 34)
+                    }
                 }
                 Text(entry.title)
                     .font(.system(size: 10.5, weight: .medium))

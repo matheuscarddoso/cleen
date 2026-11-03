@@ -8,6 +8,9 @@ import SwiftUI
 struct NotchWings: View {
     let notchWidth: Double
     let notchHeight: Double
+    /// How wide each wing is drawn (`NotchRootView` sizes them from what this measures).
+    var wings = ClosedWings.symmetric(NotchGeometry.wingWidth)
+    @Environment(NotchState.self) private var state
     @Environment(SystemMonitor.self) private var monitor
     @Environment(JunkModel.self) private var junk
     @Environment(AppModel.self) private var app
@@ -45,26 +48,37 @@ struct NotchWings: View {
                 .id(banner)
                 .transition(.trackSwap)
         } else {
-            wings.transition(.opacity)
+            wingsRow.transition(.opacity)
         }
     }
 
-    private var wings: some View {
+    /// Each side is as wide as its wing and holds its content `inset` from the outer edge
+    /// and from the camera; the content's own width is measured and handed back, so the
+    /// wing fits it exactly.
+    private var wingsRow: some View {
         HStack(spacing: 0) {
-            HStack(spacing: 6) {
+            HStack(spacing: Self.spacing) {
                 // Claude first, even beside what's playing: it's what you're waiting on.
-                if showsClaude {
-                    ClaudeWingIndicator(isWorking: !agents.working.isEmpty, justFinished: agents.justFinished, needsApproval: !agents.approvals.isEmpty)
+                if let claude = agents.wing(showingSessions: showsAgents) {
+                    ClaudeWingIndicator(wing: claude)
                         .transition(.scale(scale: 0.5).combined(with: .opacity))
                 }
                 leading
             }
-                .frame(maxWidth: .infinity, alignment: .leading)
+                .fixedSize()
+                .onGeometryChange(for: Double.self, of: { $0.size.width }) { width in
+                    if state.wingContent.leading != width { state.wingContent.leading = width }
+                }
                 .padding(.leading, inset)
-            Spacer(minLength: notchWidth)
+                .frame(width: side(wings.leading), alignment: .leading)
+            Spacer(minLength: 0)
             trailing
-                .frame(maxWidth: .infinity, alignment: .trailing)
+                .fixedSize()
+                .onGeometryChange(for: Double.self, of: { $0.size.width }) { width in
+                    if state.wingContent.trailing != width { state.wingContent.trailing = width }
+                }
                 .padding(.trailing, inset)
+                .frame(width: side(wings.trailing), alignment: .trailing)
         }
         .frame(maxHeight: .infinity)
         .animation(NotchStyle.liveSpring, value: isPlaying)
@@ -77,12 +91,17 @@ struct NotchWings: View {
         .accessibilityLabel("Cleen")
     }
 
-    /// Artwork as large as the notch allows, up to 20 pt.
-    private var artworkSize: Double { min(20, notchHeight - 8) }
+    /// Between two things in one wing (Claude's mark and what's playing).
+    static let spacing = 6.0
+
+    private var artworkSize: Double { NotchGeometry.wingArtworkSize(notchHeight: notchHeight) }
 
     /// The gap the artwork leaves above and below; used on the sides too, so the
-    /// artwork sits equally far from the side and the bottom of the notch.
-    private var inset: Double { (notchHeight - artworkSize) / 2 }
+    /// artwork sits equally far from the side, the bottom and the camera.
+    private var inset: Double { NotchGeometry.wingInset(notchHeight: notchHeight) }
+
+    /// A wing's room inside the notch's shoulders (the root pads them off on both ends).
+    private func side(_ wing: Double) -> Double { max(0, wing - NotchStyle.closedTopRadius) }
 
     private var isPlaying: Bool { nowPlaying.track?.isPlaying == true }
 
@@ -90,11 +109,9 @@ struct NotchWings: View {
         junk.phase == .scanning || junk.isCleaning || app.isSmartScanning || app.isSmartCleaning
     }
 
-    /// A session working, or one that just finished (its check is still up). A request
-    /// waiting for permission always shows: it's holding a session up.
-    private var showsClaude: Bool {
-        showsAgents && (!agents.working.isEmpty || agents.justFinished) || !agents.approvals.isEmpty
-    }
+    /// A session working, waiting on the person, or one that just ended (its mark is
+    /// still up). A request waiting for permission always shows: it's holding a session up.
+    private var showsClaude: Bool { agents.wing(showingSessions: showsAgents) != nil }
 
     private var idleIndicator: LiveActivitySettings.Idle {
         LiveActivitySettings.Idle(rawValue: idle) ?? .disk
@@ -209,3 +226,4 @@ struct NotchWings: View {
         return value.formatted(.number.precision(.fractionLength(digits)).locale(.cleen)) + units[index]
     }
 }
+

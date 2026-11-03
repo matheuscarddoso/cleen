@@ -52,7 +52,6 @@ struct EditorTopBar: View {
     static let inset: CGFloat = 12.5
     static let height: CGFloat = 34 + inset * 2
     @Environment(EditorModel.self) private var editor
-    @State private var confirmsTrash = false
     @State private var showsShortcuts = false
     @State private var showsExport = false
 
@@ -61,16 +60,11 @@ struct EditorTopBar: View {
             Button { editor.revealInFinder() } label: { Image(systemName: "folder") }
                 .buttonStyle(EditorIconButtonStyle())
                 .help("Mostrar a gravação no Finder")
-            Button { confirmsTrash = true } label: { Image(systemName: "trash") }
+            Button {
+                if editor.moveToTrash() { NSApp.keyWindow?.close() }
+            } label: { Image(systemName: "trash") }
                 .buttonStyle(EditorIconButtonStyle())
                 .help("Apagar a gravação")
-                .confirmationDialog("Mover esta gravação para o Lixo?", isPresented: $confirmsTrash) {
-                    Button("Mover para o Lixo", role: .destructive) {
-                        if editor.moveToTrash() { NSApp.keyWindow?.close() }
-                    }
-                } message: {
-                    Text("Dá para trazer de volta pelo Lixo.")
-                }
             Spacer(minLength: 20)
             title
             Spacer(minLength: 20)

@@ -82,13 +82,6 @@ enum SystemCommands {
         }
     }
 
-    /// What's in the Lixo, for the review before emptying it. Reading it needs Full Disk
-    /// Access; without it the list is empty and the review says just "Lixo".
-    static var trashItems: [URL] {
-        let trash = URL.homeDirectory.appending(path: ".Trash")
-        return (try? FileManager.default.contentsOfDirectory(at: trash, includingPropertiesForKeys: [.totalFileAllocatedSizeKey], options: [])) ?? []
-    }
-
     /// Finder empties every volume's Lixo and deals with locked files itself.
     static func emptyTrash() {
         script("tell application \"Finder\" to empty trash")

@@ -10,10 +10,11 @@ import Observation
 @Observable
 final class AgentsModel {
     private(set) var sessions: [ClaudeSession] = []
-    /// A session just finished: the closed notch shows a check for a moment.
-    private(set) var justFinished = false
-    @ObservationIgnored private var finishedTask: Task<Void, Never>?
-    /// Told when a session finishes a turn and starts waiting for the person.
+    /// A busy session's turn just ended: the closed notch shows how for a moment.
+    private(set) var justEnded: TurnEnd?
+    @ObservationIgnored private var endedTask: Task<Void, Never>?
+    /// Told when a busy session stops and wants the person: its turn ended, it asks
+    /// something, or it hit an error.
     @ObservationIgnored var onFinished: (ClaudeSession) -> Void = { _ in }
     @ObservationIgnored private var loop: Task<Void, Never>?
     /// Agentes is on screen: the steps are read often enough to follow along.
@@ -23,12 +24,50 @@ final class AgentsModel {
     /// Busy sessions first, then the ones waiting, newest first within each.
     var working: [ClaudeSession] { sessions.filter(\.state.isBusy) }
 
+    /// Any Claude Code config on this Mac has sessions: `~/.claude`, a second one beside
+    /// it, or `$CLAUDE_CONFIG_DIR`.
     static var isClaudeCodeInstalled: Bool {
-        FileManager.default.fileExists(atPath: Paths.home.appending(path: ".claude/projects").path(percentEncoded: false))
+        !ClaudeSessionScanner.projectFolders(home: Paths.home, configDir: ProcessInfo.processInfo.environment["CLAUDE_CONFIG_DIR"]).isEmpty
+    }
+
+    /// How a session reads right now: a permission request waiting in the notch outranks
+    /// what its transcript says (a tool call that's out).
+    func status(of session: ClaudeSession) -> AgentStatus {
+        approvals.contains { $0.request.sessionID == session.id } ? .permission : .session(session.state)
+    }
+
+    /// How a turn that kept the person waiting ended, worth a glance on the closed notch.
+    enum TurnEnd: Equatable {
+        /// Claude finished: their turn.
+        case done
+        /// It stopped on an API error (a limit, an overload).
+        case failed
+    }
+
+    /// What Claude's glyph on the closed notch says, most pressing first.
+    enum Wing: Equatable {
+        /// A permission request waits in the notch.
+        case permission
+        /// A session asked a question or has a plan to review.
+        case question
+        case working
+        case ended(TurnEnd)
+    }
+
+    /// The glyph to show, if any. `showingSessions` is the person's switch for Claude in
+    /// the live activities; a permission request shows regardless, since it holds a
+    /// session up until it's answered here.
+    func wing(showingSessions: Bool) -> Wing? {
+        if !approvals.isEmpty { return .permission }
+        guard showingSessions else { return nil }
+        // A question stays up until it's answered: it isn't a moment's news like an end.
+        if sessions.contains(where: \.state.needsAnswer) { return .question }
+        if !working.isEmpty { return .working }
+        return justEnded.map(Wing.ended)
     }
 
     /// A finished session's check, for checking the UI (`--live agent`).
-    func previewFinished() { showFinished() }
+    func previewFinished() { showEnded(.done) }
 
     func start() {
         Task { await refreshHook() }
@@ -49,19 +88,30 @@ final class AgentsModel {
         let found = await offMain { scanner.scan() }
         let before = Dictionary(uniqueKeysWithValues: sessions.map { ($0.id, $0.state) })
         if found != sessions { sessions = found }
-        let finished = found.filter { $0.state == .waiting && before[$0.id]?.isBusy == true }
-        for session in finished { onFinished(session) }
-        if !finished.isEmpty, working.isEmpty { showFinished() }
+        // A busy session whose turn ended, that asks something or broke wants the person;
+        // one they interrupted themselves doesn't.
+        let landed = found.filter { $0.state.callsForThePerson && before[$0.id]?.isBusy == true }
+        for session in landed { onFinished(session) }
+        // Only an end flashes, and an error never as a check. A question or a plan has
+        // the wing's needs-you pulse for as long as it waits instead.
+        let end: TurnEnd? = if landed.contains(where: { $0.state == .failed }) {
+            .failed
+        } else if landed.contains(where: { $0.state == .waiting }) {
+            .done
+        } else {
+            nil
+        }
+        if let end, working.isEmpty { showEnded(end) }
     }
 
-    /// The check stays long enough to be seen, then goes.
-    private func showFinished() {
-        finishedTask?.cancel()
-        justFinished = true
-        finishedTask = Task { [weak self] in
+    /// The mark stays long enough to be seen, then goes.
+    private func showEnded(_ end: TurnEnd) {
+        endedTask?.cancel()
+        justEnded = end
+        endedTask = Task { [weak self] in
             try? await Task.sleep(for: .seconds(2.6))
             guard !Task.isCancelled else { return }
-            self?.justFinished = false
+            self?.justEnded = nil
         }
     }
 

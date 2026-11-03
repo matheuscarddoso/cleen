@@ -1,6 +1,7 @@
 import CleenKit
 import AppKit
 import Observation
+import os
 
 /// Every screenshot, however it was taken: files from the screenshot shortcuts and the
 /// Screenshot app (see `ScreenshotFolderWatcher`), and clipboard-only captures (the ⌃
@@ -12,6 +13,9 @@ final class ScreenshotModel {
     /// Set once Cleen has replaced the native thumbnail, so it only happens on install.
     private static let tookOverThumbnailKey = "screenshotTookOverThumbnail"
 
+    /// What happens to each capture, for Console (`subsystem:app.cleen.Cleen category:screenshots`).
+    static let log = Logger(subsystem: "app.cleen.Cleen", category: "screenshots")
+
     private(set) var items: [Screenshot] = []
     var selectedID: URL?
     /// Called for each new capture, so the notch can open on it.
@@ -22,6 +26,14 @@ final class ScreenshotModel {
     /// running; it must not come back as a "clipboard screenshot".
     @ObservationIgnored private var ignoreClipboardUntil = Date.distantPast
     @ObservationIgnored private var known = Set<URL>()
+    /// Files of one capture still arriving (⌘⇧3 writes one per display, a few ms apart),
+    /// and the moment that settles them.
+    @ObservationIgnored private var landing: [ScreenshotFolderWatcher.Capture] = []
+    @ObservationIgnored private var landingTask: Task<Void, Never>?
+    /// Their decoding, started as each lands so it's done by the time one is picked.
+    @ObservationIgnored private var landingDecodes: [URL: Task<Void, Never>] = [:]
+    /// How long the files of one capture take to land, all of them.
+    private static let landingWindow = Duration.milliseconds(150)
     @ObservationIgnored private let clipboardFolder = URL.applicationSupportDirectory.appending(path: "app.cleen.Cleen/Screenshots", directoryHint: .isDirectory)
 
     init() {
@@ -62,9 +74,16 @@ final class ScreenshotModel {
     func start() {
         guard watcher == nil else { return }
         Task { await takeOverThumbnailOnFirstRun() }
-        let watcher = ScreenshotFolderWatcher { [weak self] in
-            Task { @MainActor in self?.reload(announcing: true) }
-        }
+        let watcher = ScreenshotFolderWatcher(
+            onCaptures: { [weak self] captures in
+                Task { @MainActor in self?.arrived(captures) }
+            },
+            // The full listing that follows: files that went away, and anything the
+            // quick path missed (announced only if it's new and recent).
+            onChange: { [weak self] in
+                Task { @MainActor in self?.reload(announcing: true) }
+            }
+        )
         self.watcher = watcher
         watcher.start()
         reload(announcing: false)
@@ -92,6 +111,45 @@ final class ScreenshotModel {
         announce(newest)
     }
 
+    /// Captures that just landed, straight from the watcher: listed at once. The files of
+    /// one capture land a few milliseconds apart, so the notch waits for all of them, picks
+    /// the one for the display it opens on, decodes it, and only then opens on it.
+    private func arrived(_ captures: [ScreenshotFolderWatcher.Capture]) {
+        let fresh = captures.filter { !known.contains($0.url) }
+        Self.log.info("landed \(captures.count) file(s), \(fresh.count) new")
+        guard !fresh.isEmpty else { return }
+        known.formUnion(fresh.map(\.url))
+        let shots = fresh.map { Screenshot(url: $0.url, date: $0.date, fromClipboard: false) }
+        items = Array((shots + items).sorted { $0.date > $1.date }.prefix(40))
+        landing += fresh
+        for capture in fresh {
+            landingDecodes[capture.url] = Task { await Thumbnails.shared.prepare(capture.url) }
+        }
+        landingTask?.cancel()
+        landingTask = Task { [weak self] in
+            try? await Task.sleep(for: Self.landingWindow)
+            guard !Task.isCancelled, let self else { return }
+            let captures = landing
+            let decodes = landingDecodes
+            landing = []
+            landingDecodes = [:]
+            let shown = captures[Self.indexForPointerScreen(captures)]
+            await decodes[shown.url]?.value
+            announce(Screenshot(url: shown.url, date: shown.date, fromClipboard: false))
+        }
+    }
+
+    /// The capture of the display under the pointer, where the notch opens (⌘⇧3 writes one
+    /// file per display); the newest when that can't be told.
+    private static func indexForPointerScreen(_ captures: [ScreenshotFolderWatcher.Capture]) -> Int {
+        guard captures.count > 1,
+              let main = NSScreen.screens.first,
+              let screen = NSScreen.screens.first(where: { $0.frame.contains(NSEvent.mouseLocation) }) ?? NSScreen.main
+        else { return 0 }
+        let display = ScreenCapturePicker.globalRect(ofScreenFrame: screen.frame, mainScreenHeight: main.frame.height)
+        return ScreenCapturePicker.index(for: display, among: captures.map(\.rect)) ?? 0
+    }
+
     /// A capture that only went to the clipboard; saved so it can be shared or AirDropped.
     func addClipboardCapture(_ png: Data) {
         guard Date.now > ignoreClipboardUntil else { return }
@@ -102,11 +160,15 @@ final class ScreenshotModel {
         let shot = Screenshot(url: url, date: .now, fromClipboard: true)
         known.insert(url)
         items.insert(shot, at: 0)
-        Thumbnails.shared.prefetch([url])
-        announce(shot)
+        Task {
+            await Thumbnails.shared.prepare(url)
+            announce(shot)
+        }
     }
 
     private func announce(_ shot: Screenshot) {
+        let opens = UserDefaults.standard.bool(forKey: Self.opensNotchKey)
+        Self.log.info("announcing \(shot.url.lastPathComponent, privacy: .private), opens the notch: \(opens)")
         selectedID = shot.id
         if !shot.fromClipboard, UserDefaults.standard.bool(forKey: Self.copiesOnCaptureKey) {
             copy(shot)

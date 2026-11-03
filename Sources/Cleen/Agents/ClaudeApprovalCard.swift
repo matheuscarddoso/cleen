@@ -157,9 +157,12 @@ private struct ApprovalCountdown: View {
 }
 
 /// Claude's mark on the closed notch with a ring going out from it: a session is
-/// waiting for permission. Holds still under Reduce Motion.
+/// waiting on the person (a permission, a question, a plan). Holds still under Reduce
+/// Motion.
 struct ClaudeApprovalPulse: View {
     var size = 14.0
+    /// What it waits for, for VoiceOver.
+    let label: LocalizedStringKey
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
@@ -179,6 +182,6 @@ struct ClaudeApprovalPulse: View {
         }
         .frame(width: size + 2, height: size + 2)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Claude pede permissão")
+        .accessibilityLabel(label)
     }
 }

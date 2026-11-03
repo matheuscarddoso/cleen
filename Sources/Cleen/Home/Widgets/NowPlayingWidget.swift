@@ -17,7 +17,7 @@ struct NowPlayingWidget: View {
                     NowPlayingArtwork(image: model.artwork, appURL: model.appURL, isIcon: model.artworkIsIcon, side: 50)
                         .frame(width: 50, height: 50)
                     VStack(alignment: .leading, spacing: 1) {
-                        Text(model.track?.title ?? String(localized: "Nada tocando"))
+                        MarqueeText(text: model.track?.title ?? String(localized: "Nada tocando"))
                             .font(.system(size: 13, weight: .semibold))
                         Text(model.track.map { $0.artist.isEmpty ? (model.appName ?? "") : $0.artist } ?? String(localized: "Toque algo em qualquer app"))
                             .font(.system(size: 12, weight: .medium))

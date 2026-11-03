@@ -181,37 +181,86 @@ private struct AgentSessionView: View {
     }
 }
 
-/// The last three steps: done ones checked, the running one playing in orange. New steps
-/// rise in from below, old ones drift out at the top.
+/// The last three steps: done ones checked, the running one playing in orange, one
+/// held up on the person flagged. New steps rise in from below, old ones drift out at
+/// the top.
 private struct AgentStepList: View {
     let session: ClaudeSession
+    @Environment(AgentsModel.self) private var agents
 
     var body: some View {
         let steps = Array(session.activity.steps.suffix(3))
+        let status = agents.status(of: session)
         VStack(alignment: .leading, spacing: 7) {
             if steps.isEmpty {
-                row(symbol: session.state.isBusy ? "play.fill" : "checkmark", color: session.state.isBusy ? AgentPalette.orange : NotchStyle.primary,
-                    title: session.state.isBusy ? String(localized: "Pensando…") : String(localized: "Pronto"))
+                row(symbol: Self.symbol(of: status.tone), color: Self.color(of: status.tone), title: status.title)
                     .transition(.agentStep)
             }
             ForEach(steps) { step in
-                let running = !step.isDone && session.state.isBusy
-                row(symbol: running ? "play.fill" : "checkmark", color: running ? AgentPalette.orange : NotchStyle.primary, title: AgentStepText.title(of: step))
+                stepRow(step, status: status)
                     .transition(.agentStep)
             }
-            if session.state == .thinking, steps.last?.isDone == true {
-                row(symbol: "play.fill", color: AgentPalette.orange, title: String(localized: "Pensando…"))
+            // Past the last step: Claude thinking it over, background work, or how the
+            // turn ended when that isn't plain.
+            if let last = steps.last, last.isDone, Self.showsAfterSteps(status) {
+                row(symbol: Self.symbol(of: status.tone), color: Self.color(of: status.tone), title: status.title)
                     .transition(.agentStep)
             }
         }
         .animation(.spring(response: 0.48, dampingFraction: 0.84), value: steps.map(\.id))
-        .animation(.spring(response: 0.48, dampingFraction: 0.84), value: session.state)
+        .animation(.spring(response: 0.48, dampingFraction: 0.84), value: status)
+    }
+
+    @ViewBuilder
+    private func stepRow(_ step: ClaudeStep, status: AgentStatus) -> some View {
+        if step.isDone {
+            row(symbol: "checkmark", color: NotchStyle.primary, title: AgentStepText.title(of: step))
+        } else {
+            switch status.tone {
+            case .busy:
+                row(symbol: "play.fill", color: AgentPalette.orange, title: AgentStepText.title(of: step))
+            // A question or a plan is the step itself: say what it waits for, not the
+            // tool's name. A permission keeps the step's own words (the command it's for).
+            case .needsYou:
+                let title = status == .permission ? AgentStepText.title(of: step) : status.title
+                row(symbol: Self.symbol(of: .needsYou), color: Self.color(of: .needsYou), title: title)
+            case .yourTurn, .stopped, .failed:
+                row(symbol: "checkmark", color: NotchStyle.primary, title: AgentStepText.title(of: step))
+            }
+        }
+    }
+
+    private static func showsAfterSteps(_ status: AgentStatus) -> Bool {
+        switch status {
+        case .session(.thinking), .session(.delegating), .session(.interrupted), .session(.failed): true
+        default: false
+        }
+    }
+
+    private static func symbol(of tone: AgentStatus.Tone) -> String {
+        switch tone {
+        case .busy: "play.fill"
+        case .needsYou: "hand.raised.fill"
+        case .yourTurn: "checkmark"
+        case .stopped: "stop.fill"
+        case .failed: "exclamationmark.triangle.fill"
+        }
+    }
+
+    private static func color(of tone: AgentStatus.Tone) -> Color {
+        switch tone {
+        case .busy: AgentPalette.orange
+        case .needsYou: NotchStyle.warning
+        case .yourTurn: NotchStyle.primary
+        case .stopped: NotchStyle.secondary
+        case .failed: NotchStyle.critical
+        }
     }
 
     private func row(symbol: String, color: Color, title: String) -> some View {
         HStack(spacing: 8) {
             Image(systemName: symbol)
-                .font(.system(size: symbol == "play.fill" ? 9 : 10.5, weight: .bold))
+                .font(.system(size: symbol == "play.fill" || symbol == "stop.fill" ? 9 : 10.5, weight: .bold))
                 .foregroundStyle(color)
                 .frame(width: 12)
                 .contentTransition(.symbolEffect(.replace))
@@ -228,11 +277,15 @@ private struct AgentStepList: View {
 /// +/−, a command and its running seconds, or the sentence Claude is on.
 private struct AgentStepCard: View {
     let session: ClaudeSession
+    @Environment(AgentsModel.self) private var agents
 
     var body: some View {
         let current = session.activity.steps.last
+        // A step held up on a permission is still the step to show: its command or file
+        // is what the person is asked about.
+        let live = session.state.isBusy || agents.status(of: session) == .permission
         ZStack {
-            if let current, session.state.isBusy, !current.isDone {
+            if let current, live, !current.isDone {
                 detail(current).id(current.id).transition(.toolSwap)
             } else {
                 note.id("note-\(session.activity.note ?? "")").transition(.toolSwap)
@@ -255,7 +308,9 @@ private struct AgentStepCard: View {
     }
 
     private var noteText: some View {
-        let text = session.activity.note ?? String(localized: "Pronto. Esperando você.")
+        let status = agents.status(of: session)
+        // The label beside it says "Sua vez": the card says the same, with the news first.
+        let text = session.activity.note ?? (status == .session(.waiting) ? String(localized: "Pronto. Sua vez.") : status.title)
         return Text(text)
             .font(.system(size: 12, weight: .medium))
             .foregroundStyle(NotchStyle.primary)

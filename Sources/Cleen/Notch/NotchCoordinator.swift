@@ -57,7 +57,9 @@ final class NotchCoordinator {
     /// few seconds even if the pointer is elsewhere.
     func present(tab: NotchTab) {
         guard !isSuspended else { return }
-        (controllerUnderPointer ?? primary)?.present(tab: tab)
+        let controller = controllerUnderPointer ?? primary
+        ScreenshotModel.log.info("presenting \(tab.rawValue) on \(controller?.screen.localizedName ?? "no screen", privacy: .public)")
+        controller?.present(tab: tab)
     }
 
     func presentRequest(tab: NotchTab) {

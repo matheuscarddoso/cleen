@@ -13,10 +13,13 @@ final class NotchState {
                 mirrorExpanded = false
                 isEditingHome = false
             }
-            // Picking a tool (from the grid, the dock, the search) leaves the grid.
-            showsAllTools = false
         }
     }
+    /// What the closed notch's wings hold, measured as laid out: each wing is drawn just
+    /// wide enough for it.
+    var wingContent = WingContent()
+    /// The closed notch's wings as drawn, for the pointer's hot zone.
+    var closedWings = ClosedWings.none
     /// The home tab's mirror grown to fill the panel.
     var mirrorExpanded = false
     /// Início is being rearranged: widgets go inert and show their edit controls.
@@ -25,8 +28,6 @@ final class NotchState {
     }
     /// The panel shows Ajustes instead of a tool.
     var showsSettings = false
-    /// The dock's grid: every tool, to pick one (Droppy's third button).
-    var showsAllTools = false
     /// The small "hello" island right after the first-run tour.
     var showsWelcome = false
     /// The panel shows the launcher (⌥Space) instead of a tool.
@@ -37,8 +38,8 @@ final class NotchState {
     /// right then (asking before the window is key does nothing).
     var searchFocusRequest = 0
     /// The panel grows tall, like a launcher: the search, Emoji's grid, Ajustes, and the
-    /// review of something about to be deleted.
-    var isTall: Bool { isOpen && !showsWelcome && (showsSearch || showsSettings || deletionReview != nil || showsAllTools || tab == .emoji) }
+    /// review of something that can't be taken back.
+    var isTall: Bool { isOpen && !showsWelcome && (showsSearch || showsSettings || deletionReview != nil || tab == .emoji) }
 
     /// The tabs' dock floats under the open panel, except where a tool takes the whole
     /// panel (the wide mirror, Início's edit mode, the teleprompter reading) and over the
@@ -66,12 +67,13 @@ final class NotchState {
         return .standard
     }
 
-    /// Something is about to be deleted: the panel lists it and waits for Confirmar.
+    /// Something that can't be taken back (restart, quit every app): the panel lists what
+    /// it touches and waits for Confirmar.
     private(set) var deletionReview: DeletionReview?
     /// Whether the panel was held open before the review took over.
     @ObservationIgnored private var heldBeforeReview = false
 
-    /// Grows the panel into the review; nothing is deleted until it's confirmed.
+    /// Grows the panel into the review; nothing runs until it's confirmed.
     func review(_ review: DeletionReview) {
         if deletionReview == nil { heldBeforeReview = holdsOpen }
         holdsOpen = true

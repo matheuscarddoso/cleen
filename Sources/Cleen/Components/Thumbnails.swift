@@ -61,6 +61,13 @@ nonisolated final class Thumbnails: @unchecked Sendable {
         }
     }
 
+    /// Decodes one file now, at the size every preview needs, and waits for it: a new
+    /// screenshot is ready before the panel that shows it opens.
+    func prepare(_ url: URL) async {
+        guard cache.object(forKey: url.path as NSString) == nil else { return }
+        _ = await offMain { self.decode(url) { _ in Self.prefetchPixels } }
+    }
+
     /// Decodes ahead of time, so the first look at a tab finds them ready.
     func prefetch(_ urls: [URL]) {
         let pending = urls.filter { cache.object(forKey: $0.path as NSString) == nil }
