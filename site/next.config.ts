@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const config: NextConfig = {
+  // Self-contained server the platform ships as a container image.
+  output: "standalone",
   poweredByHeader: false,
   images: { formats: ["image/avif", "image/webp"] },
   async headers() {
