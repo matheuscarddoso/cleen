@@ -94,7 +94,7 @@ final class ScreenshotModel {
     private func reload(announcing: Bool) {
         let since = Date.now.addingTimeInterval(-7 * 86_400)
         Task {
-            let found = await offMain { ScreenshotFolderWatcher.captures(since: since) }
+            let found = await ScreenshotFolderWatcher.captures(since: since)
             apply(found, announcing: announcing)
         }
     }
@@ -178,12 +178,21 @@ final class ScreenshotModel {
 
     // MARK: Actions
 
+    /// A still goes as the image and its file; a recording as its file, which is what a
+    /// paste into Messages, WhatsApp, Slack, Mail or Finder takes as the video.
     func copy(_ shot: Screenshot) {
-        guard let image = NSImage(contentsOf: shot.url) else { return }
+        let objects: [any NSPasteboardWriting]
+        if shot.isRecording {
+            guard FileManager.default.fileExists(atPath: shot.url.path(percentEncoded: false)) else { return }
+            objects = [shot.url as NSURL]
+        } else {
+            guard let image = NSImage(contentsOf: shot.url) else { return }
+            objects = [image, shot.url as NSURL]
+        }
         ignoreClipboardUntil = .now.addingTimeInterval(5)
         let pasteboard = NSPasteboard.general
         pasteboard.clearContents()
-        pasteboard.writeObjects([image, shot.url as NSURL])
+        pasteboard.writeObjects(objects)
     }
 
     func airDrop(_ shot: Screenshot) {

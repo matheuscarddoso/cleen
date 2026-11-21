@@ -1,7 +1,10 @@
 import AppKit
+import AVFoundation
+import CleenKit
 import ImageIO
 
-/// Screenshots and copied images decoded at the size they're drawn, off the main thread.
+/// Screenshots, screen recordings and copied images decoded at the size they're drawn,
+/// off the main thread. A recording is shown by one of its frames.
 ///
 /// Captures are full Retina PNGs (3000 px and up). Handing one to a 66 pt tile made the
 /// main thread decode all of it during the tab switch, once per image. ImageIO scales
@@ -56,16 +59,15 @@ nonisolated final class Thumbnails: @unchecked Sendable {
 
     func load(_ url: URL, size: CGSize, mode: Mode) async -> NSImage? {
         if let hit = cached(url, size: size, mode: mode) { return hit }
-        return await offMain {
-            self.decode(url) { source in Self.pixels(for: source, in: size, mode: mode, scale: self.scale) }
-        }
+        let scale = scale
+        return await image(of: url) { source in Self.pixels(for: source, in: size, mode: mode, scale: scale) }
     }
 
     /// Decodes one file now, at the size every preview needs, and waits for it: a new
     /// screenshot is ready before the panel that shows it opens.
     func prepare(_ url: URL) async {
         guard cache.object(forKey: url.path as NSString) == nil else { return }
-        _ = await offMain { self.decode(url) { _ in Self.prefetchPixels } }
+        _ = await image(of: url) { _ in Self.prefetchPixels }
     }
 
     /// Decodes ahead of time, so the first look at a tab finds them ready.
@@ -74,12 +76,43 @@ nonisolated final class Thumbnails: @unchecked Sendable {
         guard !pending.isEmpty else { return }
         Task.detached(priority: .utility) {
             for url in pending {
-                _ = await offMain { self.decode(url) { _ in Self.prefetchPixels } }
+                _ = await self.image(of: url) { _ in Self.prefetchPixels }
             }
         }
     }
 
     // MARK: Decoding
+
+    /// A still through ImageIO on a background queue; a recording's frame through
+    /// AVFoundation, which decodes on its own.
+    private func image(of url: URL, pixels wanted: @escaping @Sendable (CGSize) -> CGFloat) async -> NSImage? {
+        if ScreenCaptureMarker.isMovie(url) { return await frame(of: url, pixels: wanted) }
+        return await offMain { self.decode(url, pixels: wanted) }
+    }
+
+    /// A frame half a second in (or halfway through a shorter clip), at the size asked for.
+    @concurrent private func frame(of url: URL, pixels wanted: @Sendable (CGSize) -> CGFloat) async -> NSImage? {
+        let cacheKey = url.path as NSString
+        let asset = AVURLAsset(url: url)
+        guard let track = try? await asset.loadTracks(withMediaType: .video).first,
+              let (natural, transform) = try? await track.load(.naturalSize, .preferredTransform)
+        else { return nil }
+        let oriented = natural.applying(transform)
+        let sourceSize = CGSize(width: abs(oriented.width), height: abs(oriented.height))
+        guard sourceSize.width > 0, sourceSize.height > 0 else { return nil }
+        let target = min(max(sourceSize.width, sourceSize.height), wanted(sourceSize))
+        if let entry = cache.object(forKey: cacheKey), entry.pixels >= target { return entry.image }
+        let generator = AVAssetImageGenerator(asset: asset)
+        generator.appliesPreferredTrackTransform = true
+        generator.maximumSize = CGSize(width: target, height: target)
+        let seconds = (try? await asset.load(.duration)).map(CMTimeGetSeconds) ?? 0
+        let time = CMTime(seconds: min(0.5, max(0, seconds) / 2), preferredTimescale: 600)
+        guard let (cgImage, _) = try? await generator.image(at: time) else { return nil }
+        let image = NSImage(cgImage: cgImage, size: CGSize(width: cgImage.width, height: cgImage.height))
+        let entry = Entry(image: image, pixels: CGFloat(max(cgImage.width, cgImage.height)), sourceSize: sourceSize)
+        cache.setObject(entry, forKey: cacheKey, cost: cgImage.bytesPerRow * cgImage.height)
+        return image
+    }
 
     private func decode(_ url: URL, pixels wanted: (CGSize) -> CGFloat) -> NSImage? {
         let cacheKey = url.path as NSString

@@ -14,6 +14,9 @@ struct ScreenshotStrip: View {
                             ThumbnailImage(url: shot.url, mode: .fill)
                         }
                         .frame(height: 42)
+                        .overlay(alignment: .bottomLeading) {
+                            if shot.isRecording { RecordingBadge(url: shot.url, showsDuration: false) }
+                        }
                         .clipShape(.rect(cornerRadius: 6, style: .continuous))
                         .overlay {
                             RoundedRectangle(cornerRadius: 6, style: .continuous)

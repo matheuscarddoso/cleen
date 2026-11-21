@@ -2,11 +2,16 @@ import CleenKit
 import Darwin
 import Foundation
 
-/// Watches the folders macOS saves screenshots to and reports the captures in them.
+/// Watches the folders macOS saves screenshots and screen recordings to and reports the
+/// captures in them.
 ///
 /// A capture is recognized by the `com.apple.metadata:kMDItemIsScreenCapture` attribute
-/// the screenshot service writes on the file itself, so it works the instant the file
-/// lands — Spotlight can take minutes to index it, or stall on a full disk.
+/// the screenshot service writes on the file, without waiting for Spotlight to index it
+/// (that can take minutes, or stall on a full disk). The attribute is written through
+/// Spotlight's metadata service, though, and never arrives while the volume's index is
+/// broken; a new file it hasn't reached shortly after landing is recognized by the mark
+/// the service writes inside the file itself (`ScreenCaptureMarker`). A recording lands
+/// in one piece once it's stopped, so its mark can be read as soon as its name appears.
 ///
 /// New captures are found without rescanning the folder: on each change only the names
 /// that weren't there a moment ago are looked at, so a capture is reported within a few
@@ -21,17 +26,35 @@ nonisolated final class ScreenshotFolderWatcher: @unchecked Sendable {
         let rect: CGRect?
     }
 
-    private static let extensions: Set<String> = ["png", "jpg", "jpeg", "heic", "tiff", "pdf"]
+    /// Screenshots in any format the Screenshot app saves, and its recordings.
+    private static let extensions: Set<String> = ["png", "jpg", "jpeg", "heic", "tiff", "pdf", "mov", "mp4"]
     /// How long a new file is watched for the screenshot tag, and how often.
     private static let tagWait = 4.0
     private static let tagPoll = 0.05
+    /// How long the tag gets before the image's own marker is read instead. The tag
+    /// arrives about 0.1 s after the file and carries the area each file covers, which
+    /// picks the right display's file of a ⌘⇧3; the marker doesn't.
+    private static let tagGrace = 0.3
+
+    /// A new image or movie not recognized yet. Confined to `queue`.
+    private struct Pending {
+        /// When to stop waiting for the tag and read the marker.
+        let markerAt: Date
+        /// When to give up on it.
+        let deadline: Date
+        /// A movie's marker is being read (AVFoundation answers asynchronously); it isn't
+        /// given up on until the answer is in.
+        var markerReading = false
+        /// The marker was read and isn't there: only the tag can still make it a capture.
+        var markerAbsent = false
+    }
 
     private let queue = DispatchQueue(label: "app.cleen.screenshots", qos: .userInitiated)
     private var sources: [DispatchSourceFileSystemObject] = []
     /// Each folder's names as last seen. Confined to `queue`.
     private var names: [URL: Set<String>] = [:]
-    /// New image files not tagged yet, with when to give up on them. Confined to `queue`.
-    private var untagged: [URL: Date] = [:]
+    /// New files not recognized yet. Confined to `queue`.
+    private var untagged: [URL: Pending] = [:]
     private var polling = false
     private var pendingSync: DispatchWorkItem?
     private let onCaptures: @Sendable ([Capture]) -> Void
@@ -81,23 +104,39 @@ nonisolated final class ScreenshotFolderWatcher: @unchecked Sendable {
         names[folder] = now
         // The service writes a hidden temporary file and renames it: only the final,
         // visible name is the capture.
+        let landed = Date.now
         for name in added where !name.hasPrefix(".") && Self.extensions.contains((name as NSString).pathExtension.lowercased()) {
-            untagged[folder.appending(path: name)] = .now.addingTimeInterval(Self.tagWait)
+            untagged[folder.appending(path: name)] = Pending(markerAt: landed.addingTimeInterval(Self.tagGrace), deadline: landed.addingTimeInterval(Self.tagWait))
         }
         checkUntagged()
         scheduleSync()
     }
 
-    /// Reports the new files that carry the tag now; the rest are looked at again shortly,
-    /// until they're tagged or it's clear they're not captures.
+    /// Reports the new files that are captures now: tagged, or past the grace and carrying
+    /// the marker. The rest are looked at again shortly, until they're recognized or it's
+    /// clear they're not captures.
     private func checkUntagged() {
         var found: [Capture] = []
-        for (url, deadline) in untagged {
-            if Self.isScreenCapture(url) {
+        let now = Date.now
+        for (url, pending) in untagged {
+            if Self.isTaggedScreenCapture(url) {
                 untagged[url] = nil
-                found.append(Capture(url: url, date: Self.creationDate(url) ?? .now, rect: Self.captureRect(url)))
-            } else if deadline < .now || !FileManager.default.fileExists(atPath: url.path(percentEncoded: false)) {
+                found.append(Capture(url: url, date: Self.creationDate(url) ?? now, rect: Self.captureRect(url)))
+            } else if (pending.deadline < now && !pending.markerReading) || !FileManager.default.fileExists(atPath: url.path(percentEncoded: false)) {
                 untagged[url] = nil
+            } else if now >= pending.markerAt, !pending.markerAbsent, !pending.markerReading {
+                if ScreenCaptureMarker.isMovie(url) {
+                    untagged[url]?.markerReading = true
+                    Task { [weak self] in
+                        let present = await ScreenCaptureMarker.isPresent(inMovieAt: url)
+                        self?.queue.async { self?.markerRead(url, present: present) }
+                    }
+                } else if ScreenCaptureMarker.isPresent(inImageAt: url) {
+                    untagged[url] = nil
+                    found.append(Capture(url: url, date: Self.creationDate(url) ?? now, rect: nil))
+                } else {
+                    untagged[url]?.markerAbsent = true
+                }
             }
         }
         if !found.isEmpty { onCaptures(found.sorted { $0.date > $1.date }) }
@@ -107,6 +146,19 @@ nonisolated final class ScreenshotFolderWatcher: @unchecked Sendable {
             guard let self else { return }
             polling = false
             checkUntagged()
+        }
+    }
+
+    /// A movie's marker, read: a recording is reported, anything else waits out the tag.
+    /// The tag may have come (or the file gone) while it was being read.
+    private func markerRead(_ url: URL, present: Bool) {
+        guard untagged[url] != nil else { return }
+        if present {
+            untagged[url] = nil
+            onCaptures([Capture(url: url, date: Self.creationDate(url) ?? .now, rect: nil)])
+        } else {
+            untagged[url]?.markerReading = false
+            untagged[url]?.markerAbsent = true
         }
     }
 
@@ -120,24 +172,38 @@ nonisolated final class ScreenshotFolderWatcher: @unchecked Sendable {
 
     // MARK: Reading files
 
-    /// Screenshots in the watched folders taken after `since`, newest first.
-    static func captures(since: Date) -> [(url: URL, date: Date)] {
+    /// Screenshots and recordings in the watched folders taken after `since`, newest
+    /// first. Blocking file IO (the Desktop can hold thousands of files), so it runs off
+    /// the main thread.
+    @concurrent static func captures(since: Date) async -> [(url: URL, date: Date)] {
         let keys: Set<URLResourceKey> = [.creationDateKey]
-        return folders.flatMap { folder in
-            (try? FileManager.default.contentsOfDirectory(at: folder, includingPropertiesForKeys: Array(keys), options: [.skipsHiddenFiles])) ?? []
+        var found: [(url: URL, date: Date)] = []
+        var movies: [(url: URL, date: Date)] = []
+        for folder in folders {
+            let urls = (try? FileManager.default.contentsOfDirectory(at: folder, includingPropertiesForKeys: Array(keys), options: [.skipsHiddenFiles])) ?? []
+            for url in urls {
+                guard extensions.contains(url.pathExtension.lowercased()),
+                      let date = try? url.resourceValues(forKeys: keys).creationDate, date >= since
+                else { continue }
+                if isTaggedScreenCapture(url) {
+                    found.append((url, date))
+                } else if ScreenCaptureMarker.isMovie(url) {
+                    movies.append((url, date))
+                } else if ScreenCaptureMarker.isPresent(inImageAt: url) {
+                    found.append((url, date))
+                }
+            }
         }
-        .compactMap { url -> (URL, Date)? in
-            guard extensions.contains(url.pathExtension.lowercased()),
-                  let date = try? url.resourceValues(forKeys: keys).creationDate, date >= since,
-                  isScreenCapture(url)
-            else { return nil }
-            return (url, date)
+        // Untagged movies last, their headers read only for the few left.
+        for movie in movies where await ScreenCaptureMarker.isPresent(inMovieAt: movie.url) {
+            found.append(movie)
         }
-        .sorted { $0.1 > $1.1 }
-        .map { (url: $0.0, date: $0.1) }
+        return found.sorted { $0.date > $1.date }
     }
 
-    static func isScreenCapture(_ url: URL) -> Bool {
+    /// The tag alone: one xattr read, so it goes first and the marker is read only when
+    /// it's missing.
+    private static func isTaggedScreenCapture(_ url: URL) -> Bool {
         getxattr(url.path(percentEncoded: false), "com.apple.metadata:kMDItemIsScreenCapture", nil, 0, 0, 0) > 0
     }
 

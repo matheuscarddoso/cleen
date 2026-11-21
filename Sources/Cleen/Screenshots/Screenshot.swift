@@ -1,3 +1,4 @@
+import CleenKit
 import Foundation
 
 struct Screenshot: Identifiable, Hashable {
@@ -6,4 +7,7 @@ struct Screenshot: Identifiable, Hashable {
     let date: Date
     /// Taken with ⌃ (to the clipboard): Cleen keeps its own copy so the actions work.
     let fromClipboard: Bool
+
+    /// A screen recording (⌘⇧5) rather than a still.
+    var isRecording: Bool { ScreenCaptureMarker.isMovie(url) }
 }

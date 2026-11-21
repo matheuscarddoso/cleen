@@ -14,6 +14,9 @@ struct ScreenshotPreview: View {
                 .overlay {
                     RoundedRectangle(cornerRadius: 10, style: .continuous).strokeBorder(NotchStyle.cardStroke)
                 }
+                .overlay(alignment: .bottomLeading) {
+                    if shot.isRecording { RecordingBadge(url: shot.url) }
+                }
                 // Drag it straight into Slack, Mail, a Finder window…
                 .draggable(shot.url)
                 .onTapGesture(count: 2) { NSWorkspace.shared.open(shot.url) }
