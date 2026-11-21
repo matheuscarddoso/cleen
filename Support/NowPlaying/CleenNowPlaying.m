@@ -7,6 +7,7 @@
 // open-source mediaremote-adapter project.
 #import <Foundation/Foundation.h>
 #include <dlfcn.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -38,12 +39,25 @@ static void *MediaRemote(void) {
     return handle;
 }
 
-static id Value(NSDictionary *info, NSString *key) {
+// MediaRemote passes on whatever the player published, and players publish odd values: a
+// live stream's duration or playhead can be NaN or infinite. JSON can't hold those, and
+// NSJSONSerialization throws on them instead of failing; uncaught, that aborts the
+// helper. So each field goes out as the type Cleen reads, or as null.
+
+static id Text(NSDictionary *info, NSString *key) {
     id value = info[key];
-    return value ?: [NSNull null];
+    return [value isKindOfClass:[NSString class]] ? value : [NSNull null];
+}
+
+static id Number(NSDictionary *info, NSString *key) {
+    id value = info[key];
+    return [value isKindOfClass:[NSNumber class]] && isfinite([(NSNumber *)value doubleValue]) ? value : [NSNull null];
 }
 
 static void Write(NSDictionary *out) {
+    // The fields are checked one by one in Emit; this guards the line as a whole, so a
+    // field added later can only cost its line, never the helper.
+    if (![NSJSONSerialization isValidJSONObject:out]) return;
     NSData *json = [NSJSONSerialization dataWithJSONObject:out options:0 error:nil];
     if (!json) return;
     fwrite(json.bytes, 1, json.length, stdout);
@@ -69,13 +83,13 @@ static void Emit(int pid, NSDictionary *info, BOOL playing) {
         return;
     }
     out[@"title"] = title;
-    out[@"artist"] = Value(info, @"kMRMediaRemoteNowPlayingInfoArtist");
-    out[@"album"] = Value(info, @"kMRMediaRemoteNowPlayingInfoAlbum");
-    out[@"duration"] = Value(info, @"kMRMediaRemoteNowPlayingInfoDuration");
-    out[@"elapsed"] = Value(info, @"kMRMediaRemoteNowPlayingInfoElapsedTime");
-    out[@"rate"] = Value(info, @"kMRMediaRemoteNowPlayingInfoPlaybackRate");
+    out[@"artist"] = Text(info, @"kMRMediaRemoteNowPlayingInfoArtist");
+    out[@"album"] = Text(info, @"kMRMediaRemoteNowPlayingInfoAlbum");
+    out[@"duration"] = Number(info, @"kMRMediaRemoteNowPlayingInfoDuration");
+    out[@"elapsed"] = Number(info, @"kMRMediaRemoteNowPlayingInfoElapsedTime");
+    out[@"rate"] = Number(info, @"kMRMediaRemoteNowPlayingInfoPlaybackRate");
     id timestamp = info[@"kMRMediaRemoteNowPlayingInfoTimestamp"];
-    if ([timestamp isKindOfClass:[NSDate class]]) {
+    if ([timestamp isKindOfClass:[NSDate class]] && isfinite([(NSDate *)timestamp timeIntervalSince1970])) {
         out[@"timestamp"] = @([(NSDate *)timestamp timeIntervalSince1970]);
     }
     // Artwork only when it changed: it's the heavy part of every line.
