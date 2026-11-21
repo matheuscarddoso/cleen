@@ -41,6 +41,8 @@ final class RecorderOverlays {
             let level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.desktopIconWindow)) + 1)
             let window = OverlayWindow(frame: screen.frame, level: level, ignoresMouse: true, content: Image(nsImage: image).resizable().aspectRatio(contentMode: .fill).ignoresSafeArea())
             window.collectionBehavior = [.canJoinAllSpaces, .stationary, .ignoresCycle]
+            // The one Cleen window a recording has to show: it hides the icons in it.
+            CaptureExclusion.allow(window)
             window.orderFrontRegardless()
             covers.append(window)
         }

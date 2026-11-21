@@ -17,6 +17,7 @@ final class OverlayWindow: NSPanel {
         collectionBehavior = [.canJoinAllSpaces, .stationary, .fullScreenAuxiliary, .ignoresCycle]
         ignoresMouseEvents = ignoresMouse
         contentView = NSHostingView.filling(content)
+        CaptureExclusion.exclude(self)
     }
 
     override var canBecomeKey: Bool { !ignoresMouseEvents }

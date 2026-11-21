@@ -13,6 +13,7 @@ final class OnboardingWindow: NSWindow {
         ignoresMouseEvents = ignoresMouse
         collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .ignoresCycle]
         animationBehavior = .none
+        CaptureExclusion.exclude(self)
     }
 
     override var canBecomeKey: Bool { !ignoresMouseEvents }

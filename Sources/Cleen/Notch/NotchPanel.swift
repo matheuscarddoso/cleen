@@ -25,6 +25,7 @@ final class NotchPanel: NSPanel {
         // system's window fade that showed as the whole panel going translucent instead
         // of the shape closing into the notch.
         animationBehavior = .none
+        CaptureExclusion.exclude(self)
     }
 
     /// Whether the panel may take the keyboard (search, notes, a text field): only

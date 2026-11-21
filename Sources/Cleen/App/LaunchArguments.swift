@@ -3,7 +3,7 @@ import Foundation
 /// Launch flags for opening straight into a screen, used when checking the UI:
 /// `--notch <tab>` opens the notch pinned on that tool, `--settings` opens Ajustes,
 /// `--scan` starts that tool's scan right away, `--edit` opens Início in edit mode, `--live <kind>` previews a live activity,
-/// `--onboarding` replays the first-run tour.
+/// `--onboarding` replays the first-run tour, `--capturable` lets screenshots see Cleen.
 enum LaunchArguments {
     static let notchTab: NotchTab? = value(after: "--notch").flatMap(NotchTab.init(rawValue:))
     static let settings = ProcessInfo.processInfo.arguments.contains("--settings")
@@ -36,6 +36,9 @@ enum LaunchArguments {
     static let cut = ProcessInfo.processInfo.arguments.contains("--cut")
     /// `--pick display|window|area` puts the recorder's floating bar up in that mode.
     static let pick = value(after: "--pick")
+    /// `--capturable` lets screenshots and recordings see Cleen (see `CaptureExclusion`),
+    /// so scripts/shoot-notch.sh can photograph the notch.
+    static let capturable = ProcessInfo.processInfo.arguments.contains("--capturable")
 
     private static func value(after flag: String) -> String? {
         let arguments = ProcessInfo.processInfo.arguments

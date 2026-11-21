@@ -14,6 +14,7 @@ final class EditorWindowController: NSObject, NSWindowDelegate {
         self.model = model
         window = NSWindow(contentRect: CGRect(x: 0, y: 0, width: 1280, height: 760), styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView], backing: .buffered, defer: false)
         super.init()
+        CaptureExclusion.exclude(window)
         window.title = model.name
         window.titlebarAppearsTransparent = true
         window.titleVisibility = .hidden
