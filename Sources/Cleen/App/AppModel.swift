@@ -1,4 +1,5 @@
 import AppKit
+import CleenKit
 import Observation
 import SwiftUI
 
@@ -261,12 +262,31 @@ final class AppModel {
         guard !isSmartScanning else { return }
         isSmartScanning = true
         smartReport = nil
+        // Its row fills on its own; the button waits only for what it cleans.
+        largeFiles.startScan()
         async let junkScan: Void = junk.scan()
         async let projectScan: Void = projects.scan()
         async let orphanScan: Void = orphans.scan()
         async let startupScan: Void = startup.scan()
         _ = await (junkScan, projectScan, orphanScan, startupScan)
         isSmartScanning = false
+    }
+
+    /// Visão geral came on screen. Its rows only read the tools' last scans, so each one
+    /// never taken, or older than `ScanFreshness.maxAge`, is taken again in the
+    /// background, the row keeping its last number meanwhile. A tool that's scanning or
+    /// cleaning right now is left alone, and so is everything while the overview's own
+    /// cleanup runs (it cleans junk, then projects: a rescan between them would swap
+    /// what's about to be cleaned).
+    func refreshOverview() {
+        guard !isSmartCleaning else { return }
+        func due(_ phase: ScanPhase, _ lastScan: Date?, cleaning: Bool) -> Bool {
+            phase != .scanning && !cleaning && ScanFreshness.isDue(lastScan: lastScan)
+        }
+        if due(junk.phase, junk.lastScan, cleaning: junk.isCleaning) { junk.startScan() }
+        if due(projects.phase, projects.lastScan, cleaning: projects.isCleaning) { projects.startScan() }
+        if due(orphans.phase, orphans.lastScan, cleaning: orphans.isCleaning) { orphans.startScan() }
+        if due(largeFiles.phase, largeFiles.lastScan, cleaning: largeFiles.isCleaning) { largeFiles.startScan() }
     }
 
     func smartClean() async {

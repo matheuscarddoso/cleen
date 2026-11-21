@@ -13,6 +13,7 @@ final class ProjectsModel {
     private(set) var isCleaning = false
     private(set) var report: CleanupReport?
     private(set) var roots: [URL] = []
+    private(set) var lastScan: Date?
 
     var selection = Set<URL>()
 
@@ -102,6 +103,7 @@ final class ProjectsModel {
             .flatMap(\.artifacts)
             .filter(\.kind.selectedWhenStale)
             .map(\.url))
+        lastScan = .now
         phase = .ready
     }
 

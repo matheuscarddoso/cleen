@@ -8,6 +8,7 @@ final class OrphansModel {
     private(set) var groups: [OrphanGroup] = []
     private(set) var isCleaning = false
     private(set) var report: CleanupReport?
+    private(set) var lastScan: Date?
 
     var selection = Set<URL>()
 
@@ -46,6 +47,7 @@ final class OrphansModel {
         guard !Task.isCancelled else { return }
         groups = found
         selection = Set(found.flatMap(\.items).map(\.url))
+        lastScan = .now
         phase = .ready
     }
 

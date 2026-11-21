@@ -17,28 +17,32 @@ struct NotchOverviewTab: View {
                 .fill(NotchStyle.separator)
                 .frame(width: 1)
             NotchGroup {
-                NotchMeterRow(symbol: "trash", label: String(localized: "Lixo"), value: value(app.junk.phase, app.junk.totalSize), labelWidth: nil, action: { controller.state.tab = .clean }) {
+                NotchMeterRow(symbol: "trash", label: String(localized: "Lixo"), value: value(app.junk.phase, app.junk.totalSize, scanned: app.junk.lastScan), labelWidth: nil, action: { controller.state.tab = .clean }) {
                     Color.clear
                 }
-                NotchMeterRow(symbol: "chevron.left.forwardslash.chevron.right", label: String(localized: "Projetos parados"), value: value(app.projects.phase, app.projects.staleSize), labelWidth: nil, action: { controller.state.tab = .projects }) {
+                NotchMeterRow(symbol: "chevron.left.forwardslash.chevron.right", label: String(localized: "Projetos parados"), value: value(app.projects.phase, app.projects.staleSize, scanned: app.projects.lastScan), labelWidth: nil, action: { controller.state.tab = .projects }) {
                     Color.clear
                 }
-                NotchMeterRow(symbol: "puzzlepiece.extension", label: String(localized: "Restos de apps"), value: value(app.orphans.phase, app.orphans.totalSize), labelWidth: nil, action: { controller.state.tab = .leftovers }) {
+                NotchMeterRow(symbol: "puzzlepiece.extension", label: String(localized: "Restos de apps"), value: value(app.orphans.phase, app.orphans.totalSize, scanned: app.orphans.lastScan), labelWidth: nil, action: { controller.state.tab = .leftovers }) {
                     Color.clear
                 }
-                NotchMeterRow(symbol: "doc", label: String(localized: "Arquivos grandes"), value: value(app.largeFiles.phase, app.largeFiles.totalSize), labelWidth: nil, action: { controller.state.tab = .files }) {
+                NotchMeterRow(symbol: "doc", label: String(localized: "Arquivos grandes"), value: value(app.largeFiles.phase, app.largeFiles.totalSize, scanned: app.largeFiles.lastScan), labelWidth: nil, action: { controller.state.tab = .files }) {
                     Color.clear
                 }
             }
         }
         .padding(.top, 4)
+        // The rows are the tools' last scans: whatever is missing or stale is taken
+        // again each time the tab comes on screen.
+        .onAppear { app.refreshOverview() }
     }
 
-    private func value(_ phase: ScanPhase, _ size: Int64) -> String {
+    /// A row being taken again keeps its last number until the new one lands.
+    private func value(_ phase: ScanPhase, _ size: Int64, scanned lastScan: Date?) -> String {
         switch phase {
-        case .idle: "—"
-        case .scanning: "…"
         case .ready: size.bytes
+        case .scanning: lastScan == nil ? "…" : size.bytes
+        case .idle: "—"
         }
     }
 }

@@ -11,6 +11,7 @@ final class LargeFilesModel {
     private(set) var files: [FoundFile] = []
     private(set) var isCleaning = false
     private(set) var report: CleanupReport?
+    private(set) var lastScan: Date?
 
     var selection = Set<URL>()
     var kind: FileKind?
@@ -69,6 +70,7 @@ final class LargeFilesModel {
         // Nothing starts selected: these are the person's own files.
         selection = []
         kind = nil
+        lastScan = .now
         phase = .ready
     }
 
