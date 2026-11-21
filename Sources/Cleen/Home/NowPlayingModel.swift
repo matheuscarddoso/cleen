@@ -97,6 +97,8 @@ final class NowPlayingModel {
         if ContinuousClock.now - bridgeStartedAt >= Self.stableUptime { restartDelay = Self.firstRestartDelay }
         let delay = restartDelay
         restartDelay = min(restartDelay * 2, .seconds(60))
+        // The crash itself comes in through the system's report; this says what followed.
+        Diagnostics.warning("now-playing", "helper exited; restarting in \(delay)")
         Task { [weak self] in
             try? await Task.sleep(for: delay)
             self?.startBridge()

@@ -88,7 +88,10 @@ nonisolated final class CameraCapture: NSObject, AVCaptureFileOutputRecordingDel
     func fileOutput(_ output: AVCaptureFileOutput, didFinishRecordingTo outputFileURL: URL, from connections: [AVCaptureConnection], error: (any Error)?) {
         // AVFoundation reports a normal stop as an "error" that still finished the file.
         let completed = (error as NSError?)?.userInfo[AVErrorRecordingSuccessfullyFinishedKey] as? Bool ?? (error == nil)
-        if let error, !completed { Self.log.error("camera recording failed: \(error.localizedDescription, privacy: .public)") }
+        if let error, !completed {
+            Self.log.error("camera recording failed: \(error.localizedDescription, privacy: .public)")
+            Diagnostics.error("recorder", "camera recording failed: \(error.localizedDescription)")
+        }
         let starting = started
         started = nil
         let pending = finished

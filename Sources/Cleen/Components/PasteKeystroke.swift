@@ -91,6 +91,7 @@ enum PasteKeystroke {
         let name = app?.bundleIdentifier ?? "?"
         guard isAllowed else {
             log.error("paste skipped: no Accessibility permission (target: \(name, privacy: .public))")
+            Diagnostics.warning("paste", "paste skipped: no Accessibility permission (target: \(name))")
             return false
         }
         let source = CGEventSource(stateID: .hidSystemState)

@@ -275,7 +275,10 @@ final class RecorderModel {
             try await runCountdown(on: screen(of: target))
             try await begin(target, in: folder)
         } catch {
-            if !(error is CancellationError) { Self.log.error("start failed: \(error.localizedDescription, privacy: .public)") }
+            if !(error is CancellationError) {
+                Self.log.error("start failed: \(error.localizedDescription, privacy: .public)")
+                Diagnostics.error("recorder", "start failed: \(error.localizedDescription)")
+            }
             await releaseCamera()
             await tearDown()
             // Nothing worth keeping was written yet: the folder goes.
@@ -366,6 +369,7 @@ final class RecorderModel {
             try await camera?.stop()
         } catch {
             Self.log.error("stop failed: \(error.localizedDescription, privacy: .public)")
+            Diagnostics.error("recorder", "stop failed: \(error.localizedDescription)")
         }
         screen = nil
         device = nil
@@ -454,6 +458,7 @@ final class RecorderModel {
                 try camera.configure(device: device, maxHeight: cameraMaxHeight)
             } catch {
                 Self.log.error("camera setup failed: \(error.localizedDescription, privacy: .public)")
+                Diagnostics.error("recorder", "camera setup failed: \(error.localizedDescription)")
                 return
             }
             camera.startSession()

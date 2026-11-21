@@ -135,6 +135,7 @@ final class EditorModel {
                 if exportsWhenReady { exportMovie() }
             } catch {
                 Self.log.error("editor load failed: \(error.localizedDescription, privacy: .public)")
+                Diagnostics.error("editor", "load failed: \(error.localizedDescription)")
             }
         }
     }
@@ -161,6 +162,7 @@ final class EditorModel {
                 }
             } catch {
                 Self.log.error("clip insert failed: \(error.localizedDescription, privacy: .public)")
+                Diagnostics.error("editor", "clip insert failed: \(error.localizedDescription)")
                 continue
             }
             if abs(clip.speed - 1) > 0.001 {
@@ -495,6 +497,7 @@ final class EditorModel {
             } catch {
                 progress.cancel()
                 Self.log.error("export failed: \(error.localizedDescription, privacy: .public)")
+                Diagnostics.error("editor", "export failed: \(error.localizedDescription)")
                 exportState = .failed(error.localizedDescription)
             }
         }
@@ -531,6 +534,7 @@ final class EditorModel {
             return true
         } catch {
             Self.log.error("trash failed: \(error.localizedDescription, privacy: .public)")
+            Diagnostics.error("editor", "trash failed: \(error.localizedDescription)")
             return false
         }
     }
@@ -553,6 +557,7 @@ final class EditorModel {
             try project.save(to: folder)
         } catch {
             Self.log.error("save failed: \(error.localizedDescription, privacy: .public)")
+            Diagnostics.error("editor", "save failed: \(error.localizedDescription)")
         }
     }
 

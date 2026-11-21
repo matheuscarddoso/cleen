@@ -528,7 +528,9 @@
 "Nada para hoje" = "Nothing for today";
 "Nada para limpar" = "Nothing to clean";
 "Nada para remover" = "Nothing to remove";
-"Nada sai do seu Mac. Seus arquivos sempre vão para o Lixo; só caches que se recriam são apagados de vez." = "Nothing leaves your Mac. Your files always go to the Trash; only caches that rebuild themselves are deleted for good.";
+"Seus arquivos e o que você faz no Mac não saem dele. Seus arquivos sempre vão para o Lixo; só caches que se recriam são apagados de vez." = "Your files and what you do on your Mac stay on it. Your files always go to the Trash; only caches that rebuild themselves are deleted for good.";
+"Enviar relatórios de erro" = "Send error reports";
+"Se o Cleen fechar sozinho, travar ou algo falhar, o relatório técnico vai para o desenvolvedor, sem seus arquivos, seu nome ou o nome do Mac." = "If Cleen quits unexpectedly, freezes or something fails, the technical report goes to the developer, without your files, your name or your Mac's name.";
 "Nada tocando" = "Nothing playing";
 "Navegadores de teste" = "Test browsers";
 "Navegadores do Playwright, Cypress e Puppeteer. Baixados de novo no próximo teste." = "Playwright, Cypress, and Puppeteer browsers. Downloaded again on the next test run.";

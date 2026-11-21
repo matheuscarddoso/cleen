@@ -91,6 +91,7 @@ enum SystemCommands {
         Task.detached {
             guard let result = try? await Shell.run("/usr/bin/osascript", ["-e", source], timeout: .seconds(30)), result.succeeded else {
                 log.error("system command failed: \(source, privacy: .public)")
+                Diagnostics.error("system", "system command failed: \(source)")
                 return
             }
         }

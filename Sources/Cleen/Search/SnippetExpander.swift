@@ -42,6 +42,7 @@ final class SnippetExpander {
             return Unmanaged.passUnretained(event)
         }, userInfo: context) else {
             Self.log.error("snippet tap refused")
+            Diagnostics.warning("snippets", "snippet tap refused")
             return
         }
         let source = CFMachPortCreateRunLoopSource(nil, tap, 0)

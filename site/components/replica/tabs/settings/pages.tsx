@@ -450,6 +450,7 @@ export function AgentsPage() {
 export function AboutPage() {
   const l = useL();
   const [automatic, setAutomatic] = useState(true);
+  const [reports, setReports] = useState(true);
   const [checked, setChecked] = useState(false);
   const granted = (
     <span className="flex items-center gap-1 text-[11px] font-medium" style={{ color: notch.good }}>
@@ -487,9 +488,18 @@ export function AboutPage() {
         <Row
           title={l("Privacidade", "Privacy")}
           note={l(
-            "Nada sai do seu Mac. Seus arquivos sempre vão para o Lixo; só caches que se recriam são apagados de vez.",
-            "Nothing leaves your Mac. Your files always go to the Trash; only caches that rebuild themselves are deleted for good.",
+            "Seus arquivos e o que você faz no Mac não saem dele. Seus arquivos sempre vão para o Lixo; só caches que se recriam são apagados de vez.",
+            "Your files and what you do on your Mac stay on it. Your files always go to the Trash; only caches that rebuild themselves are deleted for good.",
           )}
+        />
+        <SwitchRow
+          title={l("Enviar relatórios de erro", "Send error reports")}
+          note={l(
+            "Se o Cleen fechar sozinho, travar ou algo falhar, o relatório técnico vai para o desenvolvedor, sem seus arquivos, seu nome ou o nome do Mac.",
+            "If Cleen quits unexpectedly, freezes or something fails, the technical report goes to the developer, without your files, your name or your Mac's name.",
+          )}
+          on={reports}
+          onChange={setReports}
         />
       </Group>
       <div className="flex justify-end">

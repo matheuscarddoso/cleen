@@ -101,6 +101,7 @@ nonisolated final class ScreenCapture: NSObject, SCStreamDelegate, SCStreamOutpu
 
     func recordingOutput(_ recordingOutput: SCRecordingOutput, didFailWithError error: any Error) {
         Self.log.error("recording failed: \(error.localizedDescription, privacy: .public)")
+        Diagnostics.error("recorder", "recording failed: \(error.localizedDescription)")
         resume(&started, with: error)
         resume(&finished, with: error)
     }
@@ -111,6 +112,7 @@ nonisolated final class ScreenCapture: NSObject, SCStreamDelegate, SCStreamOutpu
 
     func stream(_ stream: SCStream, didStopWithError error: any Error) {
         Self.log.error("stream stopped: \(error.localizedDescription, privacy: .public)")
+        Diagnostics.error("recorder", "stream stopped: \(error.localizedDescription)")
         resume(&started, with: error)
         resume(&finished, with: error)
     }

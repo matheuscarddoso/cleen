@@ -6,7 +6,7 @@
 
 <p align="center">
   Limpeza e saúde do Mac, morando no notch.<br>
-  Nativo em SwiftUI, sem dependências, nada sai do seu Mac.
+  Nativo em SwiftUI, sem dependências, seus dados ficam no seu Mac.
 </p>
 
 <p align="center">
@@ -109,7 +109,7 @@ você confirmar.
 
 ## Privacidade
 
-Nada é coletado nem enviado para o autor. Tudo é lido no próprio Mac:
+Nada do que você tem ou faz é coletado. Tudo é lido no próprio Mac:
 
 - **Mensagens:** o banco do app Mensagens (`~/Library/Messages`, com o Acesso Total ao
   Disco) e os nomes dos Contatos. As respostas saem pelo próprio Mensagens.
@@ -118,13 +118,22 @@ Nada é coletado nem enviado para o autor. Tudo é lido no próprio Mac:
 - **Downloads:** o progresso que os navegadores publicam para o Finder.
 - **Agentes:** os arquivos de sessão que o Claude Code já grava no Mac.
 
-A rede só entra em dois casos:
+A rede só entra nestes casos:
 
 - **Uso de IA:** os limites do plano do Claude vêm de `api.anthropic.com`, com o login
   que o próprio Claude Code guardou nas Chaves do macOS (o macOS pergunta antes). O
   gasto e os limites do Codex são lidos dos arquivos locais.
 - **Ícone do site tocando:** quando uma aba toca algo sem capa, o Cleen pede o ícone
   ao próprio site.
+- **Relatórios de erro:** quando o Cleen ou um ajudante dele fecha sozinho, trava, pesa
+  demais na CPU ou no disco, ou algo falha (uma gravação, uma exportação), o relatório
+  técnico vai para o servidor do Cleen: onde o código parou, as versões do app e do
+  macOS, o modelo do Mac e as últimas linhas do registro do próprio Cleen. Antes de sair,
+  os caminhos da pasta pessoal, o nome da conta e o do Mac e qualquer e-mail são tirados,
+  e nenhum identificador do Mac vai junto (o servidor consegue contar quantos Macs
+  tiveram o mesmo erro, nunca ligar dois erros ao mesmo Mac). Desliga em **Ajustes ›
+  Sobre › Enviar relatórios de erro**; desligado, nada sai. O registro fica no Mac, em
+  `~/Library/Logs/Cleen`.
 
 ## Idiomas
 
@@ -151,6 +160,28 @@ Para conferir telas: `--notch <aba>` abre o notch fixado numa aba, `--tools` abr
 grade, `--settings` abre os Ajustes, `--scan` já analisa, `--onboarding` repete o tour
 e `--live <tipo>` mostra uma prévia (`download`, `message`, `call`, `volume`…).
 `--editor <pasta>` abre uma gravação no editor.
+
+### Relatórios de erro
+
+O app junta crashes (os relatórios `.ips` que o macOS grava, do Cleen e dos ajudantes
+dele, como o `perl` do Now Playing), travamentos e excessos de CPU e disco (MetricKit) e
+as falhas que ele mesmo registra com `Diagnostics.error`, e envia para
+`site/app/api/diagnostics`, que guarda agrupado por assinatura (o mesmo erro tem a mesma
+assinatura em qualquer Mac). Para ler:
+
+```bash
+DIAGNOSTICS_TOKEN=… ./scripts/diagnostics.sh                    # cada problema, o mais recente primeiro
+DIAGNOSTICS_TOKEN=… ./scripts/diagnostics.sh <assinatura>       # um problema e os relatórios guardados
+DIAGNOSTICS_TOKEN=… ./scripts/diagnostics.sh <assinatura> <arquivo> --ips > crash.ips
+```
+
+No servidor, o site precisa de `DIAGNOSTICS_DIR` (uma pasta num volume persistente, senão
+um deploy apaga tudo) e `DIAGNOSTICS_TOKEN` (32 caracteres ou mais, só para ler). Sem a
+pasta, a rota responde 503 e os apps guardam os relatórios por até 14 dias, tentando de
+novo. Para testar contra um servidor local:
+`defaults write app.cleen.Cleen diagnosticsEndpoint http://127.0.0.1:3000/api/diagnostics`
+(e `defaults delete app.cleen.Cleen diagnosticsEndpoint` para voltar). Testes do site:
+`npm test` em `site/`.
 
 `CleenKit` tem a lógica de disco, sistema e gravação, sem interface e testada contra
 pastas temporárias. `Cleen` é o app (SwiftUI, isolamento padrão `MainActor`). O "tocando

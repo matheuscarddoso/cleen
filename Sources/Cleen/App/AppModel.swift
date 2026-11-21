@@ -123,6 +123,7 @@ final class AppModel {
     private func installNotch() {
         // First, so not even the "move to Aplicativos" alert shows up in a capture.
         CaptureExclusion.start()
+        Diagnostics.shared.start()
         if AppLocation.needsMove, AppLocation.offerMove() { return }
         notch.install()
         // The commands' own shortcuts and the snippet keywords work from the start.

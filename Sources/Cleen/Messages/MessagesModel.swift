@@ -116,6 +116,7 @@ final class MessagesModel {
         }.value
         if let failure {
             Self.log.error("send failed: \(failure, privacy: .public)")
+            Diagnostics.warning("messages", "send failed: Messages refused the script")
             sendError = String(localized: "Não deu para enviar. Permita o Cleen controlar o Mensagens em Ajustes do Sistema › Privacidade › Automação.")
             return false
         }

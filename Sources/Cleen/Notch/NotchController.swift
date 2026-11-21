@@ -184,6 +184,7 @@ final class NotchController {
         // instead of closing on something that silently didn't paste.
         if paste, !PasteKeystroke.isAllowed {
             PasteKeystroke.log.error("paste blocked: asking for Accessibility")
+            Diagnostics.warning("paste", "paste blocked: asking for Accessibility")
             state.pasteNeedsPermission = true
             return
         }
