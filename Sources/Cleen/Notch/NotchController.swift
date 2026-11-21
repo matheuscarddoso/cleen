@@ -16,6 +16,8 @@ final class NotchController {
     /// The drag pasteboard's change count when the mouse went down, to tell a file drag
     /// (it changes) from dragging a window or selecting text across the menu bar.
     private var dragChangeCount = NSPasteboard(name: .drag).changeCount
+    /// Ends the drop zones after a release that no zone took (see `handlePointer`).
+    private var pendingDragEnd: Task<Void, Never>?
     /// The trackpad swipe in progress over the notch, summed until it's decisive.
     private var swipe = CGVector.zero
     private var swipeHandled = false
@@ -285,6 +287,19 @@ final class NotchController {
             && pasteboard.types?.contains(.fileURL) == true
     }
 
+    /// A release over the panel that no zone took (between the zones, on the header):
+    /// the zones go once the drop would have landed. A drop arrives within milliseconds
+    /// of the release, so this never races it.
+    private func endDragSoon() {
+        pendingDragEnd?.cancel()
+        pendingDragEnd = Task { [weak self] in
+            try? await Task.sleep(for: .milliseconds(500))
+            guard !Task.isCancelled, let self else { return }
+            self.pendingDragEnd = nil
+            if self.state.isDraggingFiles { self.state.isDraggingFiles = false }
+        }
+    }
+
     private func installMonitors() {
         let mask: NSEvent.EventTypeMask = [.mouseMoved, .leftMouseDragged, .leftMouseDown, .leftMouseUp]
         if let global = NSEvent.addGlobalMonitorForEvents(matching: mask, handler: { [weak self] event in
@@ -332,9 +347,23 @@ final class NotchController {
             // The window is taller than a short panel; its clear part lets clicks through
             // to the app below, as if the window ended where the panel does.
             if let panel, panel.ignoresMouseEvents == inside { panel.ignoresMouseEvents = !inside }
-            // Only the shelf takes files, so only it pays for reading the drag pasteboard.
-            let draggingFiles = inside && event.type == .leftMouseDragged && state.tab == .shelf && !state.showsSettings && isDraggingFiles
-            if state.isDraggingFiles != draggingFiles { state.isDraggingFiles = draggingFiles }
+            if event.type == .leftMouseUp, inside, state.isDraggingFiles {
+                // The release reaches this monitor in no set order with the drop, which
+                // comes through the dragging session. Ending the drop zones here swapped
+                // them for the tray under the pointer before the drop arrived, and it
+                // found nothing to land on: the zone that takes it ends them instead.
+                endDragSoon()
+            } else {
+                // Only the shelf takes files, so only it pays for reading the drag pasteboard.
+                let draggingFiles = inside && event.type == .leftMouseDragged && state.tab == .shelf && !state.showsSettings && isDraggingFiles
+                if draggingFiles {
+                    pendingDragEnd?.cancel()
+                    pendingDragEnd = nil
+                }
+                // A release is settling: its drop may still be on the way, and the zone
+                // under it has to be there when it lands.
+                if pendingDragEnd == nil, state.isDraggingFiles != draggingFiles { state.isDraggingFiles = draggingFiles }
+            }
             if inside {
                 pendingClose?.cancel()
                 pendingClose = nil
