@@ -92,17 +92,10 @@ const install = (l: L) => [
     ),
   },
   {
-    title: l("Tente abrir uma vez", "Try to open it once"),
+    title: l("Abra o Cleen", "Open Cleen"),
     text: l(
-      "Abra a pasta Aplicativos e dê dois cliques no Cleen. O macOS avisa que não conseguiu verificar o app: feche esse aviso. É normal, o Cleen ainda não passou pela verificação paga da Apple.",
-      "Open your Applications folder and double-click Cleen. macOS says it couldn't verify the app: close that alert. That's expected, since Cleen hasn't gone through Apple's paid verification yet.",
-    ),
-  },
-  {
-    title: l("Libere em Privacidade e Segurança", "Allow it in Privacy & Security"),
-    text: l(
-      "Abra Ajustes do Sistema › Privacidade e Segurança e role até o fim. Ao lado do aviso sobre o Cleen, clique em Abrir Mesmo Assim e confirme com a sua senha ou o Touch ID. Só nesta primeira vez.",
-      "Open System Settings › Privacy & Security and scroll to the bottom. Next to the message about Cleen, click Open Anyway and confirm with your password or Touch ID. Only this first time.",
+      "Dê dois cliques no Cleen em Aplicativos. Na primeira vez, o macOS confirma se você quer abrir um app baixado da internet: clique em Abrir. O Cleen é assinado e notarizado pela Apple.",
+      "Double-click Cleen in your Applications folder. The first time, macOS asks whether you want to open an app downloaded from the internet: click Open. Cleen is signed and notarized by Apple.",
     ),
   },
   {
@@ -126,7 +119,7 @@ const faq = (l: L): readonly (readonly [string, string])[] =>
       ["Como recebo as atualizações?", "Sozinho. A cada seis horas ele procura uma versão nova, confere a integridade e a assinatura, e troca o app. Dá para desligar em Ajustes › Sobre."],
       ["As notas sincronizam com outro app?", "Sim, em Ajustes › Notas. Com o Obsidian, cada nota vira um arquivo .md numa pasta Cleen do seu cofre, e o que você muda lá volta para cá. Com o app Notas, cada nota ganha uma cópia numa pasta Cleen."],
       ["Meus dados ficam comigo?", "Sim. Nada do que você tem ou faz é coletado. A rede só é usada para tempo, cotações, câmbio, ícones do Lucide e para ler os limites das suas ferramentas de IA, direto em cada serviço. Se o Cleen travar ou algo falhar, ele envia o relatório técnico do erro para o desenvolvedor, sem seus arquivos, seu nome ou o nome do Mac; dá para desligar em Ajustes › Sobre."],
-      ["Por que o macOS avisa na primeira vez?", "O Cleen ainda não é notarizado pela Apple. Na primeira abertura, vá em Ajustes do Sistema › Privacidade e Segurança e clique em Abrir Mesmo Assim. É só uma vez."],
+      ["Por que o macOS pergunta na primeira vez?", "É a confirmação que o macOS mostra para todo app baixado da internet. O Cleen é assinado e notarizado pela Apple: clique em Abrir e ele não pergunta mais."],
     ],
     [
       ["What is Cleen?", "A Mac app that lives in the notch. It cleans up your disk, has a full launcher on ⌥ Space, keeps what you've copied, shows Claude Code at work and your AI limits, and puts almost thirty tools a gesture away."],
@@ -138,7 +131,7 @@ const faq = (l: L): readonly (readonly [string, string])[] =>
       ["How do I get updates?", "Automatically. Every six hours it looks for a new version, checks its integrity and signature, and swaps in the new app. You can turn this off in Settings › About."],
       ["Do notes sync with other apps?", "Yes, in Settings › Notes. With Obsidian, each note becomes an .md file in a Cleen folder in your vault, and changes you make there come back. With the Notes app, each note gets a copy in a Cleen folder."],
       ["Does my data stay with me?", "Yes. Nothing you have or do is collected. The network is only used for weather, stock quotes, exchange rates, Lucide icons, and reading your AI tools' limits, straight from each service. If Cleen crashes or something fails, it sends the technical error report to the developer, without your files, your name or your Mac's name; you can turn it off in Settings › About."],
-      ["Why does macOS warn me the first time?", "Cleen isn't notarized by Apple yet. The first time you open it, go to System Settings › Privacy & Security and click Open Anyway. You only do this once."],
+      ["Why does macOS ask the first time?", "It's the confirmation macOS shows for every app downloaded from the internet. Cleen is signed and notarized by Apple: click Open and it won't ask again."],
     ],
   );
 
@@ -193,7 +186,6 @@ export function Landing({ lang }: { lang: Lang }) {
             <p className="mt-6 text-[14px] text-mute">{l("Código aberto. Atualiza sozinho.", "Open source. Updates itself.")}</p>
             <p className="mt-2 text-[12px] text-faint">
               {l("macOS 26 ou mais novo · Mac com chip Apple · Versão ", "macOS 26 or later · Mac with Apple silicon · Version ")}{site.version}
-              <sup>1</sup>
             </p>
           </div>
           <div className="px-5 pb-5 pt-8 sm:px-[8.33%] sm:pb-[5%] sm:pt-12">
@@ -426,12 +418,6 @@ export function Landing({ lang }: { lang: Lang }) {
       <footer className="bg-page text-[12px] text-mute">
         <div className="mx-auto max-w-[980px] border-t border-line px-5 py-6 leading-relaxed">
           <p>
-            {l(
-              "1. O Cleen ainda não é notarizado pela Apple: na primeira abertura, libere em Ajustes do Sistema › Privacidade e Segurança › Abrir Mesmo Assim.",
-              "1. Cleen isn't notarized by Apple yet: the first time you open it, allow it in System Settings › Privacy & Security › Open Anyway.",
-            )}
-          </p>
-          <p className="mt-2">
             {l(
               "Mac e macOS são marcas da Apple Inc., registradas nos EUA e em outros países. O Cleen não é afiliado à Apple. Claude é uma marca da Anthropic.",
               "Mac and macOS are trademarks of Apple Inc., registered in the U.S. and other countries. Cleen is not affiliated with Apple. Claude is a trademark of Anthropic.",

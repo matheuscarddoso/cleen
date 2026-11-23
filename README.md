@@ -31,10 +31,8 @@
 Precisa de um Mac com chip Apple e macOS 26 ou mais novo.
 
 1. Baixe o `Cleen-<versão>.dmg` da [última versão](https://github.com/matheuscarddoso/cleen/releases/latest), abra e arraste o Cleen para Aplicativos.
-2. Abra o Cleen. Ele não é notarizado pela Apple, então na primeira vez o macOS avisa
-   que não pôde verificá-lo: clique em **OK**, vá em **Ajustes do Sistema ›
-   Privacidade e Segurança**, role até o fim e clique em **Abrir Mesmo Assim**. Só na
-   primeira vez.
+2. Abra o Cleen. Ele é assinado e notarizado pela Apple, então o macOS só confirma, na
+   primeira vez, que você quer abrir um app baixado da internet: clique em **Abrir**.
 3. O tour de boas-vindas pede as permissões, uma de cada vez, dizendo para que serve
    cada uma. Todas são opcionais.
 
