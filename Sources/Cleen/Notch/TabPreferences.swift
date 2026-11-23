@@ -35,12 +35,15 @@ final class TabPreferences {
         let savedPinned = (defaults.stringArray(forKey: Self.pinnedKey) ?? []).compactMap(NotchTab.init(rawValue:))
         pinned = defaults.object(forKey: Self.pinnedKey) == nil ? [.home, .shelf] : savedPinned
         isDockExpanded = defaults.bool(forKey: Self.expandedKey)
-        // The grid has room for every tool: what was only kept out of the old tab row
-        // (hidden by default) shows there from now on, once.
+        // The grid has room for every tool: what a layout saved for the old tab row kept
+        // out shows there from now on, once. A first launch has no layout to migrate, so
+        // it starts from the defaults and the onboarding opens on a choice, not on all.
         if !defaults.bool(forKey: Self.gridKey) {
             defaults.set(true, forKey: Self.gridKey)
-            hidden.removeAll()
-            defaults.set([String](), forKey: Self.hiddenKey)
+            if defaults.object(forKey: Self.hiddenKey) != nil {
+                hidden.removeAll()
+                defaults.set([String](), forKey: Self.hiddenKey)
+            }
         }
     }
 

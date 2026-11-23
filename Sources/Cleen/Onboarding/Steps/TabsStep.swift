@@ -9,15 +9,20 @@ struct TabsStep: View {
             message: String(localized: "Escolha as ferramentas da barra. A ordem e o resto ficam em Ajustes › Abas."),
             primary: String(localized: "Continuar")
         ) {
-            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 6), count: 3), alignment: .leading, spacing: 6) {
-                ForEach(tabs.order) { tab in
-                    TabChip(tab: tab, isOn: tabs.isVisible(tab)) {
-                        withAnimation(.spring(response: 0.32, dampingFraction: 0.8)) {
-                            tabs.setVisible(!tabs.isVisible(tab), for: tab)
+            // Every tool is a chip, more than the page has room for: the grid scrolls in
+            // the space between the text and the button instead of pushing them off.
+            NotchScroll {
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 6), count: 3), alignment: .leading, spacing: 6) {
+                    ForEach(tabs.order) { tab in
+                        TabChip(tab: tab, isOn: tabs.isVisible(tab)) {
+                            withAnimation(.spring(response: 0.32, dampingFraction: 0.8)) {
+                                tabs.setVisible(!tabs.isVisible(tab), for: tab)
+                            }
                         }
                     }
                 }
             }
+            .layoutPriority(1)
         }
     }
 }
