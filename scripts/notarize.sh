@@ -6,10 +6,19 @@
 # Uses the "cleen-notary" keychain profile: an App Store Connect API key of the
 # distribution team, saved once with
 #   xcrun notarytool store-credentials cleen-notary --key AuthKey_<id>.p8 --key-id <id> --issuer <uuid>
+# notarytool keeps that profile in a keychain macOS closes while the screen is locked,
+# so a Mac that locks halfway through a release loses it. CLEEN_NOTARY_KEY_ID and
+# CLEEN_NOTARY_ISSUER use the key itself instead, read from CLEEN_NOTARY_KEY or
+# ~/.appstoreconnect/private_keys/AuthKey_<id>.p8, with no keychain involved.
 set -euo pipefail
 
 TARGET="${1:?o .app ou o .dmg}"
-PROFILE="${CLEEN_NOTARY_PROFILE:-cleen-notary}"
+if [[ -n "${CLEEN_NOTARY_KEY_ID:-}" ]]; then
+  AUTH=(--key "${CLEEN_NOTARY_KEY:-$HOME/.appstoreconnect/private_keys/AuthKey_$CLEEN_NOTARY_KEY_ID.p8}"
+        --key-id "$CLEEN_NOTARY_KEY_ID" --issuer "${CLEEN_NOTARY_ISSUER:?o issuer da chave da API}")
+else
+  AUTH=(--keychain-profile "${CLEEN_NOTARY_PROFILE:-cleen-notary}")
+fi
 WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
 
@@ -21,12 +30,12 @@ case "$TARGET" in
 esac
 
 RESULT="$WORK/result.json"
-xcrun notarytool submit "$SUBMIT" --keychain-profile "$PROFILE" --wait --output-format json > "$RESULT"
+xcrun notarytool submit "$SUBMIT" "${AUTH[@]}" --wait --output-format json > "$RESULT"
 STATUS="$(python3 -c 'import json, sys; print(json.load(open(sys.argv[1])).get("status", ""))' "$RESULT")"
 if [[ "$STATUS" != "Accepted" ]]; then
   ID="$(python3 -c 'import json, sys; print(json.load(open(sys.argv[1])).get("id", ""))' "$RESULT")"
   echo "A Apple recusou a notarização de $TARGET ($STATUS). O motivo:"
-  [[ -n "$ID" ]] && xcrun notarytool log "$ID" --keychain-profile "$PROFILE"
+  [[ -n "$ID" ]] && xcrun notarytool log "$ID" "${AUTH[@]}"
   exit 1
 fi
 

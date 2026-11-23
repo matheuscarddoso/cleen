@@ -21,6 +21,10 @@ BRIDGE_TEAM="9QGGX38JS2"
 [[ -z "$(git status --porcelain)" ]] || { echo "Há mudanças sem commit."; exit 1; }
 [[ "$(git branch --show-current)" == main ]] || { echo "Releases saem da main."; exit 1; }
 
+# A notarization can take hours; keep the display awake meanwhile, so the screen
+# doesn't lock and close the keychain the notary profile lives in (scripts/notarize.sh).
+caffeinate -di -w $$ &
+
 # The bundle takes its version from the latest tag, so the tag comes first; it only
 # leaves this Mac once everything below has worked.
 git tag -a "$TAG" -m "Cleen $VERSION"

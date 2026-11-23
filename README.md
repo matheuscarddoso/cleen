@@ -161,7 +161,9 @@ Para assinar e notarizar, este Mac precisa de duas coisas no keychain: o certifi
 **Developer ID Application** do time `AS86DUYNV9` (com a chave privada) e o perfil
 `cleen-notary` do `notarytool`, com a chave da API do App Store Connect do mesmo time.
 Sem o certificado, o `bundle.sh` assina com o de desenvolvimento, o que serve para
-testar, mas o `release.sh` recusa.
+testar, mas o `release.sh` recusa. O macOS fecha o keychain do perfil enquanto a tela
+está bloqueada: o `release.sh` mantém a tela acordada, e para lançar sem depender dela,
+`CLEEN_NOTARY_KEY_ID` e `CLEEN_NOTARY_ISSUER` usam a chave da API direto.
 
 Para conferir telas: `--notch <aba>` abre o notch fixado numa aba, `--tools` abre a
 grade, `--settings` abre os Ajustes, `--scan` já analisa, `--onboarding` repete o tour
