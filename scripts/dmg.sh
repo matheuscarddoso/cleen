@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Builds build/Cleen.dmg: the app and a link to Aplicativos in a window laid out like
 # the installers of Aside and Helium (see scripts/make-dmg-background.swift).
-#   ./scripts/dmg.sh
+#   ./scripts/dmg.sh              build the app first
+#   ./scripts/dmg.sh --prebuilt   use build/Cleen.app as it is (release.sh notarizes it first)
 # The Finder lays the window out, so the first run asks to let Terminal control it.
 set -euo pipefail
 
@@ -17,7 +18,7 @@ HEIGHT=560
 # The Finder's bounds include the title bar.
 TITLEBAR=32
 
-./scripts/bundle.sh
+[[ "${1:-}" == "--prebuilt" ]] || ./scripts/bundle.sh
 
 rm -rf "$STAGE" "$RW" "$OUT"
 mkdir -p "$STAGE/.background"

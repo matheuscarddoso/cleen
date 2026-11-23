@@ -18,4 +18,18 @@ struct UpdateTests {
         #expect(!feed.isUpdate(over: "1.2.0", system: tahoe))
         #expect(!feed.isUpdate(over: "1.1.0", system: OperatingSystemVersion(majorVersion: 15, minorVersion: 6, patchVersion: 0)))
     }
+
+    @Test func updatesOnlyFromTheSameTeamOrItsSuccessor() {
+        // The same team, as every update until now.
+        #expect(UpdateSigner.accepts("9QGGX38JS2", replacing: "9QGGX38JS2"))
+        #expect(UpdateSigner.accepts("AS86DUYNV9", replacing: "AS86DUYNV9"))
+        // The bridge build, signed by the old team, takes the first notarized one.
+        #expect(UpdateSigner.accepts("AS86DUYNV9", replacing: "9QGGX38JS2"))
+        // Never back, never a stranger, never unsigned.
+        #expect(!UpdateSigner.accepts("9QGGX38JS2", replacing: "AS86DUYNV9"))
+        #expect(!UpdateSigner.accepts("ZZZZZZZZZZ", replacing: "9QGGX38JS2"))
+        #expect(!UpdateSigner.accepts(nil, replacing: "9QGGX38JS2"))
+        #expect(!UpdateSigner.accepts("", replacing: "9QGGX38JS2"))
+        #expect(!UpdateSigner.accepts("AS86DUYNV9", replacing: nil))
+    }
 }

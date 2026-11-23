@@ -1,6 +1,7 @@
 import Foundation
 
-/// What a release publishes for the updater: `appcast.json`, next to the DMG.
+/// What a release publishes for the updater: `update.json`, next to the DMG (and
+/// `appcast.json`, the same shape, frozen on the 1.3.1 bridge for 1.3.0 and earlier).
 ///
 ///     { "version": "1.2.0", "build": 58, "url": "https://…/Cleen-1.2.0.dmg",
 ///       "sha256": "…", "notes": "…", "minimumSystemVersion": "26.0" }

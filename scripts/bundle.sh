@@ -76,29 +76,48 @@ PLIST
 # Sign with a stable identity. An ad-hoc signature changes with every build, and macOS
 # ties privacy permissions (Calendar, Reminders, Full Disk Access, Keychain "Always
 # Allow") to the signature, so every rebuild would silently lose them.
-# Override with CLEEN_SIGN_IDENTITY; falls back to ad-hoc when no certificate exists.
-# The Apple Development certificate of the personal team (9QGGX38JS2), picked by team
-# rather than by name so no account details live in the script.
-TEAM_ID="${CLEEN_TEAM_ID:-9QGGX38JS2}"
-team_identity() {
+#
+# Picked by team rather than by name, so no account details live in the script:
+#   1. the Developer ID Application certificate of the distribution team (AS86DUYNV9),
+#      the only one Apple notarizes, with the hardened runtime and its entitlements
+#      (Support/Cleen.entitlements) and a secure timestamp;
+#   2. else the Apple Development certificate of the personal team (9QGGX38JS2), which
+#      signed every release up to the 1.3.1 bridge;
+#   3. else ad-hoc.
+# CLEEN_TEAM_ID limits the choice to one team (the bridge build uses 9QGGX38JS2);
+# CLEEN_SIGN_IDENTITY overrides it altogether.
+team_identity() { # <certificate kind> <team>
   local hash
-  for hash in $(security find-identity -v -p codesigning 2>/dev/null | awk '/Apple Development/ {print $2}'); do
+  for hash in $(security find-identity -v -p codesigning 2>/dev/null | awk -v kind="$1" 'index($0, kind) {print $2}'); do
     if security find-certificate -a -Z -p 2>/dev/null | awk -v h="$hash" '
         /^SHA-1 hash:/ { keep = ($3 == h); next }
         keep && /BEGIN CERT/ { pem = 1 }
         pem { print }
         /END CERT/ { pem = 0; if (keep) exit }' \
-      | openssl x509 -noout -subject 2>/dev/null | grep -q "OU *= *$TEAM_ID"; then
+      | openssl x509 -noout -subject 2>/dev/null | grep -q "OU *= *$2"; then
       echo "$hash"
       return
     fi
   done
 }
-IDENTITY="${CLEEN_SIGN_IDENTITY:-$(team_identity)}"
+if [[ -n "${CLEEN_SIGN_IDENTITY:-}" ]]; then
+  IDENTITY="$CLEEN_SIGN_IDENTITY"
+else
+  IDENTITY="$(team_identity "Developer ID Application" "${CLEEN_TEAM_ID:-AS86DUYNV9}")"
+  [[ -n "$IDENTITY" ]] || IDENTITY="$(team_identity "Apple Development" "${CLEEN_TEAM_ID:-9QGGX38JS2}")"
+fi
 IDENTITY="${IDENTITY:--}"
-codesign --force --sign "$IDENTITY" --timestamp=none "$APP/Contents/Resources/libCleenNowPlaying.dylib" >/dev/null
-codesign --force --sign "$IDENTITY" --timestamp=none "$APP" >/dev/null
-echo "Built $APP"
+if [[ "$IDENTITY" != "-" ]] && security find-identity -v -p codesigning | grep -F "$IDENTITY" | grep -q "Developer ID Application"; then
+  codesign --force --sign "$IDENTITY" --options runtime --timestamp "$APP/Contents/Resources/libCleenNowPlaying.dylib" >/dev/null
+  codesign --force --sign "$IDENTITY" --options runtime --timestamp --entitlements "$ROOT/Support/Cleen.entitlements" "$APP" >/dev/null
+else
+  codesign --force --sign "$IDENTITY" --timestamp=none "$APP/Contents/Resources/libCleenNowPlaying.dylib" >/dev/null
+  codesign --force --sign "$IDENTITY" --timestamp=none "$APP" >/dev/null
+fi
+SIGNATURE="$(codesign -dvv "$APP" 2>&1)"
+KIND="$(awk -F'[=:]' '/^Authority=/ {print $2; exit}' <<<"$SIGNATURE")"
+TEAM="$(awk -F= '/^TeamIdentifier=/ {print $2}' <<<"$SIGNATURE")"
+echo "Built $APP (${KIND:-ad-hoc}, team $TEAM)"
 
 if [[ "${1:-}" == "--install" ]]; then
   pkill -x Cleen 2>/dev/null || true

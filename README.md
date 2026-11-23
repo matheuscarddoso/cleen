@@ -153,8 +153,17 @@ swift test                      # testes da CleenKit (Swift Testing)
 ```
 
 A versão vem da última tag (`v1.0.0` → 1.0.0). Para lançar:
-`./scripts/release.sh 1.2.0 "o que mudou"` cria a tag, gera o DMG e publica o release
-com o `appcast.json` que a atualização automática lê.
+`./scripts/release.sh 1.4.0 "o que mudou"` cria a tag, assina o app com a Developer ID,
+notariza o app e o DMG na Apple (`scripts/notarize.sh`) e publica o release com o
+`update.json` que a atualização automática lê. O `appcast.json` de cada release é o da
+1.3.1, a ponte: a 1.3.0 e anteriores só aceitam o time que as assinou, então passam por
+ela antes de chegar na versão nova (`UpdateSigner`).
+
+Para assinar e notarizar, este Mac precisa de duas coisas no keychain: o certificado
+**Developer ID Application** do time `AS86DUYNV9` (com a chave privada) e o perfil
+`cleen-notary` do `notarytool`, com a chave da API do App Store Connect do mesmo time.
+Sem o certificado, o `bundle.sh` assina com o de desenvolvimento, o que serve para
+testar, mas o `release.sh` recusa.
 
 Para conferir telas: `--notch <aba>` abre o notch fixado numa aba, `--tools` abre a
 grade, `--settings` abre os Ajustes, `--scan` já analisa, `--onboarding` repete o tour

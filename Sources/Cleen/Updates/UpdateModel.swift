@@ -26,8 +26,10 @@ final class UpdateModel {
 
     private(set) var phase = Phase.idle
 
-    /// Published with every release by `scripts/release.sh`.
-    static let feedURL = URL(string: "https://github.com/matheuscarddoso/cleen/releases/latest/download/appcast.json")!
+    /// Published with every release by `scripts/release.sh`. 1.3.0 and earlier read
+    /// `appcast.json`, which from now on always points them at the 1.3.1 bridge build;
+    /// see `UpdateSigner`.
+    static let feedURL = URL(string: "https://github.com/matheuscarddoso/cleen/releases/latest/download/update.json")!
     static let automaticKey = "updatesAutomatic"
     private static let interval: Duration = .seconds(6 * 3600)
 
@@ -182,8 +184,10 @@ nonisolated enum Installer {
         let incoming = mount.appending(path: "Cleen.app")
         guard FileManager.default.fileExists(atPath: incoming.path(percentEncoded: false)) else { throw UpdateError.noApp }
 
-        // 3. Signed, and by the same team as the copy running.
-        guard let team = teamIdentifier(of: Bundle.main.bundleURL), teamIdentifier(of: incoming) == team, isValidSignature(incoming) else {
+        // 3. Signed, and by the same team as the copy running (or the one it handed over to).
+        guard UpdateSigner.accepts(teamIdentifier(of: incoming), replacing: teamIdentifier(of: Bundle.main.bundleURL)),
+              isValidSignature(incoming)
+        else {
             throw UpdateError.untrusted
         }
 

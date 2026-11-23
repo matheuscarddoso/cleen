@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- The hardened runtime (required for notarization) denies these until the app asks for
+     them here; each one still needs the person's consent through its usage description
+     in Info.plist. Signed in by scripts/bundle.sh with a Developer ID identity. -->
+<plist version="1.0">
+<dict>
+  <!-- The Espelho, and the recorder's camera bubble. -->
+  <key>com.apple.security.device.camera</key><true/>
+  <!-- The teleprompter's voice tracking, and recording with a voice. -->
+  <key>com.apple.security.device.audio-input</key><true/>
+  <!-- Asking the browser which tab plays, sending from Mensagens, the admin prompt. -->
+  <key>com.apple.security.automation.apple-events</key><true/>
+  <!-- Today's events and the reminders in the notch. -->
+  <key>com.apple.security.personal-information.calendars</key><true/>
+  <!-- Names and photos in Mensagens instead of numbers. -->
+  <key>com.apple.security.personal-information.addressbook</key><true/>
+  <!-- The weather where you are, when you ask for it. -->
+  <key>com.apple.security.personal-information.location</key><true/>
+</dict>
+</plist>
